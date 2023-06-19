@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>LIGAS</title>
+  <link rel="shortcut icon" href="../Imagenes/LOGO TAFA.png">
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="stylesheet" href="../style.css">
+
+
+  <script src="https://kit.fontawesome.com/9604b60dc2.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+
+  <link rel="stylesheet" href="googleFont.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.0/dist/sweetalert2.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.0/dist/sweetalert2.min.css">
+
+
+
+  <!-- Bootstrap CSS v5.2.1 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+
+</head>
+
+<body>
+  <header>
+
+    <nav class="shadow-lg sticky-top navbar navbar-expand-lg navbar-dark bg-success">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="../index.html">
+          <i class="clickCasa text-light fa-solid fa-house me-2"></i>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" href="ligas.html">LIGAS</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="copasDiv.html">COPAS DIV.</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="copaCampeones.html">COPA CAMPEONES</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="copaTotal.html">COPA TOTAL</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="copaDuos.html">COPA DÚOS</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="palmares.html">PALMARÉS</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="rankings.html">RANKINGS</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="equipos.html">EQUIPOS Y PARTICIPANTES</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="admin.html">Admin</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+  </header>
+
+
+  <main>
+
+    <div class="banner d-flex justify-content-center mt-5">
+      <a href="../index.html"><img src="https://i.ibb.co/cJkFcDr/Banner.png" alt=""></a>
+    </div>
+
+    <div class="d-flex flex-row justify-content-center mt-4">
+      <button class="btn btn-success" id="primeraDivision" onclick="primeraDivision()">PRIMERA DIVISIÓN</button>
+      <button class="btn btn-success ms-2" id="segundaDivision" onclick="segundaDivision()">SEGUNDA DIVISIÓN</button>
+      <button class="btn btn-success ms-2" id="terceraDivision" onclick="terceraDivision()">TERCERA DIVISIÓN</button>
+    </div>
+
+    <div class="tablaPosA" id="tablaPosA">
+      <div class="d-flex flex-row justify-content-center mt-4">
+        <table class="tg bordeGrueso">
+          <thead>
+            <tr>
+              <th class="tg-nqb0" colspan="7">PRIMERA DIVISION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tg-wvem">#</td>
+              <td class="tg-tpos">PARTICIPANTE</td>
+              <td class="tg-tpos">PUNTOS</td>
+              <td class="tg-tpos">PLENO</td>
+              <td class="tg-tpos">PARCIAL</td>
+              <td class="tg-tpos">ERROR</td>
+              <td class="tg-tpos">PEN</td>
+            </tr>
+            <tr>
+              <td class="tg-kbte">1</td>
+              <td class="tg-5a1m">Nico Avalos</td>
+              <td class="tg-o0x5">3</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-9wvc">1</td>
+            </tr>
+            <tr>
+              <td class="tg-6a5d">2</td>
+              <td class="tg-5a1m">Eze</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-9wvc">0</td>
+            </tr>
+            <tr>
+              <td class="tg-6a5d">3</td>
+              <td class="tg-5a1m">Ian Gangai</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-9wvc">0</td>
+            </tr>
+            <tr>
+              <td class="tg-6a5d">4</td>
+              <td class="tg-5a1m">Lucas&nbsp;&nbsp;&nbsp;Insua</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-9wvc">0</td>
+            </tr>
+            <tr>
+              <td class="tg-6a5d">5</td>
+              <td class="tg-5a1m">Facundo Marchese</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">1</td>
+            </tr>
+            <tr>
+              <td class="tg-6a5d">6</td>
+              <td class="tg-5a1m">Joel Marasco</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">1</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">7</td>
+              <td class="tg-5a1m">Kevin&nbsp;&nbsp;&nbsp;Sívori</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">1</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">8</td>
+              <td class="tg-5a1m">Mario&nbsp;&nbsp;&nbsp;Talarico</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">1</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">9</td>
+              <td class="tg-5a1m">Tomás Torcasio</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">1</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">10</td>
+              <td class="tg-5a1m">Alexis Segovia</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">0</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">11</td>
+              <td class="tg-5a1m">Fabrizio Escolano</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">0</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">12</td>
+              <td class="tg-5a1m">Luciano Hufschmid</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">0</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">13</td>
+              <td class="tg-5a1m">Matheo&nbsp;&nbsp;&nbsp;Olivera</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">0</td>
+            </tr>
+            <tr>
+              <td class="tg-iu1v">14</td>
+              <td class="tg-ojof">Moreno Perez</td>
+              <td class="tg-sktc">1</td>
+              <td class="tg-q433">0</td>
+              <td class="tg-q433">1</td>
+              <td class="tg-q433">2</td>
+              <td class="tg-q433">0</td>
+            </tr>
+            <tr>
+              <td class="tg-iu1v">15</td>
+              <td class="tg-ojof">Nacho Soto</td>
+              <td class="tg-sktc">1</td>
+              <td class="tg-q433">0</td>
+              <td class="tg-q433">1</td>
+              <td class="tg-q433">2</td>
+              <td class="tg-q433">0</td>
+            </tr>
+            <tr>
+              <td class="tg-iu1v">16</td>
+              <td class="tg-ojof">Pancho Muzzio</td>
+              <td class="tg-sktc">1</td>
+              <td class="tg-q433">0</td>
+              <td class="tg-q433">1</td>
+              <td class="tg-q433">2</td>
+              <td class="tg-q433">0</td>
+            </tr>
+            <tr>
+              <td class="tg-iu1v">17</td>
+              <td class="tg-ojof">Gabriel Talarico</td>
+              <td class="tg-sktc">0</td>
+              <td class="tg-q433">0</td>
+              <td class="tg-q433">0</td>
+              <td class="tg-q433">3</td>
+              <td class="tg-q433">0</td>
+            </tr>
+            <tr>
+              <td class="tg-iu1v">18</td>
+              <td class="tg-ojof">Lautaro Scocier</td>
+              <td class="tg-sktc">0</td>
+              <td class="tg-q433">0</td>
+              <td class="tg-q433">0</td>
+              <td class="tg-q433">3</td>
+              <td class="tg-q433">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="d-flex flex-row justify-content-center mt-4">
+        <table class="tg bordeGrueso">
+          <thead>
+            <tr>
+              <th class="tg-tpos" colspan="8">PROMEDIOS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tg-wvem">#</td>
+              <td class="tg-tpos">PARTICIPANTE</td>
+              <td class="tg-tpos">T12</td>
+              <td class="tg-tpos">T13</td>
+              <td class="tg-tpos">T14</td>
+              <td class="tg-tpos">TOTAL</td>
+              <td class="tg-tpos">PJ</td>
+              <td class="tg-iu1v">PROM</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">1</td>
+              <td class="tg-5a1m">Mario Talarico</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">57</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">59</td>
+              <td class="tg-9wvc">63</td>
+              <td class="tg-027g">0,937</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">2</td>
+              <td class="tg-5a1m">Nico&nbsp;Avalos</td>
+              <td class="tg-o0x5">51</td>
+              <td class="tg-o0x5">43</td>
+              <td class="tg-o0x5">3</td>
+              <td class="tg-o0x5">97</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,789</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">3</td>
+              <td class="tg-5a1m">Joel Marasco</td>
+              <td class="tg-o0x5">48</td>
+              <td class="tg-o0x5">46</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">96</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,780</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">4</td>
+              <td class="tg-5a1m">Pancho&nbsp;Muzzio</td>
+              <td class="tg-o0x5">46</td>
+              <td class="tg-o0x5">47</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">94</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,764</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">5</td>
+              <td class="tg-5a1m">Gabriel&nbsp;Talarico</td>
+              <td class="tg-o0x5">53</td>
+              <td class="tg-o0x5">39</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">92</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,748</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">6</td>
+              <td class="tg-5a1m">Fabrizio&nbsp;Escolano</td>
+              <td class="tg-o0x5">47</td>
+              <td class="tg-o0x5">37</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">85</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,691</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">7</td>
+              <td class="tg-5a1m">Ian Gangai</td>
+              <td class="tg-o0x5">51</td>
+              <td class="tg-o0x5">31</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">84</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,683</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">8</td>
+              <td class="tg-5a1m">Kevin&nbsp;Sívori</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">41</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">43</td>
+              <td class="tg-9wvc">63</td>
+              <td class="tg-027g">0,683</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">9</td>
+              <td class="tg-5a1m">Lucas Insua</td>
+              <td class="tg-o0x5">44</td>
+              <td class="tg-o0x5">37</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">83</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,675</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">10</td>
+              <td class="tg-5a1m">Eze</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">3</td>
+              <td class="tg-027g">0,667</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">11</td>
+              <td class="tg-5a1m">Facundo&nbsp;Marchese</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-9wvc">3</td>
+              <td class="tg-027g">0,667</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">12</td>
+              <td class="tg-5a1m">Lautaro Scocier</td>
+              <td class="tg-o0x5">38</td>
+              <td class="tg-o0x5">44</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">82</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,667</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">13</td>
+              <td class="tg-5a1m">Matheo&nbsp;Olivera</td>
+              <td class="tg-o0x5">41</td>
+              <td class="tg-o0x5">39</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">81</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,659</td>
+            </tr>
+            <tr>
+              <td class="tg-tpos">14</td>
+              <td class="tg-5a1m">Tomás&nbsp;Torcasio</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">39</td>
+              <td class="tg-o0x5">2</td>
+              <td class="tg-o0x5">41</td>
+              <td class="tg-9wvc">63</td>
+              <td class="tg-027g">0,651</td>
+            </tr>
+            <tr>
+              <td class="tg-asfa">15</td>
+              <td class="tg-5a1m">Moreno&nbsp;Perez</td>
+              <td class="tg-o0x5">42</td>
+              <td class="tg-o0x5">35</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">78</td>
+              <td class="tg-9wvc">123</td>
+              <td class="tg-027g">0,634</td>
+            </tr>
+            <tr>
+              <td class="tg-asfa">16</td>
+              <td class="tg-5a1m">Alexis&nbsp;Segovia</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-9wvc">3</td>
+              <td class="tg-027g">0,333</td>
+            </tr>
+            <tr>
+              <td class="tg-1ky8">17</td>
+              <td class="tg-5a1m">Luciano&nbsp;Hufschmid</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-9wvc">3</td>
+              <td class="tg-027g">0,333</td>
+            </tr>
+            <tr>
+              <td class="tg-1ky8">18</td>
+              <td class="tg-5a1m">Nacho Soto</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">0</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-o0x5">1</td>
+              <td class="tg-9wvc">3</td>
+              <td class="tg-027g">0,333</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tablaPosA" id="tablaPosB">
+      <div class="d-flex flex-row justify-content-center mt-4">
+        <table class="tg bordeGrueso">
+          <thead>
+            <tr>
+              <th class="tg-9xkb" colspan="7">SEGUNDA DIVISIÓN</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tg-uj9x">#</td>
+              <td class="tg-uj9x">PARTICIPANTE</td>
+              <td class="tg-uj9x">PUNTOS</td>
+              <td class="tg-uj9x">PLENO</td>
+              <td class="tg-uj9x">PARCIAL</td>
+              <td class="tg-uj9x">ERROR</td>
+              <td class="tg-uj9x">PEN</td>
+            </tr>
+            <tr>
+              <td class="tg-kbte">1</td>
+              <td class="tg-qz07">Rodrigo Soca</td>
+              <td class="tg-0kok">3</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-5ji3">1</td>
+            </tr>
+            <tr>
+              <td class="tg-kbte">2</td>
+              <td class="tg-qz07">Ignacio&nbsp;&nbsp;&nbsp;Cejas</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-5ji3">0</td>
+            </tr>
+            <tr>
+              <td class="tg-kbte">3</td>
+              <td class="tg-qz07">Pollo</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-5ji3">0</td>
+            </tr>
+            <tr>
+              <td class="tg-asfa">4</td>
+              <td class="tg-qz07">Felipe Galante</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-5ji3">1</td>
+            </tr>
+            <tr>
+              <td class="tg-asfa">5</td>
+              <td class="tg-qz07">Ramiro&nbsp;&nbsp;&nbsp;Vita</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-5ji3">1</td>
+            </tr>
+            <tr>
+              <td class="tg-uj9x">6</td>
+              <td class="tg-qz07">Rodrigo Talarico</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-5ji3">1</td>
+            </tr>
+            <tr>
+              <td class="tg-uj9x">7</td>
+              <td class="tg-qz07">Axel</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-5ji3">0</td>
+            </tr>
+            <tr>
+              <td class="tg-uj9x">8</td>
+              <td class="tg-qz07">Azul Quispe</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-5ji3">0</td>
+            </tr>
+            <tr>
+              <td class="tg-uj9x">9</td>
+              <td class="tg-qz07">Joaquin Sampadaro</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-5ji3">0</td>
+            </tr>
+            <tr>
+              <td class="tg-uj9x">10</td>
+              <td class="tg-qz07">Joel&nbsp;&nbsp;&nbsp;Alcalde</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-5ji3">0</td>
+            </tr>
+            <tr>
+              <td class="tg-uj9x">11</td>
+              <td class="tg-qz07">Lucas Aguilera</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-5ji3">0</td>
+            </tr>
+            <tr>
+              <td class="tg-uj9x">12</td>
+              <td class="tg-qz07">Renzo Badano</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">2</td>
+              <td class="tg-5ji3">0</td>
+            </tr>
+            <tr>
+              <td class="tg-uj9x">13</td>
+              <td class="tg-qz07">Natanael</td>
+              <td class="tg-0kok">1</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">0</td>
+              <td class="tg-0kok">3</td>
+              <td class="tg-5ji3">1</td>
+            </tr>
+            <tr>
+              <td class="tg-v1ns">14</td>
+              <td class="tg-1xyc">Tomás Delgado</td>
+              <td class="tg-t0o3">1</td>
+              <td class="tg-scem">0</td>
+              <td class="tg-scem">0</td>
+              <td class="tg-scem">3</td>
+              <td class="tg-scem">1</td>
+            </tr>
+            <tr>
+              <td class="tg-v1ns">15</td>
+              <td class="tg-1xyc">Bruno Alonso</td>
+              <td class="tg-t0o3">0</td>
+              <td class="tg-scem">0</td>
+              <td class="tg-scem">0</td>
+              <td class="tg-scem">3</td>
+              <td class="tg-scem">0</td>
+            </tr>
+            <tr>
+              <td class="tg-i2rd">16</td>
+              <td class="tg-1xyc">Gonzalo Nuñez</td>
+              <td class="tg-t0o3">0</td>
+              <td class="tg-scem">0</td>
+              <td class="tg-scem">0</td>
+              <td class="tg-scem">3</td>
+              <td class="tg-scem">0</td>
+            </tr>
+            <tr>
+              <td class="tg-i2rd">17</td>
+              <td class="tg-1xyc">Yago</td>
+              <td class="tg-t0o3">0</td>
+              <td class="tg-scem">0</td>
+              <td class="tg-scem">0</td>
+              <td class="tg-scem">3</td>
+              <td class="tg-scem">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <div class="tablaPosA" id="tablaPosC">
+      <div class="d-flex flex-row justify-content-center mt-4">
+        <style type="text/css">
+          
+          </style>
+          <table class="tg bordeGrueso">
+          <thead>
+            <tr>
+              <th class="tg-9gop" colspan="7">TERCERA DIVISIÓN</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tg-ouz3">#</td>
+              <td class="tg-ouz3">PARTICIPANTE</td>
+              <td class="tg-ouz3">PUNTOS</td>
+              <td class="tg-ouz3">PLENO</td>
+              <td class="tg-ouz3">PARCIAL</td>
+              <td class="tg-ouz3">ERROR</td>
+              <td class="tg-ouz3">PEN</td>
+            </tr>
+            <tr>
+              <td class="tg-kbte">1</td>
+              <td class="tg-usv2">Jhose</td>
+              <td class="tg-t9ut">3</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-4nxo">1</td>
+            </tr>
+            <tr>
+              <td class="tg-kbte">2</td>
+              <td class="tg-usv2">Joaco&nbsp;&nbsp;&nbsp;Fernandez</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+            <tr>
+              <td class="tg-kbte">3</td>
+              <td class="tg-usv2">Leandro Montes</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+            <tr>
+              <td class="tg-asfa">4</td>
+              <td class="tg-usv2">Anubis</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+            <tr>
+              <td class="tg-asfa">5</td>
+              <td class="tg-usv2">Camila Bussetto</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+            <tr>
+              <td class="tg-ouz3">6</td>
+              <td class="tg-usv2">Daniel Bazán</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+            <tr>
+              <td class="tg-ouz3">7</td>
+              <td class="tg-usv2">Martín&nbsp;&nbsp;&nbsp;Bustos</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+            <tr>
+              <td class="tg-ouz3">8</td>
+              <td class="tg-usv2">Matías Varela</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+            <tr>
+              <td class="tg-ouz3">9</td>
+              <td class="tg-usv2">Nico Luchetti</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">2</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+            <tr>
+              <td class="tg-ouz3">10</td>
+              <td class="tg-usv2">Bautista Coria</td>
+              <td class="tg-t9ut">1</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">3</td>
+              <td class="tg-4nxo">1</td>
+            </tr>
+            <tr>
+              <td class="tg-ouz3">11</td>
+              <td class="tg-usv2">Benja</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">3</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+            <tr>
+              <td class="tg-ouz3">12</td>
+              <td class="tg-usv2">Kraiizer</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">0</td>
+              <td class="tg-t9ut">3</td>
+              <td class="tg-4nxo">0</td>
+            </tr>
+          </tbody>
+          </table>
+      </div>
+    </div>
+
+    <div class="d-flex flex-row justify-content-center mt-4 margenParaPubli">
+      <button class="botonPerso" id="" onclick="">Ver competencias anteriores</button>
+    </div>
+    
+
+  </main>
+
+
+  <footer>
+
+    <div class="fixed-bottom text-center col-md">
+      <a href="Donar/index.html" target="_blank">
+        <img src="https://i.ibb.co/qkkt2sC/Banner-Publi.png" alt="Donale al admin no seas malo"
+          class="img-fluid border border-2 border-dark mt-4" width="500 rem"></a>
+    </div>
+
+  </footer>
+
+
+
+  <script src="../index.js"></script>
+
+  <!-- Bootstrap JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+    </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
+    integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
+    </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

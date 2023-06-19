@@ -20,6 +20,7 @@ body {
 
 }
 
+
 .cajaBotonesFechas {
     height: 57%;
 }
@@ -155,7 +156,7 @@ body {
 }
 
 .partido {
-    
+
     height: 30px;
 }
 
@@ -167,7 +168,7 @@ body {
     border: 2px solid black;
 }
 
-.margenParaPubli{
+.margenParaPubli {
     margin-bottom: 200px;
 }
 
@@ -209,17 +210,764 @@ body {
 
 .tg .tg-nrix {
     text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+}
+
+.fecha1 {
+    display: none;
+}
+
+.fecha32avos {}
+
+.noMostrar {
+    display: none;
+}
+
+#primeraDivision {
+    background-color: #0f5132;
+}
+
+#copaA {
+    background-color: #0f5132;
+}
+
+.tg {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.tg td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg th {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg .tg-5a1m {
+    background-color: #BDD7EE;
+    border-color: inherit;
+    text-align: left;
     vertical-align: middle
 }
 
-.fecha1{
-   display: none; 
+.tg .tg-iu1v {
+    background-color: #00B0F0;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
 }
 
-.fecha32avos{
-    
+.tg .tg-wvem {
+    background-color: #00B0EE;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
 }
 
-.noMostrar{
+.tg .tg-1ky8 {
+    background-color: #F00;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-asfa {
+    background-color: #FF0;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-9wvc {
+    background-color: #BDD7EE;
+    border-color: inherit;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-tpos {
+    background-color: #00B0F0;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-o0x5 {
+    background-color: #BDD7EE;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-027g {
+    background-color: #9BC2E6;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.tg td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg th {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg .tg-5a1m {
+    background-color: #BDD7EE;
+    border-color: inherit;
+    text-align: left;
+    vertical-align: middle
+}
+
+.tg .tg-iu1v {
+    background-color: #00B0F0;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-wvem {
+    background-color: #00B0EE;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-kbte {
+    background-color: #10F01B;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-9wvc {
+    background-color: #BDD7EE;
+    border-color: inherit;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-q433 {
+    background-color: #BDD7EE;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-nqb0 {
+    background-color: #00B0EE;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-tpos {
+    background-color: #00B0F0;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-o0x5 {
+    background-color: #BDD7EE;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-6a5d {
+    background-color: #FFC000;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-ojof {
+    background-color: #BDD7EE;
+    text-align: left;
+    vertical-align: middle
+}
+
+.tg .tg-sktc {
+    background-color: #BDD7EE;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.tg td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg th {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg .tg-1xyc {
+    background-color: #F4B084;
+    text-align: left;
+    vertical-align: middle
+}
+
+.tg .tg-9xkb {
+    background-color: #C65911;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-kbte {
+    background-color: #10F01B;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-uj9x {
+    background-color: #C65911;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-asfa {
+    background-color: #FF0;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-t0o3 {
+    background-color: #F4B084;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-qz07 {
+    background-color: #F4B084;
+    border-color: inherit;
+    text-align: left;
+    vertical-align: middle
+}
+
+.tg .tg-0kok {
+    background-color: #F4B084;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-5ji3 {
+    background-color: #F4B084;
+    border-color: inherit;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-v1ns {
+    background-color: #FFC000;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-scem {
+    background-color: #F4B084;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-i2rd {
+    background-color: #F00;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.tg td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg th {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg .tg-4nxo {
+    background-color: #A9D08E;
+    border-color: inherit;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-kbte {
+    background-color: #10F01B;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-asfa {
+    background-color: #FF0;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-usv2 {
+    background-color: #A9D08E;
+    border-color: inherit;
+    text-align: left;
+    vertical-align: middle
+}
+
+.tg .tg-9gop {
+    background-color: #548235;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-ouz3 {
+    background-color: #548235;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-t9ut {
+    background-color: #A9D08E;
+    border-color: inherit;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+#tablaPosB {
     display: none;
+}
+
+#tablaCopaB {
+    display: none;
+}
+
+#tablaPosC {
+    display: none;
+}
+
+#tablaCopaC {
+    display: none;
+}
+
+.tg {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.tg td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg th {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg .tg-y0zd {
+    background-color: #9BC2E6;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-cf6j {
+    background-color: #10F01B;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-ccd1 {
+    background-color: #9BC2E6;
+    text-align: left;
+    vertical-align: middle
+}
+
+.tg .tg-x0w5 {
+    background-color: #10F01B;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-pztu {
+    background-color: #2F75B5;
+    color: #FFF;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-6o9b {
+    background-color: #FF0;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-i2rd {
+    background-color: #F00;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-v1ns {
+    background-color: #FFC000;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-knx2 {
+    background-color: #9BC2E6;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-r9yx {
+    background-color: #FF0;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-s262 {
+    background-color: #2F75B5;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.tg td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg th {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg .tg-1xyc {
+    background-color: #F4B084;
+    text-align: left;
+    vertical-align: middle
+}
+
+.tg .tg-vn08 {
+    background-color: #C65911;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-8eyh {
+    background-color: #F4B084;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-cf6j {
+    background-color: #10F01B;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-jmr0 {
+    background-color: #C65911;
+    color: #FFF;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-x0w5 {
+    background-color: #10F01B;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-6o9b {
+    background-color: #FF0;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-i2rd {
+    background-color: #F00;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-v1ns {
+    background-color: #FFC000;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-cy48 {
+    background-color: #F4B084;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-r9yx {
+    background-color: #FF0;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.tg td {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg th {
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 10px 5px;
+    word-break: normal;
+}
+
+.tg .tg-nzgh {
+    background-color: #A9D08E;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-cf6j {
+    background-color: #10F01B;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-z214 {
+    background-color: #548235;
+    color: #FFF;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-x0w5 {
+    background-color: #10F01B;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-6o9b {
+    background-color: #FF0;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-i2rd {
+    background-color: #F00;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-v1ns {
+    background-color: #FFC000;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle
+}
+
+.tg .tg-bvkz {
+    background-color: #A9D08E;
+    text-align: left;
+    vertical-align: middle
+}
+
+.tg .tg-upfy {
+    background-color: #A9D08E;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.tg .tg-1un8 {
+    background-color: #548235;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: bottom
+}
+
+.botonPerso {
+    margin-top: 20px;
+    border: white solid 1px; 
+    border-radius: 100px;
+    outline: none; 
+    background-color: rgb(104, 6, 6);
+    box-shadow: 5px; 
+    color: white;
 }
