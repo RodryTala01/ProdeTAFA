@@ -219,3 +219,7 @@ body {
 .fecha32avos{
     
 }
+
+.noMostrar{
+    display: none;
+}
