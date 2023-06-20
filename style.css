@@ -964,10 +964,22 @@ body {
 
 .botonPerso {
     margin-top: 20px;
-    border: white solid 1px; 
+    border: white solid 1px;
     border-radius: 100px;
-    outline: none; 
+    outline: none;
     background-color: rgb(104, 6, 6);
-    box-shadow: 5px; 
+    box-shadow: 5px;
     color: white;
+}
+
+.btnCompAnt {
+    text-decoration: none;
+    color: white;
+}
+
+.btnCompAnt:hover {
+    color: white;
+    /* o el color que desees mantener */
+    text-decoration: none;
+    /* si también quieres quitar la subrayado al pasar el mouse */
 }
