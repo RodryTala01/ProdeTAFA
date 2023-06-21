@@ -214,7 +214,7 @@ body {
     font-weight: bold;
 }
 
-.fecha1 {
+.fecha32avos {
     display: none;
 }
 
@@ -982,4 +982,27 @@ body {
     /* o el color que desees mantener */
     text-decoration: none;
     /* si también quieres quitar la subrayado al pasar el mouse */
+}
+
+.botonTemps {
+    border: #0f5132 solid 1px;
+    border-radius: 4px;
+    width: 10rem;
+    height: 2rem;
+    color: white;
+    background-color: #198754;
+}
+
+.botonTemps>a{
+    text-decoration: none;
+    color: white;
+}
+
+.botonTemps>a:hover{
+    text-decoration: none;
+    color: white;
+}
+
+.btnLigaTemp1{
+    background-color: #0f5132;
 }

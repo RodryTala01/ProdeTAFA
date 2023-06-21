@@ -131,3 +131,45 @@ function copaC() {
   tablaB.style.display = "none";
   tablaC.style.display = "block";
 }
+
+function temporadaLiga(divId, boton) {
+    var divs = document.querySelectorAll('.col-md-8 > div');
+    var botones = document.querySelectorAll('.botonTemps');
+    
+    for (var i = 0; i < divs.length; i++) {
+      divs[i].style.display = 'none';
+      botones[i+1].style.backgroundColor = "#198754";
+    }
+
+    var divToShow = document.getElementById(divId);
+    if (divToShow) {
+      divToShow.style.display = 'block';
+      boton.style.backgroundColor = "#0f5132";
+    }
+  }
+
+  function primeraDivisionT3() {
+    boton1 = document.getElementById("primeraDivision")
+    boton2 = document.getElementById("segundaDivision")
+    tablaA = document.getElementById("tablaPosAT3")
+    tablaB = document.getElementById("tablaPosBT3")
+  
+    boton1.style.backgroundColor = "#0f5132";
+    boton2.style.backgroundColor = "#198754";
+  
+    tablaA.style.display = "block";
+    tablaB.style.display = "none";
+  }
+
+  function segundaDivisionT3() {
+    boton1 = document.getElementById("primeraDivision")
+    boton2 = document.getElementById("segundaDivision")
+    tablaA = document.getElementById("tablaPosAT3")
+    tablaB = document.getElementById("tablaPosBT3")
+  
+    boton1.style.backgroundColor = "#198754";
+    boton2.style.backgroundColor = "#0f5132";
+  
+    tablaA.style.display = "none";
+    tablaB.style.display = "block";
+  }
