@@ -214,11 +214,17 @@ body {
     font-weight: bold;
 }
 
+.fecha1 {
+    display: none;
+}
+
 .fecha32avos {
     display: none;
 }
 
-.fecha32avos {}
+.fecha16avos {
+    display: block;
+}
 
 .noMostrar {
     display: none;
