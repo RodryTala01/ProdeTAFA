@@ -210,3 +210,29 @@ function temporadaLiga(divId, boton) {
     tablaA.style.display = "none";
     tablaB.style.display = "block";
   }
+
+  function primeraDivisionT5() {
+    boton1 = document.getElementById("primeraDivisionT5")
+    boton2 = document.getElementById("segundaDivisionT5")
+    tablaA = document.getElementById("tablaPosAT5")
+    tablaB = document.getElementById("tablaPosBT5")
+  
+    boton1.style.backgroundColor = "#0f5132";
+    boton2.style.backgroundColor = "#198754";
+  
+    tablaA.style.display = "block";
+    tablaB.style.display = "none";
+  }
+
+  function segundaDivisionT5() {
+    boton1 = document.getElementById("primeraDivisionT5")
+    boton2 = document.getElementById("segundaDivisionT5")
+    tablaA = document.getElementById("tablaPosAT5")
+    tablaB = document.getElementById("tablaPosBT5")
+  
+    boton1.style.backgroundColor = "#198754";
+    boton2.style.backgroundColor = "#0f5132";
+  
+    tablaA.style.display = "none";
+    tablaB.style.display = "block";
+  }

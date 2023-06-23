@@ -2270,7 +2270,612 @@
           </div>
 
           <div id="ligaTemp5" style="display: none;">
-            5
+            <div class="d-flex flex-row justify-content-center mt-4">
+              <button class="btn btn-success" id="primeraDivisionT5" style="background-color: #0f5132;" onclick="primeraDivisionT5()">PRIMERA
+                DIVISIÓN</button>
+              <button class="btn btn-success ms-2" id="segundaDivisionT5" onclick="segundaDivisionT5()">SEGUNDA
+                DIVISIÓN</button>
+            </div>
+
+            <div id="tablaPosAT5">
+              <div class="d-flex flex-row justify-content-center mt-4">
+                <style type="text/css">
+                  .tg  {border-collapse:collapse;border-spacing:0;}
+                  .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg .tg-btgq{background-color:#FF0;border-color:inherit;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;
+                    font-size:14px;text-align:center;vertical-align:bottom}
+                  .tg .tg-qq8d{background-color:#00B0F0;border-color:inherit;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;font-weight:bold;
+                    text-align:center;vertical-align:bottom}
+                  .tg .tg-x70m{background-color:#F00;border-color:inherit;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;
+                    font-size:14px;text-align:left;vertical-align:bottom}
+                  .tg .tg-tlpo{background-color:#10F01B;border-color:inherit;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;text-align:left;
+                    vertical-align:bottom}
+                  .tg .tg-bbxz{background-color:#00B0F0;border-color:inherit;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;font-weight:bold;
+                    text-align:center;vertical-align:middle}
+                  .tg .tg-vxr0{background-color:#00B0F0;border-color:inherit;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;text-align:center;
+                    vertical-align:bottom}
+                  .tg .tg-tt4z{background-color:#F00;border-color:inherit;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;
+                    font-size:14px;font-weight:bold;text-align:center;vertical-align:bottom}
+                  .tg .tg-mqnd{background-color:#00B0EE;border-color:inherit;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;font-weight:bold;
+                    text-align:center;vertical-align:bottom}
+                  .tg .tg-24xr{background-color:#00B0EE;border-color:inherit;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;font-weight:bold;
+                    text-align:center;vertical-align:middle}
+                  .tg .tg-za8l{background-color:#10F01B;border-color:inherit;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;font-weight:bold;
+                    text-align:center;vertical-align:bottom}
+                  .tg .tg-u2py{background-color:#10F01B;border-color:inherit;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;text-align:center;
+                    vertical-align:bottom}
+                  .tg .tg-p1ma{background-color:#00B0F0;border-color:inherit;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;text-align:left;
+                    vertical-align:bottom}
+                  .tg .tg-11d3{background-color:#FF0;border-color:inherit;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;
+                    font-size:14px;font-weight:bold;text-align:center;vertical-align:bottom}
+                  .tg .tg-sfqc{background-color:#FF0;border-color:inherit;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;
+                    font-size:14px;text-align:left;vertical-align:bottom}
+                  .tg .tg-xe0c{background-color:#F00;border-color:inherit;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;
+                    font-size:14px;text-align:center;vertical-align:bottom}
+                  </style>
+                  <table class="tg bordeGrueso">
+                  <thead>
+                    <tr>
+                      <th class="tg-mqnd" colspan="7">PRIMERA DIVISIÓN</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="tg-24xr">#</td>
+                      <td class="tg-bbxz">PARTICIPANTE</td>
+                      <td class="tg-bbxz">PUNTOS</td>
+                      <td class="tg-bbxz">EXACTO</td>
+                      <td class="tg-bbxz">PARCIAL</td>
+                      <td class="tg-bbxz">ERROR</td>
+                      <td class="tg-bbxz">PEN</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-ydkq">1</td>
+                      <td class="tg-tlpo">Rodri Sebastian</td>
+                      <td class="tg-za8l">54</td>
+                      <td class="tg-u2py">8</td>
+                      <td class="tg-u2py">26</td>
+                      <td class="tg-u2py">26</td>
+                      <td class="tg-u2py">4</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-mqnd">2</td>
+                      <td class="tg-p1ma">Lautaro Scocier</td>
+                      <td class="tg-qq8d">50</td>
+                      <td class="tg-vxr0">8</td>
+                      <td class="tg-vxr0">24</td>
+                      <td class="tg-vxr0">28</td>
+                      <td class="tg-vxr0">2</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-mqnd">3</td>
+                      <td class="tg-p1ma">Pancho Muzzio</td>
+                      <td class="tg-qq8d">49</td>
+                      <td class="tg-vxr0">7</td>
+                      <td class="tg-vxr0">23</td>
+                      <td class="tg-vxr0">30</td>
+                      <td class="tg-vxr0">5</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-mqnd">4</td>
+                      <td class="tg-p1ma">Kevin Sívori</td>
+                      <td class="tg-qq8d">47</td>
+                      <td class="tg-vxr0">8</td>
+                      <td class="tg-vxr0">21</td>
+                      <td class="tg-vxr0">31</td>
+                      <td class="tg-vxr0">2</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-mqnd">5</td>
+                      <td class="tg-p1ma">Rodrigo Talarico</td>
+                      <td class="tg-qq8d">47</td>
+                      <td class="tg-vxr0">8</td>
+                      <td class="tg-vxr0">20</td>
+                      <td class="tg-vxr0">31</td>
+                      <td class="tg-vxr0">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-mqnd">6</td>
+                      <td class="tg-p1ma">Matheo Olivera</td>
+                      <td class="tg-qq8d">47</td>
+                      <td class="tg-vxr0">7</td>
+                      <td class="tg-vxr0">21</td>
+                      <td class="tg-vxr0">32</td>
+                      <td class="tg-vxr0">5</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-mqnd">7</td>
+                      <td class="tg-p1ma">Nahuel Scocier</td>
+                      <td class="tg-qq8d">46</td>
+                      <td class="tg-vxr0">6</td>
+                      <td class="tg-vxr0">25</td>
+                      <td class="tg-vxr0">29</td>
+                      <td class="tg-vxr0">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-mqnd">8</td>
+                      <td class="tg-p1ma">Nico Luchetti</td>
+                      <td class="tg-qq8d">44</td>
+                      <td class="tg-vxr0">6</td>
+                      <td class="tg-vxr0">23</td>
+                      <td class="tg-vxr0">31</td>
+                      <td class="tg-vxr0">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-mqnd">9</td>
+                      <td class="tg-p1ma">Joel Marasco</td>
+                      <td class="tg-qq8d">43</td>
+                      <td class="tg-vxr0">6</td>
+                      <td class="tg-vxr0">24</td>
+                      <td class="tg-vxr0">30</td>
+                      <td class="tg-vxr0">1</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-qq8d">10</td>
+                      <td class="tg-p1ma">Mario&nbsp;Talarico</td>
+                      <td class="tg-qq8d">42</td>
+                      <td class="tg-vxr0">7</td>
+                      <td class="tg-vxr0">18</td>
+                      <td class="tg-vxr0">35</td>
+                      <td class="tg-vxr0">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-qq8d">11</td>
+                      <td class="tg-p1ma">Pollo</td>
+                      <td class="tg-qq8d">41</td>
+                      <td class="tg-vxr0">5</td>
+                      <td class="tg-vxr0">23</td>
+                      <td class="tg-vxr0">32</td>
+                      <td class="tg-vxr0">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-11d3">12</td>
+                      <td class="tg-sfqc">Nico&nbsp;Avalos</td>
+                      <td class="tg-11d3">39</td>
+                      <td class="tg-btgq">4</td>
+                      <td class="tg-btgq">27</td>
+                      <td class="tg-btgq">29</td>
+                      <td class="tg-btgq">0</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-11d3">13</td>
+                      <td class="tg-sfqc">Jhose</td>
+                      <td class="tg-11d3">38</td>
+                      <td class="tg-btgq">4</td>
+                      <td class="tg-btgq">23</td>
+                      <td class="tg-btgq">33</td>
+                      <td class="tg-btgq">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-tt4z">14</td>
+                      <td class="tg-x70m">Natanael</td>
+                      <td class="tg-tt4z">30</td>
+                      <td class="tg-xe0c">4</td>
+                      <td class="tg-xe0c">18</td>
+                      <td class="tg-xe0c">38</td>
+                      <td class="tg-xe0c">0</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-tt4z">15</td>
+                      <td class="tg-x70m">Diego</td>
+                      <td class="tg-tt4z">26</td>
+                      <td class="tg-xe0c">3</td>
+                      <td class="tg-xe0c">16</td>
+                      <td class="tg-xe0c">40</td>
+                      <td class="tg-xe0c">1</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-tt4z">16</td>
+                      <td class="tg-x70m">Valentina Scocier</td>
+                      <td class="tg-tt4z">26</td>
+                      <td class="tg-xe0c">3</td>
+                      <td class="tg-xe0c">15</td>
+                      <td class="tg-xe0c">41</td>
+                      <td class="tg-xe0c">2</td>
+                    </tr>
+                  </tbody>
+                  </table>
+              </div>
+
+              <div class="d-flex flex-row justify-content-center mt-5">
+                <style type="text/css">
+                  .tg  {border-collapse:collapse;border-spacing:0;}
+                  .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg .tg-ybgy{background-color:#F00;font-weight:bold;text-align:right;vertical-align:middle}
+                  .tg .tg-x0w5{background-color:#10F01B;font-weight:bold;text-align:center;vertical-align:middle}
+                  .tg .tg-r9yx{background-color:#FF0;font-weight:bold;text-align:center;vertical-align:bottom}
+                  .tg .tg-hsi1{background-color:#10F01B;font-weight:bold;text-align:left;vertical-align:middle}
+                  .tg .tg-6o9b{background-color:#FF0;font-weight:bold;text-align:center;vertical-align:middle}
+                  .tg .tg-i2rd{background-color:#F00;font-weight:bold;text-align:center;vertical-align:middle}
+                  </style>
+                  <table class="tg bordeGrueso">
+                  <thead>
+                    <tr>
+                      <th class="tg-r9yx" colspan="5">PROMOCION</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="tg-hsi1">Jhose</td>
+                      <td class="tg-x0w5">7</td>
+                      <td class="tg-6o9b">VS</td>
+                      <td class="tg-i2rd">4</td>
+                      <td class="tg-ybgy">Tomás Hon</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-hsi1">Nico Avalos</td>
+                      <td class="tg-x0w5">11</td>
+                      <td class="tg-6o9b">VS</td>
+                      <td class="tg-i2rd">6</td>
+                      <td class="tg-ybgy">Koke</td>
+                    </tr>
+                  </tbody>
+                  </table>
+              </div>
+
+              <div class="d-flex flex-row justify-content-center mt-5">
+                <style type="text/css">
+                  .tg  {border-collapse:collapse;border-spacing:0;}
+                  .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg .tg-lifc{background-color:#FFAFAF;border-color:#ffafaf;color:#C00000;font-style:italic;font-weight:bold;text-align:center;
+                    vertical-align:bottom}
+                  .tg .tg-5fob{background-color:#FFAFAF;border-color:#ffafaf;text-align:center;vertical-align:bottom}
+                  .tg .tg-kkk5{background-color:#FFAFAF;border-color:#ffafaf;color:#C00000;font-size:18px;font-weight:bold;text-align:center;
+                    vertical-align:middle}
+                  .tg .tg-q1dx{background-color:#FFAFAF;border-color:#ffafaf;text-align:center;vertical-align:middle}
+                  </style>
+                  <table class="tg bordeGrueso" style="table-layout: fixed; width: 401px">
+                  <colgroup>
+                  <col style="width: 80px">
+                  <col style="width: 72px">
+                  <col style="width: 124px">
+                  <col style="width: 125px">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <td class="tg-q1dx" colspan="2" rowspan="9"><img src="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3e%3cpath fill='%23ff0000' d='M313.553 392.331L209.587 504.334c-9.485 10.214-25.676 10.229-35.174 0L70.438 392.331C56.232 377.031 67.062 352 88.025 352H152V80H68.024a11.996 11.996 0 0 1-8.485-3.515l-56-56C-4.021 12.926 1.333 0 12.024 0H208c13.255 0 24 10.745 24 24v328h63.966c20.878 0 31.851 24.969 17.587 40.331z'/%3e%3c/svg%3e" alt="Image" width="124" height="197"></td>
+                      <td class="tg-5fob" colspan="2">  </td>
+                    </tr>
+                    <tr>
+                      <td class="tg-kkk5" colspan="2" rowspan="2">NATANAEL</td>
+                    </tr>
+                    <tr>
+                    </tr>
+                    <tr>
+                      <td class="tg-kkk5" colspan="2" rowspan="2">DIEGO</td>
+                    </tr>
+                    <tr>
+                    </tr>
+                    <tr>
+                      <td class="tg-kkk5" colspan="2" rowspan="2">VALENTINA   SCOCIER</td>
+                    </tr>
+                    <tr>
+                    </tr>
+                    <tr>
+                      <td class="tg-5fob" colspan="2">  </td>
+                    </tr>
+                    <tr>
+                      <td class="tg-lifc" colspan="2">DESCENSO A SEGUNDA DIVISIÓN</td>
+                    </tr>
+                  </thead>
+                  </table>
+              </div>
+            </div>
+
+            <div id="tablaPosBT5" style="display: none;">
+              <div class="d-flex flex-row justify-content-center mt-4">
+                <style type="text/css">
+                  .tg  {border-collapse:collapse;border-spacing:0;}
+                  .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg .tg-fwze{background-color:#BF8F00;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    font-weight:bold;text-align:center;vertical-align:middle}
+                  .tg .tg-a37t{background-color:#10F01B;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    text-align:center;vertical-align:bottom}
+                  .tg .tg-8khg{background-color:#0F0;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    font-weight:bold;text-align:center;vertical-align:bottom}
+                  .tg .tg-4oq8{background-color:#BF8F00;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    font-weight:bold;text-align:center;vertical-align:bottom}
+                  .tg .tg-wxz9{background-color:#10F01B;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    text-align:left;vertical-align:bottom}
+                  .tg .tg-m0p4{background-color:#10F01B;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    font-weight:bold;text-align:center;vertical-align:bottom}
+                  .tg .tg-tvzq{background-color:#FF0;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    font-weight:bold;text-align:center;vertical-align:bottom}
+                  .tg .tg-a4ol{background-color:#FF0;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    text-align:left;vertical-align:bottom}
+                  .tg .tg-fqzr{background-color:#FF0;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    text-align:center;vertical-align:bottom}
+                  .tg .tg-8jsd{background-color:#BF8F00;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    text-align:left;vertical-align:bottom}
+                  .tg .tg-cmsf{background-color:#BF8F00;font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;
+                    text-align:center;vertical-align:bottom}
+                  </style>
+                  <table class="tg bordeGrueso">
+                  <thead>
+                    <tr>
+                      <th class="tg-4oq8" colspan="7">SEGUNDA DIVISIÓN </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="tg-fwze">#</td>
+                      <td class="tg-fwze">PARTICIPANTE</td>
+                      <td class="tg-fwze">PUNTOS</td>
+                      <td class="tg-fwze">PLENO</td>
+                      <td class="tg-fwze">PARCIAL</td>
+                      <td class="tg-fwze">ERROR</td>
+                      <td class="tg-fwze">PEN</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-8khg">1</td>
+                      <td class="tg-wxz9">Fabrizio Escolano</td>
+                      <td class="tg-m0p4">50</td>
+                      <td class="tg-a37t">8</td>
+                      <td class="tg-a37t">24</td>
+                      <td class="tg-a37t">28</td>
+                      <td class="tg-a37t">2</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-m0p4">2</td>
+                      <td class="tg-wxz9">Bruno Alonso</td>
+                      <td class="tg-m0p4">46</td>
+                      <td class="tg-a37t">7</td>
+                      <td class="tg-a37t">23</td>
+                      <td class="tg-a37t">30</td>
+                      <td class="tg-a37t">2</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-tvzq">3</td>
+                      <td class="tg-wxz9">Gabriel Talarico</td>
+                      <td class="tg-m0p4">46</td>
+                      <td class="tg-a37t">7</td>
+                      <td class="tg-a37t">22</td>
+                      <td class="tg-a37t">31</td>
+                      <td class="tg-a37t">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-tvzq">4</td>
+                      <td class="tg-a4ol">Tomás Hon</td>
+                      <td class="tg-tvzq">41</td>
+                      <td class="tg-fqzr">4</td>
+                      <td class="tg-fqzr">26</td>
+                      <td class="tg-fqzr">30</td>
+                      <td class="tg-fqzr">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">5</td>
+                      <td class="tg-a4ol">Koke</td>
+                      <td class="tg-tvzq">40</td>
+                      <td class="tg-fqzr">4</td>
+                      <td class="tg-fqzr">26</td>
+                      <td class="tg-fqzr">30</td>
+                      <td class="tg-fqzr">2</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">6</td>
+                      <td class="tg-8jsd">Joaco Fernandez</td>
+                      <td class="tg-4oq8">39</td>
+                      <td class="tg-cmsf">4</td>
+                      <td class="tg-cmsf">24</td>
+                      <td class="tg-cmsf">32</td>
+                      <td class="tg-cmsf">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">7</td>
+                      <td class="tg-8jsd">Eze</td>
+                      <td class="tg-4oq8">39</td>
+                      <td class="tg-cmsf">3</td>
+                      <td class="tg-cmsf">25</td>
+                      <td class="tg-cmsf">32</td>
+                      <td class="tg-cmsf">5</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">8</td>
+                      <td class="tg-8jsd">Luciano Hufschmid</td>
+                      <td class="tg-4oq8">38</td>
+                      <td class="tg-cmsf">4</td>
+                      <td class="tg-cmsf">23</td>
+                      <td class="tg-cmsf">33</td>
+                      <td class="tg-cmsf">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">9</td>
+                      <td class="tg-8jsd">Fede Gerez</td>
+                      <td class="tg-4oq8">37</td>
+                      <td class="tg-cmsf">6</td>
+                      <td class="tg-cmsf">19</td>
+                      <td class="tg-cmsf">35</td>
+                      <td class="tg-cmsf">0</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">10</td>
+                      <td class="tg-8jsd">Martín Bustos</td>
+                      <td class="tg-4oq8">37</td>
+                      <td class="tg-cmsf">3</td>
+                      <td class="tg-cmsf">26</td>
+                      <td class="tg-cmsf">31</td>
+                      <td class="tg-cmsf">2</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">11</td>
+                      <td class="tg-8jsd">Juli Boetsch</td>
+                      <td class="tg-4oq8">34</td>
+                      <td class="tg-cmsf">4</td>
+                      <td class="tg-cmsf">21</td>
+                      <td class="tg-cmsf">35</td>
+                      <td class="tg-cmsf">1</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">12</td>
+                      <td class="tg-8jsd">Verónica Lucchesi</td>
+                      <td class="tg-4oq8">34</td>
+                      <td class="tg-cmsf">4</td>
+                      <td class="tg-cmsf">21</td>
+                      <td class="tg-cmsf">35</td>
+                      <td class="tg-cmsf">1</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">13</td>
+                      <td class="tg-8jsd">Santiago</td>
+                      <td class="tg-4oq8">31</td>
+                      <td class="tg-cmsf">4</td>
+                      <td class="tg-cmsf">16</td>
+                      <td class="tg-cmsf">40</td>
+                      <td class="tg-cmsf">3</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">14</td>
+                      <td class="tg-8jsd">Anubis</td>
+                      <td class="tg-4oq8">31</td>
+                      <td class="tg-cmsf">1</td>
+                      <td class="tg-cmsf">24</td>
+                      <td class="tg-cmsf">35</td>
+                      <td class="tg-cmsf">4</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">15</td>
+                      <td class="tg-8jsd">Matías Varela</td>
+                      <td class="tg-4oq8">24</td>
+                      <td class="tg-cmsf">1</td>
+                      <td class="tg-cmsf">21</td>
+                      <td class="tg-cmsf">38</td>
+                      <td class="tg-cmsf">0</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">16</td>
+                      <td class="tg-8jsd">Rodrigo Soca</td>
+                      <td class="tg-4oq8">14</td>
+                      <td class="tg-cmsf">3</td>
+                      <td class="tg-cmsf">5</td>
+                      <td class="tg-cmsf">4</td>
+                      <td class="tg-cmsf">0</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-4oq8">17</td>
+                      <td class="tg-8jsd">Matias Diaz</td>
+                      <td class="tg-4oq8">10</td>
+                      <td class="tg-cmsf">2</td>
+                      <td class="tg-cmsf">4</td>
+                      <td class="tg-cmsf">6</td>
+                      <td class="tg-cmsf">0</td>
+                    </tr>
+                  </tbody>
+                  </table>
+              </div>
+
+              <div class="d-flex flex-row justify-content-center mt-5">
+                <style type="text/css">
+                  .tg  {border-collapse:collapse;border-spacing:0;}
+                  .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg .tg-ybgy{background-color:#F00;font-weight:bold;text-align:right;vertical-align:middle}
+                  .tg .tg-x0w5{background-color:#10F01B;font-weight:bold;text-align:center;vertical-align:middle}
+                  .tg .tg-r9yx{background-color:#FF0;font-weight:bold;text-align:center;vertical-align:bottom}
+                  .tg .tg-hsi1{background-color:#10F01B;font-weight:bold;text-align:left;vertical-align:middle}
+                  .tg .tg-6o9b{background-color:#FF0;font-weight:bold;text-align:center;vertical-align:middle}
+                  .tg .tg-i2rd{background-color:#F00;font-weight:bold;text-align:center;vertical-align:middle}
+                  </style>
+                  <table class="tg bordeGrueso">
+                  <thead>
+                    <tr>
+                      <th class="tg-r9yx" colspan="5">PROMOCION</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="tg-hsi1">Jhose</td>
+                      <td class="tg-x0w5">7</td>
+                      <td class="tg-6o9b">VS</td>
+                      <td class="tg-i2rd">4</td>
+                      <td class="tg-ybgy">Tomás Hon</td>
+                    </tr>
+                    <tr>
+                      <td class="tg-hsi1">Nico Avalos</td>
+                      <td class="tg-x0w5">11</td>
+                      <td class="tg-6o9b">VS</td>
+                      <td class="tg-i2rd">6</td>
+                      <td class="tg-ybgy">Koke</td>
+                    </tr>
+                  </tbody>
+                  </table>
+              </div>
+
+              <div class="d-flex flex-row justify-content-center mt-5">
+                <style type="text/css">
+                  .tg  {border-collapse:collapse;border-spacing:0;}
+                  .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+                    font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+                  .tg .tg-pdwd{background-color:#C1FFC1;border-color:#c1ffc1;color:#008200;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:18px;font-weight:bold;
+                    text-align:center;vertical-align:middle}
+                  .tg .tg-ky2q{background-color:#C1FFC1;border-color:#c1ffc1;color:#008000;
+                    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif !important;font-size:14px;font-style:italic;
+                    font-weight:bold;text-align:center;vertical-align:bottom}
+                  .tg .tg-fh4r{background-color:#C1FFC1;border-color:#c1ffc1;text-align:center;vertical-align:middle}
+                  .tg .tg-02ud{background-color:#C1FFC1;border-color:#c1ffc1;text-align:center;vertical-align:bottom}
+                  </style>
+                  <table class="tg bordeGrueso" style="table-layout: fixed; width: 395px">
+                  <colgroup>
+                  <col style="width: 82px">
+                  <col style="width: 81px">
+                  <col style="width: 116px">
+                  <col style="width: 116px">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <td class="tg-fh4r" colspan="2" rowspan="9"><img src="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3e%3cpath fill='%2304ff00' d='M313.553 119.669L209.587 7.666c-9.485-10.214-25.676-10.229-35.174 0L70.438 119.669C56.232 134.969 67.062 160 88.025 160H152v272H68.024a11.996 11.996 0 0 0-8.485 3.515l-56 56C-4.021 499.074 1.333 512 12.024 512H208c13.255 0 24-10.745 24-24V160h63.966c20.878 0 31.851-24.969 17.587-40.331z'/%3e%3c/svg%3e" alt="Image" width="126" height="201"></td>
+                      <td class="tg-02ud" colspan="2">  </td>
+                    </tr>
+                    <tr>
+                      <td class="tg-pdwd" colspan="2" rowspan="2">FABRIZIO ESCOLANO</td>
+                    </tr>
+                    <tr>
+                    </tr>
+                    <tr>
+                      <td class="tg-pdwd" colspan="2" rowspan="2">BRUNO ALONSO</td>
+                    </tr>
+                    <tr>
+                    </tr>
+                    <tr>
+                      <td class="tg-pdwd" colspan="2" rowspan="2">GABRIEL TALARICO</td>
+                    </tr>
+                    <tr>
+                    </tr>
+                    <tr>
+                      <td class="tg-02ud" colspan="2">  </td>
+                    </tr>
+                    <tr>
+                      <td class="tg-ky2q" colspan="2">ASCENSO A PRIMERA DIVISIÓN</td>
+                    </tr>
+                  </thead>
+                  </table>
+              </div>
+            </div>
           </div>
 
           <div id="ligaTemp6" style="display: none;">
