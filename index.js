@@ -160,8 +160,8 @@ function temporadaLiga(divId, boton) {
   }
 
   function primeraDivisionT3() {
-    boton1 = document.getElementById("primeraDivision")
-    boton2 = document.getElementById("segundaDivision")
+    boton1 = document.getElementById("primeraDivisionT3")
+    boton2 = document.getElementById("segundaDivisionT3")
     tablaA = document.getElementById("tablaPosAT3")
     tablaB = document.getElementById("tablaPosBT3")
   
@@ -173,10 +173,36 @@ function temporadaLiga(divId, boton) {
   }
 
   function segundaDivisionT3() {
-    boton1 = document.getElementById("primeraDivision")
-    boton2 = document.getElementById("segundaDivision")
+    boton1 = document.getElementById("primeraDivisionT3")
+    boton2 = document.getElementById("segundaDivisionT3")
     tablaA = document.getElementById("tablaPosAT3")
     tablaB = document.getElementById("tablaPosBT3")
+  
+    boton1.style.backgroundColor = "#198754";
+    boton2.style.backgroundColor = "#0f5132";
+  
+    tablaA.style.display = "none";
+    tablaB.style.display = "block";
+  }
+
+  function primeraDivisionT4() {
+    boton1 = document.getElementById("primeraDivisionT4")
+    boton2 = document.getElementById("segundaDivisionT4")
+    tablaA = document.getElementById("tablaPosAT4")
+    tablaB = document.getElementById("tablaPosBT4")
+  
+    boton1.style.backgroundColor = "#0f5132";
+    boton2.style.backgroundColor = "#198754";
+  
+    tablaA.style.display = "block";
+    tablaB.style.display = "none";
+  }
+
+  function segundaDivisionT4() {
+    boton1 = document.getElementById("primeraDivisionT4")
+    boton2 = document.getElementById("segundaDivisionT4")
+    tablaA = document.getElementById("tablaPosAT4")
+    tablaB = document.getElementById("tablaPosBT4")
   
     boton1.style.backgroundColor = "#198754";
     boton2.style.backgroundColor = "#0f5132";
