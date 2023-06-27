@@ -223,6 +223,10 @@ body {
 }
 
 .fecha16avos {
+    display: none;
+}
+
+.fecha2 {
     display: block;
 }
 
@@ -1015,4 +1019,8 @@ body {
 
 .margenTotal {
     margin-left: 16%;
+}
+
+td > a {
+    text-decoration: none;
 }

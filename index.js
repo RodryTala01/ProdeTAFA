@@ -2,34 +2,53 @@
 function mostrarFecha32avos() {
   fecha32avos = document.getElementById("fecha32avos");
   fecha1 = document.getElementById("fecha1");
-  fecha16avos = document.getElementById("fecha16avos")
+  fecha16avos = document.getElementById("fecha16avos");
+  fecha2 = document.getElementById("fecha2");
 
   fecha32avos.style.display = "block";
   fecha1.style.display = "none";
   fecha16avos.style.display = "none";
+  fecha2.style.display = "none";
 }
 
 function mostrarFecha1() {
   fecha32avos = document.getElementById("fecha32avos");
   fecha1 = document.getElementById("fecha1");
-  fecha16avos = document.getElementById("fecha16avos")
+  fecha16avos = document.getElementById("fecha16avos");
+  fecha2 = document.getElementById("fecha2");
 
 
   fecha32avos.style.display = "none";
   fecha1.style.display = "block";
   fecha16avos.style.display = "none";
+  fecha2.style.display = "none";
 }
 
 
 function mostrarFecha16avos() {
   fecha32avos = document.getElementById("fecha32avos");
   fecha1 = document.getElementById("fecha1");
-  fecha16avos = document.getElementById("fecha16avos")
+  fecha16avos = document.getElementById("fecha16avos");
+  fecha2 = document.getElementById("fecha2");
 
 
   fecha32avos.style.display = "none";
   fecha1.style.display = "none";
   fecha16avos.style.display = "block";
+  fecha2.style.display = "none";
+}
+
+function mostrarFecha2() {
+  fecha32avos = document.getElementById("fecha32avos");
+  fecha1 = document.getElementById("fecha1");
+  fecha16avos = document.getElementById("fecha16avos");
+  fecha2 = document.getElementById("fecha2");
+
+
+  fecha32avos.style.display = "none";
+  fecha1.style.display = "none";
+  fecha16avos.style.display = "none";
+  fecha2.style.display = "block";
 }
 
 function noHayFecha() {
