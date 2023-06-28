@@ -1024,3 +1024,7 @@ body {
 td > a {
     text-decoration: none;
 }
+
+table {
+    border: 2px solid black;
+}
