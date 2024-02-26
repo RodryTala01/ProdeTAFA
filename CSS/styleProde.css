@@ -1,0 +1,254 @@
+body {
+    background-image: url(../Imagenes/Fondo.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    text-align: center;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-family: 'Archivo Black', sans-serif;
+}
+
+.banner>img {
+
+    border: 5px solid black;
+    border-radius: 5px;
+}
+
+.banner>img:hover {
+    cursor: pointer;
+}
+
+.btn {
+    border-radius: 3px !important;
+}
+
+
+.cajaFECHA {
+    font-size: 1.5rem;
+    padding-left: 17px !important;
+    padding-right: 217px0px !important;
+    border: 1px solid black;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+}
+
+.cajaFECHA:hover {
+    color: white;
+}
+
+.cajaSIG {
+    padding-left: 17px !important;
+    padding-right: 17px !important;
+    border: 1px solid black;
+    color: black;
+    background-color: white;
+    cursor: pointer;
+    font-size: 1.5rem;
+    text-decoration: none;
+}
+
+.cajaSIG:hover {
+    color: black;
+}
+
+.cajaANT {
+    padding-left: 17px !important;
+    padding-right: 17px !important;
+    border: 1px solid black;
+    color: black;
+    background-color: white;
+    cursor: pointer;
+    font-size: 1.5rem;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.iconoCasa {
+    height: 30px;
+    transition: transform 0.3s ease;
+
+    margin-right: 2rem;
+}
+
+.iconoCasa:hover {
+    transform: scale(1.2);
+}
+
+.nav-item {
+    margin-left: 1rem;
+    font-weight: 500;
+}
+
+.animado {
+    transition: transform 0.3s ease;
+}
+
+.animado:hover {
+    transform: scale(1.2);
+}
+
+.nav-link {
+    color: white;
+}
+
+.partido>TD {
+    border: 3px solid black;
+}
+
+.botones {
+    height: auto;
+    width: "55%";
+}
+
+.fondoMio {
+    background-color: #e5e5e5;
+}
+
+.tablaMia {
+    width: 170px;
+    height: 50px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+}
+
+.tablaMia2 {
+    width: 175px;
+    height: 50px;
+    align-items: center;
+}
+
+.tablaMia3 {
+    width: 35px;
+    height: 50px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
+
+.tamañoMio {
+    width: 230px;
+}
+
+.bordeGrueso {
+    border: 2px solid rgba(83, 81, 81, 0.712);
+}
+
+.margenParaPubli {
+    margin-bottom: 200px;
+}
+
+.tg td {
+    border-color: rgba(83, 81, 81, 0.712);
+    border-style: solid;
+    border-width: 2px;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    word-break: normal;
+}
+
+.tg th {
+    border-color: rgba(83, 81, 81, 0.712);
+    border-style: solid;
+    border-width: 1px;
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+    overflow: hidden;
+    padding: 5px;
+    word-break: normal;
+}
+
+.tg .tg-cly1 {
+    text-align: left;
+    vertical-align: middle
+}
+
+.tg .tg-nrix {
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.numero {
+    font-size: 1.3rem;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+.tamañoPerso1 {
+    width: 20%;
+}
+
+.tamañoPerso2 {
+    width: 10rem;
+}
+
+.escudo {
+    position: relative;
+    align-items: center;
+}
+
+.recargar {
+    margin-top: 1rem;
+    color: red;
+    font-weight: bold;
+    background: none;
+    border: none;
+    transition: color 1s;
+}
+
+.recargar:hover {
+
+    color: black;
+
+}
+
+.fecha32avos {
+    display: none;
+}
+
+.fecha16avos {
+    display: none;
+}
+
+.fechaOctavos {
+    display: block;
+}
+
+.fechaCuartos {
+    display: none;
+}
+
+.fechaSemifinales {
+    display: none;
+}
+
+.fechaFinal {
+    display: none;
+}
+
+.fecha1 {
+    display: none;
+}
+
+.fecha2 {
+    display: none;
+}
+
+.fecha3 {
+    display: none;
+}
+
+.fecha4 {
+    display: none;
+}
+
+.fecha5 {
+    display: none;
+}

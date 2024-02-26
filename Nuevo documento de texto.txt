@@ -1,0 +1,2 @@
+-que cargue mejor la ultima fecha
+-que cambie el nombre del cartel fecha

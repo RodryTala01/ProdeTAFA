@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="CSS/styleProde.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+</head>
+
+<body>
+    <nav class=" navbar navbar-expand-lg navbar-dark bg-success ">
+        <div class="container">
+            <li class="nav-item d-flex align-items-center">
+                <a class="nav-link active " aria-current="page" href="#"><img class="iconoCasa" src="Imagenes/Home.svg"
+                        alt=""></a>
+            </li>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ">
+                    <li>
+                        <div>
+                            <div class="btn-group-vertical " role="group" aria-label="Vertical button group">
+                                <div class="btn-group " role="group">
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="#">LIGA</a>
+                    </li>
+
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="#">COPA TOTAL</a>
+                    </li>
+
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="#">COPA CAMPEONES</a>
+                    </li>
+
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="#">COPA A</a>
+                    </li>
+
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="#">COPA B</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">COPA C</a>
+                    </li>
+
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="#">COPA DÚOS</a>
+                    </li>
+
+                    <li class="nav-item animado">
+                        <a class="click nav-link active" href="#">PALMARÉS</a>
+                    </li>
+
+                    <li class="nav-item animado">
+                        <a class="click nav-link active" href="#">RANKINGS</a>
+                    </li>
+
+
+            </div>
+        </div>
+        </div>
+        </li>
+        </ul>
+        </div>
+        </div>
+    </nav>
+
+    <main>
+
+        <div class="text-center banner col-md">
+            <img src="Imagenes/Banner.png" class="img-fluid border border-2 border-dark mt-4" alt="banner" height=auto
+                width="750 rem">
+        </div>
+
+        <div id="fecha32avos" class="fecha32avos">
+
+            <div class="text-center cajaBotonesFechas mt-4 mb-4">
+                <button type="button" class="cajaFECHA tamañoMio ms-3 btn btn-success fw-bold"
+                    id="textoFecha">FECHA</button>
+                <button type="button" class="cajaSIG ms-3 btn btn-light bi bi-caret-right-fill fw-bold"
+                    onclick="mostrarFecha1()"></button>
+            </div>
+
+            <div class="container">
+                <div class="table-responsive">
+                    <div class="d-flex flex-row justify-content-center mt-5 margenParaPubli">
+                        <table class="tg bg-success">
+                            <tbody>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/1xBWyjjkA6vEWopPK3lIPA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Paises Bajos
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/jSgw5z0EPOLzdUi-Aomq7Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Croacia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/1xBWyjjkA6vEWopPK3lIPA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Argentina
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/jSgw5z0EPOLzdUi-Aomq7Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Australia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/5hLkf7KFHhmpaiOJQv8LmA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>España
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/joYpsiaYi4GDCqhSRAq5Zg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Italia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/wj9uZvn_vZrelLFGH8fnPA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Estados Unidos
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">3</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/yJF9xqmUGenD8108FJbg9A_96x96.png"
+                                            height="30px" alt="">
+                                        <br>México
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/yTS_Piy3M1wUBnqU0n5aAw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Polonia
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/h1FhPLmDg9AHXzhygqvVPg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Alemania
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/6SF7yEoB60bU5knw-M7R5Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Bélgica
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/HwYB-wsdd6M2WmLXSkd6Sg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Austria
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/HJ3_2c4w791nZJj7n-Lj3Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Portugal
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">3</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/em3xOvyKQEgz1IIYI8GO9w_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Bosnia y Herzegovina
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/SQB-jlVosxVV1Ce79FhbOA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Levante
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/meAnutdPID67rfUecKaoFg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Deportivo Alavés
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/wi-J-3U7th2bpIB_Uy9Euw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Racing Club
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/EG7pVKQAW2mvbnKsMoMbYA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Vélez Sarsfield
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Escudo_del_Club_Independiente_Rivadavia.svg/1200px-Escudo_del_Club_Independiente_Rivadavia.svg.png"
+                                            height="30px" alt="">
+                                        <br>Independiente Rivadavia
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/XRBWSDuC8J2bANaRlbvyHA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Aldosivi
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/AKqvkBpIyr-iLOK7Ig7-yQ_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Ecuador
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/SGxeD7yhwPj53FmPBmMMHg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Bolivia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://logodownload.org/wp-content/uploads/2015/05/river-plate-logo-6.png"
+                                            height="30px" alt="">
+                                        <br>River Plate
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/u9y68E7VuYQeNAVLB-8HBw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Defensa y Justicia
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="fecha1" class="fecha1">
+
+            <div class="text-center cajaBotonesFechas mt-4 mb-4">
+                <button type="button" class="cajaANT btn btn-light bi bi-caret-left-fill fw-bold"
+                    onclick="mostrarFecha32avos()"></button>
+                <button type="button" class="cajaFECHA tamañoMio ms-3 btn btn-success fw-bold"
+                    id="textoFecha">FECHA</button>
+                <button type="button" class="cajaSIG ms-3 btn btn-light bi bi-caret-right-fill fw-bold"
+                    onclick="mostrarFecha16avos()"></button>
+            </div>
+
+            <div class="container">
+                <div class="table-responsive">
+                    <div class="d-flex flex-row justify-content-center mt-5 margenParaPubli">
+                        <table class="tg bg-success">
+                            <tbody>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/1xBWyjjkA6vEWopPK3lIPA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Paises Bajos
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/jSgw5z0EPOLzdUi-Aomq7Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Croacia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/1xBWyjjkA6vEWopPK3lIPA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Argentina
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/jSgw5z0EPOLzdUi-Aomq7Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Australia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/5hLkf7KFHhmpaiOJQv8LmA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>España
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/joYpsiaYi4GDCqhSRAq5Zg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Italia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/wj9uZvn_vZrelLFGH8fnPA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Estados Unidos
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">3</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/yJF9xqmUGenD8108FJbg9A_96x96.png"
+                                            height="30px" alt="">
+                                        <br>México
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/yTS_Piy3M1wUBnqU0n5aAw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Polonia
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/h1FhPLmDg9AHXzhygqvVPg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Alemania
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/6SF7yEoB60bU5knw-M7R5Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Bélgica
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/HwYB-wsdd6M2WmLXSkd6Sg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Austria
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/HJ3_2c4w791nZJj7n-Lj3Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Portugal
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">3</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/em3xOvyKQEgz1IIYI8GO9w_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Bosnia y Herzegovina
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/SQB-jlVosxVV1Ce79FhbOA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Levante
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/meAnutdPID67rfUecKaoFg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Deportivo Alavés
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/wi-J-3U7th2bpIB_Uy9Euw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Racing Club
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/EG7pVKQAW2mvbnKsMoMbYA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Vélez Sarsfield
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Escudo_del_Club_Independiente_Rivadavia.svg/1200px-Escudo_del_Club_Independiente_Rivadavia.svg.png"
+                                            height="30px" alt="">
+                                        <br>Independiente Rivadavia
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/XRBWSDuC8J2bANaRlbvyHA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Aldosivi
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/AKqvkBpIyr-iLOK7Ig7-yQ_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Ecuador
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/SGxeD7yhwPj53FmPBmMMHg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Bolivia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://logodownload.org/wp-content/uploads/2015/05/river-plate-logo-6.png"
+                                            height="30px" alt="">
+                                        <br>River Plate
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/u9y68E7VuYQeNAVLB-8HBw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Defensa y Justicia
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="fecha16avos" class="fecha16avos">
+
+            <div class="text-center cajaBotonesFechas mt-4 mb-4">
+                <button type="button" class="cajaANT btn btn-light bi bi-caret-left-fill fw-bold"
+                    onclick="mostrarFecha1()"></button>
+                <button type="button" class="cajaFECHA tamañoMio ms-3 btn btn-success fw-bold"
+                    id="textoFecha">FECHA</button>
+                <button type="button" class="cajaSIG ms-3 btn btn-light bi bi-caret-right-fill fw-bold"
+                    onclick="mostrarFecha2()"></button>
+            </div>
+
+            <div class="container">
+                <div class="table-responsive">
+                    <div class="d-flex flex-row justify-content-center mt-4 margenParaPubli">
+                        <table class="tg bg-success">
+                            <tbody>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/1xBWyjjkA6vEWopPK3lIPA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Paises Bajos
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/jSgw5z0EPOLzdUi-Aomq7Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Croacia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/1xBWyjjkA6vEWopPK3lIPA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Argentina
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/jSgw5z0EPOLzdUi-Aomq7Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Australia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/5hLkf7KFHhmpaiOJQv8LmA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>España
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/joYpsiaYi4GDCqhSRAq5Zg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Italia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/wj9uZvn_vZrelLFGH8fnPA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Estados Unidos
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">3</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/yJF9xqmUGenD8108FJbg9A_96x96.png"
+                                            height="30px" alt="">
+                                        <br>México
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/yTS_Piy3M1wUBnqU0n5aAw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Polonia
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/h1FhPLmDg9AHXzhygqvVPg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Alemania
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/6SF7yEoB60bU5knw-M7R5Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Bélgica
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/HwYB-wsdd6M2WmLXSkd6Sg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Austria
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/HJ3_2c4w791nZJj7n-Lj3Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Portugal
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">3</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/em3xOvyKQEgz1IIYI8GO9w_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Bosnia y Herzegovina
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/SQB-jlVosxVV1Ce79FhbOA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Levante
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/meAnutdPID67rfUecKaoFg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Deportivo Alavés
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/wi-J-3U7th2bpIB_Uy9Euw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Racing Club
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/EG7pVKQAW2mvbnKsMoMbYA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Vélez Sarsfield
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Escudo_del_Club_Independiente_Rivadavia.svg/1200px-Escudo_del_Club_Independiente_Rivadavia.svg.png"
+                                            height="30px" alt="">
+                                        <br>Independiente Rivadavia
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/XRBWSDuC8J2bANaRlbvyHA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Aldosivi
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/AKqvkBpIyr-iLOK7Ig7-yQ_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Ecuador
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/SGxeD7yhwPj53FmPBmMMHg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Bolivia
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://logodownload.org/wp-content/uploads/2015/05/river-plate-logo-6.png"
+                                            height="30px" alt="">
+                                        <br>River Plate
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/u9y68E7VuYQeNAVLB-8HBw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Defensa y Justicia
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="fecha2" class="fecha2">
+
+            <div class="text-center cajaBotonesFechas mt-4 mb-4">
+                <button type="button" class="cajaANT btn btn-light bi bi-caret-left-fill fw-bold"
+                    onclick="mostrarFecha16avos()"></button>
+                <button type="button" class="cajaFECHA tamañoMio ms-3 btn btn-success fw-bold"
+                    id="textoFecha">FECHA</button>
+                <button type="button" class="cajaSIG ms-3 btn btn-light bi bi-caret-right-fill fw-bold"
+                    onclick="mostrarFechaOctavos()"></button>
+            </div>
+
+            <div class="container">
+                <div class="table-responsive">
+                    <div class="d-flex flex-row justify-content-center mt-4 margenParaPubli">
+                        <table class="tg bg-success">
+                            <tbody>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/C3J47ea36cMBc4XPbp9aaA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Everton
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/8piQOzndGmApKYTcvyN9vA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Crystal Palace
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://copaargentina.s3.amazonaws.com/original/m103826_Estudiantes_LP.svg"
+                                            height="30px" alt="">
+                                        <br>Estudiantes LP
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/Lss4UJ_IL6ekpEzz1hYKug_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Newell's Old Boys
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/l2-icwsMhIvsbRw8AwC1yg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Inter
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/srAAE0bOnCppUrlbJpFiHQ_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Atlético Madrid
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/FylTPR72JXIGFzqwQocSAQ_96x96.png"
+                                            height="30px" alt="">
+                                        <br>PSV
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/FZnTSH2rbHFos4BnlWAItw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Borussia Dortmund
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/PWRLYBJqlGrAAsKkUN6eng_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Napoli
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/paYnEE8hcrP96neHRNofhQ_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Barcelona
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/QkkllEKwkj60jEVtOEZWAg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Porto
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/4us2nCgl6kgZc0t3hpW75Q_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Austria
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://www.clubnacional.com.py/assets/images/badge.png" height="30px"
+                                            alt="">
+                                        <br>Nacional (P)
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/i6-Yda76iPfeYEg4JcNbuw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Atlético Nacional
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/izGdPix_nDr8lff08dKicA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Dinamo Zagreb
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/S0fDZjYYytbZaUt0f3cIhg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Deportivo Alavés
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/DrzFcMWJgtG1nDSdfN0dBA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Touluse
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/nFwABZ-4n_A3BGXT9A7Adg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Benfica
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/BQdP4jUBFJfG7U_JBsFIMg_96x96.png "
+                                            height="30px" alt="">
+                                        <br>Roma
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1*</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/36g41WN3WdjCRsSFiurazw_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Feyenoord
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/KfBX1kHNj26r9NxpqNaTkA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Marsella
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">3</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/3rx1dndeeE1gb97w6et-GA_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Shaktar
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/8amyvPwO0h6V9D_U2NdG_g_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Godoy Cruz
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/cEY0fDx48kkZOPpbK_Bhsg_96x96.png"
+                                            height="30px" alt="">
+                                        <br>Colo-Colo
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="fechaOctavos" class="fechaOctavos">
+
+            <div class="text-center cajaBotonesFechas mt-4 mb-4">
+                <button type="button" class="cajaANT btn btn-light bi bi-caret-left-fill fw-bold"
+                    onclick="mostrarFecha2()"></button>
+                <button type="button" class="cajaFECHA tamañoMio ms-3 btn btn-success fw-bold"
+                    id="textoFecha">FECHA</button>
+                <button type="button" class="cajaSIG ms-3 btn btn-light bi bi-caret-right-fill fw-bold"
+                    onclick="noHayFecha()"></button>
+            </div>
+
+
+            <div id="app" class="container">
+                <div class="d-flex flex-row justify-content-center mt-5">
+                    <table class="tg bg-success">
+                        <tbody>
+                            <tr v-for="lista in listaDatos">
+                                <td class="tg-nrix bg-danger estado-columna p-2 tamañoPerso1">{{lista[0]}}</td>
+                                <td class="col-md-auto p-2 tamañoPerso2">
+
+                                    <img v-if="lista[1] === 'Independiente'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/YkuS0LD4UowC0MDzpKqZXw_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Arsenal FC'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/4us2nCgl6kgZc0t3hpW75Q_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Belgrano'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/ARRobSqsCAE23mzPdOHJYQ_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Newells'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/Lss4UJ_IL6ekpEzz1hYKug_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Huracan'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/BXhsD_6yvgePrhCIeziDcA_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Betis'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/S0fDZjYYytbZaUt0f3cIhg_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Marsella'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/KfBX1kHNj26r9NxpqNaTkA_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Real Madrid'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/Th4fAVAZeCJWRcKoLW7koA_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'River Plate'"
+                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Escudo_del_C_A_River_Plate.svg/129px-Escudo_del_C_A_River_Plate.svg.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Gimnasia (LP)'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/RjY9F3KQksU2z_ce3iE7dQ_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Quilmes'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/TM2nc1qIiQss1aI1DojEfg_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[1] === 'Lanus'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/FiqktuVwEcYAOZNp32H-OQ_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <br>{{lista[1]}}
+                                </td>
+                                <td class="tg-nrix numero bg-danger p-2">{{ lista[2] !== '' ? lista[2] : 'X' }}
+                                </td>
+                                <td class="tg-nrix numero bg-danger p-2">{{ lista[3] !== '' ? lista[3] : 'X' }}
+                                </td>
+                                <td class="col-md-auto p-2 tamañoPerso2">
+
+                                    <img v-if="lista[4] === 'San Lorenzo'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/3guH9PUqsLcUw9o8VBhAlw_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Banfield'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/lRUvM7_5xXHy2h9wohKZ9A_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Rosario Central'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/z-n52o4GCyVOhf7N_VRMBw_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Racing Club'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/wi-J-3U7th2bpIB_Uy9Euw_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Newcastle'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/96CcNNQ0AYDAbssP0V9LuQ_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Talleres (C)'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/MW12yOtJtAqfvt7JKt4iUg_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Athletic Bilbao'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/OSL_5Zm6kYPP1J17Bo5uDA_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Montpellier'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/fL5Nk_2eUanYiOSB9AnBpQ_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Sevilla'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/hCTs5EX3WjCMC5Jl3QE4Rw_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Boca Juniors'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/YO1impuFJT2hex6wvCd9Pw_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Estudiantes (LP)'"
+                                        src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Logo_Actual_del_Club_Estudiantes_de_La_Plata.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <img v-if="lista[4] === 'Chacarita'"
+                                        src="https://ssl.gstatic.com/onebox/media/sports/logos/0mEYT48j2_Q3ZRvv76ikcA_96x96.png"
+                                        alt="" class="text-center escudo" height="30px">
+
+                                    <br>{{lista[4]}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+
+                </div>
+                <button class="margenParaPubli recargar" v-on:click="recargar">Actualizar</button>
+            </div>
+        </div>
+
+
+
+
+
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script src="JS/leer.js"></script>
+
+
+
+    </main>
+
+    <footer>
+
+        <div class="fixed-bottom text-center col-md">
+            <a href="" target="_blank">
+                <img src="https://i.ibb.co/qkkt2sC/Banner-Publi.png" alt="Donale al admin no seas malo"
+                    class="img-fluid border border-2 border-dark mt-4" width="500 rem"></a>
+        </div>
+
+    </footer>
+
+
+    <script src="JS/indexProde.js"></script>
+
+    <!-- Bootstrap JavaScript Libraries -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>
