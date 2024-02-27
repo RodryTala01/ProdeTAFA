@@ -5,8 +5,8 @@ function mostrarFecha32avos() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    fechaCuartos = document.getElementById("fechaCuartos");
-    fecha4 = document.getElementById("fecha4");
+    // fechaCuartos = document.getElementById("fechaCuartos");
+    // fecha4 = document.getElementById("fecha4");
 
 
 
@@ -17,8 +17,8 @@ function mostrarFecha32avos() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    fechaCuartos.style.display = "none";
-    fecha4.style.display = "none";
+    // fechaCuartos.style.display = "none";
+    // fecha4.style.display = "none";
 }
 
 function mostrarFecha1() {
@@ -28,8 +28,8 @@ function mostrarFecha1() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    fechaCuartos = document.getElementById("fechaCuartos");
-    fecha4 = document.getElementById("fecha4");
+    // fechaCuartos = document.getElementById("fechaCuartos");
+    // fecha4 = document.getElementById("fecha4");
 
 
 
@@ -40,8 +40,8 @@ function mostrarFecha1() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    fechaCuartos.style.display = "none";
-    fecha4.style.display = "none";
+    // fechaCuartos.style.display = "none";
+    // fecha4.style.display = "none";
 }
 
 
@@ -52,8 +52,8 @@ function mostrarFecha16avos() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    fechaCuartos = document.getElementById("fechaCuartos");
-    fecha4 = document.getElementById("fecha4");
+    // fechaCuartos = document.getElementById("fechaCuartos");
+    // fecha4 = document.getElementById("fecha4");
 
 
 
@@ -64,8 +64,8 @@ function mostrarFecha16avos() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    fechaCuartos.style.display = "none";
-    fecha4.style.display = "none";
+    // fechaCuartos.style.display = "none";
+    // fecha4.style.display = "none";
 }
 
 function mostrarFecha2() {
@@ -75,8 +75,8 @@ function mostrarFecha2() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    fechaCuartos = document.getElementById("fechaCuartos");
-    fecha4 = document.getElementById("fecha4");
+    // fechaCuartos = document.getElementById("fechaCuartos");
+    // fecha4 = document.getElementById("fecha4");
 
 
 
@@ -87,8 +87,8 @@ function mostrarFecha2() {
     fecha2.style.display = "block";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    fechaCuartos.style.display = "none";
-    fecha4.style.display = "none";
+    // fechaCuartos.style.display = "none";
+    // fecha4.style.display = "none";
 }
 
 function mostrarFechaOctavos() {
@@ -98,8 +98,8 @@ function mostrarFechaOctavos() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    fechaCuartos = document.getElementById("fechaCuartos");
-    fecha4 = document.getElementById("fecha4");
+    // fechaCuartos = document.getElementById("fechaCuartos");
+    // fecha4 = document.getElementById("fecha4");
 
 
 
@@ -110,8 +110,8 @@ function mostrarFechaOctavos() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "block";
     fecha3.style.display = "none";
-    fechaCuartos.style.display = "none";
-    fecha4.style.display = "none";
+    // fechaCuartos.style.display = "none";
+    // fecha4.style.display = "none";
 }
 
 function mostrarFecha3() {
@@ -121,8 +121,8 @@ function mostrarFecha3() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    fechaCuartos = document.getElementById("fechaCuartos");
-    fecha4 = document.getElementById("fecha4");
+    // fechaCuartos = document.getElementById("fechaCuartos");
+    // fecha4 = document.getElementById("fecha4");
 
 
 
@@ -133,8 +133,8 @@ function mostrarFecha3() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "block";
-    fechaCuartos.style.display = "none";
-    fecha4.style.display = "none";
+    // fechaCuartos.style.display = "none";
+    // fecha4.style.display = "none";
 }
 
 function mostrarFechaCuartos() {
@@ -144,8 +144,8 @@ function mostrarFechaCuartos() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    fechaCuartos = document.getElementById("fechaCuartos");
-    fecha4 = document.getElementById("fecha4");
+    // fechaCuartos = document.getElementById("fechaCuartos");
+    // fecha4 = document.getElementById("fecha4");
 
 
 
@@ -156,8 +156,8 @@ function mostrarFechaCuartos() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    fechaCuartos.style.display = "block";
-    fecha4.style.display = "none";
+    // fechaCuartos.style.display = "block";
+    // fecha4.style.display = "none";
 }
 
 function mostrarFecha4() {
@@ -167,8 +167,8 @@ function mostrarFecha4() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    fechaCuartos = document.getElementById("fechaCuartos");
-    fecha4 = document.getElementById("fecha4");
+    // fechaCuartos = document.getElementById("fechaCuartos");
+    // fecha4 = document.getElementById("fecha4");
 
 
 
@@ -179,8 +179,8 @@ function mostrarFecha4() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    fechaCuartos.style.display = "none";
-    fecha4.style.display = "block";
+    // fechaCuartos.style.display = "none";
+    // fecha4.style.display = "block";
 }
 
 
