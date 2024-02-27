@@ -249,3 +249,140 @@ th.p-2,
     opacity: 0% !important;
     cursor: default !important;
 }
+
+#containerPelota {
+    position: absolute;
+    animation: rebota 0.4s alternate infinite ease-out, rotation 7s infinite linear, seMueve 7s infinite linear;
+    bottom: 15%;
+    /* Ajuste inicial */
+}
+
+@keyframes rebota {
+    0% {
+        bottom: 25%;
+        transform: scaleY(1);
+    }
+
+    100% {
+        bottom: 50%;
+        transform: scaleY(1);
+    }
+}
+
+@keyframes rotation {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(359deg);
+        /* Rotación completa */
+    }
+
+    50% {
+        transform: rotate(0deg);
+    }
+
+    75% {
+        transform: rotate(-359deg);
+        /* Rotación completa */
+    }
+}
+
+@keyframes seMueve {
+
+    0%,
+    100% {
+        left: 45%;
+    }
+
+    25% {
+        left: 60%;
+    }
+
+    50% {
+        left: 45%;
+    }
+
+    75% {
+        left: 30%;
+    }
+}
+
+#textoCargando {
+    margin-top: 2rem;
+    font-size: 20px;
+    color: whitesmoke;
+}
+
+#punto1 {
+    animation: loading1 1s infinite;
+}
+
+#punto2 {
+    animation: loading2 1s infinite;
+}
+
+#punto3 {
+    animation: loading3 1s infinite;
+}
+
+@keyframes loading1 {
+    0% {
+        opacity: 0;
+    }
+
+    25% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    75% {
+        opacity: 1;
+    }
+}
+
+@keyframes loading2 {
+    0% {
+        opacity: 0;
+    }
+
+    25% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    75% {
+        opacity: 1;
+    }
+}
+
+@keyframes loading3 {
+    0% {
+        opacity: 0;
+    }
+
+    25% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    75% {
+        opacity: 1;
+    }
+}
+
+#app {
+    display: none;
+}

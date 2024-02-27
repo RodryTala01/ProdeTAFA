@@ -87,6 +87,8 @@
         </div>
     </nav>
 
+
+
     <main>
 
         <div class="text-center banner col-md">
@@ -1000,6 +1002,16 @@
                     onclick="noHayFecha()"></button>
             </div>
 
+            <div id="containerPelota" class="containerPelota justify-content-center">
+                <img class="pelota" v-if="!loaded"
+                    src="https://www.tenvinilo.com/vinilos-decorativos/img/preview/vinilo-infantil-pelota-futbol-color-1399.png"
+                    width="95" height="96" id="pelota">
+
+
+            </div>
+            <div class="textoCargando" id="textoCargando">
+                Cargando Fecha<span id="punto1">.</span><span id="punto2">.</span><span id="punto3">.</span>
+            </div>
 
             <div id="app" class="container">
                 <div class="d-flex flex-row justify-content-center mt-4">
@@ -1344,6 +1356,10 @@
                 <button class="margenParaPubli recargar" v-on:click="recargar">Actualizar</button>
             </div>
         </div>
+
+
+
+
 
 
 
