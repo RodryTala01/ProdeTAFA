@@ -43,8 +43,8 @@ function ocultarPelotaYTextoDeCarga() {
 
 
     if (containerPelota && textoCargando) {
-        containerPelota.style.opacity = "0";
-        textoCargando.style.opacity = "0";
+        containerPelota.style.display = "none";
+        textoCargando.style.display = "none";
     }
 
     document.getElementById("app").style.display = "block";
