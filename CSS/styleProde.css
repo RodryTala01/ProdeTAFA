@@ -1,7 +1,7 @@
 body {
-    background-image: url(../Imagenes/Fondo.png);
-    background-size: cover;
-    background-repeat: no-repeat;
+    background-image: url(../Imagenes/FondoPrueba.jpg);
+    background-size: auto;
+    background-repeat: repeat;
     background-attachment: fixed;
     text-align: center;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
@@ -23,12 +23,18 @@ body {
     border-radius: 3px !important;
 }
 
+.cajaFECHA:hover {
+    background-color: #3f4d7a;
+    border-color: #4d5d94;
+}
 
 .cajaFECHA {
     width: 10rem !important;
     font-size: 1rem;
+    background-color: #293250;
     color: white;
     text-decoration: none;
+    border-color: #4d5d94;
 }
 
 .cajaSIG {
@@ -48,15 +54,9 @@ body {
     box-sizing: border-box;
 }
 
-.iconoCasa {
-    height: 30px;
-    transition: transform 0.3s ease;
-
-    margin-right: 2rem;
-}
-
-.iconoCasa:hover {
-    transform: scale(1.2);
+.activo{
+    font-weight: bold;
+    color: rgb(54, 53, 53) !important;
 }
 
 .nav-item {
@@ -385,4 +385,34 @@ th.p-2,
 
 #app {
     display: none;
+}
+
+.colorTiempo {
+    background-color: #293250;
+    color: white;
+}
+
+.colorEquipo {
+    background-color: #FFD55A;
+}
+
+.colorGoles {
+    background-color: #6DD47E;
+}
+
+div>div>div>table>tbody>tr>th.bg-danger {
+    background-color: #293250 !important;
+    color: white;
+}
+
+div>div>div>table>tbody>tr>td.col-md-auto {
+    background-color: #FFD55A;
+}
+
+div>div>div>table>tbody>tr>td.bg-danger {
+    background-color: #6DD47E !important;
+}
+
+.navbar {
+    margin-right: none !important;
 }

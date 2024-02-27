@@ -7,11 +7,10 @@ const vue = new Vue({
     created() {
         this.getLista();
         // Ejecutar recargar() cada segundo
-        setInterval(this.recargar, 240000);
+        setInterval(this.recargar, 50000);
     },
     methods: {
         recargar() {
-            console.log("Recargando...");
             this.getLista();
         },
         getLista() {

@@ -24,60 +24,54 @@
 </head>
 
 <body>
-    <nav class=" navbar navbar-expand-lg navbar-dark bg-success ">
-        <div class="container">
-            <li class="nav-item d-flex align-items-center">
-                <a class="nav-link active " aria-current="page" href="#"><img class="iconoCasa" src="Imagenes/Home.svg"
-                        alt=""></a>
-            </li>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container-fluid">
+                <div class="d-flex justify-content-center">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                </div>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 justify-content-center">
                     <li>
                         <div>
-                            <div class="btn-group-vertical " role="group" aria-label="Vertical button group">
-                                <div class="btn-group " role="group">
+                            <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                                <div class="btn-group" role="group">
+                    <li class="nav-item animado">
+                        <a class="nav-link activo" href="#">INICIO</a>
+                    </li>
                     <li class="nav-item animado">
                         <a class="nav-link" href="#">LIGA</a>
                     </li>
-
                     <li class="nav-item animado">
                         <a class="nav-link" href="#">COPA TOTAL</a>
                     </li>
-
                     <li class="nav-item animado">
                         <a class="nav-link" href="#">COPA CAMPEONES</a>
                     </li>
-
                     <li class="nav-item animado">
                         <a class="nav-link" href="#">COPA A</a>
                     </li>
-
                     <li class="nav-item animado">
                         <a class="nav-link" href="#">COPA B</a>
                     </li>
-
                     <li class="nav-item">
                         <a class="nav-link disabled" href="#">COPA C</a>
                     </li>
-
                     <li class="nav-item animado">
                         <a class="nav-link" href="#">COPA DÚOS</a>
                     </li>
-
                     <li class="nav-item animado">
                         <a class="click nav-link active" href="#">PALMARÉS</a>
                     </li>
-
                     <li class="nav-item animado">
                         <a class="click nav-link active" href="#">RANKINGS</a>
                     </li>
-
-
+                    <li class="nav-item animado">
+                        <a class="click nav-link active" href="#">EQUIPOS</a>
+                    </li>
             </div>
         </div>
         </div>
@@ -86,6 +80,7 @@
         </div>
         </div>
     </nav>
+
 
 
 
@@ -1013,13 +1008,13 @@
                 Cargando Fecha<span id="punto1">.</span><span id="punto2">.</span><span id="punto3">.</span>
             </div>
 
-            <div id="app" class="container">
+            <div id="app" class="container margenParaPubli">
                 <div class="d-flex flex-row justify-content-center mt-4">
                     <table class="tg bg-success">
                         <tbody>
                             <tr v-for="lista in listaDatos">
-                                <td class="tg-nrix bg-danger estado-columna p-2">{{lista[0]}}</td>
-                                <td class="col-md-auto p-2 tamañoPerso2">
+                                <td class="tg-nrix estado-columna colorTiempo p-2">{{lista[0]}}</td>
+                                <td class="col-md-auto p-2 tamañoPerso2 colorEquipo">
 
                                     <img v-if="lista[1] === 'Independiente'"
                                         src="https://ssl.gstatic.com/onebox/media/sports/logos/YkuS0LD4UowC0MDzpKqZXw_96x96.png"
@@ -1201,11 +1196,11 @@
 
                                     <br>{{lista[1]}}
                                 </td>
-                                <td class="tg-nrix numero bg-danger p-2">{{ lista[2] !== '' ? lista[2] : 'X' }}
+                                <td class="tg-nrix numero p-2 colorGoles">{{ lista[2] !== '' ? lista[2] : 'X' }}
                                 </td>
-                                <td class="tg-nrix numero bg-danger p-2">{{ lista[3] !== '' ? lista[3] : 'X' }}
+                                <td class="tg-nrix numero p-2 colorGoles">{{ lista[3] !== '' ? lista[3] : 'X' }}
                                 </td>
-                                <td class="col-md-auto p-2 tamañoPerso2">
+                                <td class="col-md-auto p-2 tamañoPerso2 colorEquipo">
 
                                     <img v-if="lista[4] === 'San Lorenzo'"
                                         src="https://ssl.gstatic.com/onebox/media/sports/logos/3guH9PUqsLcUw9o8VBhAlw_96x96.png"
@@ -1353,7 +1348,6 @@
 
 
                 </div>
-                <button class="margenParaPubli recargar" v-on:click="recargar">Actualizar</button>
             </div>
         </div>
 
