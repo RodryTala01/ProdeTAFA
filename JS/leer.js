@@ -27,19 +27,31 @@ const vue = new Vue({
                     return lista.json()
                 }).then((valores) => {
                     this.listaDatos = valores.values;
+                    // Agregar las filas de fecha entre las secciones de datos
+                    this.addFechaRows();
                     // Establecer loaded como true una vez que los datos estén cargados
                     ocultarPelotaYTextoDeCarga()
                 }).catch(err => {
                     console.log(err);
                 })
-        } // fin funcion getLista()
+        }, // fin funcion getLista()
+
+        addFechaRows() {
+
+            this.listaDatos.splice(1, 0, { fecha: 'Miércoles 28 de Febrero', colspan: 5 });
+
+            this.listaDatos.splice(4, 0, { fecha: 'Jueves 29 de Febrero', colspan: 5 });
+
+            this.listaDatos.splice(9, 0, { fecha: 'Viernes 01 de Marzo', colspan: 5 });
+
+            this.listaDatos.splice(12, 0, { fecha: 'Sábado 02 de Marzo', colspan: 5 });
+        }
     } // fin methods
 });
 
 function ocultarPelotaYTextoDeCarga() {
     var containerPelota = document.getElementById("containerPelota");
     var textoCargando = document.getElementById("textoCargando");
-
 
     if (containerPelota && textoCargando) {
         containerPelota.style.display = "none";

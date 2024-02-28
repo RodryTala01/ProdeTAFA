@@ -1011,9 +1011,15 @@
             <div id="app" class="container margenParaPubli">
                 <div class="d-flex flex-row justify-content-center mt-4">
                     <table class="tg bg-success">
+                        
                         <tbody>
-                            <tr v-for="lista in listaDatos">
-                                <td class="tg-nrix estado-columna colorTiempo p-2">{{lista[0]}}</td>
+                            
+                            <tr v-for="(lista, index) in listaDatos">
+                                <template v-if="index === 1 || index === 4 || index === 9 || index === 12">
+                                    <td colspan="5" class=" fecha">{{ lista.fecha }}</td>
+                                </template>
+                                <template v-else>
+                                    <td class="tg-nrix estado-columna colorTiempo p-2">{{ lista[0] }}</td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo">
 
                                     <img v-if="lista[1] === 'Independiente'"
@@ -1341,12 +1347,17 @@
 
 
                                     <br>{{lista[4]}}
+
+                                    
+                                    
                                 </td>
+                                
+                                </template>
                             </tr>
                         </tbody>
+                        
                     </table>
-
-
+                    
                 </div>
             </div>
         </div>

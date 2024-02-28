@@ -416,3 +416,9 @@ div>div>div>table>tbody>tr>td.bg-danger {
 .navbar {
     margin-right: none !important;
 }
+
+.fecha {
+    background-color: #293250 !important;
+    color: white;
+    font-size: 0.8rem;
+}
