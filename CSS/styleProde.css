@@ -427,13 +427,6 @@ div>div>div>table>tbody>tr>td.bg-danger {
             display: none !important;
 }
 
-#inputTexto {
-    resize: none;
-    /* Evita que el usuario pueda redimensionar el textarea */
-    overflow-y: hidden;
-    /* Oculta el desplazamiento vertical */
-}
-
 textarea {
     padding: 10px;
     width: 30%;
@@ -444,13 +437,21 @@ textarea {
     
 }
 
-#campoInput {
+#inputTexto,
+#inputTextoOctavos {
+    resize: none;
+    /* Evita que el usuario pueda redimensionar el textarea */
+    overflow-y: hidden;
+    /* Oculta el desplazamiento vertical */
+}
+
+#campoInput, #campoInputOctavos {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-#btnVolver, #btnEnviar, #btnAbrirInput{
+#btnVolver, #btnEnviar, #btnAbrirInput,#btnVolverOctavos, #btnEnviarOctavos, #btnAbrirInputOctavos{
     background-color: #202C33;
     color: #E9E1BE;
     border: none;
@@ -459,25 +460,29 @@ textarea {
     
 }
 
-#btnAbrirInput{
+#btnAbrirInput, #btnAbrirInputOctavos{
     margin-top: 1rem;
 }
 
-#btnEnviar {
+#btnEnviar, #btnEnviarOctavos {
     margin-top: 1rem;
 }
 
-#btnVolver {
+#btnVolver,  #btnVolverOctavos{
     margin: 1rem;
 }
 
 #btnVolver:hover,
 #btnEnviar:hover,
-#btnAbrirInput:hover{
+#btnAbrirInput:hover,
+#btnVolverOctavos:hover,
+#btnEnviarOctavos:hover,
+#btnAbrirInputOctavos:hover{
     background-color: #182025;
 }
 
-#btnMas, #btnMenos {
+#btnMas, #btnMenos,#btnMasOctavos,
+#btnMenosOctavos {
     border: 1px black solid;
     width: 2rem;
     height: 2rem;

@@ -38,13 +38,15 @@ const vue = new Vue({
 
         addFechaRows() {
 
-            this.listaDatos.splice(1, 0, { fecha: 'Miércoles 28 de Febrero', colspan: 5 });
+            this.listaDatos.splice(0, 0, { fecha: 'Martes 27 de Febrero', colspan: 5 });
 
-            this.listaDatos.splice(4, 0, { fecha: 'Jueves 29 de Febrero', colspan: 5 });
+            this.listaDatos.splice(2, 0, { fecha: 'Miércoles 28 de Febrero', colspan: 5 });
 
-            this.listaDatos.splice(9, 0, { fecha: 'Viernes 01 de Marzo', colspan: 5 });
+            this.listaDatos.splice(5, 0, { fecha: 'Jueves 29 de Febrero', colspan: 5 });
 
-            this.listaDatos.splice(12, 0, { fecha: 'Sábado 02 de Marzo', colspan: 5 });
+            this.listaDatos.splice(10, 0, { fecha: 'Viernes 01 de Marzo', colspan: 5 });
+
+            this.listaDatos.splice(13, 0, { fecha: 'Sábado 02 de Marzo', colspan: 5 });
         }
     } // fin methods
 });

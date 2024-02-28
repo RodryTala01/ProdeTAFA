@@ -194,6 +194,119 @@ function noHayFecha() {
 }
 
 
+function abrirInputOctavos() {
+    document.getElementById("campoInputOctavos").classList.remove("hidden");
+    document.getElementById("btnAbrirInputOctavos").classList.add("hidden");
+}
+
+function volverOctavos() {
+    document.getElementById("campoInputOctavos").classList.add("hidden");
+    document.getElementById("btnAbrirInputOctavos").classList.remove("hidden");
+}
+
+function ajustarAlturaOctavos() {
+    var textarea = document.getElementById("inputTextoOctavos");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function corroborarFechaOctavos() {
+
+    var texto = document.getElementById("inputTextoOctavos").value;
+    plenos = 0;
+    parciales = 0;
+    errores = 0;
+    puntosTotales = 0;
+
+    const numeros = texto.match(/\d+/g);
+    if (!numeros) return [];
+
+    const pares = [];
+    for (let i = 0; i < numeros.length; i += 2) {
+        if (i + 1 < numeros.length) {
+            pares.push([parseInt(numeros[i]), parseInt(numeros[i + 1])]);
+        }
+    }
+
+    const fechaCorrecta = [
+        [0, 1],
+        [4, 1],
+        [2, 2],
+        [0, 0],
+        [3, 1],
+        [4, 1],
+        [1, 0],
+        [1, 1],
+        [0, 0],
+        [0, 1],
+        [1, 0],
+        [1, 1]
+    ];
+
+    for (let i = 0; i < 12; i++) {
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(pares[i][0]) || isNaN(pares[i][1]))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (pares[i][0] == fechaCorrecta[i][0] && pares[i][1] == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((pares[i][0] > pares[i][1] && fechaCorrecta[i][0] > fechaCorrecta[i][1]) || (pares[i][0] < pares[i][1] && fechaCorrecta[i][0] < fechaCorrecta[i][1])
+            || (pares[i][0] == pares[i][1] && fechaCorrecta[i][0] == fechaCorrecta[i][1] && pares[i][0] !== fechaCorrecta[i][0] && pares[i][1] !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+    }
+    puntosTotales = 3 * plenos + 1 * parciales + penalesOctavos;
+
+    var puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    var plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    var parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    var erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    var penalesTexto = penalesOctavos === 1 ? 'PENAL' : 'PENALES';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penalesOctavos + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+
+
+}
+
+var penalesOctavos = 0;
+
+function sumarPenalesOctavos() {
+    penalesOctavos++;
+    actualizarPenalesOctavos();
+}
+
+function restarPenalesOctavos() {
+    if (penalesOctavos > 0) {
+        penalesOctavos--;
+        actualizarPenalesOctavos();
+    } else {
+        alert("El número no puede ser menor que 0 pedazo de autista");
+    }
+}
+
+function actualizarPenalesOctavos() {
+    document.getElementById("penalesOctavos").innerText = penalesOctavos;
+}
+
+
+
+
+
+
+
+
+
+
+
 function abrirInput() {
     document.getElementById("campoInput").classList.remove("hidden");
     document.getElementById("btnAbrirInput").classList.add("hidden");
@@ -209,11 +322,8 @@ function ajustarAltura() {
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
 }
- 
+
 function corroborar() {
-
-    
-
 
     var texto = document.getElementById("inputTexto").value;
     plenos = 0;
@@ -269,7 +379,7 @@ function corroborar() {
     var penalesTexto = penales === 1 ? 'PENAL' : 'PENALES';
 
     Swal.fire({
-        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto+ '</span>',
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
         html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
             '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
             '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
@@ -299,3 +409,4 @@ function restarPenales() {
 function actualizarPenales() {
     document.getElementById("penales").innerText = penales;
 }
+
