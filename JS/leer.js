@@ -60,3 +60,5 @@ function ocultarPelotaYTextoDeCarga() {
 
     document.getElementById("app").style.display = "block";
 }
+
+

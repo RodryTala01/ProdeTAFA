@@ -422,3 +422,67 @@ div>div>div>table>tbody>tr>td.bg-danger {
     color: white;
     font-size: 0.8rem;
 }
+
+.hidden {
+            display: none !important;
+}
+
+#inputTexto {
+    resize: none;
+    /* Evita que el usuario pueda redimensionar el textarea */
+    overflow-y: hidden;
+    /* Oculta el desplazamiento vertical */
+}
+
+textarea {
+    padding: 10px;
+    width: 30%;
+    border: none;
+    border-radius: 3px;
+    background-color: #202C33;
+    color: #E9E1BE;
+    
+}
+
+#campoInput {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#btnVolver, #btnEnviar, #btnAbrirInput{
+    background-color: #202C33;
+    color: #E9E1BE;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.5s;
+    
+}
+
+#btnAbrirInput{
+    margin-top: 1rem;
+}
+
+#btnEnviar {
+    margin-top: 1rem;
+}
+
+#btnVolver {
+    margin: 1rem;
+}
+
+#btnVolver:hover,
+#btnEnviar:hover,
+#btnAbrirInput:hover{
+    background-color: #182025;
+}
+
+#btnMas, #btnMenos {
+    border: 1px black solid;
+    width: 2rem;
+    height: 2rem;
+    
+}
+
+
+

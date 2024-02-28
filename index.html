@@ -1008,7 +1008,7 @@
                 Cargando Fecha<span id="punto1">.</span><span id="punto2">.</span><span id="punto3">.</span>
             </div>
 
-            <div id="app" class="container margenParaPubli">
+            <div id="app" class="container ">
                 <div class="d-flex flex-row justify-content-center mt-4">
                     <table class="tg bg-success">
                         
@@ -1359,8 +1359,27 @@
                     </table>
                     
                 </div>
+
+                <button id="btnAbrirInput" class="margenParaPubli p-2" onclick="abrirInput()">CALCULADORA DE PUNTOS</button>
+                <div id="campoInput" class="hidden margenParaPubli">
+                    <button id="btnVolver" class="p-2" onclick="volver()">VOLVER</button>
+                    <h6 style="color: red; margin-top: 1rem;">Pegar la fecha separando los números al menos por un espacio</h6>
+                    <h6 style="color: red; margin-top: none; font-size: 0.7rem">El calculador de puntos no funciona en vivo</h6>
+                    <textarea id="inputTexto" placeholder="Pegá tu fecha acá" oninput="ajustarAltura()"></textarea>
+                    <p style="color: white; margin-top: 2rem;">Penales:</p>
+                    <h6 style="color: orange; margin-top: none; font-size: 0.7rem">Por algunos motivos no se pueden sumar los penales automáticamente así que indicá abajo cuántos puntos por penales sacaste:</h6>
+                    <div>
+                    <div id="penales" style="color: white; font-weight: bold;">0</div>
+                    <button onclick="sumarPenales()" id="btnMas" class="me-2">+</button><button id="btnMenos" class="ms-2" onclick="restarPenales()">-</button></div>
+                    <button id="btnEnviar" class="p-2" onclick="corroborar()">Enviar</button>
+                    
+                </div>
+
             </div>
+
+            
         </div>
+        
 
 
 
