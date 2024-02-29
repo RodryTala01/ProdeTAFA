@@ -848,7 +848,7 @@ function corroborar() {
     const fechaCorrecta = [
         [1, 1],
         [4, 0],
-        ["X", "X"],
+        [0, 3],
         ["X", "X"],
         ["X", "X"],
         ["X", "X"],
