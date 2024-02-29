@@ -479,7 +479,7 @@ textarea {
 #btnEnviar32avos,
 #btnAbrirInput32avos {
     background-color: #202C33;
-    color: #E9E1BE;
+    color: white;
     border: none;
     border-radius: 5px;
     transition: background-color 0.5s;
