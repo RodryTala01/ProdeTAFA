@@ -549,3 +549,10 @@ textarea {
     height: 2rem;
 
 }
+
+.primeraDivision>table>tbody>tr>td,
+.primeraDivisionPromedios>div>table>tbody>tr>td,
+.segundaDivision>div>table>tbody>tr>td {
+    font-size: 0.7rem !important;
+    /* Por ejemplo, reducir el tamaño de fuente para dispositivos más pequeños */
+}
