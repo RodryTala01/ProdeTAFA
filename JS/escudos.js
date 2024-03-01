@@ -318,6 +318,14 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/lRUvM7_5xXHy2h9wohKZ9A_96x96.png";
             break;
 
+        case "PSG":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/mcpMspef1hwHwi9qrfp4YQ_96x96.png";
+            break;
+
+        case "Monaco":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/RX0XTi5Dtg4joMtuHNmYKg_96x96.png";
+            break;
+
 
         default:
             // Si el nombre del equipo no coincide con ningún caso, puedes asignar un escudo predeterminado o mostrar un mensaje de error
