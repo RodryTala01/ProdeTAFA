@@ -2,16 +2,19 @@ const vue = new Vue({
     el: '#app',
     data: {
         listaDatos: [],
-        loaded: false
+        loaded: false,
+        listaGoles: []
     },
     created() {
         this.getLista();
+        // this.getGoles2();
         // Ejecutar recargar() cada segundo
         setInterval(this.recargar, 50000);
     },
     methods: {
         recargar() {
             this.getLista();
+            // this.getGoles2();
         },
         getLista() {
             // id de la hoja de calculo
@@ -19,10 +22,10 @@ const vue = new Vue({
             //// nuestra      APIKey
             const apiKey = 'AIzaSyDS9VtkbPnvgTil44LtEiQ--DLIp5-GE2g';
             // rango de la hoja de calculo que queremos leer
-            const values = 'A2:AE12';
+            const values = 'A2:AE13';
             // fetch es un método nativo para hacer peticiones http
             // en el navegador 
-            fetch("https://content-sheets.googleapis.com/v4/spreadsheets/" + idSheets + "/values/A2:AZ100?access_token=" + apiKey + "&key=" + apiKey)
+            fetch("https://content-sheets.googleapis.com/v4/spreadsheets/" + idSheets + "/values/"+ values +"?access_token=" + apiKey + "&key=" + apiKey)
                 .then((lista) => {
                     return lista.json()
                 }).then((valores) => {
@@ -34,19 +37,15 @@ const vue = new Vue({
                 }).catch(err => {
                     console.log(err);
                 })
-        }, // fin funcion getLista()
+        }, // fin funcion getLista(
 
         addFechaRows() {
 
-            this.listaDatos.splice(0, 0, { fecha: 'Martes 27 de Febrero', colspan: 5 });
+            this.listaDatos.splice(0, 0, { fecha: 'Domingo 03 de Marzo', colspan: 5 });
 
-            this.listaDatos.splice(2, 0, { fecha: 'Miércoles 28 de Febrero', colspan: 5 });
+            this.listaDatos.splice(8, 0, { fecha: 'Martes 05 de Marzo', colspan: 5 });
 
-            this.listaDatos.splice(5, 0, { fecha: 'Jueves 29 de Febrero', colspan: 5 });
-
-            this.listaDatos.splice(10, 0, { fecha: 'Viernes 01 de Marzo', colspan: 5 });
-
-            this.listaDatos.splice(13, 0, { fecha: 'Sábado 02 de Marzo', colspan: 5 });
+            this.listaDatos.splice(12, 0, { fecha: 'Miercoles 06 de Marzo', colspan: 5 });
         }
     } // fin methods
 });

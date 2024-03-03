@@ -325,6 +325,31 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Monaco":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/RX0XTi5Dtg4joMtuHNmYKg_96x96.png";
             break;
+        
+        case "Mallorca":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Ss21P4CUmigjrEtcoapjVg_96x96.png";
+            break;
+        
+        case "Atalanta":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/0XmrZHobvb6ua5tgMOnTEA_96x96.png";
+            break;
+        
+        case "Atl. Nacional":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/i6-Yda76iPfeYEg4JcNbuw_96x96.png";
+            break;
+        
+        case "Fluminense":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/fCMxMMDF2AZPU7LzYKSlig_96x96.png";
+            break;
+        
+        case "Liga de Quito":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Iuk3Emwfmii37cXTu4qJEQ_96x96.png";
+            break;
+        
+        case "Argentinos":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/_Vs9SZ4f9XZbgLC2ee_GTA_96x96.png";
+            break;
+        
 
 
         default:
@@ -334,7 +359,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
     }
 }
 
-for (let i = 1; i <= 132; i++) {
+for (let i = 1; i <= 72; i++) {
     var equipoNombreLocal = document.getElementById("equipoNombreLocal" + i).innerText;
     var equipoNombreVisitante = document.getElementById("equipoNombreVisitante" + i).innerText;
     var equipoEscudoLocal = document.getElementById("equipoEscudoLocal" + i);

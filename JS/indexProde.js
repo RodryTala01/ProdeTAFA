@@ -5,7 +5,7 @@ function mostrarFecha32avos() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    // fechaCuartos = document.getElementById("fechaCuartos");
+    fechaCuartos = document.getElementById("fechaCuartos");
     // fecha4 = document.getElementById("fecha4");
 
 
@@ -17,7 +17,7 @@ function mostrarFecha32avos() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    // fechaCuartos.style.display = "none";
+    fechaCuartos.style.display = "none";
     // fecha4.style.display = "none";
 }
 
@@ -28,7 +28,7 @@ function mostrarFecha1() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    // fechaCuartos = document.getElementById("fechaCuartos");
+    fechaCuartos = document.getElementById("fechaCuartos");
     // fecha4 = document.getElementById("fecha4");
 
 
@@ -40,7 +40,7 @@ function mostrarFecha1() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    // fechaCuartos.style.display = "none";
+    fechaCuartos.style.display = "none";
     // fecha4.style.display = "none";
 }
 
@@ -52,7 +52,7 @@ function mostrarFecha16avos() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    // fechaCuartos = document.getElementById("fechaCuartos");
+    fechaCuartos = document.getElementById("fechaCuartos");
     // fecha4 = document.getElementById("fecha4");
 
 
@@ -64,7 +64,7 @@ function mostrarFecha16avos() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    // fechaCuartos.style.display = "none";
+    fechaCuartos.style.display = "none";
     // fecha4.style.display = "none";
 }
 
@@ -75,7 +75,7 @@ function mostrarFecha2() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    // fechaCuartos = document.getElementById("fechaCuartos");
+    fechaCuartos = document.getElementById("fechaCuartos");
     // fecha4 = document.getElementById("fecha4");
 
 
@@ -87,7 +87,7 @@ function mostrarFecha2() {
     fecha2.style.display = "block";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    // fechaCuartos.style.display = "none";
+    fechaCuartos.style.display = "none";
     // fecha4.style.display = "none";
 }
 
@@ -98,7 +98,7 @@ function mostrarFechaOctavos() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    // fechaCuartos = document.getElementById("fechaCuartos");
+    fechaCuartos = document.getElementById("fechaCuartos");
     // fecha4 = document.getElementById("fecha4");
 
 
@@ -110,7 +110,7 @@ function mostrarFechaOctavos() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "block";
     fecha3.style.display = "none";
-    // fechaCuartos.style.display = "none";
+    fechaCuartos.style.display = "none";
     // fecha4.style.display = "none";
 }
 
@@ -121,7 +121,7 @@ function mostrarFecha3() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    // fechaCuartos = document.getElementById("fechaCuartos");
+    fechaCuartos = document.getElementById("fechaCuartos");
     // fecha4 = document.getElementById("fecha4");
 
 
@@ -133,7 +133,7 @@ function mostrarFecha3() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "block";
-    // fechaCuartos.style.display = "none";
+    fechaCuartos.style.display = "none";
     // fecha4.style.display = "none";
 }
 
@@ -144,7 +144,7 @@ function mostrarFechaCuartos() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    // fechaCuartos = document.getElementById("fechaCuartos");
+    fechaCuartos = document.getElementById("fechaCuartos");
     // fecha4 = document.getElementById("fecha4");
 
 
@@ -156,7 +156,7 @@ function mostrarFechaCuartos() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    // fechaCuartos.style.display = "block";
+    fechaCuartos.style.display = "block";
     // fecha4.style.display = "none";
 }
 
@@ -167,7 +167,7 @@ function mostrarFecha4() {
     fecha2 = document.getElementById("fecha2");
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
-    // fechaCuartos = document.getElementById("fechaCuartos");
+    fechaCuartos = document.getElementById("fechaCuartos");
     // fecha4 = document.getElementById("fecha4");
 
 
@@ -179,7 +179,7 @@ function mostrarFecha4() {
     fecha2.style.display = "none";
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
-    // fechaCuartos.style.display = "none";
+    fechaCuartos.style.display = "none";
     // fecha4.style.display = "block";
 }
 
@@ -778,6 +778,7 @@ function corroborarFechaOctavos() {
 
 }
 
+
 var penalesOctavos = 0;
 
 function sumarPenalesOctavos() {
@@ -808,6 +809,133 @@ function actualizarPenalesOctavos() {
 
 
 
+
+
+function abrirInputFecha3() {
+    document.getElementById("campoInputFecha3").classList.remove("hidden");
+    document.getElementById("btnAbrirInputFecha3").classList.add("hidden");
+}
+
+function volverFecha3() {
+    document.getElementById("campoInputFecha3").classList.add("hidden");
+    document.getElementById("btnAbrirInputFecha3").classList.remove("hidden");
+}
+
+function ajustarAlturaFecha3() {
+    var textarea = document.getElementById("inputTextoFecha3");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function corroborarFecha3() {
+
+    var texto = document.getElementById("inputTextoFecha3").value;
+    plenos = 0;
+    parciales = 0;
+    errores = 0;
+    puntosTotales = 0;
+
+    const numeros = texto.match(/\d+/g);
+    if (!numeros) return [];
+
+    const pares = [];
+    for (let i = 0; i < numeros.length; i += 2) {
+        if (i + 1 < numeros.length) {
+            pares.push([parseInt(numeros[i]), parseInt(numeros[i + 1])]);
+        }
+    }
+
+    const fechaCorrecta = [
+        [1, 1],
+        [4, 0],
+        [0, 3],
+        [3, 0],
+        [2, 0],
+        [2, 0],
+        [0, 0],
+        [0, 1],
+        [0, 0],
+        [2, 2],
+        [0, 0],
+        [2, 1]
+    ];
+
+    const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
+    const errorFecha3 = document.getElementById("errorFecha3");
+    if (pares.length < fechaSinX.length) {
+        errorFecha3.innerHTML = "ERROR: Te faltan partidos.";
+    } else {
+        errorFecha3.innerHTML = "";
+    }
+
+    for (let i = 0; i < 12; i++) {
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(pares[i][0]) || isNaN(pares[i][1]))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (pares[i][0] == fechaCorrecta[i][0] && pares[i][1] == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((pares[i][0] > pares[i][1] && fechaCorrecta[i][0] > fechaCorrecta[i][1]) || (pares[i][0] < pares[i][1] && fechaCorrecta[i][0] < fechaCorrecta[i][1])
+            || (pares[i][0] == pares[i][1] && fechaCorrecta[i][0] == fechaCorrecta[i][1] && pares[i][0] !== fechaCorrecta[i][0] && pares[i][1] !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+        console.log(pares)
+    }
+    puntosTotales = 3 * plenos + 1 * parciales + penalesFecha3;
+
+    var puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    var plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    var parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    var erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    var penalesTexto = penalesFecha3 === 1 ? 'PENAL' : 'PENALES';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penalesFecha3 + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+
+
+}
+
+var penalesFecha3 = 0;
+
+function sumarPenalesFecha3() {
+    penalesFecha3++;
+    actualizarPenalesFecha3();
+}
+
+function restarPenalesFecha3() {
+    if (penalesFecha3 > 0) {
+        penalesFecha3--;
+        actualizarPenalesFecha3();
+    } else {
+        alert("El número no puede ser menor que 0 pedazo de autista");
+    }
+}
+
+function actualizarPenalesFecha3() {
+    document.getElementById("penalesFecha3").innerText = penalesFecha3;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function abrirInput() {
     document.getElementById("campoInput").classList.remove("hidden");
     document.getElementById("btnAbrirInput").classList.add("hidden");
@@ -824,14 +952,61 @@ function ajustarAltura() {
     textarea.style.height = textarea.scrollHeight + "px";
 }
 
-function corroborar() {
+let fechaCorrecta = []; // Variable global para almacenar los datos de fechaCorrecta
 
+getGoles2(); // Llama a getGoles2() al cargar la página
+
+function getGoles2() {
+    // id de la hoja de cálculo
+    const idSheets = '169rYxgQwzjatwq4iFgCTPn8y83IdvRH-Guy2PmTtnRk';
+    // nuestra APIKey
+    const apiKey = 'AIzaSyDS9VtkbPnvgTil44LtEiQ--DLIp5-GE2g';
+    // rango de la hoja de cálculo que queremos leer
+    const values2 = 'C2:D13';
+    // fetch es un método nativo para hacer peticiones http en el navegador
+    fetch("https://content-sheets.googleapis.com/v4/spreadsheets/" + idSheets + "/values/" + values2 + "?access_token=" + apiKey + "&key=" + apiKey)
+        .then((lista) => {
+            return lista.json()
+        }).then((valores) => {
+            // Almacena los datos obtenidos en fechaCorrecta
+            fechaCorrecta = valores.values.map(item => [parseInt(item[0]), parseInt(item[1])]);
+            // Ahora que tienes los datos, puedes llamar a la función corroborar()
+            corroborar();
+        }).catch(err => {
+            console.log(err);
+        })
+}
+
+var penales = 0;
+
+function sumarPenales() {
+    penales++;
+    actualizarPenales();
+}
+
+function restarPenales() {
+    if (penales > 0) {
+        penales--;
+        actualizarPenales();
+    } else {
+        alert("El número no puede ser menor que 0 pedazo de autista");
+    }
+}
+
+function actualizarPenales() {
+    document.getElementById("penales").innerText = penales;
+}
+
+
+
+
+function corroborar() {
     var texto = document.getElementById("inputTexto").value;
     var error = document.getElementById("error");
-    plenos = 0;
-    parciales = 0;
-    errores = 0;
-    puntosTotales = 0;
+    var plenos = 0;
+    var parciales = 0;
+    var errores = 0;
+    var puntosTotales = 0;
 
     const numeros = texto.match(/\d+/g);
     if (!numeros) return [];
@@ -843,39 +1018,14 @@ function corroborar() {
         }
     }
 
-
-
-    const fechaCorrecta = [
-        [1, 1],
-        [4, 0],
-        [0, 3],
-        [3, 0],
-        [2, 0],
-        [2, 0],
-        [0, 0],
-        ["X", "X"],
-        ["X", "X"],
-        ["X", "X"],
-        ["X", "X"],
-        ["X", "X"]
-    ];
-
-
-    const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
-    if (pares.length < fechaSinX.length) {
+    if (pares.length < fechaCorrecta.length) {
         error.innerHTML = "ERROR: Te faltan partidos.";
         return;
     } else {
         error.innerHTML = "";
     }
-
-
-
-
-    for (let i = 0; i < 12; i++) {
-        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(pares[i][0]) || isNaN(pares[i][1]))) {
-            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
-        }
+    
+    for (let i = 0; i < fechaCorrecta.length; i++) {
 
         if (pares[i][0] == fechaCorrecta[i][0] && pares[i][1] == fechaCorrecta[i][1]) {
             plenos++;
@@ -902,27 +1052,5 @@ function corroborar() {
             '<span style="color:orange">' + penales + ' ' + penalesTexto + '</span>',
         confirmButtonText: 'OK'
     });
-
-
-}
-
-var penales = 0;
-
-function sumarPenales() {
-    penales++;
-    actualizarPenales();
-}
-
-function restarPenales() {
-    if (penales > 0) {
-        penales--;
-        actualizarPenales();
-    } else {
-        alert("El número no puede ser menor que 0 pedazo de autista");
-    }
-}
-
-function actualizarPenales() {
-    document.getElementById("penales").innerText = penales;
 }
 

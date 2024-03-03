@@ -213,11 +213,11 @@ body {
 }
 
 .fecha3 {
-    display: block;
+    display: none;
 }
 
 .fechaCuartos {
-    display: none;
+    display: block;
 }
 
 .fecha4 {
@@ -438,9 +438,11 @@ textarea {
 }
 
 #inputTexto,
+#inputTextoCuartos,
 #inputTextoOctavos,
 #inputTextoFecha2,
 #inputTexto16avos,
+#inputTextoFecha3,
 #inputTextoFecha1,
 #inputTexto32avos {
     resize: none;
@@ -450,7 +452,9 @@ textarea {
 }
 
 #campoInput,
+#campoInputCuartos,
 #campoInputOctavos,
+#campoInputFecha3,
 #campoInputFecha2,
 #campoInput16avos,
 #campoInputFecha1,
@@ -463,6 +467,12 @@ textarea {
 #btnVolver,
 #btnEnviar,
 #btnAbrirInput,
+#btnVolverFecha3,
+#btnEnviarFecha3,
+#btnAbrirInputFecha3,
+#btnVolverCuartos,
+#btnEnviarCuartos,
+#btnAbrirInputCuartos,
 #btnVolverOctavos,
 #btnEnviarOctavos,
 #btnAbrirInputOctavos,
@@ -493,6 +503,8 @@ textarea {
 #btnAbrirInputFecha1,
 #btnAbrirInput32avos,
 #btnEnviar,
+#btnAbrirInputFecha3,
+#btnEnviarFecha3,
 #btnEnviarOctavos,
 #btnEnviarFecha2,
 #btnEnviar16avos,
@@ -520,6 +532,9 @@ textarea {
 #btnVolverFecha2:hover,
 #btnEnviarFecha2:hover,
 #btnAbrirInputFecha2:hover,
+#btnVolverFecha3:hover,
+#btnEnviarFecha3:hover,
+#btnAbrirInputFecha3:hover,
 #btnVolver16avos:hover,
 #btnEnviar16avos:hover,
 #btnAbrirInput16avos:hover,
@@ -538,6 +553,8 @@ textarea {
 #btnMenosOctavos,
 #btnMasFecha2,
 #btnMenosFecha2,
+#btnMasFecha3,
+#btnMenosFecha3,
 #btnMas16avos,
 #btnMenos16avos,
 #btnMasFecha1,
