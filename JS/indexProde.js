@@ -6,7 +6,7 @@ function mostrarFecha32avos() {
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
-    // fecha4 = document.getElementById("fecha4");
+    fecha4 = document.getElementById("fecha4");
 
 
 
@@ -18,7 +18,7 @@ function mostrarFecha32avos() {
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
-    // fecha4.style.display = "none";
+    fecha4.style.display = "none";
 }
 
 function mostrarFecha1() {
@@ -29,7 +29,7 @@ function mostrarFecha1() {
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
-    // fecha4 = document.getElementById("fecha4");
+    fecha4 = document.getElementById("fecha4");
 
 
 
@@ -41,7 +41,7 @@ function mostrarFecha1() {
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
-    // fecha4.style.display = "none";
+    fecha4.style.display = "none";
 }
 
 
@@ -53,7 +53,7 @@ function mostrarFecha16avos() {
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
-    // fecha4 = document.getElementById("fecha4");
+    fecha4 = document.getElementById("fecha4");
 
 
 
@@ -65,7 +65,7 @@ function mostrarFecha16avos() {
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
-    // fecha4.style.display = "none";
+    fecha4.style.display = "none";
 }
 
 function mostrarFecha2() {
@@ -76,7 +76,7 @@ function mostrarFecha2() {
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
-    // fecha4 = document.getElementById("fecha4");
+    fecha4 = document.getElementById("fecha4");
 
 
 
@@ -88,7 +88,7 @@ function mostrarFecha2() {
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
-    // fecha4.style.display = "none";
+    fecha4.style.display = "none";
 }
 
 function mostrarFechaOctavos() {
@@ -99,7 +99,7 @@ function mostrarFechaOctavos() {
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
-    // fecha4 = document.getElementById("fecha4");
+    fecha4 = document.getElementById("fecha4");
 
 
 
@@ -111,7 +111,7 @@ function mostrarFechaOctavos() {
     fechaOctavos.style.display = "block";
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
-    // fecha4.style.display = "none";
+    fecha4.style.display = "none";
 }
 
 function mostrarFecha3() {
@@ -122,7 +122,7 @@ function mostrarFecha3() {
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
-    // fecha4 = document.getElementById("fecha4");
+    fecha4 = document.getElementById("fecha4");
 
 
 
@@ -134,7 +134,7 @@ function mostrarFecha3() {
     fechaOctavos.style.display = "none";
     fecha3.style.display = "block";
     fechaCuartos.style.display = "none";
-    // fecha4.style.display = "none";
+    fecha4.style.display = "none";
 }
 
 function mostrarFechaCuartos() {
@@ -145,7 +145,7 @@ function mostrarFechaCuartos() {
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
-    // fecha4 = document.getElementById("fecha4");
+    fecha4 = document.getElementById("fecha4");
 
 
 
@@ -157,7 +157,7 @@ function mostrarFechaCuartos() {
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
     fechaCuartos.style.display = "block";
-    // fecha4.style.display = "none";
+    fecha4.style.display = "none";
 }
 
 function mostrarFecha4() {
@@ -168,7 +168,7 @@ function mostrarFecha4() {
     fechaOctavos = document.getElementById("fechaOctavos");
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
-    // fecha4 = document.getElementById("fecha4");
+    fecha4 = document.getElementById("fecha4");
 
 
 
@@ -180,7 +180,7 @@ function mostrarFecha4() {
     fechaOctavos.style.display = "none";
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
-    // fecha4.style.display = "block";
+    fecha4.style.display = "block";
 }
 
 
@@ -926,6 +926,120 @@ function actualizarPenalesFecha3() {
 
 
 
+
+
+
+function abrirInputCuartos() {
+    document.getElementById("campoInputCuartos").classList.remove("hidden");
+    document.getElementById("btnAbrirInputCuartos").classList.add("hidden");
+}
+
+function volverCuartos() {
+    document.getElementById("campoInputCuartos").classList.add("hidden");
+    document.getElementById("btnAbrirInputCuartos").classList.remove("hidden");
+}
+
+function ajustarAlturaCuartos() {
+    var textarea = document.getElementById("inputTextoCuartos");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function corroborarCuartos() {
+
+    var texto = document.getElementById("inputTextoCuartos").value;
+    plenos = 0;
+    parciales = 0;
+    errores = 0;
+    puntosTotales = 0;
+
+    const numeros = texto.match(/\d+/g);
+    if (!numeros) return [];
+
+    const pares = [];
+    for (let i = 0; i < numeros.length; i += 2) {
+        if (i + 1 < numeros.length) {
+            pares.push([parseInt(numeros[i]), parseInt(numeros[i + 1])]);
+        }
+    }
+
+    const fechaCorrecta = [
+        [2, 1],
+        [3, 1],
+        [2, 1],
+        [0, 4],
+        [1, 2],
+        [5, 0],
+        [2, 2],
+        [1, 2],
+        [3, 0],
+        [0, 0],
+        [3, 1],
+        [1, 1]
+    ];
+
+    const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
+    const errorCuartos = document.getElementById("errorCuartos");
+    if (pares.length < fechaSinX.length) {
+        errorCuartos.innerHTML = "ERROR: Te faltan partidos.";
+    } else {
+        errorCuartos.innerHTML = "";
+    }
+
+    for (let i = 0; i < 12; i++) {
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(pares[i][0]) || isNaN(pares[i][1]))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (pares[i][0] == fechaCorrecta[i][0] && pares[i][1] == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((pares[i][0] > pares[i][1] && fechaCorrecta[i][0] > fechaCorrecta[i][1]) || (pares[i][0] < pares[i][1] && fechaCorrecta[i][0] < fechaCorrecta[i][1])
+            || (pares[i][0] == pares[i][1] && fechaCorrecta[i][0] == fechaCorrecta[i][1] && pares[i][0] !== fechaCorrecta[i][0] && pares[i][1] !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+        console.log(pares)
+    }
+    puntosTotales = 3 * plenos + 1 * parciales + penalesCuartos;
+
+    var puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    var plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    var parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    var erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    var penalesTexto = penalesCuartos === 1 ? 'PENAL' : 'PENALES';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penalesCuartos + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+
+
+}
+
+var penalesCuartos = 0;
+
+function sumarPenalesCuartos() {
+    penalesCuartos++;
+    actualizarPenalesCuartos();
+}
+
+function restarPenalesCuartos() {
+    if (penalesCuartos > 0) {
+        penalesCuartos--;
+        actualizarPenalesCuartos();
+    } else {
+        alert("El número no puede ser menor que 0 pedazo de autista");
+    }
+}
+
+function actualizarPenalesCuartos() {
+    document.getElementById("penalesCuartos").innerText = penalesCuartos;
+}
 
 
 

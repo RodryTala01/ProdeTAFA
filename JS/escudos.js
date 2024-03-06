@@ -8,10 +8,10 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Racing Club":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/wi-J-3U7th2bpIB_Uy9Euw_96x96.png";
             break;
-        case "Estudiantes LP":
+        case "Estudiantes (LP)":
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/a/aa/Logo_Actual_del_Club_Estudiantes_de_La_Plata.png";
             break;
-        case "Newell's Old Boys":
+        case "Newells":
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Escudo_del_Club_Atl%C3%A9tico_Newell%27s_Old_Boys_de_Rosario.svg/1200px-Escudo_del_Club_Atl%C3%A9tico_Newell%27s_Old_Boys_de_Rosario.svg.png";
             break;
         case "Croacia":
@@ -140,10 +140,6 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
 
         case "Bayern Munich":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/-_cmntP5q_pHL7g5LfkRiw_96x96.png";
-            break;
-
-        case "Paris Saint-German":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/mcpMspef1hwHwi9qrfp4YQ_96x96.png";
             break;
 
         case "Real Sociedad":
@@ -350,6 +346,18 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/_Vs9SZ4f9XZbgLC2ee_GTA_96x96.png";
             break;
         
+        case "Juventus":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/6lal-0xwWtos5HI99HRvuQ_96x96.png";
+            break;
+        
+        case "Deportes Tolima":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/xiEOsGeaqMqf7DlTh3siRQ_96x96.png";
+            break;
+        
+        case "Ind. Medellín":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/EXzxmE5XPA9zm43tU_q2xg_96x96.png";
+            break;
+        
 
 
         default:
@@ -359,7 +367,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
     }
 }
 
-for (let i = 1; i <= 72; i++) {
+for (let i = 1; i <= 84; i++) {
     var equipoNombreLocal = document.getElementById("equipoNombreLocal" + i).innerText;
     var equipoNombreVisitante = document.getElementById("equipoNombreVisitante" + i).innerText;
     var equipoEscudoLocal = document.getElementById("equipoEscudoLocal" + i);
