@@ -573,3 +573,18 @@ textarea {
     font-size: 0.7rem !important;
     /* Por ejemplo, reducir el tamaño de fuente para dispositivos más pequeños */
 }
+
+
+/* Estilo para la imagen en computadora */
+@media only screen and (min-width: 768px) {
+    .imagenLlave {
+        width: 40%;
+    }
+}
+
+/* Estilo para la imagen en dispositivos móviles */
+@media only screen and (max-width: 767px) {
+    .imagenLlave {
+        width: 100%;
+    }
+}
