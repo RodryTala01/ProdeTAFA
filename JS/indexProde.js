@@ -7,6 +7,7 @@ function mostrarFecha32avos() {
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
     fecha4 = document.getElementById("fecha4");
+    fechaSemifinales = document.getElementById("fechaSemifinales");
 
 
 
@@ -19,6 +20,7 @@ function mostrarFecha32avos() {
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
     fecha4.style.display = "none";
+    fechaSemifinales.style.display = "none";
 }
 
 function mostrarFecha1() {
@@ -30,6 +32,7 @@ function mostrarFecha1() {
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
     fecha4 = document.getElementById("fecha4");
+    fechaSemifinales = document.getElementById("fechaSemifinales");
 
 
 
@@ -42,6 +45,7 @@ function mostrarFecha1() {
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
     fecha4.style.display = "none";
+    fechaSemifinales.style.display = "none";
 }
 
 
@@ -54,6 +58,7 @@ function mostrarFecha16avos() {
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
     fecha4 = document.getElementById("fecha4");
+    fechaSemifinales = document.getElementById("fechaSemifinales");
 
 
 
@@ -66,6 +71,7 @@ function mostrarFecha16avos() {
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
     fecha4.style.display = "none";
+    fechaSemifinales.style.display = "none";
 }
 
 function mostrarFecha2() {
@@ -77,6 +83,7 @@ function mostrarFecha2() {
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
     fecha4 = document.getElementById("fecha4");
+    fechaSemifinales = document.getElementById("fechaSemifinales");
 
 
 
@@ -89,6 +96,7 @@ function mostrarFecha2() {
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
     fecha4.style.display = "none";
+    fechaSemifinales.style.display = "none";
 }
 
 function mostrarFechaOctavos() {
@@ -100,7 +108,7 @@ function mostrarFechaOctavos() {
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
     fecha4 = document.getElementById("fecha4");
-
+    fechaSemifinales = document.getElementById("fechaSemifinales");
 
 
 
@@ -112,6 +120,7 @@ function mostrarFechaOctavos() {
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
     fecha4.style.display = "none";
+    fechaSemifinales.style.display = "none";
 }
 
 function mostrarFecha3() {
@@ -123,6 +132,7 @@ function mostrarFecha3() {
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
     fecha4 = document.getElementById("fecha4");
+    fechaSemifinales = document.getElementById("fechaSemifinales");
 
 
 
@@ -135,6 +145,7 @@ function mostrarFecha3() {
     fecha3.style.display = "block";
     fechaCuartos.style.display = "none";
     fecha4.style.display = "none";
+    fechaSemifinales.style.display = "none";
 }
 
 function mostrarFechaCuartos() {
@@ -146,6 +157,7 @@ function mostrarFechaCuartos() {
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
     fecha4 = document.getElementById("fecha4");
+    fechaSemifinales = document.getElementById("fechaSemifinales");
 
 
 
@@ -158,6 +170,7 @@ function mostrarFechaCuartos() {
     fecha3.style.display = "none";
     fechaCuartos.style.display = "block";
     fecha4.style.display = "none";
+    fechaSemifinales.style.display = "none";
 }
 
 function mostrarFecha4() {
@@ -169,6 +182,7 @@ function mostrarFecha4() {
     fecha3 = document.getElementById("fecha3");
     fechaCuartos = document.getElementById("fechaCuartos");
     fecha4 = document.getElementById("fecha4");
+    fechaSemifinales = document.getElementById("fechaSemifinales");
 
 
 
@@ -181,7 +195,34 @@ function mostrarFecha4() {
     fecha3.style.display = "none";
     fechaCuartos.style.display = "none";
     fecha4.style.display = "block";
+    fechaSemifinales.style.display = "none";
 }
+
+function mostrarFechaSemifinales() {
+    fecha32avos = document.getElementById("fecha32avos");
+    fecha1 = document.getElementById("fecha1");
+    fecha16avos = document.getElementById("fecha16avos");
+    fecha2 = document.getElementById("fecha2");
+    fechaOctavos = document.getElementById("fechaOctavos");
+    fecha3 = document.getElementById("fecha3");
+    fechaCuartos = document.getElementById("fechaCuartos");
+    fecha4 = document.getElementById("fecha4");
+    fechaSemifinales = document.getElementById("fechaSemifinales");
+
+
+
+
+    fecha32avos.style.display = "none";
+    fecha1.style.display = "none";
+    fecha16avos.style.display = "none";
+    fecha2.style.display = "none";
+    fechaOctavos.style.display = "none";
+    fecha3.style.display = "none";
+    fechaCuartos.style.display = "none";
+    fecha4.style.display = "none";
+    fechaSemifinales.style.display = "block";
+}
+
 
 
 function noHayFecha() {
@@ -1044,6 +1085,120 @@ function actualizarPenalesCuartos() {
 
 
 
+
+
+
+function abrirInputFecha4() {
+    document.getElementById("campoInputFecha4").classList.remove("hidden");
+    document.getElementById("btnAbrirInputFecha4").classList.add("hidden");
+}
+
+function volverFecha4() {
+    document.getElementById("campoInputFecha4").classList.add("hidden");
+    document.getElementById("btnAbrirInputFecha4").classList.remove("hidden");
+}
+
+function ajustarAlturaFecha4() {
+    var textarea = document.getElementById("inputTextoFecha4");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function corroborarFecha4() {
+
+    var texto = document.getElementById("inputTextoFecha4").value;
+    plenos = 0;
+    parciales = 0;
+    errores = 0;
+    puntosTotales = 0;
+
+    const numeros = texto.match(/\d+/g);
+    if (!numeros) return [];
+
+    const pares = [];
+    for (let i = 0; i < numeros.length; i += 2) {
+        if (i + 1 < numeros.length) {
+            pares.push([parseInt(numeros[i]), parseInt(numeros[i + 1])]);
+        }
+    }
+
+    const fechaCorrecta = [
+        [4, 0],
+        [0, 0],
+        [4, 0],
+        [2, 2],
+        [2, 0],
+        [1, 1],
+        [1, 1],
+        [2, 2],
+        [2, 2],
+        [1, 1],
+        [0, 1],
+        [4, 2]
+    ];
+
+    const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
+    const errorFecha4 = document.getElementById("errorFecha4");
+    if (pares.length < fechaSinX.length) {
+        errorFecha4.innerHTML = "ERROR: Te faltan partidos.";
+    } else {
+        errorFecha4.innerHTML = "";
+    }
+
+    for (let i = 0; i < 12; i++) {
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(pares[i][0]) || isNaN(pares[i][1]))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (pares[i][0] == fechaCorrecta[i][0] && pares[i][1] == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((pares[i][0] > pares[i][1] && fechaCorrecta[i][0] > fechaCorrecta[i][1]) || (pares[i][0] < pares[i][1] && fechaCorrecta[i][0] < fechaCorrecta[i][1])
+            || (pares[i][0] == pares[i][1] && fechaCorrecta[i][0] == fechaCorrecta[i][1] && pares[i][0] !== fechaCorrecta[i][0] && pares[i][1] !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+        console.log(pares)
+    }
+    puntosTotales = 3 * plenos + 1 * parciales + penalesFecha4;
+
+    var puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    var plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    var parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    var erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    var penalesTexto = penalesFecha4 === 1 ? 'PENAL' : 'PENALES';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penalesFecha4 + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+
+
+}
+
+var penalesFecha4 = 0;
+
+function sumarPenalesFecha4() {
+    penalesFecha4++;
+    actualizarPenalesFecha4();
+}
+
+function restarPenalesFecha4() {
+    if (penalesFecha4 > 0) {
+        penalesFecha4--;
+        actualizarPenalesFecha4();
+    } else {
+        alert("El número no puede ser menor que 0 pedazo de autista");
+    }
+}
+
+function actualizarPenalesFecha4() {
+    document.getElementById("penalesFecha4").innerText = penalesFecha4;
+}
 
 
 

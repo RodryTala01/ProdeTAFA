@@ -358,6 +358,41 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/EXzxmE5XPA9zm43tU_q2xg_96x96.png";
             break;
         
+        case "Brighton And Hove":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/EKIe0e-ZIphOcfQAwsuEEQ_96x96.png";
+            break;
+        
+        case "Ajax":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/WIAAdPpdzFwVKU7maFvJ6w_96x96.png";
+            break;
+        
+        case "Marsella":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/KfBX1kHNj26r9NxpqNaTkA_96x96.png";
+            break;
+        
+        case "Villarreal":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/WKH7Ak5cYD6Qm1EEqXzmVw_96x96.png";
+            break;
+
+        case "Nashville SC":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/lGl7IVkIXcnY2XcAH77yeg_96x96.png";
+            break;
+
+        case "Liverpool":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/0iShHhASp5q1SL4JhtwJiw_96x96.png";
+            break;
+        
+        case "Fiorentina":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/h-HS2cEVCwMJZFSlwYeWmA_96x96.png";
+            break;
+
+        case "Colo Colo":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/cEY0fDx48kkZOPpbK_Bhsg_96x96.png";
+            break;
+
+        case "Univ. de Chile":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/jqe29gPx-mxrOrDOSLwcBw_96x96.png";
+            break;
 
 
         default:
@@ -367,7 +402,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
     }
 }
 
-for (let i = 1; i <= 84; i++) {
+for (let i = 1; i <= 96; i++) {
     var equipoNombreLocal = document.getElementById("equipoNombreLocal" + i).innerText;
     var equipoNombreVisitante = document.getElementById("equipoNombreVisitante" + i).innerText;
     var equipoEscudoLocal = document.getElementById("equipoEscudoLocal" + i);
