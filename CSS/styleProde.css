@@ -225,11 +225,11 @@ body {
 }
 
 .fechaSemifinales {
-    display: block;
+    display: none;
 }
 
 .fecha5 {
-    display: none;
+    display: block;
 }
 
 .fechaFinal {
@@ -444,6 +444,7 @@ textarea {
 #inputTexto16avos,
 #inputTextoFecha3,
 #inputTextoFecha4,
+#inputTextoSemifinales,
 #inputTextoFecha1,
 #inputTexto32avos {
     resize: none;
@@ -459,6 +460,7 @@ textarea {
 #campoInputFecha4,
 #campoInputFecha2,
 #campoInput16avos,
+#campoInputSemifinales,
 #campoInputFecha1,
 #campoInput32avos {
     display: flex;
@@ -481,6 +483,9 @@ textarea {
 #btnVolverOctavos,
 #btnEnviarOctavos,
 #btnAbrirInputOctavos,
+#btnVolverSemifinales,
+#btnEnviarSemifinales,
+#btnAbrirInputSemifinales,
 #btnVolverFecha2,
 #btnEnviarFecha2,
 #btnAbrirInputFecha2,
@@ -510,7 +515,8 @@ textarea {
 #btnVolverFecha3,
 #btnVolverFecha4,
 #btnVolver32avos,
-#btnVolverCuartos {
+#btnVolverCuartos,
+#btnVolverSemifinales {
     margin: 1rem;
 }
 
@@ -540,7 +546,10 @@ textarea {
 #btnAbrirInputFecha32avos:hover
 #btnVolverCuartos:hover,
 #btnEnviarCuartos:hover,
-#btnAbrirInputCuartos:hover {
+#btnAbrirInputCuartos:hover,
+#btnVolverSemifinales:hover,
+#btnEnviarSemifinales:hover,
+#btnAbrirInputSemifinales:hover {
     background-color: #182025;
 }
 
@@ -548,6 +557,8 @@ textarea {
 #btnMenos,
 #btnMasOctavos,
 #btnMenosOctavos,
+#btnMasSemifinales,
+#btnMenosSemifinales,
 #btnMasFecha2,
 #btnMenosFecha2,
 #btnMasFecha3,

@@ -393,7 +393,34 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Univ. de Chile":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/jqe29gPx-mxrOrDOSLwcBw_96x96.png";
             break;
+        
+        case "Palestino":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Ubdk8GFceorl-XdowrkDBg_96x96.png";
+            break;
+        
+        case "Bragantino":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/lMyw2zn1Z4cdkaxKJWnsQw_96x96.png";
+            break;
+        
+        case "Botafogo":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/KLDWYp-H8CAOT9H_JgizRg_96x96.png";
+            break;
+        
+        case "West Ham":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/bXkiyIzsbDip3x2FFcUU3A_96x96.png";
+            break;
 
+        case "Friburgo":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/s0YO0sK9qrioMnzJuFGKuw_96x96.png";
+            break;
+
+        case "Nacional":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Uql1qECWH5pRMbm5UVsjPg_96x96.png";
+            break;
+        
+        case "Always Ready":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/f/f3/%40Club_Always_Ready_Escudo.png";
+            break;
 
         default:
             // Si el nombre del equipo no coincide con ningún caso, puedes asignar un escudo predeterminado o mostrar un mensaje de error
@@ -402,7 +429,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
     }
 }
 
-for (let i = 1; i <= 96; i++) {
+for (let i = 1; i <= 108; i++) {
     var equipoNombreLocal = document.getElementById("equipoNombreLocal" + i).innerText;
     var equipoNombreVisitante = document.getElementById("equipoNombreVisitante" + i).innerText;
     var equipoEscudoLocal = document.getElementById("equipoEscudoLocal" + i);
