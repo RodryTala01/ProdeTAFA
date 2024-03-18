@@ -47,7 +47,9 @@ const vue = new Vue({
 
             this.listaDatos.splice(6, 0, { fecha: 'Domingo 17 de Marzo', colspan: 5 });
 
-            this.listaDatos.splice(14, 0, { fecha: 'Martes 19 de Marzo', colspan: 5 });
+            this.listaDatos.splice(13, 0, { fecha: 'Martes 19 de Marzo', colspan: 5 });
+
+            this.listaDatos.splice(15, 0, { fecha: 'Miércoles 20 de Marzo', colspan: 5 });
         }
     } // fin methods
 });
