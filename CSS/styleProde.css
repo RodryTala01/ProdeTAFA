@@ -590,7 +590,7 @@ textarea {
 /* Estilo para la imagen en computadora */
 @media only screen and (min-width: 768px) {
     .imagenLlave {
-        width: 40%;
+        width: 60%;
     }
 }
 

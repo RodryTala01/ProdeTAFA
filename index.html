@@ -2041,8 +2041,9 @@
                         <tbody>
 
                             <tr v-for="(lista, index) in listaDatos">
-                                <template v-if="index === 0 || index === 2 || index === 6 || index === 13 || index === 15">
-                                    <td colspan="5" class=" fecha">{{ lista.fecha }}</td>
+                                <template
+                                    v-if="index === 0 || index === 2 || index === 6 || index === 13 || index === 15">
+                                    <td colspan="6" class=" fecha">{{ lista.fecha }}</td>
                                 </template>
                                 <template v-else>
                                     <td class="tg-nrix estado-columna colorTiempo p-2">{{ lista[0] }}</td>
@@ -2625,11 +2626,15 @@
                                         <br>{{lista[4]}}
 
 
-
                                     </td>
+                                    
+
+
 
                                 </template>
+
                             </tr>
+
                         </tbody>
 
                     </table>
@@ -2662,7 +2667,6 @@
 
 
         </div>
-
 
 
 
