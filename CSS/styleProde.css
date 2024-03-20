@@ -543,8 +543,7 @@ textarea {
 #btnAbrirInputFecha1:hover,
 #btnVolverFecha32avos:hover,
 #btnEnviarFecha32avos:hover,
-#btnAbrirInputFecha32avos:hover
-#btnVolverCuartos:hover,
+#btnAbrirInputFecha32avos:hover #btnVolverCuartos:hover,
 #btnEnviarCuartos:hover,
 #btnAbrirInputCuartos:hover,
 #btnVolverSemifinales:hover,
@@ -591,6 +590,9 @@ textarea {
 @media only screen and (min-width: 768px) {
     .imagenLlave {
         width: 60%;
+        margin: auto;
+        display: block;
+        margin-bottom: 200px;
     }
 }
 
@@ -598,10 +600,12 @@ textarea {
 @media only screen and (max-width: 767px) {
     .imagenLlave {
         width: 90%;
+        margin: auto;
+        display: block;
     }
 }
- 
-.blanco{ 
+
+.blanco {
     color: white;
 }
 
@@ -613,6 +617,7 @@ textarea {
 
 /* Ocultar columnas en dispositivos móviles */
 @media only screen and (max-width: 768px) {
+
     .tbl th:nth-child(4),
     .tbl th:nth-child(5),
     .tbl td:nth-child(5),
@@ -632,4 +637,28 @@ textarea {
 
 .gruposCopaA {
     display: none;
+}
+
+.btnGruposLlaves {
+    width: 100px;
+    background-color: #202C33;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    transition: background-color 0.5s;
+    margin-top: 1rem;
+}
+
+.btnGruposLlaves:hover {
+    background-color: #182025;
+}
+
+.btnActivo {
+    width: 100px;
+    color: grey;
+    border: none;
+    border-radius: 3px;
+    transition: background-color 0.5s;
+    margin-top: 1rem;
+    background-color: #182025;
 }

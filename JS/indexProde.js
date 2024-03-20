@@ -1481,3 +1481,36 @@ function corroborar() {
     });
 }
 
+
+
+
+
+function mostrarGrupos() {
+    var grupos = document.getElementById("grupos");
+    var llaves = document.getElementById("llaves");
+    var btnLlaves = document.getElementById("btnLlaves");
+    var btnGrupos = document.getElementById("btnGrupos");
+
+    llaves.style.display = "none";
+    grupos.style.display = "block";
+
+    btnLlaves.classList.remove("btnGruposLlaves", "btnGruposLlaves:hover");
+    btnLlaves.classList.add("btnActivo");
+    btnGrupos.classList.remove("btnActivo");
+    btnGrupos.classList.add("btnGruposLlaves", "btnGruposLlaves:hover");
+}
+
+function mostrarLlaves() {
+    var grupos = document.getElementById("grupos");
+    var llaves = document.getElementById("llaves");
+    var btnLlaves = document.getElementById("btnLlaves");
+    var btnGrupos = document.getElementById("btnGrupos");
+
+    llaves.style.display = "block";
+    grupos.style.display = "none";
+
+    btnGrupos.classList.remove("btnGruposLlaves", "btnGruposLlaves:hover");
+    btnGrupos.classList.add("btnActivo");
+    btnLlaves.classList.remove("btnActivo");
+    btnLlaves.classList.add("btnGruposLlaves", "btnGruposLlaves:hover");
+}

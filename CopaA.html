@@ -94,10 +94,15 @@
                 width="600 rem">
         </div>
 
-        <img src="Imagenes/LlavesCopaA.png" alt="" width="40%" class="mt-4 imagenLlave ">
+        <div class="botonesCopa">
+        <button id="btnGrupos" class=" p-2 btnActivo me-5" onclick="mostrarLlaves()">Llaves</button>
+        <button id="btnLlaves" class="btnGruposLlaves p-2" onclick="mostrarGrupos()">Grupos</button>
+        </div>
 
-        <div class="gruposCopaA">
-            <div class="container margenArriba ">
+        <div class=""><img src="Imagenes/LlavesCopaA.png" alt="" width="40%" class="mt-4 imagenLlave" id="llaves"></div>
+
+        <div class="gruposCopaA mt-5" id="grupos">
+            <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-md-7">
                         <table class="table tbl" style="border: 2px black solid;">
