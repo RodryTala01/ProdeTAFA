@@ -9,7 +9,7 @@ function mostrarFecha32avos() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
-
+    fechaFinal = document.getElementById("fechaFinal");
 
 
 
@@ -23,6 +23,7 @@ function mostrarFecha32avos() {
     fecha4.style.display = "none";
     fechaSemifinales.style.display = "none";
     fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 function mostrarFecha1() {
@@ -36,7 +37,7 @@ function mostrarFecha1() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
-
+    fechaFinal = document.getElementById("fechaFinal");
 
 
     fecha32avos.style.display = "none";
@@ -49,6 +50,7 @@ function mostrarFecha1() {
     fecha4.style.display = "none";
     fechaSemifinales.style.display = "none";
     fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 
@@ -63,7 +65,7 @@ function mostrarFecha16avos() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
-
+    fechaFinal = document.getElementById("fechaFinal");
 
 
     fecha32avos.style.display = "none";
@@ -76,6 +78,7 @@ function mostrarFecha16avos() {
     fecha4.style.display = "none";
     fechaSemifinales.style.display = "none";
     fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 function mostrarFecha2() {
@@ -89,7 +92,7 @@ function mostrarFecha2() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
-
+    fechaFinal = document.getElementById("fechaFinal");
 
 
     fecha32avos.style.display = "none";
@@ -102,6 +105,7 @@ function mostrarFecha2() {
     fecha4.style.display = "none";
     fechaSemifinales.style.display = "none";
     fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 function mostrarFechaOctavos() {
@@ -115,7 +119,7 @@ function mostrarFechaOctavos() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
-
+    fechaFinal = document.getElementById("fechaFinal");
 
     fecha32avos.style.display = "none";
     fecha1.style.display = "none";
@@ -127,6 +131,7 @@ function mostrarFechaOctavos() {
     fecha4.style.display = "none";
     fechaSemifinales.style.display = "none";
     fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 function mostrarFecha3() {
@@ -140,7 +145,7 @@ function mostrarFecha3() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
-
+    fechaFinal = document.getElementById("fechaFinal");
 
 
     fecha32avos.style.display = "none";
@@ -153,6 +158,7 @@ function mostrarFecha3() {
     fecha4.style.display = "none";
     fechaSemifinales.style.display = "none";
     fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 function mostrarFechaCuartos() {
@@ -166,7 +172,7 @@ function mostrarFechaCuartos() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
-
+    fechaFinal = document.getElementById("fechaFinal");
 
 
     fecha32avos.style.display = "none";
@@ -179,6 +185,7 @@ function mostrarFechaCuartos() {
     fecha4.style.display = "none";
     fechaSemifinales.style.display = "none";
     fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 function mostrarFecha4() {
@@ -192,7 +199,7 @@ function mostrarFecha4() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
-
+    fechaFinal = document.getElementById("fechaFinal");
 
 
     fecha32avos.style.display = "none";
@@ -205,6 +212,7 @@ function mostrarFecha4() {
     fecha4.style.display = "block";
     fechaSemifinales.style.display = "none";
     fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 function mostrarFechaSemifinales() {
@@ -218,7 +226,7 @@ function mostrarFechaSemifinales() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
-
+    fechaFinal = document.getElementById("fechaFinal");
 
 
     fecha32avos.style.display = "none";
@@ -231,6 +239,7 @@ function mostrarFechaSemifinales() {
     fecha4.style.display = "none";
     fechaSemifinales.style.display = "block";
     fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 function mostrarFecha5() {
@@ -244,6 +253,7 @@ function mostrarFecha5() {
     fecha4 = document.getElementById("fecha4");
     fechaSemifinales = document.getElementById("fechaSemifinales");
     fecha5 = document.getElementById("fecha5");
+    fechaFinal = document.getElementById("fechaFinal");
 
 
 
@@ -257,6 +267,35 @@ function mostrarFecha5() {
     fecha4.style.display = "none";
     fechaSemifinales.style.display = "none";
     fecha5.style.display = "block";
+    fechaFinal.style.display = "none";
+}
+
+function mostrarFechaFinal() {
+    fecha32avos = document.getElementById("fecha32avos");
+    fecha1 = document.getElementById("fecha1");
+    fecha16avos = document.getElementById("fecha16avos");
+    fecha2 = document.getElementById("fecha2");
+    fechaOctavos = document.getElementById("fechaOctavos");
+    fecha3 = document.getElementById("fecha3");
+    fechaCuartos = document.getElementById("fechaCuartos");
+    fecha4 = document.getElementById("fecha4");
+    fechaSemifinales = document.getElementById("fechaSemifinales");
+    fecha5 = document.getElementById("fecha5");
+    fechaFinal = document.getElementById("fechaFinal");
+
+
+
+    fecha32avos.style.display = "none";
+    fecha1.style.display = "none";
+    fecha16avos.style.display = "none";
+    fecha2.style.display = "none";
+    fechaOctavos.style.display = "none";
+    fecha3.style.display = "none";
+    fechaCuartos.style.display = "none";
+    fecha4.style.display = "none";
+    fechaSemifinales.style.display = "none";
+    fecha5.style.display = "none";
+    fechaFinal.style.display = "block";
 }
 
 
@@ -1355,6 +1394,123 @@ function actualizarPenalesSemifinales() {
 }
 
 
+
+
+
+
+
+
+function abrirInputFecha5() {
+    document.getElementById("campoInputFecha5").classList.remove("hidden");
+    document.getElementById("btnAbrirInputFecha5").classList.add("hidden");
+}
+
+function volverFecha5() {
+    document.getElementById("campoInputFecha5").classList.add("hidden");
+    document.getElementById("btnAbrirInputFecha5").classList.remove("hidden");
+}
+
+function ajustarAlturaFecha5() {
+    var textarea = document.getElementById("inputTextoFecha5");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function corroborarFecha5() {
+
+    var texto = document.getElementById("inputTextoFecha5").value;
+    plenos = 0;
+    parciales = 0;
+    errores = 0;
+    puntosTotales = 0;
+
+    const numeros = texto.match(/\d+/g);
+    if (!numeros) return [];
+
+    const pares = [];
+    for (let i = 0; i < numeros.length; i += 2) {
+        if (i + 1 < numeros.length) {
+            pares.push([parseInt(numeros[i]), parseInt(numeros[i + 1])]);
+        }
+    }
+
+    const fechaCorrecta = [
+        [0, 1],
+        [1, 1],
+        [1, 1],
+        [1, 0],
+        [4, 2],
+        [2, 2],
+        [2, 6],
+        [1, 1],
+        [0, 3],
+        [2, 0],
+        [3, 0],
+        ["X", "X"]
+    ];
+
+    const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
+    const errorFecha5 = document.getElementById("errorFecha5");
+    if (pares.length < fechaSinX.length) {
+        errorFecha5.innerHTML = "ERROR: Te faltan partidos.";
+    } else {
+        errorFecha5.innerHTML = "";
+    }
+
+    for (let i = 0; i < 12; i++) {
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(pares[i][0]) || isNaN(pares[i][1]))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (pares[i][0] == fechaCorrecta[i][0] && pares[i][1] == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((pares[i][0] > pares[i][1] && fechaCorrecta[i][0] > fechaCorrecta[i][1]) || (pares[i][0] < pares[i][1] && fechaCorrecta[i][0] < fechaCorrecta[i][1])
+            || (pares[i][0] == pares[i][1] && fechaCorrecta[i][0] == fechaCorrecta[i][1] && pares[i][0] !== fechaCorrecta[i][0] && pares[i][1] !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+        console.log(pares)
+    }
+    puntosTotales = 3 * plenos + 1 * parciales + penalesFecha5;
+
+    var puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    var plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    var parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    var erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    var penalesTexto = penalesFecha5 === 1 ? 'PENAL' : 'PENALES';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penalesFecha5 + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+
+
+}
+
+var penalesFecha5 = 0;
+
+function sumarPenalesFecha5() {
+    penalesFecha5++;
+    actualizarPenalesFecha5();
+}
+
+function restarPenalesFecha5() {
+    if (penalesFecha5 > 0) {
+        penalesFecha5--;
+        actualizarPenalesFecha5();
+    } else {
+        alert("El número no puede ser menor que 0 pedazo de autista");
+    }
+}
+
+function actualizarPenalesFecha5() {
+    document.getElementById("penalesFecha5").innerText = penalesFecha5;
+}
 
 
 

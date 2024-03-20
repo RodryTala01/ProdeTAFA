@@ -229,11 +229,11 @@ body {
 }
 
 .fecha5 {
-    display: block;
+    display: none;
 }
 
 .fechaFinal {
-    display: none;
+    display: block;
 }
 
 .penales {
@@ -445,6 +445,7 @@ textarea {
 #inputTextoFecha3,
 #inputTextoFecha4,
 #inputTextoSemifinales,
+#inputTextoFecha5,
 #inputTextoFecha1,
 #inputTexto32avos {
     resize: none;
@@ -462,6 +463,7 @@ textarea {
 #campoInput16avos,
 #campoInputSemifinales,
 #campoInputFecha1,
+#campoInputFecha5,
 #campoInput32avos {
     display: flex;
     flex-direction: column;
@@ -495,6 +497,9 @@ textarea {
 #btnVolverFecha1,
 #btnEnviarFecha1,
 #btnAbrirInputFecha1,
+#btnVolverFecha5,
+#btnEnviarFecha5,
+#btnAbrirInputFecha5,
 #btnVolver32avos,
 #btnEnviar32avos,
 #btnAbrirInput32avos {
@@ -514,6 +519,7 @@ textarea {
 #btnVolver16avos,
 #btnVolverFecha3,
 #btnVolverFecha4,
+#btnVolverFecha5,
 #btnVolver32avos,
 #btnVolverCuartos,
 #btnVolverSemifinales {
@@ -541,6 +547,9 @@ textarea {
 #btnVolverFecha1:hover,
 #btnEnviarFecha1:hover,
 #btnAbrirInputFecha1:hover,
+#btnVolverFecha5:hover,
+#btnEnviarFecha5:hover,
+#btnAbrirInputFecha5:hover,
 #btnVolverFecha32avos:hover,
 #btnEnviarFecha32avos:hover,
 #btnAbrirInputFecha32avos:hover #btnVolverCuartos:hover,
@@ -568,6 +577,8 @@ textarea {
 #btnMenos16avos,
 #btnMasFecha1,
 #btnMenosFecha1,
+#btnMasFecha5,
+#btnMenosFecha5,
 #btnMas16avos,
 #btnMenos16avos,
 #btnMasCuartos,

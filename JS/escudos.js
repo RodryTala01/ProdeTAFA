@@ -421,6 +421,39 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Always Ready":
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/f/f3/%40Club_Always_Ready_Escudo.png";
             break;
+        
+        case "El Porvenir":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/4/44/Club_Elporvenir_logo.png";
+            break;
+        
+        case "Ind. Santa Fe":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/9ykygO-be_VGkEO4AcC8SQ_96x96.png";
+            break;
+        
+        case "Instituto":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/6/6d/Escudo_Instituto_Atletico_Central_Cordoba.png";
+            break;
+        
+        case "Leicester City":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/UDYY4FSlty6fXFBzvFfcyw_96x96.png";
+            break;
+        
+        case "Atlanta United":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/B_ryUSpvCV5lD6csLmDBUw_96x96.png";
+            break;
+        
+        case "Orlando City":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/vsXMXekftWCjaARo-WYVkA_96x96.png";
+            break;
+        
+        case "Portugal":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/HJ3_2c4w791nZJj7n-Lj3Q_96x96.png";
+            break;
+        
+        case "Suecia":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/OkFlRvRsKMWb8Hk20L9Trw_96x96.png";
+            break;
+            
 
         default:
             // Si el nombre del equipo no coincide con ningún caso, puedes asignar un escudo predeterminado o mostrar un mensaje de error
@@ -429,7 +462,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
     }
 }
 
-for (let i = 1; i <= 108; i++) {
+for (let i = 1; i <= 120; i++) {
     var equipoNombreLocal = document.getElementById("equipoNombreLocal" + i).innerText;
     var equipoNombreVisitante = document.getElementById("equipoNombreVisitante" + i).innerText;
     var equipoEscudoLocal = document.getElementById("equipoEscudoLocal" + i);
