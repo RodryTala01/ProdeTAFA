@@ -611,8 +611,15 @@ textarea {
 
 .tbl th,
 .tbl td {
-    padding: 8px;
     vertical-align: middle;
+}
+.tbl {
+    width: auto;
+    table-layout: auto;
+}
+
+.tbl td {
+    white-space: nowrap;
 }
 
 /* Ocultar columnas en dispositivos móviles */

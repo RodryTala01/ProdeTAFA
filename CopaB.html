@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Copa B - Prode TAFA</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="shortcut icon" href="Imagenes/LOGO TAFA ICONO.png">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="CSS/styleProde.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+
+
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-center">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 justify-content-center">
+                    <li>
+                        <div>
+                            <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                                <div class="btn-group" role="group">
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="index.html">INICIO</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="Ligas.html">LIGAS</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link " href="CopaTotal.html">COPA TOTAL</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="#">COPA CAMPEONES</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="CopaA.html">COPA A</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link activo" href="#">COPA B</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">COPA C</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="#">COPA DÚOS</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="click nav-link active" href="#">PALMARÉS</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="click nav-link active" href="#">RANKINGS</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="click nav-link active" href="#">EQUIPOS</a>
+                    </li>
+            </div>
+        </div>
+        </div>
+        </li>
+        </ul>
+        </div>
+        </div>
+    </nav>
+
+
+
+
+    <div>
+    
+        <div class="text-center banner col-md">
+            <img src="Imagenes/Banner.png" class="img-fluid border border-2 border-dark mt-4" alt="banner" height=auto
+                width="600 rem">
+        </div>
+    
+        <div class="botonesCopa">
+            <button id="btnGrupos" class=" p-2 btnActivo me-5" onclick="mostrarLlaves()">Llaves</button>
+            <button id="btnLlaves" class="btnGruposLlaves p-2" onclick="mostrarGrupos()">Grupos</button>
+        </div>
+    
+        <div class=""><img src="Imagenes/LlavesCopaB.png" alt="" width="40%" class="mt-4 imagenLlave" id="llaves"></div>
+    
+        <div class="gruposCopaA mt-5" id="grupos">
+            <div class="container ">
+                <div class="row justify-content-center">
+                    <div class="col-md-7 d-flex justify-content-center">
+                        <table class="table tbl" style="border: 2px black solid;">
+                            <thead>
+                                <tr style="border: 1px black solid;">
+                                    <th colspan="8" style="background-color:#C65911;color:#FFF;">GRUPO 1</th>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid; ">#</th>
+                                    <th colspan="2" style="background-color:#C65911;color:#FFF;">PARTICIPANTE</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PTS</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PLENO</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PARCIAL
+                                    </th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">ERROR</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PEN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#0F0; border: 1px black solid;">1</td>
+                                    <td style="background-color:#0F0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Kevin Sivori.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#0F0; text-align: start;">Kevin Sívori</td>
+                                    <td style="background-color:#0F0; font-weight: bold; border: 1px black solid;">19
+                                    </td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">4</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">7</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">13</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
+                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Mario Talarico.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#FF0; text-align: start;">Mario Talarico</td>
+                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">15
+                                    </td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">9</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">13</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
+                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Joaquin Sampadaro.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#FF0; text-align: start;">Joaquin Sampadaro</td>
+                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">14
+                                    </td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">8</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">14</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#F00; border: 1px black solid;">4</td>
+                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Dani Bazan.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#F00; text-align: start;">Dani Bazán</td>
+                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">8
+                                    </td>
+                                    <td style="background-color:#F00; border: 1px black solid;">1</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">18</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
+                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Santiago.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#F00; text-align: start;">Santi</td>
+                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">2
+                                    </td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">2</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">22</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                </tr>
+    
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="container ">
+                <div class="mt-5 mb-5">
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-7 d-flex justify-content-center">
+                        <table class="table tbl" style="border: 2px black solid;">
+                            <thead>
+                                <tr style="border: 1px black solid;">
+                                    <th colspan="8" style="background-color:#C65911;color:#FFF;">GRUPO 2</th>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">#</th>
+                                    <th colspan="2" style="background-color:#C65911;color:#FFF;">PARTICIPANTE</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PTS</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PLENO</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PARCIAL
+                                    </th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">ERROR</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PEN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#0F0; border: 1px black solid;">1</td>
+                                    <td style="background-color:#0F0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Rodri Sebastian.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#0F0; text-align: start;">Rodri Sebastian</td>
+                                    <td style="background-color:#0F0; font-weight: bold; border: 1px black solid;">19
+                                    </td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">4</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">7</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">13</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
+                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Nacho Soto2.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#FF0; text-align: start;">Nacho Soto</td>
+                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">16
+                                    </td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">7</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">14</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
+                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Joe.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#FF0; text-align: start;">Joel Marasco</td>
+                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">14
+                                    </td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">8</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">14</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#F00; border: 1px black solid;">4</td>
+                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Pancho Muzzio.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#F00; text-align: start;">Pancho Muzzio</td>
+                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">8
+                                    </td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">8</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">16</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
+                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Anubis-removebg-preview.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#F00; text-align: start;">Anubis</td>
+                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">3
+                                    </td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">3</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">21</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="mt-5 mb-5">
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-md-7 d-flex justify-content-center">
+                        <table class="table tbl" style="border: 2px black solid;">
+                            <thead>
+                                <tr style="border: 1px black solid;">
+                                    <th colspan="8" style="background-color:#C65911;color:#FFF;">GRUPO 3</th>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">#</th>
+                                    <th colspan="2" style="background-color:#C65911;color:#FFF;">PARTICIPANTE</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PTS</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PLENO</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PARCIAL
+                                    </th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">ERROR</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PEN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#0F0; border: 1px black solid;">1</td>
+                                    <td style="background-color:#0F0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Jhose.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#0F0; text-align: start;">Jhose</td>
+                                    <td style="background-color:#0F0; font-weight: bold; border: 1px black solid;">21
+                                    </td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">5</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">6</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">13</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
+                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Felipe Galante.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#FF0; text-align: start;">Felipe Galante</td>
+                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">15
+                                    </td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">9</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">13</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
+                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Azul Quispe.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#FF0; text-align: start;">Azul Quispe</td>
+                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">12
+                                    </td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">1</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">9</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">14</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#FF0; border: 1px black solid;">4</td>
+                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Rodrigo Talarico.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#FF0; text-align: start;">Rodrigo Talarico</td>
+                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">12
+                                    </td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">12</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">12</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
+                                    <td style="background-color:#F00; width: 50px; height: 30px;"><img
+                                            src="Imagenes/Escudos/Joaco Fernandez.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#F00; text-align: start;">Joaco Fernández</td>
+                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">10
+                                    </td>
+                                    <td style="background-color:#F00; border: 1px black solid;">1</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">7</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">16</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="mt-5 mb-5">
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-sm-7 d-flex justify-content-center">
+                        <table class="table tbl" style="border: 2px black solid;">
+                            <thead>
+                                <tr style="border: 1px black solid;">
+                                    <th colspan="8" style="background-color:#C65911;color:#FFF;">GRUPO 4</th>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">#</th>
+                                    <th colspan="2" style="background-color:#C65911;color:#FFF;">PARTICIPANTE</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PTS</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PLENO</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PARCIAL
+                                    </th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">ERROR</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PEN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#0F0; border: 1px black solid;">1</td>
+                                    <td style="background-color:#0F0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Ignacio Cejas.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#0F0; text-align: start;">Ignacio Cejas</td>
+                                    <td style="background-color:#0F0; font-weight: bold; border: 1px black solid;">14
+                                    </td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">2</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">8</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">14</td>
+                                    <td style="background-color:#0F0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
+                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Anto.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#FF0; text-align: start;">Antonella López</td>
+                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">7
+                                    </td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">1</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">4</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">19</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#F00; border: 1px black solid;">4</td>
+                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Matheo olivera.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#F00; text-align: start;">Matheo Olivera</td>
+                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">5
+                                    </td>
+                                    <td style="background-color:#F00; border: 1px black solid;">1</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">2</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">21</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="container margenParaPubli">
+                <div class="mt-5 mb-5">
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-sm-7 d-flex justify-content-center">
+                        <table class="table tbl" style="border: 2px black solid;">
+                            <thead>
+                                <tr style="border: 1px black solid;">
+                                    <th colspan="8" style="background-color:#C65911;color:#FFF;">DESEMPATE</th>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">#</th>
+                                    <th colspan="2" style="background-color:#C65911;color:#FFF;">PARTICIPANTE</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PTS</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PLENO</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PARCIAL
+                                    </th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">ERROR</th>
+                                    <th style="background-color:#C65911;color:#FFF; border: 1px black solid;">PEN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#FF0; border: 1px black solid;">1</td>
+                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Rodrigo Talarico.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#FF0; text-align: start;">Rodrigo Talarico</td>
+                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">11
+                                    </td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">12</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">12</td>
+                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#F00; border: 1px black solid;">3</td>
+                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Dani Bazan.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#F00; text-align: start;">Dani Bazán</td>
+                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">8
+                                    </td>
+                                    <td style="background-color:#F00; border: 1px black solid;">1</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">18</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                </tr>
+                                <tr style="border: 1px black solid;">
+                                    <td style="background-color:#F00; border: 1px black solid;">4</td>
+                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
+                                            src="Imagenes/Escudos/Pancho Muzzio.png"
+                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
+                                    <td style="background-color:#F00; text-align: start;">Pancho Muzzio</td>
+                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">8
+                                    </td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">8</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">16</td>
+                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+
+
+
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script src="JS/leer.js"></script>
+
+
+
+        </main>
+
+        <footer>
+
+            <div class="fixed-bottom text-center col-md">
+                <a href="Donar/index.html" target="_blank">
+                    <img src="https://i.ibb.co/qkkt2sC/Banner-Publi.png" alt="Donale al admin no seas malo"
+                        class="img-fluid border border-2 border-dark mt-4" width="500 rem"></a>
+            </div>
+
+        </footer>
+
+        <script src="JS/escudos.js"></script>
+        <script src="JS/indexProde.js"></script>
+
+        <!-- Bootstrap JavaScript Libraries -->
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>
