@@ -453,6 +453,78 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Suecia":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/OkFlRvRsKMWb8Hk20L9Trw_96x96.png";
             break;
+        
+        case "Atlético Rafaela":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/sJTwhSg2rykiEWNDGevTtQ_96x96.png";
+            break;
+        
+        case "Panamá":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/JIn8OwxL6KFFiYrKGnL2RQ_96x96.png";
+            break;
+        
+        case "México":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/yJF9xqmUGenD8108FJbg9A_96x96.png";
+            break;
+
+        case "Ghana":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/VJQ1emg0TOubjGnap4vWuw_96x96.png";
+            break;
+        
+        case "Noruega":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/lLDKax72TPgU_Hcj0W-DOg_96x96.png";
+            break;
+
+        case "República Checa":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/8AluO-WxpcHtC0KKHmFgvg_96x96.png";
+            break;
+
+        case "España":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/5hLkf7KFHhmpaiOJQv8LmA_96x96.png";
+            break;
+
+        case "Colombia":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/tXHnA_tDylayacdjWQCJvw_96x96.png";
+            break;
+        
+        case "Argentina":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/1xBWyjjkA6vEWopPK3lIPA_96x96.png";
+            break;
+
+        case "El Salvador":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/88vJq30FdUDnRtijjPJyoA_96x96.png";
+            break;
+
+        case "Millonarios":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/1DQhf49J-kjaVmo0XSBAsA_96x96.png";
+            break;
+
+        case "Inglaterra":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/DTqIL8Ba3KIuxGkpXw5ayA_96x96.png";
+            break;
+
+        case "Brasil":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/zKLzoJVYz0bb6oAnPUdwWQ_96x96.png";
+            break;
+
+        case "Croacia":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/9toerdOg8xW4CRhDaZxsyw_96x96.png";
+            break;
+
+        case "Francia":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/z3JEQB3coEAGLCJBEUzQ2A_96x96.png";
+            break;
+
+        case "Alemania":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/h1FhPLmDg9AHXzhygqvVPg_96x96.png";
+            break;
+        
+        case "Deportivo Pereira":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/5uF-LNu9tpUdI3tz-juutw_96x96.png";
+            break;
+
+        case "Túnez":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Xs33c9XVUJBX0IkeFn_bIw_96x96.png";
+            break;
             
 
         default:
@@ -462,7 +534,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
     }
 }
 
-for (let i = 1; i <= 120; i++) {
+for (let i = 1; i <= 132; i++) {
     var equipoNombreLocal = document.getElementById("equipoNombreLocal" + i).innerText;
     var equipoNombreVisitante = document.getElementById("equipoNombreVisitante" + i).innerText;
     var equipoEscudoLocal = document.getElementById("equipoEscudoLocal" + i);
