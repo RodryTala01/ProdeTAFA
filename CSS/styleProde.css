@@ -193,7 +193,7 @@ body {
 }
 
 .fecha32avos {
-    display: none;
+    display: block;
 }
 
 .fecha1 {
@@ -237,7 +237,7 @@ body {
 }
 
 .fechaPromos {
-    display: block;
+    display: none;
 }
 
 .penales {
