@@ -1824,3 +1824,22 @@ function mostrarLlaves() {
     btnLlaves.classList.remove("btnActivo");
     btnLlaves.classList.add("btnGruposLlaves", "btnGruposLlaves:hover");
 }
+
+function crearTabla() {
+    var inputTexto = document.getElementById("inputTextoAdmin").value;
+    var numeros = inputTexto.match(/\d+/g);
+    var tablaHTML = "<table border='1'>";
+
+    for (var i = 0; i < numeros.length; i += 2) {
+        tablaHTML += "<tr><td>" + numeros[i] + "</td><td> - </td><td>" + numeros[i + 1] + "</td></tr>";
+    }
+
+    tablaHTML += "</table>";
+    document.getElementById("tablaAdmin").innerHTML = tablaHTML;
+}
+
+function ajustarAlturaAdmin() {
+    var textarea = document.getElementById("inputTextoAdmin");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
