@@ -193,11 +193,11 @@ body {
 }
 
 .fecha32avos {
-    display: block;
+    display: none;
 }
 
 .fecha1 {
-    display: none;
+    display: block;
 }
 
 .fecha16avos {
@@ -672,10 +672,22 @@ textarea {
 }
 
 .gruposCopaA {
-    display: none;
+    display: flex;
+    justify-content: center;
 }
 
-.btnGruposLlaves {
+#btnGrupo1,
+#btnGrupo2,
+#btnGrupo3,
+#btnGrupo4,
+#btnGrupo5,
+#btnGrupo6,
+#btnGrupo7,
+#btnGrupo8,
+#btnGrupo9,
+#btnGrupo10,
+.btnGruposLlaves
+ {
     width: 100px;
     background-color: #202C33;
     color: white;
@@ -685,6 +697,16 @@ textarea {
     margin-top: 1rem;
 }
 
+#btnGrupo1:hover,
+#btnGrupo2:hover,
+#btnGrupo3:hover,
+#btnGrupo4:hover,
+#btnGrupo5:hover,
+#btnGrupo6:hover,
+#btnGrupo7:hover,
+#btnGrupo8:hover,
+#btnGrupo9:hover,
+#btnGrupo10:hover,
 .btnGruposLlaves:hover {
     background-color: #182025;
 }
@@ -707,4 +729,20 @@ textarea {
 #tablaAdmin td {
     width: 50px;
     border: black 1px solid;
+}
+
+#grupo2,
+#grupo3,
+#grupo4,
+#grupo5,
+#grupo6,
+#grupo7,
+#grupo8,
+#grupo9,
+#grupo10{
+    display: none;
+}
+
+#grupo1 {
+    display: flex;
 }

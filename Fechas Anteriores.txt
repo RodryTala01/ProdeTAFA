@@ -1,4 +1,4 @@
-<!-- <div id="fecha32avos" class="fecha32avos">
+        <div id="fecha32avos" class="fecha32avos">
 
             <div class="text-center cajaBotonesFechas  mt-4">
                 <button type="button" class="cajaANT inutil btn btn-light bi bi-caret-left-fill fw-bold"></button>
@@ -2354,7 +2354,7 @@
 
                 </div>
             </div>
-        </div> -->
+        </div>
 
         <div id="fechaPromos" class="fechaPromos">
         
@@ -2798,5 +2798,4 @@
                     </table>
 
             </div>
-        
         </div>

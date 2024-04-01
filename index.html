@@ -49,7 +49,7 @@
                         <a class="nav-link" href="CopaTotal.html">COPA TOTAL</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="#">COPA CAMPEONES</a>
+                        <a class="nav-link" href="CopaCampeones.html">COPA CAMPEONES</a>
                     </li>
                     <li class="nav-item animado">
                         <a class="nav-link" href="CopaA.html">COPA A</a>
@@ -61,7 +61,7 @@
                         <a class="nav-link disabled" href="#">COPA C</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="#">COPA DÚOS</a>
+                        <a class="nav-link" href="CopaDuos.html">COPA DÚOS</a>
                     </li>
                     <li class="nav-item animado">
                         <a class="click nav-link active" href="#">PALMARÉS</a>
@@ -90,10 +90,217 @@
 
         <div id="fecha32avos" class="fecha32avos">
 
+            <div class="text-center cajaBotonesFechas  mt-4">
+                <button type="button" class="cajaANT inutil btn btn-light bi bi-caret-left-fill fw-bold"></button>
+                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold" id="textoFecha">32avos de
+                    Final</button>
+                <button type="button" class="cajaSIG btn btn-light bi bi-caret-right-fill fw-bold"
+                    onclick="mostrarFecha1()"></button>
+            </div>
+
+            <div class="container">
+                <div class="table-responsive">
+                    <div class="d-flex flex-row justify-content-center mt-4">
+                        <table class="tg bg-success">
+                            <tbody>
+                                <tr class="bordeGrueso fecha">
+                                    <td colspan="5">Viernes 29 de Marzo</td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2 tamañoPerso2"><img id="equipoEscudoLocal1" src=""
+                                            height="30px" alt="">
+                                        <br><span id="equipoNombreLocal1">Peñarol</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2 tamañoPerso2"><img id="equipoEscudoVisitante1" src=""
+                                            height="30px" alt="">
+                                        <br><span id="equipoNombreVisitante1">Nacional</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2 tamañoPerso2"><img id="equipoEscudoLocal2" src=""
+                                            height="30px" alt="">
+                                        <br><span id="equipoNombreLocal2">Defensa y Justicia</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2 tamañoPerso2"><img id="equipoEscudoVisitante2" src=""
+                                            height="30px" alt="">
+                                        <br><span id="equipoNombreVisitante2">Estudiantes (LP)</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal3" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal3">Huracán</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante3" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante3">River Plate</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso fecha">
+                                    <td colspan="5">Sábado 30 de Marzo</td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal4" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal4">Newcastle United</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">4</td>
+                                    <td class="tg-nrix numero bg-danger p-2">3</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante4" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante4">West Ham</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal5" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal5">Lazio</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante5" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante5">Juventus</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal6" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal6">Bayern Munich</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante6" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante6">Borussia Dortmund</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal7" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal7">Fiorentina</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante7" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante7">Milan</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal8" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal8">Boca Juniors</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">2</td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante8" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante8">San Lorenzo</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal9" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal9">Cerro Porteño</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante9" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante9">Nacional (P)</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal10" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal10">Napoli</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="tg-nrix numero bg-danger p-2">3</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante10" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante10">Atalanta</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal11" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal11">Talleres (C)</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">1</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante11" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante11">Vélez Sarsfield</span>
+                                    </td>
+                                </tr>
+                                <tr class="bordeGrueso">
+                                    <th class="tg-nrix bg-danger estado-columna p-2">Final</th>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoLocal12" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreLocal12">Libertad</span>
+                                    </td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="tg-nrix numero bg-danger p-2">0</td>
+                                    <td class="col-md-auto p-2"><img id="equipoEscudoVisitante12" src="" height="30px"
+                                            alt="">
+                                        <br><span id="equipoNombreVisitante12">Olimpia</span>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <button id="btnAbrirInput32avos" class="margenParaPubli p-2"
+                        onclick="abrirInput32avos()">CALCULADORA DE
+                        PUNTOS</button>
+                    <div id="campoInput32avos" class="hidden margenParaPubli">
+                        <button id="btnVolver32avos" class="p-2" onclick="volver32avos()">VOLVER</button>
+                        <h6 style="color: red; margin-top: 1rem;">Pegar la fecha separando los números al menos por un
+                            espacio</h6>
+                        <textarea id="inputTexto32avos" placeholder="Pegá tu fecha acá"
+                            oninput="ajustarAltura32avos()"></textarea>
+                        <p style="color: white; margin-top: 2rem;">Penales:</p>
+                        <h6 style="color: orange; margin-top: none; font-size: 0.7rem">Por algunos motivos no se pueden
+                            sumar los penales
+                            automáticamente así que indicá abajo cuántos puntos por penales sacaste:</h6>
+                        <h5 id="error32avos" style="color: red; margin-top: none; font-size: 1rem"></h5>
+                        <div>
+                            <div id="penales32avos" style="color: white; font-weight: bold;">0</div>
+                            <button onclick="sumarPenales32avos()" id="btnMas32avos" class="me-2">+</button><button
+                                id="btnMenos32avos" class="ms-2" onclick="restarPenales32avos()">-</button>
+                        </div>
+                        <button id="btnEnviar32avos" class="p-2" onclick="corroborar32avos()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="fecha1" class="fecha1">
+
             <div class="text-center cajaBotonesFechas mt-4">
-                <button type="button" class="cajaANT btn btn-light bi bi-caret-left-fill fw-bold inutil"
-                    onclick=""></button>
-                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold" id="textoFecha">32avos de Final</button>
+                <button type="button" class="cajaANT btn btn-light bi bi-caret-left-fill fw-bold"
+                    onclick="mostrarFecha32avos()"></button>
+                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold" id="textoFecha">Fecha
+                    1</button>
                 <button type="button" class="cajaSIG btn btn-light bi bi-caret-right-fill fw-bold"
                     onclick="noHayFecha()"></button>
             </div>
@@ -116,7 +323,7 @@
                         <tbody>
 
                             <tr v-for="(lista, index) in listaDatos">
-                                <template v-if="index === 0 || index === 4">
+                                <template v-if="index === 0 || index === 5 || index === 7">
                                     <td colspan="6" class=" fecha">{{ lista.fecha }}</td>
                                 </template>
                                 <template v-else>
@@ -499,6 +706,17 @@
                                             src="https://ssl.gstatic.com/onebox/media/sports/logos/-n4YxXgf_vhcYhp03Mq6Dw_96x96.png"
                                             alt="" class="text-center escudo" height="30px">
 
+                                        <img v-if="lista[1] === 'Ind. Medellin'"
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/EXzxmE5XPA9zm43tU_q2xg_96x96.png"
+                                            alt="" class="text-center escudo" height="30px">
+
+                                        <img v-if="lista[1] === 'Benfica'"
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/nFwABZ-4n_A3BGXT9A7Adg_96x96.png"
+                                            alt="" class="text-center escudo" height="30px">
+
+                                        <img v-if="lista[1] === 'Dep. Tachira'"
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/TL3-aSNtyCUP78uUZ35HWg_96x96.png"
+                                            alt="" class="text-center escudo" height="30px">
 
 
 
@@ -890,6 +1108,30 @@
 
                                         <img v-if="lista[4] === 'Olimpia'"
                                             src="https://ssl.gstatic.com/onebox/media/sports/logos/4O3gcJ3OuxDAG9z4lkzk0Q_96x96.png"
+                                            alt="" class="text-center escudo" height="30px">
+
+                                        <img v-if="lista[4] === 'Atl Tucuman'"
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/3arLHe5K6lOpRpQhi2_WDQ_96x96.png"
+                                            alt="" class="text-center escudo" height="30px">
+
+                                        <img v-if="lista[4] === 'America Cali'"
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/Pg8gT7CDn-Jv1zZ2EO7ajQ_96x96.png"
+                                            alt="" class="text-center escudo" height="30px">
+
+                                        <img v-if="lista[4] === 'Tottenham'"
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/k3Q_mKE98Dnohrcea0JFgQ_96x96.png"
+                                            alt="" class="text-center escudo" height="30px">
+
+                                        <img v-if="lista[4] === 'Sporting'"
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/58doDuhR0wW3WZE9PdODUw_96x96.png"
+                                            alt="" class="text-center escudo" height="30px">
+
+                                        <img v-if="lista[4] === 'Flamengo'"
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/orE554NToSkH6nuwofe7Yg_96x96.png"
+                                            alt="" class="text-center escudo" height="30px">
+
+                                        <img v-if="lista[4] === 'Internacional'"
+                                            src="https://ssl.gstatic.com/onebox/media/sports/logos/OWVFKuHrQuf4q2Wk0hEmSA_96x96.png"
                                             alt="" class="text-center escudo" height="30px">
 
 

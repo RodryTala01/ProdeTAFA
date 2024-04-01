@@ -52,7 +52,7 @@
                         <a class="nav-link " href="CopaTotal.html">COPA TOTAL</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="#">COPA CAMPEONES</a>
+                        <a class="nav-link" href="CopaCampeones.html">COPA CAMPEONES</a>
                     </li>
                     <li class="nav-item animado">
                         <a class="nav-link activo" href="#">COPA A</a>
@@ -64,7 +64,7 @@
                         <a class="nav-link disabled" href="#">COPA C</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="#">COPA DÚOS</a>
+                        <a class="nav-link" href="CopaDuos.html">COPA DÚOS</a>
                     </li>
                     <li class="nav-item animado">
                         <a class="click nav-link active" href="#">PALMARÉS</a>
@@ -94,391 +94,588 @@
                 width="600 rem">
         </div>
 
-        <div class="botonesCopa">
+        <!-- <div class="botonesCopa">
             <button id="btnGrupos" class=" p-2 btnActivo me-5" onclick="mostrarLlaves()">Llaves</button>
             <button id="btnLlaves" class="btnGruposLlaves p-2" onclick="mostrarGrupos()">Grupos</button>
-        </div>
+        </div> -->
 
-        <div class=""><img src="Imagenes/LlavesCopaA.png" alt="" width="40%" class="mt-4 imagenLlave" id="llaves"></div>
+        <!-- <div class=""><img src="Imagenes/LlavesCopaA.png" alt="" width="40%" class="mt-4 imagenLlave" id="llaves"></div> -->
 
-        <div class="gruposCopaA mt-5" id="grupos">
-            <div class="container ">
-                <div class="row justify-content-center">
-                    <div class="col-md-7 d-flex justify-content-center">
-                        <table class="table tbl" style="border: 2px black solid;">
-                            <thead>
-                                <tr style="border: 1px black solid;">
-                                    <th colspan="8" style="background-color:#2F75B5;color:#FFF;">GRUPO 1</th>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid; ">#</th>
-                                    <th colspan="2" style="background-color:#2F75B5;color:#FFF;">PARTICIPANTE</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PTS</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PLENO</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PARCIAL
-                                    </th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">ERROR</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PEN</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#0F0; border: 1px black solid;">1</td>
-                                    <td style="background-color:#0F0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Joel Alcalde.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#0F0; text-align: start;">Joel Alcalde</td>
-                                    <td style="background-color:#0F0; font-weight: bold; border: 1px black solid;">17
-                                    </td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">3</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">8</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">13</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
-                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Nico avalos.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#FF0; text-align: start;">Nico Avalos</td>
-                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">15
-                                    </td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">9</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">9</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
-                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Benja-removebg-preview.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#FF0; text-align: start;">Benja</td>
-                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">14
-                                    </td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">5</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">16</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#F00; border: 1px black solid;">4</td>
-                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Ian Gangai.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#F00; text-align: start;">Ian Gangai</td>
-                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">12
-                                    </td>
-                                    <td style="background-color:#F00; border: 1px black solid;">1</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">9</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">14</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
-                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Luciano Hufschmid.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#F00; text-align: start;">Luciano Hufschmid</td>
-                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">10
-                                    </td>
-                                    <td style="background-color:#F00; border: 1px black solid;">1</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">7</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">16</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                </tr>
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="container ">
-                <div class="mt-5 mb-5">
-                </div>
-                <div class="row justify-content-center">
-                    <div class="col-md-7 d-flex justify-content-center">
-                        <table class="table tbl" style="border: 2px black solid;">
-                            <thead>
-                                <tr style="border: 1px black solid;">
-                                    <th colspan="8" style="background-color:#2F75B5;color:#FFF;">GRUPO 2</th>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">#</th>
-                                    <th colspan="2" style="background-color:#2F75B5;color:#FFF;">PARTICIPANTE</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PTS</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PLENO</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PARCIAL
-                                    </th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">ERROR</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PEN</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#0F0; border: 1px black solid;">1</td>
-                                    <td style="background-color:#0F0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Lucas Aguilera2.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#0F0; text-align: start;">Lucas Aguilera</td>
-                                    <td style="background-color:#0F0; font-weight: bold; border: 1px black solid;">23
-                                    </td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">5</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">8</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">11</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
-                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Rodrigo Soca 2.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#FF0; text-align: start;">Rodrigo Soca</td>
-                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">18
-                                    </td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">9</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">12</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
-                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Yago.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#FF0; text-align: start;">Yago</td>
-                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">16
-                                    </td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">4</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">4</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">15</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#F00; border: 1px black solid;">4</td>
-                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Tomas Torcasio.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#F00; text-align: start;">Tomás Torcasio</td>
-                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">13
-                                    </td>
-                                    <td style="background-color:#F00; border: 1px black solid;">1</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">10</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">13</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
-                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Tomas delgado.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#F00; text-align: start;">Tomás Delgado</td>
-                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">5
-                                    </td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">19</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="container">
-                <div class="mt-5 mb-5">
-                </div>
-                <div class="row justify-content-center">
-                    <div class="col-md-7 d-flex justify-content-center">
-                        <table class="table tbl" style="border: 2px black solid;">
-                            <thead>
-                                <tr style="border: 1px black solid;">
-                                    <th colspan="8" style="background-color:#2F75B5;color:#FFF;">GRUPO 3</th>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">#</th>
-                                    <th colspan="2" style="background-color:#2F75B5;color:#FFF;">PARTICIPANTE</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PTS</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PLENO</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PARCIAL
-                                    </th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">ERROR</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PEN</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#0F0; border: 1px black solid;">1</td>
-                                    <td style="background-color:#0F0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Renzo Badano.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#0F0; text-align: start;">Renzo Badano</td>
-                                    <td style="background-color:#0F0; font-weight: bold; border: 1px black solid;">21
-                                    </td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">5</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">6</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">13</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
-                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Eze.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#FF0; text-align: start;">Eze</td>
-                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">21
-                                    </td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">5</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">6</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">13</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
-                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Lucas Insua.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#FF0; text-align: start;">Lucas Insua</td>
-                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">20
-                                    </td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">4</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">8</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">12</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#F00; border: 1px black solid;">4</td>
-                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Bruno Alonso.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#F00; text-align: start;">Bruno Alonso</td>
-                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">16
-                                    </td>
-                                    <td style="background-color:#F00; border: 1px black solid;">3</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">7</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">14</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
-                                    <td style="background-color:#F00; width: 50px; height: 30px;"><img
-                                            src="Imagenes/Escudos/Moreno Perez.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#F00; text-align: start;">Moreno Pérez</td>
-                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">13
-                                    </td>
-                                    <td style="background-color:#F00; border: 1px black solid;">3</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">4</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">17</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="container" style="color: white;">
-                        <h5>DESEMPATE</h5>
-                        <div><img src="Imagenes/Escudos/Renzo Badano.png" height="30px" alt=""> Renzo Badano 1 - 0 Eze
-                            <img src="Imagenes/Escudos/Eze.png" height="30px" alt=""></div>
-                    </div>
-                </div>
-            </div>
-            <div class="container margenParaPubli">
-                <div class="mt-5 mb-5">
-                </div>
-                <div class="row justify-content-center">
-                    <div class="col-sm-7 d-flex justify-content-center">
-                        <table class="table tbl" style="border: 2px black solid;">
-                            <thead>
-                                <tr style="border: 1px black solid;">
-                                    <th colspan="8" style="background-color:#2F75B5;color:#FFF;">GRUPO 4</th>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">#</th>
-                                    <th colspan="2" style="background-color:#2F75B5;color:#FFF;">PARTICIPANTE</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PTS</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PLENO</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PARCIAL
-                                    </th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">ERROR</th>
-                                    <th style="background-color:#2F75B5;color:#FFF; border: 1px black solid;">PEN</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#0F0; border: 1px black solid;">1</td>
-                                    <td style="background-color:#0F0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Gabriel Talarico 2.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#0F0; text-align: start;">Gabriel Talarico</td>
-                                    <td style="background-color:#0F0; font-weight: bold; border: 1px black solid;">24
-                                    </td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">5</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">9</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">10</td>
-                                    <td style="background-color:#0F0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#FF0; border: 1px black solid;">2</td>
-                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Fabrizio Escolano NUEVO.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#FF0; text-align: start;">Fabrizio Escolano</td>
-                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">21
-                                    </td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">4</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">9</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">11</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#FF0; border: 1px black solid;">3</td>
-                                    <td style="background-color:#FF0; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Camila Bussetto.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#FF0; text-align: start;">Cami</td>
-                                    <td style="background-color:#FF0; font-weight: bold; border: 1px black solid;">10
-                                    </td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">1</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">7</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">16</td>
-                                    <td style="background-color:#FF0; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#F00; border: 1px black solid;">4</td>
-                                    <td style="background-color:#F00; width: 50px; height: 50px;"><img
-                                            src="Imagenes/Escudos/Pollo.png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#F00; text-align: start;">Pollo</td>
-                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">10
-                                    </td>
-                                    <td style="background-color:#F00; border: 1px black solid;">1</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">7</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">16</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                </tr>
-                                <tr style="border: 1px black solid;">
-                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
-                                    <td style="background-color:#F00; width: 50px; height: 30px;"><img
-                                            src="Imagenes/Escudos/Bautista Coria (2).png"
-                                            style="height: 30px; max-width: 33px; object-fit:contain;"></td>
-                                    <td style="background-color:#F00; text-align: start;">Bautista Coria</td>
-                                    <td style="background-color:#F00; font-weight: bold; border: 1px black solid;">5
-                                    </td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">5</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">19</td>
-                                    <td style="background-color:#F00; border: 1px black solid;">0</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="container" style="color: white;">
-                        <h5>DESEMPATE</h5>
-                        <div><img src="Imagenes/Escudos/Camila Bussetto.png" height="30px" alt=""> Cami 4 - 1 Pollo <img
-                                src="Imagenes/Escudos/Pollo.png" height="30px" alt=""></div>
-                    </div>
-                </div>
-            </div>
+        <div class="gruposCopaA mt-5 margenParaPubli" id="grupos">
+            <table style="border-collapse:collapse;border-spacing:0" class="tg">
+                <thead>
+                    <tr>
+                        <th style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal"
+                            colspan="7">GRUPO 1</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            #</td>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PARTICIPANTE</td>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PTS</td>
+                        <td
+                            style="background-color:#10F01B;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PLENO</td>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PARCIAL</td>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            ERROR</td>
+                        <td
+                            style="background-color:#FFC000;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PEN</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#10F01B;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Lucas Aguilera</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            10</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            4</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            6</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Fabrizio Escolano</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            8</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            8</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Yago</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            7</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            4</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            7</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            4</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Cami</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            6</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            8</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Tomás Torcasio</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            9</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal"
+                            colspan="7">GRUPO 2</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            #</td>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PARTICIPANTE</td>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PTS</td>
+                        <td
+                            style="background-color:#10F01B;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PLENO</td>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PARCIAL</td>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            ERROR</td>
+                        <td
+                            style="background-color:#FFC000;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PEN</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#10F01B;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Gabriel Talarico</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            9</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            7</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Tomás Delgado</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            8</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            6</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Pollo</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            9</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            4</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Moreno Pérez</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            4</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            4</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            8</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Lucas Insua</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            10</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal"
+                            colspan="7">GRUPO 3</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            #</td>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PARTICIPANTE</td>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PTS</td>
+                        <td
+                            style="background-color:#10F01B;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PLENO</td>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PARCIAL</td>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            ERROR</td>
+                        <td
+                            style="background-color:#FFC000;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PEN</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#0F0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Eze</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            12</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            6</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Pancho Muzzio</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            9</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Renzo Badano</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            7</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            4</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Rodrigo Soca</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            7</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Luciano Hufschmid</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            9</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal"
+                            colspan="7">GRUPO 4</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            #</td>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PARTICIPANTE</td>
+                        <td
+                            style="background-color:#2F75B5;border-color:black;border-style:solid;border-width:1px;color:#FFF;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PTS</td>
+                        <td
+                            style="background-color:#10F01B;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PLENO</td>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PARCIAL</td>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            ERROR</td>
+                        <td
+                            style="background-color:#FFC000;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:middle;word-break:normal">
+                            PEN</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#10F01B;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Jhose</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            8</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            6</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Nico Avalos</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            8</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            6</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#FF0;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Ian Gangai</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            7</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            9</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            4</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Joel Alcalde</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            6</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            2</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            10</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="background-color:#F00;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            5</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:left;vertical-align:middle;word-break:normal">
+                            Bruno Alonso</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            6</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            1</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            3</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            8</td>
+                        <td
+                            style="background-color:#9BC2E6;border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;text-align:center;vertical-align:bottom;word-break:normal">
+                            0</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
     </div>

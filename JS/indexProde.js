@@ -386,17 +386,17 @@ function corroborar32avos() {
 
     const fechaCorrecta = [
         [0, 0],
-        [4, 1],
-        [2, 0],
-        [1, 3],
-        [2, 4],
-        [4, 0],
-        [0, 0],
-        [1, 2],
-        [1, 2],
         [1, 0],
         [1, 0],
-        [1, 2]
+        [4, 3],
+        [1, 0],
+        [0, 2],
+        [1, 2],
+        [2, 1],
+        [1, 0],
+        [0, 3],
+        [1, 0],
+        [0, 0]
     ];
 
     const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
@@ -1842,4 +1842,15 @@ function ajustarAlturaAdmin() {
     var textarea = document.getElementById("inputTextoAdmin");
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function mostrarGrupo(grupo) {
+    for (var i = 1; i <= 10; i++) {
+        var elementoGrupo = document.getElementById("grupo" + i);
+        if (i === grupo) {
+            elementoGrupo.style.display = "flex";
+        } else {
+            elementoGrupo.style.display = "none";
+        }
+    }
 }

@@ -525,7 +525,14 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Túnez":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Xs33c9XVUJBX0IkeFn_bIw_96x96.png";
             break;
-            
+        
+        case "Peñarol":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/dO-HNzx-ozLofoWOj7kr9g_96x96.png";
+            break;
+        
+        case "Libertad":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/-n4YxXgf_vhcYhp03Mq6Dw_96x96.png";
+            break;
 
         default:
             // Si el nombre del equipo no coincide con ningún caso, puedes asignar un escudo predeterminado o mostrar un mensaje de error
