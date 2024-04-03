@@ -197,11 +197,11 @@ body {
 }
 
 .fecha1 {
-    display: block;
+    display: none;
 }
 
 .fecha16avos {
-    display: none;
+    display: block;
 }
 
 .fecha2 {

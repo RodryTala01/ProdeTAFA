@@ -317,7 +317,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "PSG":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/mcpMspef1hwHwi9qrfp4YQ_96x96.png";
             break;
-
+        
         case "Monaco":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/RX0XTi5Dtg4joMtuHNmYKg_96x96.png";
             break;
@@ -532,6 +532,26 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         
         case "Libertad":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/-n4YxXgf_vhcYhp03Mq6Dw_96x96.png";
+            break;
+        
+        case "América Cali":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Pg8gT7CDn-Jv1zZ2EO7ajQ_96x96.png";
+            break;
+        
+        case "Sporting":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/58doDuhR0wW3WZE9PdODUw_96x96.png";
+            break;
+        
+        case "Flamengo":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/orE554NToSkH6nuwofe7Yg_96x96.png";
+            break;
+        
+        case "Internacional":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/OWVFKuHrQuf4q2Wk0hEmSA_96x96.png";
+            break;
+        
+        case "Deportivo Táchira":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/TL3-aSNtyCUP78uUZ35HWg_96x96.png";
             break;
 
         default:
