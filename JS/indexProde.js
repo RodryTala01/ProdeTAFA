@@ -1854,3 +1854,19 @@ function mostrarGrupo(grupo) {
         }
     }
 }
+
+function palmaresVolverAtras(){
+    var botones = document.getElementById("botones");
+    var primeraDivision = document.getElementById("primeraDivision")
+
+    primeraDivision.style.display = "none"
+    botones.style.display = "block"
+}
+
+function palmaresPrimeraDivision(){
+    var botones = document.getElementById("botones");
+    var primeraDivision = document.getElementById("primeraDivision")
+
+    primeraDivision.style.display = "block"
+    botones.style.display = "none"
+}
