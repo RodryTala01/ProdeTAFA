@@ -1857,16 +1857,31 @@ function mostrarGrupo(grupo) {
 
 function palmaresVolverAtras(){
     var botones = document.getElementById("botones");
-    var primeraDivision = document.getElementById("primeraDivision")
+    var primeraDivision = document.getElementById("palmaresPrimeraDivision")
+    var segundaDivision = document.getElementById("palmaresSegundaDivision")
+    var terceraDivision = document.getElementById("palmaresTerceraDivision")
 
-    primeraDivision.style.display = "none"
-    botones.style.display = "block"
+    primeraDivision.style.display = "none";
+    segundaDivision.style.display = "none";
+    terceraDivision.style.display = "none";
+    botones.style.display = "block";
 }
 
-function palmaresPrimeraDivision(){
+function mostrarPalmares(competicion) {
     var botones = document.getElementById("botones");
-    var primeraDivision = document.getElementById("primeraDivision")
+    var competicion = document.getElementById("palmares" + competicion);
 
-    primeraDivision.style.display = "block"
-    botones.style.display = "none"
+    console.log(competicion);
+    competicion.style.display = "block";
+    botones.style.display = "none";
+}
+
+
+
+function palmaresNo() {
+    Swal.fire({
+        title: "EN CONSTRUCCIÓN",
+        text: "Pronto van a estar cargados todos los Palmarés.",
+        imageUrl: "Imagenes/enConstruccion.gif",
+    });
 }

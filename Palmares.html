@@ -94,7 +94,7 @@
 
         <div id="botones">
             <div class="container">
-                <div class="myCard" id="" onclick="palmaresPrimeraDivision()">
+                <div class="myCard" onclick="mostrarPalmares('PrimeraDivision')">
                     <div class="innerCard">
                         <div class="frontSide">
                             <h3 class="tituloCard">PRIMERA DIVISIÓN</h3>
@@ -105,7 +105,7 @@
                     </div>
                 </div>
 
-                <div class="myCard">
+                <div class="myCard" onclick="mostrarPalmares('SegundaDivision')">
                     <div class="innerCard" id="">
                         <div class="frontSide">
                             <h3 class="tituloCard">SEGUNDA DIVISIÓN</h3>
@@ -116,7 +116,7 @@
                     </div>
                 </div>
 
-                <div class="myCard">
+                <div class="myCard" onclick="mostrarPalmares('TerceraDivision')">
                     <div class="innerCard" id="">
                         <div class="frontSide">
                             <h3 class="tituloCard">TERCERA DIVISIÓN</h3>
@@ -128,7 +128,7 @@
                 </div>
             </div>
             <div class="container">
-                <div class="myCard" id="">
+                <div class="myCard" onclick="mostrarPalmares('CopaA')">
                     <div class="innerCard">
                         <div class="frontSide">
                             <h3 class="tituloCard">COPA A</h3>
@@ -139,7 +139,7 @@
                     </div>
                 </div>
 
-                <div class="myCard">
+                <div class="myCard" onclick="palmaresNo()">
                     <div class="innerCard" id="">
                         <div class="frontSide">
                             <h3 class="tituloCard">COPA B</h3>
@@ -150,7 +150,7 @@
                     </div>
                 </div>
 
-                <div class="myCard">
+                <div class="myCard" onclick="palmaresNo()">
                     <div class="innerCard" id="">
                         <div class="frontSide">
                             <h3 class="tituloCard">COPA C</h3>
@@ -162,7 +162,7 @@
                 </div>
             </div>
             <div class="container">
-                <div class="myCard" id="">
+                <div class="myCard" id="" onclick="palmaresNo()"> 
                     <div class="innerCard">
                         <div class="frontSide">
                             <h3 class="tituloCard">COPA TOTAL</h3>
@@ -174,7 +174,7 @@
                 </div>
 
                 <div class="myCard">
-                    <div class="innerCard" id="">
+                    <div class="innerCard" id="" onclick="palmaresNo()">
                         <div class="frontSide">
                             <h3 class="tituloCard">COPA DÚOS</h3>
                         </div>
@@ -185,7 +185,7 @@
                 </div>
 
                 <div class="myCard">
-                    <div class="innerCard" id="">
+                    <div class="innerCard" id="" onclick="palmaresNo()">
                         <div class="frontSide">
                             <h3 class="tituloCard">COPA CAMPEONES</h3>
                         </div>
@@ -197,15 +197,19 @@
             </div>
         </div>
 
-
-
         <button class="mt-5 boton-atras" onclick="palmaresVolverAtras()"><img src="Imagenes/arrow-left-square-fill.svg"
                 alt=""></button>
 
-        <div style="margin: 0 auto; width: fit-content;" id="primeraDivision" class="mt-5">
 
-            <div class="titulo"><h1 style="color: rgb(36, 181, 201);">PALMARÉS PRIMERA DIVISIÓN</h1>
-            <img src="Imagenes/Trofeos/PrimeraDivision.png" alt="" height="120px"></div>
+
+
+
+        <div style="margin: 0 auto; width: fit-content;" id="palmaresPrimeraDivision" class="mt-5">
+
+            <div class="titulo">
+                <h1 style="color: rgb(36, 181, 201);">PALMARÉS PRIMERA DIVISIÓN</h1>
+                <img src="Imagenes/Trofeos/PrimeraDivision.png" alt="" height="120px">
+            </div>
             <div class="margenParaPubli">
 
 
@@ -221,7 +225,7 @@
                                 style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">2</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">1</label>
                             </div>
@@ -231,7 +235,7 @@
                                 style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T17 T19</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T15</label>
                             </div>
@@ -250,7 +254,7 @@
                                 style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">2</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -260,7 +264,7 @@
                                 style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T8 T13</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -279,7 +283,7 @@
                                 style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">2</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -289,7 +293,7 @@
                                 style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T1 T5</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -308,7 +312,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 66%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">2</label>
                             </div>
@@ -318,7 +322,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T18</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 66%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T12 T19</label>
                             </div>
@@ -337,7 +341,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 66%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">2</label>
                             </div>
@@ -347,7 +351,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T11</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 66%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T4 T9</label>
                             </div>
@@ -366,7 +370,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">1</label>
                             </div>
@@ -376,7 +380,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T15</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T7</label>
                             </div>
@@ -395,7 +399,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">1</label>
                             </div>
@@ -405,7 +409,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T12</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T14</label>
                             </div>
@@ -425,7 +429,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">1</label>
                             </div>
@@ -435,7 +439,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T9</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T11</label>
                             </div>
@@ -454,7 +458,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -464,7 +468,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T16</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -483,7 +487,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -493,7 +497,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T14</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -512,7 +516,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -522,7 +526,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T7</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -541,7 +545,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -551,7 +555,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T6</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -570,7 +574,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -580,7 +584,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T4</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -599,7 +603,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -609,7 +613,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T3</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -628,7 +632,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">1</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -638,7 +642,7 @@
                                 style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos">T2</label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos"></label>
                             </div>
@@ -657,7 +661,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 100%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">3</label>
                             </div>
@@ -667,7 +671,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 100%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T13 T16 T17</label>
                             </div>
@@ -686,7 +690,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 67%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">2</label>
                             </div>
@@ -696,7 +700,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 67%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T5 T8</label>
                             </div>
@@ -715,7 +719,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">1</label>
                             </div>
@@ -725,7 +729,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T18</label>
                             </div>
@@ -744,7 +748,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">1</label>
                             </div>
@@ -754,7 +758,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T6</label>
                             </div>
@@ -769,19 +773,21 @@
                     </div>
                     <div class="barra-progreso">
                         <div class="barraAdelante" style="display: flex;">
-                            <div class="progresoPD" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                            <div class="progresoPD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">1</label>
                             </div>
                         </div>
                         <div class="barraAtras" style="display: flex;">
-                            <div class="progresoPD" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                            <div class="progresoPD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T3</label>
                             </div>
@@ -800,7 +806,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">1</label>
                             </div>
@@ -810,7 +816,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T2</label>
                             </div>
@@ -829,7 +835,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">1</label>
                             </div>
@@ -839,7 +845,7 @@
                                 style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
                                 <label class="titulos"></label>
                             </div>
-                            <div class="progresoSubPD"
+                            <div class="progresoSub"
                                 style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
                                 <label class="titulos">T1</label>
                             </div>
@@ -852,6 +858,1541 @@
 
 
 
+            </div>
+        </div>
+
+        <div style="margin: 0 auto; width: fit-content;" id="palmaresSegundaDivision" class="mt-5">
+
+            <div class="titulo">
+                <h1 style="color: rgb(128, 62, 31);">PALMARÉS SEGUNDA DIVISIÓN</h1>
+                <img src="Imagenes/Trofeos/SegundaDivision.png" alt="" height="120px">
+            </div>
+            <div class="margenParaPubli">
+
+
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Tomas delgado.png" class="me-2">
+                        <span class="nombreEquipo">Tomás Delgado</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">2</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T11 T15</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T7</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="" class="me-2">
+                        <span class="nombreEquipo">Matías Díaz</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">2</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 67%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T6 T8</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Jhose.png" class="me-2">
+                        <span class="nombreEquipo">Jhose</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 66%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">2</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T19</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 66%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T15 T18</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Kevin Sivori.png" class="me-2">
+                        <span class="nombreEquipo">Kevin Sívori</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 66%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">2</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T12</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 66%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T3 T11</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Lucas Insua.png" class="me-2">
+                        <span class="nombreEquipo">Lucas Insua</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T9</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T8</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Mario Talarico.png" class="me-2">
+                        <span class="nombreEquipo">Mario Talarico</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T7</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T12</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Pancho Muzzio.png" class="me-2">
+                        <span class="nombreEquipo">Pancho Muzzio</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T3</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T19</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="" class="me-2">
+                        <span class="nombreEquipo">Gabriel Talarico</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T18</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Yago.png" class="me-2">
+                        <span class="nombreEquipo">Yago</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T17</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Eze.png" class="me-2">
+                        <span class="nombreEquipo">Eze</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T16</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Rodrigo Soca 2.png" class="me-2">
+                        <span class="nombreEquipo">Rodrigo Soca</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T14</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Nacho soto.png" class="me-2">
+                        <span class="nombreEquipo">Nacho Soto</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T13</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Fabrizio Escolano NUEVO.png" class="me-2">
+                        <span class="nombreEquipo">Fabrizio Escolano</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T5</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Nata.png" class="me-2">
+                        <span class="nombreEquipo">Natanael</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 34%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T4</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Luciano Hufschmid.png" class="me-2">
+                        <span class="nombreEquipo">Bruno Alonso</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 67%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">2</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 67%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T5 T14</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Camila Bussetto.png" class="me-2">
+                        <span class="nombreEquipo">Cami</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T17</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Joel Alcalde.png" class="me-2">
+                        <span class="nombreEquipo">Joel Alcalde</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T16</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Alexis_Segovia-removebg-preview.png" class="me-2">
+                        <span class="nombreEquipo">Alexis Segovia</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 33%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T13</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="" class="me-2">
+                        <span class="nombreEquipo">Valentina Scocier</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T9</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Ramiro vita.png" class="me-2">
+                        <span class="nombreEquipo">Ramiro Vita</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T6</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Nahuel Socier.png" class="me-2">
+                        <span class="nombreEquipo">Nahuel Scocier</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoSD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 34%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T4</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+
+        <div style="margin: 0 auto; width: fit-content;" id="palmaresTerceraDivision" class="mt-5">
+
+            <div class="titulo">
+                <h1 style="color: rgb(50, 133, 42);">PALMARÉS TERCERA DIVISIÓN</h1>
+                <img src="Imagenes/Trofeos/TerceraDivision.png" alt="" height="120px">
+            </div>
+            <div class="margenParaPubli">
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Ramiro Ebel.png" class="me-2">
+                        <span class="nombreEquipo">Ramiro Ebel</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T17</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T16</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Jhose.png" class="me-2">
+                        <span class="nombreEquipo">Jhose</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T14</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T12</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="" class="me-2">
+                        <span class="nombreEquipo">Nico Luchetti (C)</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T16</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Yago.png" class="me-2">
+                        <span class="nombreEquipo">Yago</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T15</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Joel Alcalde.png" class="me-2">
+                        <span class="nombreEquipo">Joel Alcalde</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T13</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Luciano Hufschmid.png" class="me-2">
+                        <span class="nombreEquipo">Luciano Hufschmid</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T12</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Felipe Galante.png" class="me-2">
+                        <span class="nombreEquipo">Felipe Galante</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T11</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Joaquin Sampadaro.png" class="me-2">
+                        <span class="nombreEquipo">Joaquin Sampadaro</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 50%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T9</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Azul Quispe.png" class="me-2">
+                        <span class="nombreEquipo">Azul Quispe</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T17</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Anubis-removebg-preview.png" class="me-2">
+                        <span class="nombreEquipo">Anubis</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub" style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub" style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T15</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Benja-removebg-preview.png" class="me-2">
+                        <span class="nombreEquipo">Benja</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T14</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Ignacio Cejas.png" class="me-2">
+                        <span class="nombreEquipo">Ignacio Cejas</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T13</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Kraiizer.png" class="me-2">
+                        <span class="nombreEquipo">Kraiizer</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T11</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Facundo marchese.png" class="me-2">
+                        <span class="nombreEquipo">Facundo Marchese</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoTD" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub" style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoTD" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub" style="width: 50%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T9</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div style="margin: 0 auto; width: fit-content;" id="palmaresCopaA" class="mt-5">
+        
+            <div class="titulo">
+                <h1 style="color: rgb(47, 117, 181);">PALMARÉS COPA A</h1>
+                <img src="Imagenes/Trofeos/CopaA.png" alt="" height="120px">
+            </div>
+            <div class="margenParaPubli">
+        
+        
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Nico avalos.png" class="me-2">
+                        <span class="nombreEquipo">Nico Avalos</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 57.14%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">4</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 42.86%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">3</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 57.14%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T4 T13 T17 T18</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 42.86%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T6 T9 T11</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Rodrigo Soca 2.png" class="me-2">
+                        <span class="nombreEquipo">Rodrigo Soca </span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 42.86%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">3</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 42.86%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T9 T15 T16</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Fabrizio Escolano NUEVO.png" class="me-2">
+                        <span class="nombreEquipo">Fabrizio Escolano</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 42.86%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">3</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 42.86%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T6 T7 T12</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Lucas Aguilera2.png" class="me-2">
+                        <span class="nombreEquipo">Lucas Aguilera</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 28.57%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">2</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 28.57%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T11 T19</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Pancho Muzzio.png" class="me-2">
+                        <span class="nombreEquipo">Pancho Muzzio</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 14.29%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 14.29%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T8</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T17</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Alexis_Segovia-removebg-preview.png" class="me-2">
+                        <span class="nombreEquipo">Alexis Segovia</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 14.29%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 14.29%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T14</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Nahuel Socier.png" class="me-2">
+                        <span class="nombreEquipo">Nahuel Scocier</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 14.29%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">1</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 14.29%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos">T5</label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 0%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Camila Bussetto.png" class="me-2">
+                        <span class="nombreEquipo">Cami</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 28.57%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">2</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 28.57%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T18 T19</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Pollo.png" class="me-2">
+                        <span class="nombreEquipo">Pollo</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T16</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Tomas Torcasio.png" class="me-2">
+                        <span class="nombreEquipo">Tomás Torcasio</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T15</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Eze.png" class="me-2">
+                        <span class="nombreEquipo">Eze</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T14</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Lucas Insua.png" class="me-2">
+                        <span class="nombreEquipo">Lucas Insua</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T13</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Joe.png" class="me-2">
+                        <span class="nombreEquipo">Joel Marasco</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA" style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T12</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Ian Gangai.png" class="me-2">
+                        <span class="nombreEquipo">Ian Gangai</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T8</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Jhose.png" class="me-2">
+                        <span class="nombreEquipo">Jhose</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T7</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Kevin Sivori.png" class="me-2">
+                        <span class="nombreEquipo">Kevin Sívori</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T5</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="equipo container" style="display: flex; align-items: center; justify-content: center;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="Imagenes/Escudos/Rodrigo Talarico.png" class="me-2">
+                        <span class="nombreEquipo">Rodrigo Talarico</span>
+                    </div>
+                    <div class="barra-progreso">
+                        <div class="barraAdelante" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">1</label>
+                            </div>
+                        </div>
+                        <div class="barraAtras" style="display: flex;">
+                            <div class="progresoCA"
+                                style="width: 0%; display: flex; align-items: center; justify-content: flex-end;">
+                                <label class="titulos"></label>
+                            </div>
+                            <div class="progresoSub"
+                                style="width: 14.29%; display: flex; justify-content: flex-end; align-items: center;">
+                                <label class="titulos">T4</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+        
             </div>
         </div>
 
