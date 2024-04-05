@@ -635,18 +635,18 @@ function corroborar16avos() {
     }
 
     const fechaCorrecta = [
-        [3, 2],
-        [1, 1],
         [1, 2],
-        [1, 1],
-        [0, 2],
+        [1, 0],
+        [1, 3],
+        [2, 0],
+        [1, 0],
         [0, 0],
         [1, 2],
         [1, 1],
-        [2, 1],
+        [4, 3],
         [1, 0],
         [2, 1],
-        [2, 1]
+        [0, 0]
     ];
 
     const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
@@ -1853,9 +1853,20 @@ function mostrarGrupo(grupo) {
             elementoGrupo.style.display = "none";
         }
     }
+
+    for (let i = 1; i <= 10; i++) { 
+        var botonGrupo = document.getElementById("btnGrupo" + i);
+        if (i === grupo) {
+            botonGrupo.classList.add("btnActivo");
+        }
+        else {
+            botonGrupo.classList.remove("btnActivo");
+        }
+
+    }
 }
 
-function palmaresVolverAtras(){
+function palmaresVolverAtras() {
     var botones = document.getElementById("botones");
     var primeraDivision = document.getElementById("palmaresPrimeraDivision")
     var segundaDivision = document.getElementById("palmaresSegundaDivision")

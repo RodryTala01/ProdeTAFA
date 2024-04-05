@@ -553,6 +553,42 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Deportivo Táchira":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/TL3-aSNtyCUP78uUZ35HWg_96x96.png";
             break;
+        
+        case "Spartak Moscú":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/hUl-fOuJ6EBgj1-dkrtiJA_96x96.png";
+            break;
+        
+        case "Zenit":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/r9R0PnNtEnurIdPHPtzB7g_96x96.png";
+            break;
+        
+        case "Junior":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/yAhh9CCI7x9DAyQkRJrouA_96x96.png";
+            break;
+        
+        case "Nacional (Pot)":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/c/c0/%22Club_Atl%C3%A9tico_Nacional_Potosi%22.png";
+            break;
+
+        case "Monterrey":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/ahk7Sh_pHluBYjQ3AkMqqA_96x96.png";
+            break;
+
+        case "Palmeiras":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/7spurne-xDt2p6C0imYYNA_96x96.png";
+            break;
+        
+        case "Sao Paulo":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/4w2Z97Hf9CSOqICK3a8AxQ_96x96.png";
+            break;
+
+        case "U. Católica (E)":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/xR8t4XRhh-fUtJuT3QrCVA_96x96.png";
+            break;
+
+        case "Cruzeiro":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Tcv9X__nIh-6wFNJPMwIXQ_96x96.png";
+            break;
 
         default:
             // Si el nombre del equipo no coincide con ningún caso, puedes asignar un escudo predeterminado o mostrar un mensaje de error

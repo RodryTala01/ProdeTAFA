@@ -201,11 +201,11 @@ body {
 }
 
 .fecha16avos {
-    display: block;
+    display: none;
 }
 
 .fecha2 {
-    display: none;
+    display: block;
 }
 
 .fechaOctavos {
@@ -726,7 +726,7 @@ textarea {
     border-radius: 3px;
     transition: background-color 0.5s;
     margin-top: 1rem;
-    background-color: #182025;
+    background-color: #BF8F00 !important;
 }
 
 #tablaAdmin tr {
@@ -751,7 +751,7 @@ textarea {
     display: none;
 }
 
-#grupo1 {
+#grupo1, #desempateCopaTotal {
     display: flex;
 }
 
@@ -763,6 +763,14 @@ textarea {
 
     margin-top: 2.6rem;
     margin-bottom: 2.6rem;
+}
+
+.containerFecha {
+    display: flex;
+    justify-content: center;
+
+    align-items: center;
+
 }
 
 .myCard {

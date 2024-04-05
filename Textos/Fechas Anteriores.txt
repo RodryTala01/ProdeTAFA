@@ -8,7 +8,7 @@
                     onclick="mostrarFecha1()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -221,7 +221,7 @@
                     onclick="mostrarFecha16avos()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -434,7 +434,7 @@
                     onclick="mostrarFecha2()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -644,7 +644,7 @@
                     onclick="mostrarFechaOctavos()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -855,7 +855,7 @@
                     onclick="mostrarFecha3()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -1065,7 +1065,7 @@
                     onclick="mostrarFechaCuartos()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -1283,7 +1283,7 @@
                     onclick="mostrarFecha4()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -1495,7 +1495,7 @@
                     onclick="mostrarFechaSemifinales()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -1708,7 +1708,7 @@
                     onclick="mostrarFecha5()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -1930,7 +1930,7 @@
                     onclick="mostrarFechaFinal()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
@@ -2151,7 +2151,7 @@
                     onclick="mostrarFechaPromos()"></button>
             </div>
 
-            <div class="container">
+            <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
                         <table class="tg bg-success">
