@@ -1,4 +1,5 @@
 body {
+    
     background-image: url(../Imagenes/FondoPrueba.jpg);
     background-size: auto;
     background-repeat: repeat;
@@ -773,7 +774,9 @@ textarea {
 
 }
 
+
 .myCard {
+    
     padding: 10px;
     width: 175px;
     height: 160px;
@@ -830,6 +833,7 @@ textarea {
 }
 
 .barra-progreso {
+    
     margin-bottom: 1rem;
     text-align: left;
     height: auto;
@@ -870,11 +874,17 @@ textarea {
     background-color: rgb(198, 89, 17);
 }
 
+.progresoCC {
+    height: 30px;
+    background-color: rgb(84, 130, 53);
+}
+
 #palmaresPrimeraDivision,
 #palmaresSegundaDivision,
 #palmaresTerceraDivision,
 #palmaresCopaA,
-#palmaresCopaB {
+#palmaresCopaB,
+#palmaresCopaC {
     display: none;
 }
 

@@ -1868,17 +1868,19 @@ function mostrarGrupo(grupo) {
 
 function palmaresVolverAtras() {
     var botones = document.getElementById("botones");
-    var primeraDivision = document.getElementById("palmaresPrimeraDivision")
-    var segundaDivision = document.getElementById("palmaresSegundaDivision")
-    var terceraDivision = document.getElementById("palmaresTerceraDivision")
-    var copaA = document.getElementById("palmaresCopaA")
-    var copaB = document.getElementById("palmaresCopaB")
+    var primeraDivision = document.getElementById("palmaresPrimeraDivision");
+    var segundaDivision = document.getElementById("palmaresSegundaDivision");
+    var terceraDivision = document.getElementById("palmaresTerceraDivision");
+    var copaA = document.getElementById("palmaresCopaA");
+    var copaB = document.getElementById("palmaresCopaB");
+    var copaC = document.getElementById("palmaresCopaC");
 
     primeraDivision.style.display = "none";
     segundaDivision.style.display = "none";
     terceraDivision.style.display = "none";
     copaA.style.display = "none";
     copaB.style.display = "none";
+    copaC.style.display = "none";
     botones.style.display = "block";
 }
 
