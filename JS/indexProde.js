@@ -1871,10 +1871,14 @@ function palmaresVolverAtras() {
     var primeraDivision = document.getElementById("palmaresPrimeraDivision")
     var segundaDivision = document.getElementById("palmaresSegundaDivision")
     var terceraDivision = document.getElementById("palmaresTerceraDivision")
+    var copaA = document.getElementById("palmaresCopaA")
+    var copaB = document.getElementById("palmaresCopaB")
 
     primeraDivision.style.display = "none";
     segundaDivision.style.display = "none";
     terceraDivision.style.display = "none";
+    copaA.style.display = "none";
+    copaB.style.display = "none";
     botones.style.display = "block";
 }
 
