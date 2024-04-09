@@ -206,11 +206,11 @@ body {
 }
 
 .fecha2 {
-    display: block;
+    display: none;
 }
 
 .fechaOctavos {
-    display: none;
+    display: block;
 }
 
 .fecha3 {
