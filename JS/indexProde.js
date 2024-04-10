@@ -767,7 +767,7 @@ function corroborarFecha2() {
         [2, 1],
         [2, 2],
         [3, 3],
-        ["X", "X"]
+        [2, 1]
     ];
 
     const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
