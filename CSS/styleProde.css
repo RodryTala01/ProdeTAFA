@@ -680,9 +680,17 @@ textarea {
 .margenArriba {
     margin-top: 100px;
 }
-
-.gruposCopaA {
+#llaves {
     display: flex;
+    justify-content: center;
+}
+#grupos {
+    display: none;
+    justify-content: center;
+}
+
+#gruposTotal {
+    display: none;
     justify-content: center;
 }
 
@@ -722,12 +730,12 @@ textarea {
 
 .btnActivo {
     width: 100px;
-    color: grey;
+    color: white;
     border: none;
     border-radius: 3px;
     transition: background-color 0.5s;
     margin-top: 1rem;
-    background-color: #BF8F00 !important;
+    background-color: #000000 !important;
 }
 
 #tablaAdmin tr {

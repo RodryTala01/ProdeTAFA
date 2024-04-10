@@ -1792,6 +1792,36 @@ function corroborar() {
 }
 
 
+function mostrarGruposTotal() {
+    var gruposTotal = document.getElementById("gruposTotal");
+    var llaves = document.getElementById("llaves");
+    var btnLlaves = document.getElementById("btnLlaves");
+    var btnGrupos = document.getElementById("btnGrupos");
+
+    gruposTotal.style.display = "block"
+    llaves.style.display = "none";
+
+    btnLlaves.classList.remove("btnGruposLlaves", "btnGruposLlaves:hover");
+    btnLlaves.classList.add("btnActivo");
+    btnGrupos.classList.remove("btnActivo");
+    btnGrupos.classList.add("btnGruposLlaves", "btnGruposLlaves:hover");
+}
+
+function mostrarLlavesTotal() {
+    var gruposTotal = document.getElementById("gruposTotal");
+    var llaves = document.getElementById("llaves");
+    var btnLlaves = document.getElementById("btnLlaves");
+    var btnGrupos = document.getElementById("btnGrupos");
+
+    gruposTotal.style.display = "none"
+    llaves.style.display = "flex";
+
+    btnGrupos.classList.remove("btnGruposLlaves", "btnGruposLlaves:hover");
+    btnGrupos.classList.add("btnActivo");
+    btnLlaves.classList.remove("btnActivo");
+    btnLlaves.classList.add("btnGruposLlaves", "btnGruposLlaves:hover");
+}
+
 
 
 
@@ -1802,7 +1832,7 @@ function mostrarGrupos() {
     var btnGrupos = document.getElementById("btnGrupos");
 
     llaves.style.display = "none";
-    grupos.style.display = "block";
+    grupos.style.display = "flex";
 
     btnLlaves.classList.remove("btnGruposLlaves", "btnGruposLlaves:hover");
     btnLlaves.classList.add("btnActivo");
@@ -1816,7 +1846,7 @@ function mostrarLlaves() {
     var btnLlaves = document.getElementById("btnLlaves");
     var btnGrupos = document.getElementById("btnGrupos");
 
-    llaves.style.display = "block";
+    llaves.style.display = "flex";
     grupos.style.display = "none";
 
     btnGrupos.classList.remove("btnGruposLlaves", "btnGruposLlaves:hover");
