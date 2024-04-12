@@ -878,18 +878,18 @@ function corroborarFechaOctavos() {
     }
 
     const fechaCorrecta = [
-        [0, 1],
-        [4, 1],
+        [2, 1],
+        [2, 3],
+        [2, 1],
+        [1, 0],
+        [2, 0],
+        [3, 0],
         [2, 2],
-        [0, 0],
-        [3, 1],
-        [4, 1],
-        [1, 0],
-        [1, 1],
-        [0, 0],
+        [2, 1],
+        [0, 3],
         [0, 1],
         [1, 0],
-        [1, 1]
+        [2, 0]
     ];
 
     const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
@@ -1904,6 +1904,10 @@ function palmaresVolverAtras() {
     var copaA = document.getElementById("palmaresCopaA");
     var copaB = document.getElementById("palmaresCopaB");
     var copaC = document.getElementById("palmaresCopaC");
+    var copaTotal = document.getElementById("palmaresCopaTotal");
+    var copaDuos = document.getElementById("palmaresCopaDuos");
+    var copaCampeones = document.getElementById("palmaresCopaCampeones");
+    var titulosTotales = document.getElementById("palmaresTitulosTotales");
 
     primeraDivision.style.display = "none";
     segundaDivision.style.display = "none";
@@ -1911,6 +1915,11 @@ function palmaresVolverAtras() {
     copaA.style.display = "none";
     copaB.style.display = "none";
     copaC.style.display = "none";
+    copaTotal.style.display = "none";
+    copaDuos.style.display = "none";
+    copaCampeones.style.display = "none";
+    titulosTotales.style.display = "none";
+
     botones.style.display = "block";
 }
 
@@ -1918,7 +1927,6 @@ function mostrarPalmares(competicion) {
     var botones = document.getElementById("botones");
     var competicion = document.getElementById("palmares" + competicion);
 
-    console.log(competicion);
     competicion.style.display = "block";
     botones.style.display = "none";
 }

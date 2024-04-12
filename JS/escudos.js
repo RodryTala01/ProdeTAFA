@@ -597,6 +597,22 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "L.A. Galaxy":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/V8OvQi4fAodF6UhZABVp3g_96x96.png";
             break;
+        
+        case "Atlético Mineiro":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/q9fhEsgpuyRq58OgmSndcQ_96x96.png";
+            break;
+        
+        case "Alianza Lima":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/TP5mGzCKTS6SCRPqvAvBVA_96x96.png";
+            break;
+        
+        case "Independiente del Valle":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Qg_3ucpKBdjZIpga48sfIw_96x96.png";
+            break;
+        
+        case "Barcelona (E)":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/snzD6Ep_orwAcAA5c5sPNw_96x96.png";
+            break;
 
         default:
             // Si el nombre del equipo no coincide con ningún caso, puedes asignar un escudo predeterminado o mostrar un mensaje de error

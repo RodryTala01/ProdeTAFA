@@ -210,11 +210,11 @@ body {
 }
 
 .fechaOctavos {
-    display: block;
+    display: none;
 }
 
 .fecha3 {
-    display: none;
+    display: block;
 }
 
 .fechaCuartos {
@@ -851,6 +851,17 @@ textarea {
     transition: transform 0.2s;
 }
 
+.barra-progreso-fixed {
+
+    margin-bottom: 1rem;
+    text-align: left;
+    height: auto;
+    margin-left: 10px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.2s;
+}
+
 .progresoPD {
     height: 30px;
     background-color: rgb(36, 181, 201);
@@ -887,13 +898,42 @@ textarea {
     background-color: rgb(84, 130, 53);
 }
 
+.progresoCT {
+    height: 30px;
+    background-color: rgb(168, 130, 3);
+}
+
+.progresoCD {
+    height: 30px;
+    background-color: rgb(167, 41, 179);
+}
+
+.progresoCCC {
+    height: 30px;
+    background-color: rgb(26, 94, 158);
+}
+
+.progresoTT {
+    height: 30px;
+    background-color: rgb(255, 255, 0);
+}
+
 #palmaresPrimeraDivision,
 #palmaresSegundaDivision,
 #palmaresTerceraDivision,
 #palmaresCopaA,
 #palmaresCopaB,
-#palmaresCopaC {
+#palmaresCopaC,
+#palmaresCopaTotal,
+#palmaresCopaDuos,
+#palmaresCopaCampeones,
+#palmaresTitulosTotales,
+#palmaresTitulosOficiales {
     display: none;
+}
+
+.chiquito {
+    font-size: 10px;
 }
 
 .titulos {
