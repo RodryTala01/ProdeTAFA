@@ -613,6 +613,33 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Barcelona (E)":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/snzD6Ep_orwAcAA5c5sPNw_96x96.png";
             break;
+        
+        case "Borussia Monchengladbach":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/HFg_gp-vbuL7z1Othoa0ZA_96x96.png";
+            break;
+        
+        case "Fortaleza":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/me10ephzRxdj45zVq1Risg_96x96.png";
+            break;
+        
+        case "Toluca":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/ycTgfmECsg0S-aVXCOPXcA_96x96.png";
+            break;
+        
+        case "Corinthians":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/tCMSqgXVHROpdCpQhzTo1g_96x96.png";
+            break;
+        
+        case "Danubio":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/42ylSoH2yhRG3RKtNPn3kQ_96x96.png";
+            break;
+        
+        case "América de Cali":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Pg8gT7CDn-Jv1zZ2EO7ajQ_96x96.png";
+            break;
+
+
+
 
         default:
             // Si el nombre del equipo no coincide con ningún caso, puedes asignar un escudo predeterminado o mostrar un mensaje de error
