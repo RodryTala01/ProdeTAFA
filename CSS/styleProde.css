@@ -218,11 +218,11 @@ body {
 }
 
 .fechaCuartos {
-    display: block;
+    display: none;
 }
 
 .fecha4 {
-    display: none;
+    display: block;
 }
 
 .fechaSemifinales {

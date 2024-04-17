@@ -12,7 +12,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/a/aa/Logo_Actual_del_Club_Estudiantes_de_La_Plata.png";
             break;
         case "Newells":
-            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Escudo_del_Club_Atl%C3%A9tico_Newell%27s_Old_Boys_de_Rosario.svg/1200px-Escudo_del_Club_Atl%C3%A9tico_Newell%27s_Old_Boys_de_Rosario.svg.png";
+            elementoEscudo.src = "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/14.png";
             break;
         case "Croacia":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/9toerdOg8xW4CRhDaZxsyw_96x96.png";
@@ -637,6 +637,18 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "América de Cali":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Pg8gT7CDn-Jv1zZ2EO7ajQ_96x96.png";
             break;
+        
+        case "Independiente Rivadavia":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/scnuIenZqsNPXaSlRp2u-g_96x96.png";
+            break;
+
+        case "Barracas Central":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/tN1IcWkuTUtejJIV6Q5E5g_96x96.png";
+            break;
+        
+        case "Bahía":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/nIdbR6qIUDyZUBO9vojSPw_96x96.png";
+            break;
 
 
 
@@ -648,7 +660,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
     }
 }
 
-for (let i = 1; i <= 132; i++) {
+for (let i = 1; i <= 84; i++) {
     var equipoNombreLocal = document.getElementById("equipoNombreLocal" + i).innerText;
     var equipoNombreVisitante = document.getElementById("equipoNombreVisitante" + i).innerText;
     var equipoEscudoLocal = document.getElementById("equipoEscudoLocal" + i);
