@@ -1908,6 +1908,7 @@ function palmaresVolverAtras() {
     var copaDuos = document.getElementById("palmaresCopaDuos");
     var copaCampeones = document.getElementById("palmaresCopaCampeones");
     var titulosTotales = document.getElementById("palmaresTitulosTotales");
+    var titulosOficiales = document.getElementById("palmaresTitulosOficiales");
 
     primeraDivision.style.display = "none";
     segundaDivision.style.display = "none";
@@ -1919,6 +1920,7 @@ function palmaresVolverAtras() {
     copaDuos.style.display = "none";
     copaCampeones.style.display = "none";
     titulosTotales.style.display = "none";
+    titulosOficiales.style.display = "none";
 
     botones.style.display = "block";
 }

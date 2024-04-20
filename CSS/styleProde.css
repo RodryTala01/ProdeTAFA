@@ -1,5 +1,5 @@
 body {
-    
+
     background-image: url(../Imagenes/FondoPrueba.jpg);
     background-size: auto;
     background-repeat: repeat;
@@ -625,7 +625,11 @@ textarea {
         margin-bottom: 200px;
     }
 
-    .barra-progreso{
+    .barra-progreso {
+        width: 500px;
+    }
+
+    .barra-progresoTT {
         width: 500px;
     }
 }
@@ -638,7 +642,11 @@ textarea {
         display: block;
     }
 
-    .barra-progreso{
+    .barra-progreso {
+        width: 240px
+    }
+
+    .barra-progresoTT {
         width: 240px
     }
 }
@@ -680,10 +688,12 @@ textarea {
 .margenArriba {
     margin-top: 100px;
 }
+
 #llaves {
     display: flex;
     justify-content: center;
 }
+
 #grupos {
     display: none;
     justify-content: center;
@@ -760,7 +770,8 @@ textarea {
     display: none;
 }
 
-#grupo1, #desempateCopaTotal {
+#grupo1,
+#desempateCopaTotal {
     display: flex;
 }
 
@@ -784,7 +795,7 @@ textarea {
 
 
 .myCard {
-    
+
     padding: 10px;
     width: 175px;
     height: 160px;
@@ -841,17 +852,6 @@ textarea {
 }
 
 .barra-progreso {
-    
-    margin-bottom: 1rem;
-    text-align: left;
-    height: auto;
-    margin-left: 10px;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.2s;
-}
-
-.barra-progreso-fixed {
 
     margin-bottom: 1rem;
     text-align: left;
@@ -861,6 +861,16 @@ textarea {
     transform-style: preserve-3d;
     transition: transform 0.2s;
 }
+
+.barra-progresoTT {
+
+    margin-bottom: 1rem;
+    text-align: left;
+    height: auto;
+    margin-left: 10px;
+    position: relative;
+}
+
 
 .progresoPD {
     height: 30px;
@@ -868,9 +878,8 @@ textarea {
 }
 
 .progresoSub {
-    height:30px;
-    background-color: rgb(87, 87, 87)
-
+    height: 30px;
+    background-color: rgb(87, 104, 89)
 }
 
 .progresoSD {
@@ -918,6 +927,11 @@ textarea {
     background-color: rgb(255, 255, 0);
 }
 
+.progresoTO {
+    height: 30px;
+    background-color: rgb(255, 166, 0);
+}
+
 #palmaresPrimeraDivision,
 #palmaresSegundaDivision,
 #palmaresTerceraDivision,
@@ -938,8 +952,8 @@ textarea {
 
 .titulos {
     text-align: right !important;
-    padding-right: 5px;
-    padding-left: 5px;
+    padding-right: 2px;
+    padding-left: 2px;
 }
 
 .barraAtras {
@@ -963,7 +977,7 @@ textarea {
 }
 
 
-.equipo>div>img{
+.equipo>div>img {
     padding-bottom: 12%;
     max-width: 30px;
 }
@@ -993,4 +1007,3 @@ textarea {
     transform: scale(1.1);
     /* Escala ligeramente el botón al pasar el mouse sobre él */
 }
-
