@@ -222,11 +222,11 @@ body {
 }
 
 .fecha4 {
-    display: block;
+    display: none;
 }
 
 .fechaSemifinales {
-    display: none;
+    display: block;
 }
 
 .fecha5 {
