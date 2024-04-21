@@ -1884,7 +1884,7 @@ function mostrarGrupo(grupo) {
         }
     }
 
-    for (let i = 1; i <= 10; i++) { 
+    for (let i = 1; i <= 10; i++) {
         var botonGrupo = document.getElementById("btnGrupo" + i);
         if (i === grupo) {
             botonGrupo.classList.add("btnActivo");
@@ -1941,4 +1941,72 @@ function palmaresNo() {
         text: "Pronto van a estar cargados todos los Palmarés.",
         imageUrl: "Imagenes/enConstruccion.gif",
     });
+}
+
+
+const abrirModal = document.getElementById('botonTablaGeneral');
+const miModal = document.getElementById('modalGeneral');
+const cerrarModal = document.getElementById('cerrarModalGeneral');
+
+abrirModal.addEventListener('click', function () {
+    miModal.style.display = 'block';
+});
+
+cerrarModal.addEventListener('click', function () {
+    miModal.style.display = 'none';
+});
+
+window.addEventListener('click', function (event) {
+    if (event.target == miModal) {
+        miModal.style.display = 'none';
+    }
+});
+
+const abrirModalIFFHS = document.getElementById('botonTablaIFFHS');
+const miModalIFFHS = document.getElementById('modalIFFHS');
+const cerrarModalIFFHS = document.getElementById('cerrarModalIFFHS');
+
+abrirModalIFFHS.addEventListener('click', function () {
+    miModalIFFHS.style.display = 'block';
+});
+
+cerrarModalIFFHS.addEventListener('click', function () {
+    miModalIFFHS.style.display = 'none';
+});
+
+window.addEventListener('click', function (event) {
+    if (event.target == miModalIFFHS) {
+        miModalIFFHS.style.display = 'none';
+    }
+});
+
+const abrirModalCriterio = document.getElementById('botonCriterio');
+const miModalCriterio = document.getElementById('modalCriterio');
+const cerrarModalCriterio = document.getElementById('cerrarModalCriterio');
+
+abrirModalCriterio.addEventListener('click', function () {
+    miModalCriterio.style.display = 'block';
+});
+
+cerrarModalCriterio.addEventListener('click', function () {
+    miModalCriterio.style.display = 'none';
+});
+
+window.addEventListener('click', function (event) {
+    if (event.target == miModalCriterio) {
+        miModalCriterio.style.display = 'none';
+    }
+});
+
+function toggleExtintos() {
+    for (var i = 1; i <= 50; i++) {
+        var extinto = document.getElementById("extinto" + i);
+        if (extinto.style.display === 'none') {
+            extinto.style.display = 'flex';
+            document.getElementById("textoOcultarExtintos").innerHTML = "Ocultar clubes extintos";
+        } else {
+            extinto.style.display = 'none';
+            document.getElementById("textoOcultarExtintos").innerHTML = "Mostrar clubes extintos";
+        }
+    }
 }

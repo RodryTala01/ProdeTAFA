@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <title>Equipos - Prode TAFA</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="shortcut icon" href="Imagenes/LOGO TAFA ICONO.png">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="CSS/styleProde.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-center">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 justify-content-center">
+                    <li>
+                        <div>
+                            <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
+                                <div class="btn-group" role="group">
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="index.html">INICIO</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="Ligas.html">LIGAS</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="CopaTotal.html">COPA TOTAL</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="CopaCampeones.html">COPA CAMPEONES</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="CopaA.html">COPA A</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="CopaB.html">COPA B</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">COPA C</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link" href="CopaDuos.html">COPA DÚOS</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="click nav-link" href="Palmares.html">PALMARÉS</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="click nav-link " href="Rankings.html">RANKINGS</a>
+                    </li>
+                    <li class="nav-item animado">
+                        <a class="click nav-link activo" href="Equipos.html">EQUIPOS</a>
+                    </li>
+            </div>
+        </div>
+        </div>
+        </li>
+        </ul>
+        </div>
+        </div>
+    </nav>
+
+    <div>
+
+        <div class="text-center banner col-md">
+            <img src="Imagenes/Banner.png" class="img-fluid border border-2 border-dark mt-4" alt="banner" height=auto
+                width="600 rem">
+        </div>
+
+        <h1 class="mt-5" style="color: white;">EQUIPOS</h1>
+        <a id="textoOcultarExtintos" style="color: rgb(13,104,245); cursor: pointer" onclick="toggleExtintos()">Ocultar equipos extintos</a>
+
+
+
+        <div class="container ">
+            <div class="row margenParaPubli">
+                <div class="col" id="extinto1">
+                    <button class="btn btn-custom" style="color: white;" >
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Agustín
+                    </button>
+                </div>
+                <div class="col" id="extinto2">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Alexis_Segovia-removebg-preview.png" alt="">
+                        Alexis Segovia
+                    </button>
+                </div>
+                <div class="col" id="extinto3">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Anto.png" alt="">
+                        Antonella López
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Anubis-removebg-preview.png" alt="">
+                        Anubis
+                    </button>
+                </div>
+                <div class="col"  id="extinto4">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Axel.png" alt="">
+                        Axel
+                    </button>
+                </div>
+                <div class="col"  id="extinto5">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Aylen Benedetti
+                    </button>
+                </div>
+                <div class="col"  id="extinto6">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Azul Quispe.png" alt="">
+                        Azul Quispe
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Bautista Coria (2).png" alt="">
+                        Bautista Coria
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Benja-removebg-preview.png" alt="">
+                        Benja
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Bruno Alonso.png" alt="">
+                        Bruno Alonso
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Camila Bussetto.png" alt="">
+                        Cami
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Ciro Guarch.png" alt="">
+                        Ciro Guarch
+                    </button>
+                </div>
+                <div class="col"  id="extinto7">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Cristian
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Cristian Hantis
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Dani Bazan.png" alt="">
+                        Dani Bazán
+                    </button>
+                </div>
+                <div class="col"  id="extinto8">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Diego
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Eze.png" alt="">
+                        Eze
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Fabrizio Escolano NUEVO.png" alt="">
+                        Fabrizio Escolano
+                    </button>
+                </div>
+                <div class="col"  id="extinto9">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Facu Montes
+                    </button>
+                </div>
+                <div class="col"  id="extinto10">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Facundo Di Paola
+                    </button>
+                </div>
+                <div class="col"  id="extinto11">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Facundo marchese.png" alt="">
+                        Facundo Marchese
+                    </button>
+                </div>
+                <div class="col"  id="extinto12">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Fede Gerez
+                    </button>
+                </div>
+                <div class="col"  id="extinto13">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Fede Salatino
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Felipe Galante.png" alt="">
+                        Felipe Galante
+                    </button>
+                </div>
+                <div class="col"  id="extinto14">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Franco Kin
+                    </button>
+                </div>
+
+                <div class="col"  id="extinto15">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Franco Przepiorka
+                    </button>
+                </div>
+                <div class="col" >
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Gabriel Talarico 2.png" alt="">
+                        Gabriel Talarico
+                    </button>
+                </div>
+                <div class="col" id="extinto16">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Helyy
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Ian Gangai.png" alt="">
+                        Ian Gangai
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Ignacio Cejas.png" alt="">
+                        Ignacio Cejas
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Jhose.png" alt="">
+                        Jhose
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Joaco Fernandez.png" alt="">
+                        Joaco Fernández
+                    </button>
+                </div>
+                <div class="col" >
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Joaquin Sampadaro.png" alt="">
+                        Joaquin Sampadaro
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Joel Alcalde.png" alt="">
+                        Joel Alcalde
+                    </button>
+                </div>
+                <div class="col" >
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Joe.png" alt="">
+                        Joel Marasco
+                    </button>
+                </div>
+                <div class="col"  id="extinto17">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Juli Boetsch
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Kevin Sivori.png" alt="">
+                        Kevin Sívori
+                    </button>
+                </div>
+                <div class="col"  id="extinto18">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Kisha
+                    </button>
+                </div>
+                <div class="col"  id="extinto19">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Koke
+                    </button>
+                </div>
+                <div class="col"  id="extinto20">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Kraiizer.png" alt="">
+                        Kraiizer
+                    </button>
+                </div>
+                <div class="col"  id="extinto21">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Lautaro Scocier.png" alt="">
+                        Lautaro Scocier
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Lucas Aguilera.png" alt="">
+                        Lucas Aguilera
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Lucas Insua.png" alt="">
+                        Lucas Insua
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Luciano Hufschmid.png" alt="">
+                        Luciano Hufschmid
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Manu Solbes
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Mario Talarico.png" alt="">
+                        Mario Talarico
+                    </button>
+                </div>
+                <div class="col"  id="extinto22">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Martin Bustos.png" alt="">
+                        Martín Bustos
+                    </button>
+                </div>
+                <div class="col"  id="extinto23">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Matheo olivera.png" alt="">
+                        Matheo Olivera
+                    </button>
+                </div>
+                <div class="col"  id="extinto24">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Matias varela.png" alt="">
+                        Matías Varela
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Moreno Perez.png" alt="">
+                        Moreno Pérez
+                    </button>
+                </div>
+                <div class="col"  id="extinto25">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Nacho Soto.png" alt="">
+                        Nacho Soto
+                    </button>
+                </div>
+                <div class="col" id="extinto26">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Nahir Gomez
+                    </button>
+                </div>
+                <div class="col"  id="extinto27">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Nahuel Socier.png" alt="">
+                        Nahuel Scocier
+                    </button>
+                </div>
+                <div class="col"  id="extinto28">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Nata.png" alt="">
+                        Natanael
+                    </button>
+                </div>
+                <div class="col" >
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Nico avalos.png" alt="">
+                        Nico Avalos
+                    </button>
+                </div>
+                <div class="col"  id="extinto29">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Nico Luchetti (C)
+                    </button>
+                </div>
+                <div class="col"  id="extinto30">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Nico Luchetti.png" alt="">
+                        Nico Luchetti (R)
+                    </button>
+                </div>
+                <div class="col"  id="extinto31">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Nicolas Borea
+                    </button>
+                </div>
+                <div class="col"  id="extinto32">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Nicolas Lucero
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Pancho Muzzio.png" alt="">
+                        Pancho Muzzio
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Pollo.png" alt="">
+                        Pollo
+                    </button>
+                </div>
+                <div class="col"  id="extinto33">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Ramiro Caruso
+                    </button>
+                </div>
+                <div class="col"  id="extinto34">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Ramiro Ebel.png" alt="">
+                        Ramiro Ebel
+                    </button>
+                </div>
+                <div class="col"  id="extinto35">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Ramiro vita.png" alt="">
+                        Ramiro Vita
+                    </button>
+                </div>
+                <div class="col" >
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Renzo Badano.png" alt="">
+                        Renzo Badano
+                    </button>
+                </div>
+                <div class="col" >
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Rodri Sebastian.png" alt="">
+                        Rodri Sebastian
+                    </button>
+                </div>
+                <div class="col" >
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Rodrigo Soca 2.png" alt="">
+                        Rodrigo Soca
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Rodrigo Talarico.png" alt="">
+                        Rodrigo Talarico
+                    </button>
+                </div>
+                <div class="col" >
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Santiago.png" alt="">
+                        Santi
+                    </button>
+                </div>
+                <div class="col"  id="extinto36">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Santino Mercado
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Tomas delgado.png" alt="">
+                        Tomás Delgado
+                    </button>
+                </div>
+                <div class="col"  id="extinto37">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Tomás Gonzalez
+                    </button>
+                </div>
+                <div class="col"  id="extinto38"> 
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Tomás Hon
+                    </button>
+                </div>
+                <div class="col" id="extinto39">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Tomás Pérez
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Tomas Torcasio.png" alt="">
+                        Tomás Torcasio
+                    </button>
+                </div>
+                <div class="col"  id="extinto40">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Valentina Scocier
+                    </button>
+                </div>
+                <div class="col"  id="extinto41">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Valium
+                    </button>
+                </div>
+                <div class="col"  id="extinto42">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/sinEscudo.png" alt="">
+                        Verónica Lucchesi
+                    </button>
+                </div>
+                <div class="col">
+                    <button class="btn btn-custom" style="color: white;">
+                        <img src="Imagenes/Escudos/Yago.png" alt="">
+                        Yago
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script src="JS/leer.js"></script>
+
+
+
+        </main>
+
+        <footer>
+
+            <div class="fixed-bottom text-center col-md">
+                <a href="Donar/index.html" target="_blank">
+                    <img src="https://i.ibb.co/qkkt2sC/Banner-Publi.png" alt="Donale al admin no seas malo"
+                        class="img-fluid border border-2 border-dark mt-4" width="500 rem"></a>
+            </div>
+
+        </footer>
+
+        <script src="JS/escudos.js"></script>
+        <script src="JS/indexProde.js"></script>
+
+        <!-- Bootstrap JavaScript Libraries -->
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>

@@ -2,7 +2,7 @@
 <html lang="es">
 
 <head>
-    <title>ADMIN - Prode TAFA</title>
+    <title>Rankings - Prode TAFA</title>
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -64,13 +64,13 @@
                         <a class="nav-link" href="CopaDuos.html">COPA DÚOS</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="click nav-link active" href="Palmares.html">PALMARÉS</a>
+                        <a class="click nav-link" href="Palmares.html">PALMARÉS</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="click nav-link active" href="Rankings.html">RANKINGS</a>
+                        <a class="click nav-link activo" href="#">RANKINGS</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="click nav-link active" href="Equipos.html">EQUIPOS</a>
+                        <a class="click nav-link" href="Equipos.html">EQUIPOS</a>
                     </li>
             </div>
         </div>
@@ -92,13 +92,79 @@
         </div>
 
 
-        <div class="mt-5">
-            <div>
-                <textarea id="inputTextoAdmin" placeholder="Pegá la fecha acá" oninput="ajustarAlturaAdmin()"></textarea>
-            </div>
-            <button id="btnEnviarAdmin" class="p-2" onclick="crearTabla()">Enviar</button>
+
+        <div class="container">
+            <button class="botonesRanking" id="botonTablaGeneral">TABLA
+                GENERAL</button>
+            <button class="botonesRanking" id="botonTablaIFFHS">TABLA IFFHS</button>
+
         </div>
-        <div id="tablaAdmin" class="text-center margenParaPubli justify-content-center d-flex mt-5"></div>
+        <div class="textoRanking">
+            <h4>Tabla General: </h4>
+            <h5>Tabla de puntos totales durante todas las temporadas.</h5>
+        </div>
+        <div class="textoRanking mt-5">
+            <h4>Tabla IFFHS: </h4>
+            <h5>Ranking de puntos de las últimas 5 temporadas conforme al siguiente <a id="botonCriterio" style="color: rgb(13,104,245); text-decoration: underline; cursor: pointer">criterio</a></h5>
+        </div>
+
+        <div id="modalGeneral" class="modal">
+            <div class="modal-contenido">
+                <span id="cerrarModalGeneral" class="cerrar">&times;</span>
+                <img src="Imagenes/TablaGeneral.png" class="modal-imagen">
+            </div>
+        </div>
+
+        <div id="modalIFFHS" class="modal">
+            <div class="modal-contenido">
+                <span id="cerrarModalIFFHS" class="cerrar">&times;</span>
+                <img src="Imagenes/TablaIFFHS.png" class="modal-imagen">
+            </div>
+        </div>
+
+        <div id="modalCriterio" class="modalCriterio">
+            <div class="modalCriterio-contenido">
+                <span id="cerrarModalCriterio" class="cerrar">&times;</span>
+                <li>Campeón Liga A: 100pts</li>
+                <li>Subcampeón Liga A: 75pts</li>
+                <li>Posiciones en A: 1 pto por posición de abajo hacia arriba + n° de participantes en la C y B (CAMPEON NO SUMA)</li>
+                <li>Campeón Liga B: 40pts</li>
+                <li>Subcampeón Liga B: 30pts</li>
+                <li>Posiciones en B: 1 pto por posición de abajo hacia arriba + n° de participantes en la C (CAMPEON NO SUMA)</li>
+                <li>Campeón Liga C: 25pts</li>
+                <li>Posiciones en C: 1 pto por posición de abajo hacia arriba (CAMPEON NO SUMA)</li>
+                <li>Puntos A: *1</li>
+                <li>Puntos B: *0,75</li>
+                <li>Puntos C: *0,5</li>
+                <li>Plenos A: *2</li>
+                <li>Plenos B: *1</li>
+                <li>Plenos C: *0,75</li>
+                <li>Posición Errores A: 1pto por posición de abajo hacia arriba</li>
+                <li>Posición Errores B: 0,66pts por posición de abajo hacia arriba</li>
+                <li>Posición Errores C: 0,33pts por posición de abajo hacia arriba</li>
+                <li>Campeón Copa A: 75pts</li>
+                <li>Campeón Copa B: 40pts</li>
+                <li>Campeón Copa C: 25pts</li>
+                <li>Campeón Copa CAMPEONES: 100pts</li>
+                <li>Campeón Copa TOTAL: 100pts</li>
+                <li>Campeón Copa DÚOS: 50pts</li>
+                <li>Posición Copa A: Octavos: 10pts Cuartos: 15pts Semis: 25pts Subcampeón: 40pts</li>
+                <li>Posición Copa B: Octavos: 4pts Cuartos: 8pts Semis 15pts Subcampeón 25pts</li>
+                <li>Posición Copa C: Octavos: 2pts Cuartos: 5pts Semis: 8pts Subcampeón 15pts</li>
+                <li>Posición Copa CAMPEONES: 32avos: 10pts 16avos: 15pts Octavos: 25pts Cuartos: 40pts Semis: 50pts Subcampeón: 75pts</li>
+                <li>Posición Copa TOTAL: Octavos: 30pts Cuartos: 45pts Semis: 60pts Subcampeón: 75pts</li>
+                <li>Posición Copa DUOS: Fase 2: 5pts Fase 3: 10pts Fase 4: 15pts Fase5: 20pts Subcampeón: 30pts</li>
+                <li>Puntos grupo A: *1</li>
+                <li>Puntos grupo B: *0,75</li>
+                <li>Puntos grupo C: *0,5</li>
+                <li>Puntos grupo TOTAL: *2</li>
+
+            </div>
+        </div>
+
+
+
+
 
 
 
