@@ -226,11 +226,11 @@ body {
 }
 
 .fechaSemifinales {
-    display: block;
+    display: none;
 }
 
 .fecha5 {
-    display: none;
+    display: block;
 }
 
 .fechaFinal {

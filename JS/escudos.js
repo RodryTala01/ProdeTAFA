@@ -585,6 +585,10 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "U. Católica (E)":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/xR8t4XRhh-fUtJuT3QrCVA_96x96.png";
             break;
+        
+        case "U. Católica (Ch)":
+            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/tomgbf2yPii8nJqOGsfsVw_96x96.png";
+            break;
 
         case "Cruzeiro":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Tcv9X__nIh-6wFNJPMwIXQ_96x96.png";
