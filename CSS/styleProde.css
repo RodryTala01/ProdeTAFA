@@ -1224,8 +1224,3 @@ div>button>a {
     border: 1px solid black;
 }
 
-.tablaHistorial {
-    display: flex;
-    justify-content: center;
-    text-align: center;
-}
