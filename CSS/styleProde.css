@@ -647,6 +647,7 @@ textarea {
     .modalCriterio {
         display: none;
         position: fixed;
+        background-color: #fefefe;
         z-index: 1000;
         left: 0;
         top: 0;
