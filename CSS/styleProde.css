@@ -230,11 +230,11 @@ body {
 }
 
 .fecha5 {
-    display: block;
+    display: none;
 }
 
 .fechaFinal {
-    display: none;
+    display: block;
 }
 
 .fechaPromos {
@@ -647,7 +647,7 @@ textarea {
     .modalCriterio {
         display: none;
         position: fixed;
-        background-color: #fefefe;
+
         z-index: 1000;
         left: 0;
         top: 0;
@@ -656,9 +656,21 @@ textarea {
         background-color: rgba(0, 0, 0, 0.8);
     }
 
+    .modalCriterio-contenido {
+        position: fixed;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fefefe;
+        max-width: 80%;
+        max-height: 76%;
+        overflow: auto;
+        background-color: #fefefe;
+    }
+
     .modal-contenido {
         position: fixed;
-        top: 50%;
+        top: 45%;
         left: 50%;
         transform: translate(-50%, -50%);
         background-color: #fefefe;
@@ -1180,4 +1192,40 @@ textarea {
 .btn-custom:hover {
     transform: scale(1.1);
     /* Aumentar el tamaño en un 10% */
+}
+
+div>button>a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.imgHistorial {
+    margin-left: 1rem;
+    max-width: 100%;
+    height: auto;
+    max-height: 30px;
+}
+
+.tituloHistorial {
+    background-color: black;
+    color: white;
+    padding: 5px;
+    border: 3px solid black;
+}
+
+.subtituloHistorial {
+    background-color: #615e5e;
+    border: 3px solid black;
+}
+
+.subtituloHistorial>th {
+    padding: 5px;
+    border: 1px solid black;
+}
+
+.tablaHistorial {
+    display: flex;
+    justify-content: center;
+    text-align: center;
 }

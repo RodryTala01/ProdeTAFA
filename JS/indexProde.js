@@ -1475,18 +1475,18 @@ function corroborarFecha5() {
     }
 
     const fechaCorrecta = [
+        [1, 2],
+        [2, 1],
+        [5, 0],
         [0, 1],
-        [1, 1],
-        [1, 1],
+        [3, 2],
         [1, 0],
-        [4, 2],
-        [2, 2],
-        [2, 6],
         [1, 1],
-        [0, 3],
-        [2, 0],
-        [3, 0],
-        [5, 2]
+        [4, 1],
+        [2, 3],
+        [1, 2],
+        [0, 0],
+        [4, 2]
     ];
 
     const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
@@ -2010,3 +2010,4 @@ function toggleExtintos() {
         }
     }
 }
+
