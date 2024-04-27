@@ -1868,6 +1868,43 @@ function crearTabla() {
     document.getElementById("tablaAdmin").innerHTML = tablaHTML;
 }
 
+function generarInstrucciones() {
+    // Obtener el texto ingresado
+    var partidosTexto = document.getElementById("inputTextoParaCopiar").value;
+
+    // Dividir el texto en líneas
+    var lineas = partidosTexto.split('\n');
+
+    // Obtener el nombre del torneo (primer renglón)
+    var torneo = lineas.shift().toUpperCase();
+
+    // Limpiar el contenido anterior
+    document.getElementById("textoParaCopiar").innerHTML = '';
+
+    // Procesar cada partido
+    lineas.forEach(function (partido) {
+        // Ignorar renglones vacíos
+        if (partido.trim().length === 0) return;
+
+        // Dividir el partido en sus componentes
+        var componentes = partido.split('\t');
+        var equipo1 = componentes[0];
+        var resultado1 = parseInt(componentes[1]);
+        var resultado2 = parseInt(componentes[3]);
+        var equipo2 = componentes[4];
+
+        // Generar las instrucciones
+        var instruccion1 = 'agregarResultado("' + equipo1 + '", "' + resultado1 + '-' + resultado2 + '", "' + equipo2 + '", "' + torneo + '");';
+        var instruccion2 = 'agregarResultado("' + equipo2 + '", "' + resultado2 + '-' + resultado1 + '", "' + equipo1 + '", "' + torneo + '");';
+
+
+        // Mostrar las instrucciones en el elemento de salida
+        document.getElementById("textoParaCopiar").innerHTML += '<p>' + instruccion1 + '</p>';
+        document.getElementById("textoParaCopiar").innerHTML += '<p>' + instruccion2 + '</p>';
+    });
+}
+
+
 function ajustarAlturaAdmin() {
     var textarea = document.getElementById("inputTextoAdmin");
     textarea.style.height = "auto";

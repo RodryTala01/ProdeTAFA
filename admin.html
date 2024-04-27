@@ -98,7 +98,18 @@
             </div>
             <button id="btnEnviarAdmin" class="p-2" onclick="crearTabla()">Enviar</button>
         </div>
-        <div id="tablaAdmin" class="text-center margenParaPubli justify-content-center d-flex mt-5"></div>
+        <div id="tablaAdmin" class="text-center justify-content-center d-flex mt-5"></div>
+
+
+        <div class="mt-5">
+            <div>
+                <textarea id="inputTextoParaCopiar" placeholder="Pegá los partidos acá"
+                    oninput="ajustarAlturaAdmin()"></textarea>
+            </div>
+            <button id="btnEnviarTextoParaCopiar" class="p-2" onclick="generarInstrucciones()">Enviar</button>
+        </div>
+        <div id="textoParaCopiar" class="text-center margenParaPubli mt-5"></div>
+
 
 
 

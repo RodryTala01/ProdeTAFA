@@ -444,6 +444,7 @@ textarea {
 
 #inputTexto,
 #inputTextoAdmin,
+#inputTextoParaCopiar,
 #inputTextoCuartos,
 #inputTextoOctavos,
 #inputTextoFecha2,
@@ -480,6 +481,7 @@ textarea {
 
 #btnVolver,
 #btnEnviar,
+#btnEnviarTextoParaCopiar,
 #btnEnviarAdmin,
 #btnAbrirInput,
 #btnVolverFecha3,
@@ -542,6 +544,7 @@ textarea {
 #btnVolver:hover,
 #btnEnviar:hover,
 #btnEnviarAdmin:hover,
+#btnEnviarTextoParaCopiar:hover,
 #btnAbrirInput:hover,
 #btnVolverOctavos:hover,
 #btnEnviarOctavos:hover,
@@ -618,6 +621,18 @@ textarea {
 
 /* Estilo para la imagen en computadora */
 @media only screen and (min-width: 768px) {
+    .resultado {
+        margin: auto;
+        padding-right: 5px;
+        padding-left: 5px;
+        margin-top: 5px;
+        text-align: center;
+        width: 20%;
+        border-radius: 5px;
+        border: 1px solid #000000;
+        background-color: #f9f9f9;
+    }
+
     .imagenLlave {
         width: 60%;
         margin: auto;
@@ -705,6 +720,15 @@ textarea {
 
 /* Estilo para la imagen en dispositivos móviles */
 @media only screen and (max-width: 767px) {
+    .resultado {
+        margin: auto;
+        margin-top: 5px;
+        width: 80%;
+        border-radius: 5px;
+        border: 1px solid #000000;
+        background-color: #f9f9f9;
+    }
+
     .imagenLlave {
         width: 90%;
         margin: auto;
@@ -1194,9 +1218,13 @@ textarea {
     /* Aumentar el tamaño en un 10% */
 }
 
-div>button>a {
+div>a {
     color: white;
     text-decoration: none;
+
+}
+
+.col>a>button {
     font-weight: bold;
 }
 
@@ -1224,3 +1252,41 @@ div>button>a {
     border: 1px solid black;
 }
 
+.contenedorHistorial>table>tbody {
+    background-color: white;
+    border: 3px black solid;
+}
+
+.contenedorHistorial>table>tbody>tr>td {
+    border: 1px black solid;
+    font-weight: bold;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+
+
+.verde {
+    background-color: #00ff00;
+    color: #000000;
+}
+
+.rojo {
+    background-color: #ff0008;
+    color: #000000;
+}
+
+.amarillo {
+    background-color: #ffff00;
+    color: rgb(0, 0, 0);
+}
+
+#textoParaCopiar {
+    color: white;
+    margin-left: auto;
+}
+
+.tablaResultadosPartidos {
+
+    width: 100%;
+}
