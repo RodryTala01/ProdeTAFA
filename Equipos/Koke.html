@@ -2,7 +2,7 @@
 <html lang="es">
 
 <head>
-    <title>ADMIN - Prode TAFA</title>
+    <title>Koke - Prode TAFA</title>
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -11,11 +11,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-    <link rel="shortcut icon" href="Imagenes/LOGO TAFA ICONO.png">
+    <link rel="shortcut icon" href="../Imagenes/LOGO TAFA ICONO.png">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <link rel="stylesheet" href="CSS/styleProde.css">
+    <link rel="stylesheet" href="../CSS/styleProde.css">
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -40,37 +40,37 @@
                             <div class="btn-group-vertical" role="group" aria-label="Vertical button group">
                                 <div class="btn-group" role="group">
                     <li class="nav-item animado">
-                        <a class="nav-link" href="index.html">INICIO</a>
+                        <a class="nav-link" href="../index.html">INICIO</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="Ligas.html">LIGAS</a>
+                        <a class="nav-link" href="../Ligas.html">LIGAS</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="CopaTotal.html">COPA TOTAL</a>
+                        <a class="nav-link" href="../CopaTotal.html">COPA TOTAL</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="CopaCampeones.html">COPA CAMPEONES</a>
+                        <a class="nav-link" href="../CopaCampeones.html">COPA CAMPEONES</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="CopaA.html">COPA A</a>
+                        <a class="nav-link" href="../CopaA.html">COPA A</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="CopaB.html">COPA B</a>
+                        <a class="nav-link" href="../CopaB.html">COPA B</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link disabled" href="#">COPA C</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href="CopaDuos.html">COPA DÚOS</a>
+                        <a class="nav-link" href="../CopaDuos.html">COPA DÚOS</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="click nav-link active" href="Palmares.html">PALMARÉS</a>
+                        <a class="click nav-link" href="../Palmares.html">PALMARÉS</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="click nav-link active" href="Rankings.html">RANKINGS</a>
+                        <a class="click nav-link" href="../Rankings.html">RANKINGS</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="click nav-link active" href="Equipos.html">EQUIPOS</a>
+                        <a class="click nav-link " href="../Equipos.html">EQUIPOS</a>
                     </li>
             </div>
         </div>
@@ -81,47 +81,44 @@
         </div>
     </nav>
 
-
-
-
     <div>
 
         <div class="text-center banner col-md">
-            <img src="Imagenes/Banner.png" class="img-fluid border border-2 border-dark mt-4" alt="banner" height=auto
-                width="600 rem">
+            <img src="../Imagenes/Banner.png" class="img-fluid border border-2 border-dark mt-4" alt="banner"
+                height=auto width="600 rem">
         </div>
 
 
-        <div class="mt-5">
-            <div>
-                <textarea id="inputTextoAdmin" placeholder="Pegá la fecha acá"
-                    oninput="ajustarAlturaAdmin()"></textarea>
-            </div>
-            <button id="btnEnviarAdmin" class="p-2" onclick="crearTabla()">Enviar</button>
+        <div class="contenedorHistorial d-flex justify-content-center">
+            <table id="historialKoke" class="tablaHistorial mt-5">
+                <thead>
+                    <tr>
+                        <th class="tituloHistorial" colspan="8">Koke<img
+                                src="../Imagenes/Escudos/sinEscudo.png" class="imgHistorial" alt="Escudo"></th>
+                    </tr>
+                    <tr class="subtituloHistorial">
+                        <th>Rival</th>
+                        <th>DIF</th>
+                        <th>PJ</th>
+                        <th>PG</th>
+                        <th>PE</th>
+                        <th>PP</th>
+                        <th>PtsF</th>
+                        <th>PtsC</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
         </div>
-        
-        <div id="tablaAdmin" class="text-center justify-content-center d-flex mt-5"></div>
-
-
-        <div class="mt-5">
-            <div>
-                <textarea id="inputTextoParaCopiar" placeholder="Pegá los partidos acá"
-                    oninput="ajustarAltura2()"></textarea>
-            </div>
-            <button id="btnEnviarTextoParaCopiar" class="p-2" onclick="generarInstrucciones()">Enviar</button>
+        <div id="resultadosKoke" class="mt-5 align-items-center margenParaPubli">
         </div>
-
-        <div id="textoParaCopiar" class="text-center margenParaPubli mt-5"></div>
-
-
-
-
 
 
 
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-        <script src="JS/leer.js"></script>
 
 
 
@@ -130,15 +127,15 @@
         <footer>
 
             <div class="fixed-bottom text-center col-md">
-                <a href="Donar/index.html" target="_blank">
+                <a href="../Donar/index.html" target="_blank">
                     <img src="https://i.ibb.co/qkkt2sC/Banner-Publi.png" alt="Donale al admin no seas malo"
                         class="img-fluid border border-2 border-dark mt-4" width="500 rem"></a>
             </div>
 
         </footer>
 
-        <script src="JS/escudos.js"></script>
-        <script src="JS/indexProde.js"></script>
+        <script src="../JS/historiales.js"></script>
+        <script src="../JS/indexProde.js"></script>
 
         <!-- Bootstrap JavaScript Libraries -->
 

@@ -1872,11 +1872,18 @@ function generarInstrucciones() {
     // Obtener el texto ingresado
     var partidosTexto = document.getElementById("inputTextoParaCopiar").value;
 
+    // Reemplazar letras con tilde por letras sin tilde
+    partidosTexto = partidosTexto.replace(/[áÁ]/g, 'a')
+        .replace(/[éÉ]/g, 'e')
+        .replace(/[íÍ]/g, 'i')
+        .replace(/[óÓ]/g, 'o')
+        .replace(/[úÚ]/g, 'u');
+
     // Dividir el texto en líneas
     var lineas = partidosTexto.split('\n');
 
     // Obtener el nombre del torneo (primer renglón)
-    var torneo = lineas.shift().toUpperCase();
+    var torneo = lineas.shift().toUpperCase().trim();
 
     // Limpiar el contenido anterior
     document.getElementById("textoParaCopiar").innerHTML = '';
@@ -1905,10 +1912,20 @@ function generarInstrucciones() {
 }
 
 
+
 function ajustarAlturaAdmin() {
     var textarea = document.getElementById("inputTextoAdmin");
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function ajustarAltura2() {
+
+    var textarea2 = document.getElementById("inputTextoParaCopiar");
+    textarea2.style.height = ""; // Restablecer la altura para que se ajuste automáticamente
+
+    // Ajustar la altura del textarea según su contenido
+    textarea2.style.height = textarea2.scrollHeight + "px";
 }
 
 function mostrarGrupo(grupo) {
