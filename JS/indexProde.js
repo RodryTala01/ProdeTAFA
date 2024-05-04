@@ -1928,6 +1928,58 @@ function ajustarAltura2() {
     textarea2.style.height = textarea2.scrollHeight + "px";
 }
 
+function ajustarAltura3() {
+
+    var textarea2 = document.getElementById("inputTextoParaCopiar2");
+    textarea2.style.height = ""; // Restablecer la altura para que se ajuste automáticamente
+
+    // Ajustar la altura del textarea según su contenido
+    textarea2.style.height = textarea2.scrollHeight + "px";
+}
+
+function quitarTildes(texto) {
+    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+
+function generarTextos() {
+    var inputTexto = document.getElementById("inputTextoParaCopiar2").value;
+    var lineas = inputTexto.split("\n");
+    var textoGenerado = "";
+
+    // Función para quitar tildes
+    function quitarTildes(texto) {
+        return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    for (var i = 0; i < lineas.length; i++) {
+        var campos = lineas[i].split("\t");
+        if (campos.length === 8) {
+            // Quitando tildes de cada campo
+            for (var j = 0; j < campos.length; j++) {
+                campos[j] = quitarTildes(campos[j]);
+            }
+            // Generando el texto sin tildes
+            textoGenerado += 'agregarDatos("' + campos[0] + '", "' + campos[1] + '", "' + campos[2] + '", "' + campos[3] + '", "' + campos[4] + '", "' + campos[5] + '", "' + campos[6] + '", "' + campos[7] + '");\n';
+        }
+    }
+
+    document.getElementById("textoParaCopiar2").innerText = textoGenerado;
+}
+
+
+function copiarTextoGenerado() {
+    var textoParaCopiar = document.getElementById("textoParaCopiar2");
+    var textoRange = document.createRange();
+    textoRange.selectNode(textoParaCopiar);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(textoRange);
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();
+    alert("Texto copiado al portapapeles.");
+}
+
+
 function mostrarGrupo(grupo) {
     for (var i = 1; i <= 10; i++) {
         var elementoGrupo = document.getElementById("grupo" + i);

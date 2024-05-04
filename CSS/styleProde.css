@@ -445,6 +445,7 @@ textarea {
 #inputTexto,
 #inputTextoAdmin,
 #inputTextoParaCopiar,
+#inputTextoParaCopiar2,
 #inputTextoCuartos,
 #inputTextoOctavos,
 #inputTextoFecha2,
@@ -482,6 +483,7 @@ textarea {
 #btnVolver,
 #btnEnviar,
 #btnEnviarTextoParaCopiar,
+#btnEnviarTextoParaCopiar2,#btnCopiarTexto,
 #btnEnviarAdmin,
 #btnAbrirInput,
 #btnVolverFecha3,
@@ -544,7 +546,8 @@ textarea {
 #btnVolver:hover,
 #btnEnviar:hover,
 #btnEnviarAdmin:hover,
-#btnEnviarTextoParaCopiar:hover,
+#btnEnviarTextoParaCopiar:hover,#btnEnviarTextoParaCopiar2:hover,
+#btnCopiarTexto:hover,
 #btnAbrirInput:hover,
 #btnVolverOctavos:hover,
 #btnEnviarOctavos:hover,
@@ -1289,4 +1292,77 @@ div>a {
 .tablaResultadosPartidos {
 
     width: 100%;
+}
+
+.container-cardEquipo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cardEquipo {
+    border: 1px solid #ccc;
+    background-color: rgba(148, 146, 146, 0.205);
+    border-radius: 8px;
+    padding: 20px;
+    width: 350px;
+
+}
+
+
+.card-shield-image {
+    display: block;
+    margin: 0 auto;
+    width: 100px;
+    /* ajusta el tamaño según sea necesario */
+}
+
+.card-team-name {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #012c47;
+}
+
+.card-stats {
+    margin-top: 20px;
+}
+
+.card-stats p {
+    margin: 5px 0;
+}
+
+.card-stats span {
+    font-weight: bold;
+}
+
+.card-full {
+    color: #017c01;
+}
+
+.card-partial {
+    color: #adad01;
+}
+
+.card-errors {
+    color: red;
+}
+
+.card-extras {
+    color: orange;
+}
+
+.card-average {
+    color: rgb(0, 2, 128);
+}
+
+.card-iffhs {
+    color: teal;
+}
+
+
+
+#posRanking {
+    font-weight: 100;
+    color: white;
 }

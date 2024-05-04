@@ -106,7 +106,6 @@ function colores() {
     var diferenciaPartidos = document.getElementsByClassName("diferenciaPartidos");
     for (var i = 0; i < diferenciaPartidos.length; i++) {
         var valor = parseInt(diferenciaPartidos[i].textContent);
-        console.log(valor);
         if (valor > 0) {
             diferenciaPartidos[i].style.backgroundColor = 'rgb(0,128,0)';
             diferenciaPartidos[i].style.color = 'white';
@@ -4778,16 +4777,40 @@ agregarResultado("Tomas Delgado", "21-13", "Tomas Torcasio", "SEMIFINALES COPA D
 agregarResultado("Tomas Torcasio", "13-21", "Tomas Delgado", "SEMIFINALES COPA DUOS T20");
 agregarResultado("Lucas Aguilera", "21-13", "Nico Avalos", "SEMIFINALES COPA DUOS T20");
 agregarResultado("Nico Avalos", "13-21", "Lucas Aguilera", "SEMIFINALES COPA DUOS T20");
-
-
-
-
-
-
-
-
-
-
+agregarResultado("Ciro Guarch", "2-9", "Mario Talarico", "FINAL COPA B T20");
+agregarResultado("Mario Talarico", "9-2", "Ciro Guarch", "FINAL COPA B T20");
+agregarResultado("Fabrizio Escolano", "3-3", "Luciano Hufschmid", "FINAL COPA A T20");
+agregarResultado("Luciano Hufschmid", "3-3", "Fabrizio Escolano", "FINAL COPA A T20");
+agregarResultado("Fabrizio Escolano", "3-3", "Luciano Hufschmid", "DESEMPATE FINAL COPA A T20");
+agregarResultado("Luciano Hufschmid", "3-3", "Fabrizio Escolano", "DESEMPATE FINAL COPA A T20");
+agregarResultado("Fabrizio Escolano", "4-3", "Luciano Hufschmid", "DESEMPATE 2 FINAL COPA A T20");
+agregarResultado("Luciano Hufschmid", "3-4", "Fabrizio Escolano", "DESEMPATE 2 FINAL COPA A T20");
+agregarResultado("Lucas Aguilera", "5-5", "Nico Avalos", "FINAL COPA TOTAL T20");
+agregarResultado("Nico Avalos", "5-5", "Lucas Aguilera", "FINAL COPA TOTAL T20");
+agregarResultado("Lucas Aguilera", "1-0", "Nico Avalos", "DESEMPATE FINAL COPA TOTAL T20");
+agregarResultado("Nico Avalos", "0-1", "Lucas Aguilera", "DESEMPATE FINAL COPA TOTAL T20");
+agregarResultado("Ciro Guarch", "5-10", "Tomas Delgado", "FINAL COPA DUOS T20");
+agregarResultado("Tomas Delgado", "10-5", "Ciro Guarch", "FINAL COPA DUOS T20");
+agregarResultado("Fabrizio Escolano", "5-10", "Lucas Aguilera", "FINAL COPA DUOS T20");
+agregarResultado("Lucas Aguilera", "10-5", "Fabrizio Escolano", "FINAL COPA DUOS T20");
+agregarResultado("Ciro Guarch", "5-10", "Lucas Aguilera", "FINAL COPA DUOS T20");
+agregarResultado("Lucas Aguilera", "10-5", "Ciro Guarch", "FINAL COPA DUOS T20");
+agregarResultado("Fabrizio Escolano", "5-10", "Tomas Delgado", "FINAL COPA DUOS T20");
+agregarResultado("Tomas Delgado", "10-5", "Fabrizio Escolano", "FINAL COPA DUOS T20");
+agregarResultado("Lucas Aguilera", "4-8", "Moreno Perez", "FINAL COPA CAMPEONES T20");
+agregarResultado("Moreno Perez", "8-4", "Lucas Aguilera", "FINAL COPA CAMPEONES T20");
+agregarResultado("Tomas Torcasio", "1-1", "Dani Bazan", "PROMOCION T20");
+agregarResultado("Dani Bazan", "1-1", "Tomas Torcasio", "PROMOCION T20");
+agregarResultado("Gabriel Talarico", "4-4", "Kevin Sivori", "PROMOCION T20");
+agregarResultado("Kevin Sivori", "4-4", "Gabriel Talarico", "PROMOCION T20");
+agregarResultado("Tomas Torcasio", "4-4", "Dani Bazan", "DESEMPATE PROMOCION T20");
+agregarResultado("Dani Bazan", "4-4", "Tomas Torcasio", "DESEMPATE PROMOCION T20");
+agregarResultado("Gabriel Talarico", "4-4", "Kevin Sivori", "DESEMPATE PROMOCION T20");
+agregarResultado("Kevin Sivori", "4-4", "Gabriel Talarico", "DESEMPATE PROMOCION T20");
+agregarResultado("Renzo Badano", "3-3", "Tomas Torcasio", "DESEMPATE PRIMERA DIVISION T20");
+agregarResultado("Tomas Torcasio", "3-3", "Renzo Badano", "DESEMPATE PRIMERA DIVISION T20");
+agregarResultado("Renzo Badano", "1-0", "Tomas Torcasio", "DESEMPATE 2 PRIMERA DIVISION T20");
+agregarResultado("Tomas Torcasio", "0-1", "Renzo Badano", "DESEMPATE 2 PRIMERA DIVISION T20");
 
 
 
@@ -4809,3 +4832,109 @@ agregarResultado("Nico Avalos", "13-21", "Lucas Aguilera", "SEMIFINALES COPA DUO
 
 
 colores();
+
+
+
+function agregarDatos(pos, nombre, puntos, promedio, plenos, parciales, errores, extras) {
+    // Buscar el elemento con la clase "card-team-name" que contiene el nombre
+    
+    var nombres = document.getElementsByClassName("card-team-name");
+    for (var i = 0; i < nombres.length; i++) {
+        if (nombres[i].innerText.trim() === nombre) {
+            // Encontrado el nombre, ahora actualizar los datos
+            var card = nombres[i].closest('.cardEquipo');
+            card.querySelector('.posRanking').innerText = pos + "°";
+            card.querySelector('.card-total-points').innerText = puntos + "pts";
+            card.querySelector('.card-full').innerText = plenos;
+            card.querySelector('.card-partial').innerText = parciales;
+            card.querySelector('.card-errors').innerText = errores;
+            card.querySelector('.card-extras').innerText = extras;
+            card.querySelector('.card-average').innerText = promedio;
+            return; // Salir del bucle, ya se ha encontrado y actualizado el nombre
+        }
+    }
+    // Si el nombre no se encuentra en ninguna tarjeta, mostrar un mensaje de error
+    console.error("El nombre '" + nombre + "' no se encontró en las tarjetas.");
+    
+}
+
+
+agregarDatos("1", "Nico Avalos", "1543", "0,720691266", "248", "736", "1157", "63");
+agregarDatos("2", "Fabrizio Escolano", "1474", "0,757840617", "223", "741", "981", "64");
+agregarDatos("3", "Mario Talarico", "1409", "0,720347648", "250", "578", "1128", "81");
+agregarDatos("4", "Jhose", "1400", "0,721277692", "207", "698", "1036", "81");
+agregarDatos("5", "Gabriel Talarico", "1352", "0,714965627", "208", "636", "1047", "92");
+agregarDatos("6", "Pancho Muzzio", "1341", "0,695539419", "198", "672", "1058", "75");
+agregarDatos("7", "Kevin Sivori", "1330", "0,70482247", "195", "674", "1018", "71");
+agregarDatos("8", "Rodrigo Talarico", "1324", "0,682826199", "200", "645", "1094", "79");
+agregarDatos("9", "Luciano Hufschmid", "1320", "0,675537359", "192", "649", "1113", "95");
+agregarDatos("10", "Rodrigo Soca", "1296", "0,755244755", "222", "577", "917", "53");
+agregarDatos("11", "Eze", "1257", "0,680563075", "188", "634", "1025", "59");
+agregarDatos("12", "Bruno Alonso", "1230", "0,671031097", "184", "619", "1030", "59");
+agregarDatos("13", "Moreno Perez", "1223", "0,722813239", "200", "573", "919", "50");
+agregarDatos("14", "Matheo Olivera", "1216", "0,681232493", "198", "552", "1035", "70");
+agregarDatos("15", "Joel Marasco", "1208", "0,652267819", "182", "598", "1072", "64");
+agregarDatos("16", "Ian Gangai", "1124", "0,720512821", "182", "520", "858", "58");
+agregarDatos("17", "Lucas Aguilera", "1060", "0,7090301", "170", "500", "825", "50");
+agregarDatos("18", "Tomas Delgado", "1026", "0,694181326", "162", "490", "826", "50");
+agregarDatos("19", "Anubis", "1002", "0,547540984", "122", "570", "1138", "66");
+agregarDatos("20", "Lucas Insua", "968", "0,645333333", "158", "453", "889", "41");
+agregarDatos("21", "Tomas Torcasio", "965", "0,666436464", "145", "487", "816", "43");
+agregarDatos("22", "Nico Luchetti (R)", "939", "0,612524462", "122", "516", "895", "57");
+agregarDatos("23", "Lautaro Scocier", "904", "0,74037674", "133", "436", "652", "69");
+agregarDatos("24", "Rodri Sebastian", "841", "0,652950311", "111", "435", "742", "73");
+agregarDatos("25", "Renzo Badano", "829", "0,611356932", "120", "434", "802", "35");
+agregarDatos("26", "Santi", "813", "0,570126227", "125", "389", "912", "49");
+agregarDatos("27", "Joaquin Sampadaro", "790", "0,591317365", "115", "393", "828", "52");
+agregarDatos("28", "Nacho Soto", "778", "0,626913779", "106", "420", "715", "40");
+agregarDatos("29", "Joel Alcalde", "777", "0,560201875", "128", "372", "887", "21");
+agregarDatos("30", "Pollo", "774", "0,662671233", "111", "419", "638", "22");
+agregarDatos("31", "Benja", "773", "0,613979349", "102", "436", "721", "31");
+agregarDatos("32", "Nahuel Scocier", "764", "0,710037175", "117", "363", "596", "50");
+agregarDatos("33", "Dani Bazan", "699", "0,534812548", "105", "359", "843", "25");
+agregarDatos("34", "Ignacio Cejas", "674", "0,603942652", "99", "353", "664", "24");
+agregarDatos("35", "Natanael", "643", "0,581900452", "94", "330", "681", "31");
+agregarDatos("36", "Martin Bustos", "643", "0,580849142", "72", "388", "647", "39");
+agregarDatos("37", "Cami", "603", "0,691513761", "98", "291", "483", "18");
+agregarDatos("38", "Bautista Coria", "597", "0,546203111", "81", "318", "694", "36");
+agregarDatos("39", "Valentina Scocier", "587", "0,58935743", "78", "314", "604", "39");
+agregarDatos("40", "Azul Quispe", "571", "0,579695431", "86", "282", "617", "31");
+agregarDatos("41", "Facundo Marchese", "571", "0,569292124", "85", "282", "636", "34");
+agregarDatos("42", "Alexis Segovia", "562", "0,624444444", "83", "283", "534", "30");
+agregarDatos("43", "Ramiro Vita", "524", "0,682291667", "81", "253", "434", "28");
+agregarDatos("44", "Yago", "523", "0,643296433", "87", "243", "483", "19");
+agregarDatos("45", "Matias Varela", "459", "0,551020408", "56", "254", "523", "37");
+agregarDatos("46", "Antonella Lopez", "363", "0,48015873", "49", "193", "514", "23");
+agregarDatos("47", "Joaco Fernandez", "346", "0,678431373", "37", "193", "280", "42");
+agregarDatos("48", "Felipe Galante", "338", "0,728448276", "56", "142", "266", "28");
+agregarDatos("49", "Kraiizer", "333", "0,465083799", "39", "197", "480", "19");
+agregarDatos("50", "Veronica Lucchesi", "322", "0,779661017", "52", "156", "205", "10");
+agregarDatos("51", "Diego", "294", "0,68372093", "48", "118", "264", "32");
+agregarDatos("52", "Tomas Gonzalez", "288", "0,668213457", "38", "152", "241", "22");
+agregarDatos("53", "Fede Gerez", "274", "0,578059072", "40", "137", "297", "17");
+agregarDatos("54", "Axel", "269", "0,615560641", "35", "144", "258", "20");
+agregarDatos("55", "Tomas Hon", "224", "0,664688427", "29", "124", "184", "13");
+agregarDatos("56", "Juli Boetsch", "210", "0,673076923", "29", "113", "170", "10");
+agregarDatos("57", "Facu Montes", "207", "0,616071429", "29", "93", "214", "27");
+agregarDatos("58", "Franco Przepiorka", "174", "0,710204082", "28", "75", "142", "15");
+agregarDatos("59", "Koke", "161", "0,602996255", "16", "109", "142", "4");
+agregarDatos("60", "Aylen Benedetti", "149", "0,668161435", "16", "73", "134", "28");
+agregarDatos("61", "Nico Luchetti (C)", "102", "0,364285714", "13", "61", "206", "2");
+agregarDatos("62", "Helyy", "96", "0,6", "17", "37", "106", "8");
+agregarDatos("63", "Fede Salatino", "95", "0,586419753", "9", "55", "98", "13");
+agregarDatos("64", "Ciro Guarch", "77", "0,641666667", "13", "36", "71", "2");
+agregarDatos("65", "Ramiro Ebel", "76", "0,472049689", "10", "45", "106", "1");
+agregarDatos("66", "Valium", "76", "0,457831325", "9", "40", "117", "9");
+agregarDatos("67", "Manu Solbes", "75", "0,78125", "15", "28", "53", "2");
+agregarDatos("68", "Nahir Gomezz", "65", "0,78313253", "4", "29", "50", "24");
+agregarDatos("69", "Cristian Hantis", "60", "0,555555556", "9", "33", "66", "0");
+agregarDatos("70", "Nicolas Borea", "53", "1,019230769", "7", "20", "25", "12");
+agregarDatos("71", "Agustin", "50", "0,568181818", "7", "26", "55", "3");
+agregarDatos("72", "Tomas Perez", "44", "0,846153846", "4", "22", "26", "10");
+agregarDatos("73", "Kisha", "40", "1,481481481", "5", "9", "13", "16");
+agregarDatos("74", "Nicolas Lucero", "36", "0,692307692", "1", "23", "28", "10");
+agregarDatos("75", "Santino Mercado", "29", "0,557692308", "4", "16", "32", "1");
+agregarDatos("76", "Facundo Di Paola", "28", "1,037037037", "2", "9", "16", "13");
+agregarDatos("77", "Cristian", "20", "0,487804878", "2", "14", "25", "0");
+agregarDatos("78", "Ramiro Caruso", "9", "0,15", "2", "3", "55", "0");
+agregarDatos("79", "Franco Kin", "7", "0,134615385", "0", "7", "45", "0");

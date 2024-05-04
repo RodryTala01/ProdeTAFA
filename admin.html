@@ -111,9 +111,19 @@
             <button id="btnEnviarTextoParaCopiar" class="p-2" onclick="generarInstrucciones()">Enviar</button>
         </div>
 
-        <div id="textoParaCopiar" class="text-center margenParaPubli mt-5"></div>
+        <div id="textoParaCopiar" class="text-center mt-2"></div>
 
+        <div class="mt-5">
+            <div>
+                <textarea id="inputTextoParaCopiar2" placeholder="Pegá la tabla acá" oninput="ajustarAltura3()"></textarea>
+            </div>
+            <button id="btnEnviarTextoParaCopiar2" class="p-2" onclick="generarTextos()">Enviar</button>
+        </div>
+        
+        <div id="textoParaCopiar2" class="text-center mt-5"></div>
+        <button id="btnCopiarTexto" class="p-2 margenParaPubli" onclick="copiarTextoGenerado()">Copiar Texto Generado</button>
 
+                    
 
 
 
