@@ -1855,13 +1855,21 @@ function mostrarLlaves() {
     btnLlaves.classList.add("btnGruposLlaves", "btnGruposLlaves:hover");
 }
 
+
+
 function crearTabla() {
     var inputTexto = document.getElementById("inputTextoAdmin").value;
     var numeros = inputTexto.match(/\d+/g);
-    var tablaHTML = "<table border='1'>";
+    var tablaHTML = "<table>";
 
-    for (var i = 0; i < numeros.length; i += 2) {
-        tablaHTML += "<tr><td>" + numeros[i] + "</td><td> - </td><td>" + numeros[i + 1] + "</td></tr>";
+    var textarea = document.getElementById("inputTextoAdmin");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+
+    if (numeros && numeros.length > 1) {
+        for (var i = 0; i < numeros.length; i += 2) {
+            tablaHTML += "<tr><td>" + numeros[i] + "</td><td> - </td><td>" + (numeros[i + 1] || "") + "</td></tr>";
+        }
     }
 
     tablaHTML += "</table>";
@@ -1871,6 +1879,12 @@ function crearTabla() {
 function generarInstrucciones() {
     // Obtener el texto ingresado
     var partidosTexto = document.getElementById("inputTextoParaCopiar").value;
+
+    var textarea2 = document.getElementById("inputTextoParaCopiar");
+    textarea2.style.height = ""; // Restablecer la altura para que se ajuste automáticamente
+
+    // Ajustar la altura del textarea según su contenido
+    textarea2.style.height = textarea2.scrollHeight + "px";
 
     // Reemplazar letras con tilde por letras sin tilde
     partidosTexto = partidosTexto.replace(/[áÁ]/g, 'a')
@@ -1913,29 +1927,6 @@ function generarInstrucciones() {
 
 
 
-function ajustarAlturaAdmin() {
-    var textarea = document.getElementById("inputTextoAdmin");
-    textarea.style.height = "auto";
-    textarea.style.height = textarea.scrollHeight + "px";
-}
-
-function ajustarAltura2() {
-
-    var textarea2 = document.getElementById("inputTextoParaCopiar");
-    textarea2.style.height = ""; // Restablecer la altura para que se ajuste automáticamente
-
-    // Ajustar la altura del textarea según su contenido
-    textarea2.style.height = textarea2.scrollHeight + "px";
-}
-
-function ajustarAltura3() {
-
-    var textarea2 = document.getElementById("inputTextoParaCopiar2");
-    textarea2.style.height = ""; // Restablecer la altura para que se ajuste automáticamente
-
-    // Ajustar la altura del textarea según su contenido
-    textarea2.style.height = textarea2.scrollHeight + "px";
-}
 
 function quitarTildes(texto) {
     return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -1946,6 +1937,12 @@ function generarTextos() {
     var inputTexto = document.getElementById("inputTextoParaCopiar2").value;
     var lineas = inputTexto.split("\n");
     var textoGenerado = "";
+
+    var textarea2 = document.getElementById("inputTextoParaCopiar2");
+    textarea2.style.height = ""; // Restablecer la altura para que se ajuste automáticamente
+
+    // Ajustar la altura del textarea según su contenido
+    textarea2.style.height = textarea2.scrollHeight + "px";
 
     // Función para quitar tildes
     function quitarTildes(texto) {
@@ -1969,6 +1966,17 @@ function generarTextos() {
 
 
 function copiarTextoGenerado() {
+    var textoParaCopiar = document.getElementById("tablaAdmin");
+    var textoRange = document.createRange();
+    textoRange.selectNode(textoParaCopiar);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(textoRange);
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();
+    alert("Texto copiado al portapapeles.");
+}
+
+function copiarTextoGenerado2() {
     var textoParaCopiar = document.getElementById("textoParaCopiar2");
     var textoRange = document.createRange();
     textoRange.selectNode(textoParaCopiar);
@@ -1979,6 +1987,16 @@ function copiarTextoGenerado() {
     alert("Texto copiado al portapapeles.");
 }
 
+function copiarTextoGenerado3() {
+    var textoParaCopiar = document.getElementById("textoParaCopiar");
+    var textoRange = document.createRange();
+    textoRange.selectNode(textoParaCopiar);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(textoRange);
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();
+    alert("Texto copiado al portapapeles.");
+}
 
 function mostrarGrupo(grupo) {
     for (var i = 1; i <= 10; i++) {

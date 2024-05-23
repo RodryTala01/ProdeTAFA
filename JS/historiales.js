@@ -4811,6 +4811,286 @@ agregarResultado("Renzo Badano", "3-3", "Tomas Torcasio", "DESEMPATE PRIMERA DIV
 agregarResultado("Tomas Torcasio", "3-3", "Renzo Badano", "DESEMPATE PRIMERA DIVISION T20");
 agregarResultado("Renzo Badano", "1-0", "Tomas Torcasio", "DESEMPATE 2 PRIMERA DIVISION T20");
 agregarResultado("Tomas Torcasio", "0-1", "Renzo Badano", "DESEMPATE 2 PRIMERA DIVISION T20");
+agregarResultado("Joel Alcalde", "13-8", "Pancho Muzzio", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Pancho Muzzio", "8-13", "Joel Alcalde", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ignacio Cejas", "9-6", "Benja", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Benja", "6-9", "Ignacio Cejas", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Luciano Hufschmid", "4-0", "Joel Marasco", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joel Marasco", "0-4", "Luciano Hufschmid", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodri Sebastian", "9-10", "Benja", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Benja", "10-9", "Rodri Sebastian", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Gabriel Talarico", "5-9", "Pancho Muzzio", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Pancho Muzzio", "9-5", "Gabriel Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Mario Talarico", "4-7", "Santi", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Santi", "7-4", "Mario Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Tomas Delgado", "12-18", "Pancho Muzzio", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Pancho Muzzio", "18-12", "Tomas Delgado", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Anubis", "8-12", "Santi", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Santi", "12-8", "Anubis", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Dani Bazan", "2-6", "Benja", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Benja", "6-2", "Dani Bazan", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joaco Fernandez", "10-12", "Santi", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Santi", "12-10", "Joaco Fernandez", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Manu Solbes", "6-12", "Pancho Muzzio", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Pancho Muzzio", "12-6", "Manu Solbes", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Bautista Coria", "6-8", "Benja", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Benja", "8-6", "Bautista Coria", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Cami", "12-13", "Lucas Aguilera", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Lucas Aguilera", "13-12", "Cami", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Kevin Sivori", "6-10", "Pollo", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Pollo", "10-6", "Kevin Sivori", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Jhose", "4-7", "Rodrigo Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodrigo Talarico", "7-4", "Jhose", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Yago", "9-10", "Lucas Aguilera", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Lucas Aguilera", "10-9", "Yago", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Cristian Hantis", "8-9", "Pollo", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Pollo", "9-8", "Cristian Hantis", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Renzo Badano", "7-7", "Rodrigo Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodrigo Talarico", "7-7", "Renzo Badano", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Eze", "7-14", "Lucas Aguilera", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Lucas Aguilera", "14-7", "Eze", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Bruno Alonso", "6-5", "Rodrigo Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodrigo Talarico", "5-6", "Bruno Alonso", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Fabrizio Escolano", "13-15", "Pollo", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Pollo", "15-13", "Fabrizio Escolano", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ian Gangai", "12-11", "Rodrigo Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodrigo Talarico", "11-12", "Ian Gangai", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Tomas Torcasio", "8-10", "Lucas Aguilera", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Lucas Aguilera", "10-8", "Tomas Torcasio", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Felipe Galante", "12-13", "Mario Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Mario Talarico", "13-12", "Felipe Galante", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Nico Avalos", "10-11", "Gabriel Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Gabriel Talarico", "11-10", "Nico Avalos", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Moreno Perez", "5-6", "Rodri Sebastian", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodri Sebastian", "6-5", "Moreno Perez", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ignacio Cejas", "17-16", "Tomas Delgado", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Tomas Delgado", "16-17", "Ignacio Cejas", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joel Alcalde", "8-15", "Dani Bazan", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Dani Bazan", "15-8", "Joel Alcalde", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Luciano Hufschmid", "5-4", "Anubis", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Anubis", "4-5", "Luciano Hufschmid", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Gabriel Talarico", "17-12", "Manu Solbes", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Manu Solbes", "12-17", "Gabriel Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Mario Talarico", "6-9", "Bautista Coria", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Bautista Coria", "9-6", "Mario Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodri Sebastian", "3-3", "Joaco Fernandez", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joaco Fernandez", "3-3", "Rodri Sebastian", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Tomas Delgado", "18-9", "Nico Avalos", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Nico Avalos", "9-18", "Tomas Delgado", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Dani Bazan", "8-9", "Moreno Perez", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Moreno Perez", "9-8", "Dani Bazan", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Anubis", "6-5", "Felipe Galante", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Felipe Galante", "5-6", "Anubis", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ciro Guarch", "12-13", "Yago", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Yago", "13-12", "Ciro Guarch", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodrigo Soca", "8-9", "Renzo Badano", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Renzo Badano", "9-8", "Rodrigo Soca", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Lucas Insua", "4-5", "Cristian Hantis", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Cristian Hantis", "5-4", "Lucas Insua", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Cami", "13-10", "Bruno Alonso", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Bruno Alonso", "10-13", "Cami", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Kevin Sivori", "11-5", "Eze", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Eze", "5-11", "Kevin Sivori", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Jhose", "11-0", "Joaquin Sampadaro", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joaquin Sampadaro", "0-11", "Jhose", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Yago", "18-12", "Fabrizio Escolano", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Fabrizio Escolano", "12-18", "Yago", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Renzo Badano", "5-12", "Tomas Torcasio", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Tomas Torcasio", "12-5", "Renzo Badano", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Cristian Hantis", "4-8", "Ian Gangai", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ian Gangai", "8-4", "Cristian Hantis", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Bruno Alonso", "11-15", "Lucas Insua", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Lucas Insua", "15-11", "Bruno Alonso", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Eze", "9-8", "Rodrigo Soca", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodrigo Soca", "8-9", "Eze", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Manu Solbes", "13-10", "Tomas Delgado", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Tomas Delgado", "10-13", "Manu Solbes", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joaco Fernandez", "11-8", "Anubis", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Anubis", "8-11", "Joaco Fernandez", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Bautista Coria", "4-6", "Dani Bazan", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Dani Bazan", "6-4", "Bautista Coria", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Felipe Galante", "9-7", "Joaco Fernandez", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joaco Fernandez", "7-9", "Felipe Galante", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Nico Avalos", "9-5", "Bautista Coria", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Bautista Coria", "5-9", "Nico Avalos", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Morneo Perez", "8-4", "Manu Solbes", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Manu Solbes", "4-8", "Morneo Perez", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Luciano Hufschmid", "15-14", "Moreno Perez", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Moreno Perez", "14-15", "Luciano Hufschmid", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ignacio Cejas", "10-12", "Nico Avalos", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Nico Avalos", "12-10", "Ignacio Cejas", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joel Alcalde", "9-9", "Felipe Galante", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Felipe Galante", "9-9", "Joel Alcalde", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Mario Talarico", "9-15", "Luciano Hufschmid", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Luciano Hufschmid", "15-9", "Mario Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Gabriel Talarico", "7-13", "Joel Alcalde", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joel Alcalde", "13-7", "Gabriel Talarico", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodri Sebastian", "2-11", "Ignacio Cejas", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ignacio Cejas", "11-2", "Rodri Sebastian", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ian Gangai", "11-15", "Bruno Alonso", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Bruno Alonso", "15-11", "Ian Gangai", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Fabrizio Escolano", "11-11", "Eze", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Eze", "11-11", "Fabrizio Escolano", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Tomas Torcasio", "9-7", "Joaquin Sampadaro", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Joaquin Sampadaro", "7-9", "Tomas Torcasio", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodrigo Soca", "10-9", "Ian Gangai", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ian Gangai", "9-10", "Rodrigo Soca", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Lucas Insua", "8-9", "Fabrizio Escolano", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Fabrizio Escolano", "9-8", "Lucas Insua", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ciro Guarch", "2-8", "Tomas Torcasio", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Tomas Torcasio", "8-2", "Ciro Guarch", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Cami", "14-11", "Rodrigo Soca", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Rodrigo Soca", "11-14", "Cami", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Jhose", "9-10", "Lucas Insua", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Lucas Insua", "10-9", "Jhose", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Kevin Sivori", "8-8", "Ciro Guarch", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Ciro Guarch", "8-8", "Kevin Sivori", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Yago", "11-11", "Cami", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Cami", "11-11", "Yago", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Renzo Badano", "8-9", "Kevin Sivori", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Kevin Sivori", "9-8", "Renzo Badano", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Cristian Hantis", "8-7", "Jhose", "COPA TRIOS FASE DE GRUPOS");
+
+agregarResultado("Jhose", "7-8", "Cristian Hantis", "COPA TRIOS FASE DE GRUPOS");
+
 
 
 
