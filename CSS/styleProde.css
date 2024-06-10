@@ -1,19 +1,13 @@
 body {
 
-    background-image: url(../Imagenes/Fondo.JPG);
-    background-size: auto;
-    background-repeat: repeat;
-    background-attachment: fixed;
+    
     text-align: center;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     font-family: 'Archivo Black', sans-serif;
 }
 
 .navbar {
-    background-image: url(../Imagenes/FondoNavbar.JPG);
-    background-size: auto;
-    background-repeat: no-repeat;
-    background-color: #143CDA;
+    
 }
 
 .banner>img {
