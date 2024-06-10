@@ -2135,3 +2135,31 @@ function toggleExtintos() {
     }
 }
 
+
+function desplazar(cantidad) {
+    const contenedor = document.getElementById('contenedorFechas');
+    const anchoBoton = document.querySelector('.cajaFECHA').offsetWidth + 10; // Ancho del botón + margen
+    const desplazamiento = cantidad * anchoBoton;
+    contenedor.scrollLeft += desplazamiento;
+}
+
+function fechaCopaAmerica(id) {
+    
+    var botonesFecha = document.querySelectorAll('.cajaFECHA'); // Selecciona todos los botones de fecha
+    botonesFecha.forEach(function (btn) {
+        btn.classList.remove('btnFechaActivo'); // Quita la clase 'btnFechaActivo' a todos los botones
+    });
+    document.getElementById("btn" + id).classList.add('btnFechaActivo'); // Agrega la clase 'btnFechaActivo' al botón clicado
+
+    var divsFechas = document.querySelectorAll('[id^="fecha"]'); // Selecciona todos los divs de fecha
+    divsFechas.forEach(function (div) {
+        
+        if (div.id === "fecha" + id) {
+            div.style.display = "block"; // Muestra el div correspondiente al ID
+        } else {
+            div.style.display = "none"; // Oculta los demás divs
+        }
+    });
+
+    
+}

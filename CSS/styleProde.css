@@ -1,6 +1,6 @@
 body {
 
-    background-image: url(../Imagenes/FondoPrueba.jpg);
+    background-image: url(../Imagenes/FondoAmerica.jpg);
     background-size: auto;
     background-repeat: repeat;
     background-attachment: fixed;
@@ -9,10 +9,14 @@ body {
     font-family: 'Archivo Black', sans-serif;
 }
 
+.navbar {
+    background-image: url(../Imagenes/FondoNavbar.jpg);
+    background-size: auto;
+    background-repeat: no-repeat;
+    background-color: #143CDA;
+}
+
 .banner>img {
-
-
-    border: 5px solid black;
     border-radius: 5px;
 }
 
@@ -24,28 +28,36 @@ body {
     border-radius: 3px !important;
 }
 
-.cajaFECHA:hover {
-    background-color: #3f4d7a;
-    border-color: #4d5d94;
+.cajaBotonesFechas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#contenedorFechas {
+    display: flex;
+    overflow: hidden;
+    width: 300px;
+    /* Ajusta según necesites */
+    scroll-behavior: smooth;
+}
+
+.btnFechaActivo {
+    background: rgb(255, 0, 179) !important;
+    border: rgb(121, 116, 116) 1px solid !important;
 }
 
 .cajaFECHA {
     width: 10rem !important;
     font-size: 1rem;
-    background-color: #293250;
+    background-color: #29325042;
     color: white;
     text-decoration: none;
     border-color: #4d5d94;
+    margin: 0 5px;
 }
 
-.cajaSIG {
-    color: black;
-    background-color: white;
-    cursor: pointer;
-    font-size: 1rem;
-    text-decoration: none;
-}
-
+.cajaSIG,
 .cajaANT {
     color: black;
     background-color: white;
@@ -55,9 +67,20 @@ body {
     box-sizing: border-box;
 }
 
+.cajaFECHA:active {
+    background: #00000000 !important;
+    border: rgb(121, 116, 116) 1px solid !important;
+}
+
+.cajaFECHA:hover {
+    background-color: #3f4d7a00;
+    border-color: #4d5d94;
+}
+
+
 .activo {
     font-weight: bold;
-    color: rgb(54, 53, 53) !important;
+    color: rgb(255, 0, 179) !important;
 }
 
 .nav-item {
@@ -198,7 +221,7 @@ body {
 }
 
 .fecha1 {
-    display: none;
+    display: block;
 }
 
 .fecha16avos {
@@ -234,7 +257,7 @@ body {
 }
 
 .fechaFinal {
-    display: block;
+    display: none;
 }
 
 .fechaPromos {
@@ -393,39 +416,39 @@ th.p-2,
 }
 
 .colorTiempo {
-    background-color: #293250;
+    border-top: 2px white solid;
     color: white;
 }
 
 .colorEquipo {
-    background-color: #FFD55A;
+    border-top: 2px white solid;
+    color: white;
 }
 
 .colorGoles {
-    background-color: #6DD47E;
+    color: white;
+    border-top: 2px white solid;
 }
 
 div>div>div>table>tbody>tr>th.bg-danger {
-    background-color: #293250 !important;
+
     color: white;
 }
 
 div>div>div>table>tbody>tr>td.col-md-auto {
-    background-color: #FFD55A;
+    color: white;
 }
 
-div>div>div>table>tbody>tr>td.bg-danger {
-    background-color: #6DD47E !important;
-}
+div>div>div>table>tbody>tr>td.bg-danger {}
 
 .navbar {
     margin-right: none !important;
 }
 
 .fecha {
-    background-color: #293250 !important;
+    border-top: 2px white solid;
     color: white;
-    font-size: 0.8rem;
+    font-size: 1rem;
 }
 
 .hidden {
@@ -483,7 +506,8 @@ textarea {
 #btnVolver,
 #btnEnviar,
 #btnEnviarTextoParaCopiar,
-#btnEnviarTextoParaCopiar2,#btnCopiarTexto,
+#btnEnviarTextoParaCopiar2,
+#btnCopiarTexto,
 #btnEnviarAdmin,
 #btnAbrirInput,
 #btnVolverFecha3,
@@ -546,7 +570,8 @@ textarea {
 #btnVolver:hover,
 #btnEnviar:hover,
 #btnEnviarAdmin:hover,
-#btnEnviarTextoParaCopiar:hover,#btnEnviarTextoParaCopiar2:hover,
+#btnEnviarTextoParaCopiar:hover,
+#btnEnviarTextoParaCopiar2:hover,
 #btnCopiarTexto:hover,
 #btnAbrirInput:hover,
 #btnVolverOctavos:hover,
@@ -1367,3 +1392,6 @@ div>a {
     color: white;
 }
 
+.noMostrar{
+    display: none;
+}

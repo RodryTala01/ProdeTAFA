@@ -5,17 +5,17 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Real Madrid":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/Th4fAVAZeCJWRcKoLW7koA_96x96.png";
             break;
+        
         case "Racing Club":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/wi-J-3U7th2bpIB_Uy9Euw_96x96.png";
             break;
+        
         case "Estudiantes (LP)":
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/a/aa/Logo_Actual_del_Club_Estudiantes_de_La_Plata.png";
             break;
+        
         case "Newells":
             elementoEscudo.src = "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/14.png";
-            break;
-        case "Croacia":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/9toerdOg8xW4CRhDaZxsyw_96x96.png";
             break;
 
         case "Paises Bajos":
@@ -479,7 +479,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             break;
 
         case "España":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/5hLkf7KFHhmpaiOJQv8LmA_96x96.png";
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Bandera_de_Espa%C3%B1a.svg/1200px-Bandera_de_Espa%C3%B1a.svg.png";
             break;
 
         case "Colombia":
@@ -507,7 +507,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             break;
 
         case "Croacia":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/9toerdOg8xW4CRhDaZxsyw_96x96.png";
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Flag_of_Croatia.svg/800px-Flag_of_Croatia.svg.png";
             break;
 
         case "Francia":
@@ -673,6 +673,23 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Libertad (P)":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/-n4YxXgf_vhcYhp03Mq6Dw_96x96.png";
             break;
+        
+        case "Hungria":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Flag_of_Hungary.svg/640px-Flag_of_Hungary.svg.png";
+            break;
+        
+        case "Suiza":
+            elementoEscudo.src = "https://resizer.glanacion.com/resizer/v2/bandera-de-QXTBVQPH2VGERDRYP52BCDXKPI.png?auth=ead56be35f0805b6eefa89ba700d665d073344419c19e0aa7c55e95c702c8cd7&width=420&height=420&quality=70&smart=true";
+            break;
+        
+        case "Italia":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Flag_of_Italy.svg/310px-Flag_of_Italy.svg.png";
+            break;
+        
+        case "Albania":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Flag_of_Albania.svg/800px-Flag_of_Albania.svg.png";
+            break;
+
 
 
 

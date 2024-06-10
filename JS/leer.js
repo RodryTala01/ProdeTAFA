@@ -22,7 +22,7 @@ const vue = new Vue({
             //// nuestra      APIKey
             const apiKey = 'AIzaSyDS9VtkbPnvgTil44LtEiQ--DLIp5-GE2g';
             // rango de la hoja de calculo que queremos leer
-            const values = 'A2:AF13';
+            const values = 'A2:E10';
             // fetch es un método nativo para hacer peticiones http
             // en el navegador 
             fetch("https://content-sheets.googleapis.com/v4/spreadsheets/" + idSheets + "/values/"+ values +"?access_token=" + apiKey + "&key=" + apiKey)
@@ -41,10 +41,10 @@ const vue = new Vue({
 
         addFechaRows() {
 
-            this.listaDatos.splice(0, 0, { fecha: 'Sábado 27 de Abril', colspan: 5 });
-            this.listaDatos.splice(6, 0, { fecha: 'Domingo 28 de Abril', colspan: 5 });
+            this.listaDatos.splice(0, 0, { fecha: 'EUROCOPA', colspan: 5 });
 
         }
+
     } // fin methods
 });
 
