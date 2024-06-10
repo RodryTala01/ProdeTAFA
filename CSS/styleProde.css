@@ -1,6 +1,6 @@
 body {
 
-    background-image: url(../Imagenes/Fondo.jpg);
+    background-image: url(../Imagenes/Fondo.JPG);
     background-size: auto;
     background-repeat: repeat;
     background-attachment: fixed;
@@ -10,7 +10,7 @@ body {
 }
 
 .navbar {
-    background-image: url(../Imagenes/FondoNavbar.jpg);
+    background-image: url(../Imagenes/FondoNavbar.JPG);
     background-size: auto;
     background-repeat: no-repeat;
     background-color: #143CDA;
