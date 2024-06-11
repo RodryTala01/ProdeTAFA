@@ -1,3 +1,4 @@
+
 function mostrarFecha32avos() {
     fecha32avos = document.getElementById("fecha32avos");
     fecha1 = document.getElementById("fecha1");
@@ -2059,10 +2060,10 @@ function mostrarPalmares(competicion) {
 
 
 
-function palmaresNo() {
+function enConstruccion() {
     Swal.fire({
         title: "EN CONSTRUCCIÓN",
-        text: "Pronto van a estar cargados todos los Palmarés.",
+        text: "Pronto van a estar cargadas todas las funciones no te desesperes.",
         imageUrl: "Imagenes/enConstruccion.gif",
     });
 }
@@ -2138,7 +2139,9 @@ function toggleExtintos() {
 
 
 
+
 function fechaCopaAmerica(id) {
+    console.log("Función fechaCopaAmerica llamada con ID:", id);
     var botonesFecha = document.querySelectorAll('.cajaFECHA'); // Selecciona todos los botones de fecha
     botonesFecha.forEach(function (btn) {
         btn.classList.remove('btnFechaActivo'); // Quita la clase 'btnFechaActivo' a todos los botones
@@ -2158,14 +2161,14 @@ function fechaCopaAmerica(id) {
 function clicFlechaIzquierda() {
     var botonesFecha = document.querySelectorAll('.cajaFECHA');
     var activeIndex = Array.from(botonesFecha).findIndex(btn => btn.classList.contains('btnFechaActivo'));
-    
 
     if (activeIndex > 0) {
         var prevButtonId = botonesFecha[activeIndex - 1].id.replace('btn', ''); // Obtener el ID del botón anterior
         fechaCopaAmerica(prevButtonId);
-        
     }
-    if (activeIndex < 29) { desplazar(-1) }
+    if (activeIndex < 29) {
+        desplazar(-1);
+    }
 }
 
 function clicFlechaDerecha() {
@@ -2175,7 +2178,9 @@ function clicFlechaDerecha() {
         var nextButtonId = botonesFecha[activeIndex + 1].id.replace('btn', ''); // Obtener el ID del botón siguiente
         fechaCopaAmerica(nextButtonId);
     }
-    if (activeIndex > 2) { desplazar(1) }
+    if (activeIndex > 2) {
+        desplazar(1);
+    }
 }
 
 document.getElementById('btnIzquierda').addEventListener('click', clicFlechaIzquierda);
@@ -2187,4 +2192,3 @@ function desplazar(cantidad) {
     const desplazamiento = cantidad * anchoBoton;
     contenedor.scrollLeft += desplazamiento;
 }
-

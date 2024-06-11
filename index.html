@@ -107,16 +107,18 @@
                         <a class="nav-link activo" href="#">INICIO</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href=".html">COPA AMÉRICA</a>
+                        <a class="nav-link" href="#" onclick="enConstruccion()">COPA AMÉRICA</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href=".html">EUROCOPA</a>
+                        <a class="nav-link" href="#" onclick="enConstruccion()">EUROCOPA</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link" href=".html">LIGA EUROAMÉRICA</a>
+                        <a class="nav-link" href="#" onclick="enConstruccion()">LIGA EUROAMÉRICA</a>
                     </li>
                     <li class="nav-item animado">
-                        <a class="nav-link bi bi-calculator" style="display: flex; justify-content: center; font-size: 1.3rem; margin-left: 1rem;" href=".html"></a>
+                        <a class="nav-link bi bi-calculator" onclick="enConstruccion()"
+                            style="display: flex; justify-content: center; font-size: 1.3rem; margin-left: 1rem;"
+                            href="#"></a>
                     </li>
             </div>
         </div>
@@ -146,8 +148,8 @@
                 onclick="clicFlechaIzquierda()"></button>
 
             <div id="contenedorFechas">
-                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn14del6 btnFechaActivo"
-                    id="btn14del6" onclick="fechaCopaAmerica('14del6')">Vie 14/06</button>
+                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn14del6 btnFechaActivo" id="btn14del6"
+                    onclick="fechaCopaAmerica('14del6')">Vie 14/06</button>
                 <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn15del6" id="btn15del6"
                     onclick="fechaCopaAmerica('15del6')">Sáb
                     15/06</button>
@@ -239,10 +241,10 @@
 
                             <tr v-for="(lista, index) in listaDatos">
                                 <template v-if="index === 0">
-                                    <td colspan="6" class=" fecha">{{ lista.fecha }}</td>
+                                    <td colspan="6" class=" fecha ">{{ lista.fecha }}</td>
                                 </template>
                                 <template v-else>
-                                    <td class="tg-nrix estado-columna colorTiempo p-2">{{ lista[0] }}</td>
+                                    <td class="tg-nrix estado-columna colorTiempo p-2 ">{{ lista[0] }}</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo">
 
                                         <img v-if="lista[1] === 'Independiente'"
@@ -1442,7 +1444,7 @@
             </div>
         </div>
 
-        <button id="btnAbrirInput32avos" class="margenParaPubli p-2" onclick="abrirInput32avos()">CALCULADORA DE
+        <!--<button id="btnAbrirInput32avos" class="margenParaPubli p-2" onclick="abrirInput32avos()">CALCULADORA DE
             PUNTOS</button>
         <div id="campoInput32avos" class="hidden margenParaPubli">
             <button id="btnVolver32avos" class="p-2" onclick="volver32avos()">VOLVER</button>
@@ -1460,7 +1462,7 @@
                     id="btnMenos32avos" class="ms-2" onclick="restarPenales32avos()">-</button>
             </div>
             <button id="btnEnviar32avos" class="p-2" onclick="corroborar32avos()">Enviar</button>
-        </div>
+        </div>-->
 
 
 
@@ -1471,8 +1473,8 @@
 
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-        <script src="JS/leer.js"></script>
-        
+
+
 
     </main>
 
@@ -1481,13 +1483,15 @@
         <div class="fixed-bottom text-center col-md">
             <a href="Donar/index.html" target="_blank">
                 <img src="https://i.ibb.co/qkkt2sC/Banner-Publi.png" alt="Donale al admin no seas malo"
-                    class="img-fluid border border-2 border-dark mt-4" width="500 rem"></a>
+                    class="img-fluid border border-2 border-dark mt-4" width="377 rem">
+                <img src="https://seeklogo.com/images/P/pedidos-ya-logo-0F97E91D99-seeklogo.com.png?v=638240607230000000"
+                    alt="Donale al admin no seas malo" class="mt-4" width="30rem"></a>
         </div>
 
     </footer>
 
     <script src="JS/escudos.js"></script>
-    <script src="JS/indexProde.js"></script>
+    
 
     <!-- Bootstrap JavaScript Libraries -->
 
@@ -1495,7 +1499,9 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 
-
+    
+    <script src="JS/leer.js"></script>
+    <script src="JS/indexProde.js"></script>
 </body>
 
 </html>
