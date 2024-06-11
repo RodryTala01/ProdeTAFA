@@ -114,6 +114,9 @@
                     <li class="nav-item animado">
                         <a class="nav-link" href=".html">LIGA EUROAMÉRICA</a>
                     </li>
+                    <li class="nav-item animado">
+                        <a class="nav-link bi bi-calculator" style="display: flex; justify-content: center; font-size: 1.3rem; margin-left: 1rem;" href=".html"></a>
+                    </li>
             </div>
         </div>
         </div>
@@ -139,7 +142,7 @@
 
         <div class="text-center cajaBotonesFechas mt-4">
             <button type="button" class="cajaANT btn btn-light bi bi-caret-left-fill fw-bold" id="btnIzquierda"
-                onclick="desplazar(-2)"></button>
+                onclick="clicFlechaIzquierda()"></button>
 
             <div id="contenedorFechas">
                 <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn14del6 btnFechaActivo"
@@ -211,7 +214,7 @@
             </div>
 
             <button type="button" class="cajaSIG btn btn-light bi bi-caret-right-fill fw-bold" id="btnDerecha"
-                onclick="desplazar(2)"></button>
+                onclick="clicFlechaDerecha()"></button>
         </div>
 
         <div id="fecha14del6" class="fecha14del6">
@@ -1420,13 +1423,13 @@
                                     <th class="tg-nrix estado-columna colorTiempo p-2">16:00</th>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoLocal3"
                                             src="" height="30px" width="50px" alt="">
-                                        <br><span id="equipoNombreLocal3">Hungria</span>
+                                        <br><span id="equipoNombreLocal3">Italia</span>
                                     </td>
                                     <td class="tg-nrix numero p-2 colorGoles">X</td>
                                     <td class="tg-nrix numero p-2 colorGoles">X</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante3" src="" height="30px" width="50px" alt="">
-                                        <br><span id="equipoNombreVisitante3">Suiza</span>
+                                        <br><span id="equipoNombreVisitante3">Albania</span>
                                     </td>
                                 </tr>
 
@@ -1468,7 +1471,8 @@
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
         <script src="JS/leer.js"></script>
-
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2152065057728128"
+            crossorigin="anonymous"></script>
 
 
     </main>

@@ -2136,15 +2136,9 @@ function toggleExtintos() {
 }
 
 
-function desplazar(cantidad) {
-    const contenedor = document.getElementById('contenedorFechas');
-    const anchoBoton = document.querySelector('.cajaFECHA').offsetWidth + 10; // Ancho del botón + margen
-    const desplazamiento = cantidad * anchoBoton;
-    contenedor.scrollLeft += desplazamiento;
-}
+
 
 function fechaCopaAmerica(id) {
-    
     var botonesFecha = document.querySelectorAll('.cajaFECHA'); // Selecciona todos los botones de fecha
     botonesFecha.forEach(function (btn) {
         btn.classList.remove('btnFechaActivo'); // Quita la clase 'btnFechaActivo' a todos los botones
@@ -2153,13 +2147,44 @@ function fechaCopaAmerica(id) {
 
     var divsFechas = document.querySelectorAll('[id^="fecha"]'); // Selecciona todos los divs de fecha
     divsFechas.forEach(function (div) {
-        
         if (div.id === "fecha" + id) {
             div.style.display = "block"; // Muestra el div correspondiente al ID
         } else {
             div.style.display = "none"; // Oculta los demás divs
         }
     });
-
-    
 }
+
+function clicFlechaIzquierda() {
+    var botonesFecha = document.querySelectorAll('.cajaFECHA');
+    var activeIndex = Array.from(botonesFecha).findIndex(btn => btn.classList.contains('btnFechaActivo'));
+    
+
+    if (activeIndex > 0) {
+        var prevButtonId = botonesFecha[activeIndex - 1].id.replace('btn', ''); // Obtener el ID del botón anterior
+        fechaCopaAmerica(prevButtonId);
+        
+    }
+    if (activeIndex < 29) { desplazar(-1) }
+}
+
+function clicFlechaDerecha() {
+    var botonesFecha = document.querySelectorAll('.cajaFECHA');
+    var activeIndex = Array.from(botonesFecha).findIndex(btn => btn.classList.contains('btnFechaActivo'));
+    if (activeIndex < botonesFecha.length - 1) {
+        var nextButtonId = botonesFecha[activeIndex + 1].id.replace('btn', ''); // Obtener el ID del botón siguiente
+        fechaCopaAmerica(nextButtonId);
+    }
+    if (activeIndex > 2) { desplazar(1) }
+}
+
+document.getElementById('btnIzquierda').addEventListener('click', clicFlechaIzquierda);
+document.getElementById('btnDerecha').addEventListener('click', clicFlechaDerecha);
+
+function desplazar(cantidad) {
+    const contenedor = document.getElementById('contenedorFechas');
+    const anchoBoton = document.querySelector('.cajaFECHA').offsetWidth + 10; // Ancho del botón + margen
+    const desplazamiento = cantidad * anchoBoton;
+    contenedor.scrollLeft += desplazamiento;
+}
+
