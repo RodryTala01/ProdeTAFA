@@ -2060,15 +2060,6 @@ function mostrarPalmares(competicion) {
 
 
 
-function enConstruccion() {
-    Swal.fire({
-        title: "EN CONSTRUCCIÓN",
-        text: "Pronto van a estar cargadas todas las funciones no te desesperes.",
-        imageUrl: "Imagenes/enConstruccion.gif",
-    });
-}
-
-
 const abrirModal = document.getElementById('botonTablaGeneral');
 const miModal = document.getElementById('modalGeneral');
 const cerrarModal = document.getElementById('cerrarModalGeneral');
@@ -2178,7 +2169,7 @@ function clicFlechaDerecha() {
         var nextButtonId = botonesFecha[activeIndex + 1].id.replace('btn', ''); // Obtener el ID del botón siguiente
         fechaCopaAmerica(nextButtonId);
     }
-    if (activeIndex > 2) {
+    if (activeIndex > 1) {
         desplazar(1);
     }
 }

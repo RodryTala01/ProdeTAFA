@@ -19,7 +19,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             break;
 
         case "Paises Bajos":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/8GEqzfLegwFFpe6X2BODTg_96x96.png";
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Flag_of_the_Netherlands.svg/640px-Flag_of_the_Netherlands.svg.png";
             break;
 
         case "Independiente":
@@ -447,7 +447,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             break;
         
         case "Portugal":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/HJ3_2c4w791nZJj7n-Lj3Q_96x96.png";
+            elementoEscudo.src = "https://media.istockphoto.com/id/483663073/es/vector/bandera-de-portugal.jpg?s=612x612&w=0&k=20&c=AhsHvnIM0tfsPcSaNdVbjsy5uCJ10gQ3mKwUqvBVuGc=";
             break;
         
         case "Suecia":
@@ -487,7 +487,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             break;
         
         case "Argentina":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/1xBWyjjkA6vEWopPK3lIPA_96x96.png";
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/200px-Flag_of_Argentina.svg.png";
             break;
 
         case "El Salvador":
@@ -499,7 +499,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             break;
 
         case "Inglaterra":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/DTqIL8Ba3KIuxGkpXw5ayA_96x96.png";
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Flag_of_England.svg/1200px-Flag_of_England.svg.png";
             break;
 
         case "Brasil":
@@ -511,11 +511,11 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             break;
 
         case "Francia":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/z3JEQB3coEAGLCJBEUzQ2A_96x96.png";
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Flag_of_France_%281794%E2%80%931815%2C_1830%E2%80%931974%29.svg/200px-Flag_of_France_%281794%E2%80%931815%2C_1830%E2%80%931974%29.svg.png";
             break;
 
         case "Alemania":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/h1FhPLmDg9AHXzhygqvVPg_96x96.png";
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Germany_%283-2%29.svg/220px-Flag_of_Germany_%283-2%29.svg.png";
             break;
         
         case "Deportivo Pereira":
@@ -690,7 +690,86 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Flag_of_Albania.svg/800px-Flag_of_Albania.svg.png";
             break;
 
-
+        case "Serbia":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Flag_of_Serbia.svg/800px-Flag_of_Serbia.svg.png";
+            break;
+        
+        case "Eslovenia":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Flag_of_Slovenia.svg/640px-Flag_of_Slovenia.svg.png";
+            break;
+        
+        case "Dinamarca":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/200px-Flag_of_Denmark.svg.png";
+            break;
+        
+        case "Polonia":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Flag_of_Poland.svg/800px-Flag_of_Poland.svg.png";
+            break;
+        
+        case "Austria":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Flag_of_Austria.svg/1200px-Flag_of_Austria.svg.png";
+            break;
+        
+        case "Rumania":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Flag_of_Romania.svg/1200px-Flag_of_Romania.svg.png";
+            break;
+        
+        case "Ucrania":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/200px-Flag_of_Ukraine.svg.png";
+            break;
+        
+        case "Belgica":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Flag_of_Belgium.svg/900px-Flag_of_Belgium.svg.png";
+            break;
+        
+        case "Eslovaquia":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Flag_of_Slovakia.svg/1200px-Flag_of_Slovakia.svg.png";
+            break;
+        
+        case "Turquia":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Turkey.svg/640px-Flag_of_Turkey.svg.png";
+            break;
+        
+        case "Georgia":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Flag_of_Georgia.svg/800px-Flag_of_Georgia.svg.png";
+            break;
+        
+        case "Rep. Checa":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_the_Czech_Republic.svg";
+            break;
+        
+        case "Escocia":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/1/10/Flag_of_Scotland.svg";
+            break;
+        
+        case "Canadá":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Canada_%28Pantone%29.svg/800px-Flag_of_Canada_%28Pantone%29.svg.png";
+            break;
+        
+        case "Perú":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Flag_of_Peru_%281825%E2%80%931884%29.svg/270px-Flag_of_Peru_%281825%E2%80%931884%29.svg.png";
+            break;
+        
+        case "Chile":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Flag_of_Chile.svg/200px-Flag_of_Chile.svg.png";
+            break;
+        
+        case "Ecuador":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/e/e8/Flag_of_Ecuador.svg";
+            break;
+        
+        case "Venezuela":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Flag_of_Venezuela.svg/200px-Flag_of_Venezuela.svg.png";
+            break;
+        
+        case "Mexico":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Flag_of_Mexico.svg/2560px-Flag_of_Mexico.svg.png";
+            break;
+        
+        case "Jamaica":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Flag_of_Jamaica.svg/2560px-Flag_of_Jamaica.svg.png";
+            break;
+            
 
 
 
