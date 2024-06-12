@@ -457,14 +457,6 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         case "Atlético Rafaela":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/sJTwhSg2rykiEWNDGevTtQ_96x96.png";
             break;
-        
-        case "Panamá":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/JIn8OwxL6KFFiYrKGnL2RQ_96x96.png";
-            break;
-        
-        case "México":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/yJF9xqmUGenD8108FJbg9A_96x96.png";
-            break;
 
         case "Ghana":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/VJQ1emg0TOubjGnap4vWuw_96x96.png";
@@ -483,7 +475,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             break;
 
         case "Colombia":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/tXHnA_tDylayacdjWQCJvw_96x96.png";
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Colombia.svg/200px-Flag_of_Colombia.svg.png";
             break;
         
         case "Argentina":
@@ -503,7 +495,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             break;
 
         case "Brasil":
-            elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/zKLzoJVYz0bb6oAnPUdwWQ_96x96.png";
+            elementoEscudo.src = "https://concepto.de/wp-content/uploads/2022/04/bandera-de-brasil-actual.jpg";
             break;
 
         case "Croacia":
@@ -674,7 +666,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/-n4YxXgf_vhcYhp03Mq6Dw_96x96.png";
             break;
         
-        case "Hungria":
+        case "Hungría":
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Flag_of_Hungary.svg/640px-Flag_of_Hungary.svg.png";
             break;
         
@@ -726,7 +718,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Flag_of_Slovakia.svg/1200px-Flag_of_Slovakia.svg.png";
             break;
         
-        case "Turquia":
+        case "Turquía":
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Turkey.svg/640px-Flag_of_Turkey.svg.png";
             break;
         
@@ -762,12 +754,36 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Flag_of_Venezuela.svg/200px-Flag_of_Venezuela.svg.png";
             break;
         
-        case "Mexico":
+        case "México":
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Flag_of_Mexico.svg/2560px-Flag_of_Mexico.svg.png";
             break;
         
         case "Jamaica":
             elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Flag_of_Jamaica.svg/2560px-Flag_of_Jamaica.svg.png";
+            break;
+        
+        case "Estados Unidos":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/1024px-Flag_of_the_United_States.svg.png";
+            break;
+        
+        case "Bolivia":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Bandera_de_Bolivia_%28Estado%29.svg/264px-Bandera_de_Bolivia_%28Estado%29.svg.png";
+            break;
+        
+        case "Uruguay":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Uruguay.svg/1200px-Flag_of_Uruguay.svg.png";
+            break;
+        
+        case "Panamá":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Flag_of_Panama.svg/800px-Flag_of_Panama.svg.png";
+            break;
+        
+        case "Paraguay":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Flag_of_Paraguay.svg/2560px-Flag_of_Paraguay.svg.png";
+            break;
+        
+        case "Costa Rica":
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Flag_of_Costa_Rica_%28state%29.svg/200px-Flag_of_Costa_Rica_%28state%29.svg.png";
             break;
             
 
@@ -775,7 +791,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
 
         default:
             // Si el nombre del equipo no coincide con ningún caso, puedes asignar un escudo predeterminado o mostrar un mensaje de error
-            elementoEscudo.src = "../Imagenes/Fondo.png";
+            elementoEscudo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Gay_Pride_Flag.svg/200px-Gay_Pride_Flag.svg.png";
             break;
     }
 }
