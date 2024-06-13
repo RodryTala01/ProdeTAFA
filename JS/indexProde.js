@@ -2132,7 +2132,6 @@ function toggleExtintos() {
 
 
 function fechaCopaAmerica(id) {
-    console.log("Función fechaCopaAmerica llamada con ID:", id);
     var botonesFecha = document.querySelectorAll('.cajaFECHA'); // Selecciona todos los botones de fecha
     botonesFecha.forEach(function (btn) {
         btn.classList.remove('btnFechaActivo'); // Quita la clase 'btnFechaActivo' a todos los botones
@@ -2182,4 +2181,30 @@ function desplazar(cantidad) {
     const anchoBoton = document.querySelector('.cajaFECHA').offsetWidth + 10; // Ancho del botón + margen
     const desplazamiento = cantidad * anchoBoton;
     contenedor.scrollLeft += desplazamiento;
+}
+
+function calculadoraCopaAmerica() {
+    var btnAme = document.getElementById("btnCalculadoraCopaAmerica");
+    var btnEuro = document.getElementById("btnCalculadoraEurocopa");
+    var divAme = document.getElementById("divCalculadoraCopaAmerica");
+    var divEuro = document.getElementById("divCalculadoraEurocopa");
+
+    btnEuro.classList.remove('btnFechaActivo');
+    btnAme.classList.add('btnFechaActivo');
+
+    divAme.style.display = "block"; // Muestra el div correspondiente al ID
+    divEuro.style.display = "none"; // Oculta los demás divs
+}
+
+function calculadoraEurocopa() {
+    var btnAme = document.getElementById("btnCalculadoraCopaAmerica");
+    var btnEuro = document.getElementById("btnCalculadoraEurocopa");
+    var divAme = document.getElementById("divCalculadoraCopaAmerica");
+    var divEuro = document.getElementById("divCalculadoraEurocopa");
+
+    btnAme.classList.remove('btnFechaActivo');
+    btnEuro.classList.add('btnFechaActivo');
+
+    divEuro.style.display = "block"; // Muestra el div correspondiente al ID
+    divAme.style.display = "none"; // Oculta los demás divs
 }

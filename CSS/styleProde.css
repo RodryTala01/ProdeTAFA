@@ -1391,3 +1391,10 @@ div>a {
 .noMostrar{
     display: none;
 }
+
+#divCalculadoraCopaAmerica{
+    display: none;
+}
+#divCalculadoraEurocopa {
+    display: block;
+}

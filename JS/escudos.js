@@ -796,12 +796,24 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
     }
 }
 
-for (let i = 1; i <= 150; i++) {
-    var equipoNombreLocal = document.getElementById("equipoNombreLocal" + i).innerText;
-    var equipoNombreVisitante = document.getElementById("equipoNombreVisitante" + i).innerText;
+for (let i = 0; i <= 150; i++) {
+    // Obtener elementos
+    var equipoNombreLocalElement = document.getElementById("equipoNombreLocal" + i);
+    var equipoNombreVisitanteElement = document.getElementById("equipoNombreVisitante" + i);
     var equipoEscudoLocal = document.getElementById("equipoEscudoLocal" + i);
     var equipoEscudoVisitante = document.getElementById("equipoEscudoVisitante" + i);
 
+    // Verificar que todos los elementos existen
+    if (!equipoNombreLocalElement || !equipoNombreVisitanteElement || !equipoEscudoLocal || !equipoEscudoVisitante) {
+        continue; // Saltar al siguiente índice si algún elemento no existe
+    }
+
+    // Obtener textos de los elementos
+    var equipoNombreLocal = equipoNombreLocalElement.innerText;
+    var equipoNombreVisitante = equipoNombreVisitanteElement.innerText;
+
+    // Asignar escudos
     asignarEscudo(equipoNombreLocal, equipoEscudoLocal);
     asignarEscudo(equipoNombreVisitante, equipoEscudoVisitante);
 }
+
