@@ -1,3 +1,6 @@
+let currentFechaEuro = 1;  // Inicializa currentFecha como variable global
+let currentFechaAmerica = 1;  // Inicializa currentFecha como variable global COPA AMERICA
+
 
 function mostrarFecha32avos() {
     fecha32avos = document.getElementById("fecha32avos");
@@ -2208,3 +2211,86 @@ function calculadoraEurocopa() {
     divEuro.style.display = "block"; // Muestra el div correspondiente al ID
     divAme.style.display = "none"; // Oculta los demás divs
 }
+
+
+
+
+function calculadoraPasarAFechaEuro(direction) {
+    let totalFechas = 3;
+
+    if (direction === 'next' && currentFechaEuro < totalFechas) {
+        currentFechaEuro++;
+    } else if (direction === 'prev' && currentFechaEuro > 1) {
+        currentFechaEuro--;
+    }
+
+    // Oculta todos los contenedores de fechas de Eurocopa
+    for (let i = 1; i <= totalFechas; i++) {
+        let fechaDiv = document.getElementById('fechaCalculadoraEurocopa' + i);
+        if (fechaDiv) {
+            fechaDiv.style.display = 'none';
+        }
+    }
+
+    // Muestra el contenedor de fecha seleccionado
+    let selectedFecha = document.getElementById('fechaCalculadoraEurocopa' + currentFechaEuro);
+    if (selectedFecha) {
+        selectedFecha.style.display = 'flex';
+    }
+
+    // Actualiza el texto del contenedor de fechas
+    let contenedorFechas = document.getElementById('nombreFechaEurocopa');
+    if (contenedorFechas) {
+        contenedorFechas.innerText = 'FECHA ' + currentFechaEuro;
+    }
+
+    // Habilita o deshabilita los botones en función de la fecha actual
+    let btnIzquierda = document.getElementById('btnIzquierdaEuro');
+    let btnDerecha = document.getElementById('btnDerechaEuro');
+    btnIzquierda.disabled = currentFechaEuro === 1;
+    btnDerecha.disabled = currentFechaEuro === totalFechas;
+}
+
+function calculadoraPasarAFechaAmerica(direction) {
+
+    
+
+    let totalFechas = 3;
+
+    if (direction === 'next' && currentFechaAmerica < totalFechas) {
+        currentFechaAmerica++;
+    } else if (direction === 'prev' && currentFechaAmerica > 1) {
+        currentFechaAmerica--;
+    }
+
+    // Oculta todos los contenedores de fechas de América
+    for (let i = 1; i <= totalFechas; i++) {
+        let fechaDiv = document.getElementById('fechaCalculadoraAmerica' + i);
+        if (fechaDiv) {
+            fechaDiv.style.display = 'none';
+        }
+    }
+
+    // Muestra el contenedor de fecha seleccionado
+    let selectedFecha = document.getElementById('fechaCalculadoraAmerica' + currentFechaAmerica);
+    if (selectedFecha) {
+        selectedFecha.style.display = 'flex';
+    }
+
+    // Actualiza el texto del contenedor de fechas
+    let contenedorFechas = document.getElementById('nombreFechaAmerica');
+    if (contenedorFechas) {
+        contenedorFechas.innerText = 'FECHA ' + currentFechaAmerica;
+    }
+
+    // Habilita o deshabilita los botones en función de la fecha actual
+    let btnIzquierda = document.getElementById('btnIzquierdaAmerica');
+    let btnDerecha = document.getElementById('btnDerechaAmerica');
+    btnIzquierda.disabled = currentFechaAmerica === 1;
+    btnDerecha.disabled = currentFechaAmerica === totalFechas;
+    
+}
+document.addEventListener("", function () {
+    calculadoraPasarAFechaEuro();  // Inicializa la Eurocopa
+    calculadoraPasarAFechaAmerica();  // Inicializa América
+});
