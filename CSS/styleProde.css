@@ -1,14 +1,12 @@
 body {
 
-    
+
     text-align: center;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     font-family: 'Archivo Black', sans-serif;
 }
 
-.navbar {
-    
-}
+.navbar {}
 
 .banner>img {
     border-radius: 5px;
@@ -644,7 +642,16 @@ textarea {
 
 
 /* Estilo para la imagen en computadora */
+
+
+
 @media only screen and (min-width: 768px) {
+
+    .tablaPosicionesEurocopa {
+        width: 30%;
+        border-collapse: collapse;
+    }
+
     .resultado {
         margin: auto;
         padding-right: 5px;
@@ -744,6 +751,13 @@ textarea {
 
 /* Estilo para la imagen en dispositivos móviles */
 @media only screen and (max-width: 767px) {
+
+    .tablaPosicionesEurocopa {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
     .resultado {
         margin: auto;
         margin-top: 5px;
@@ -1388,13 +1402,101 @@ div>a {
     color: white;
 }
 
-.noMostrar{
+.noMostrar {
     display: none;
 }
 
-#divCalculadoraCopaAmerica{
+#divCalculadoraCopaAmerica {
     display: none;
 }
+
 #divCalculadoraEurocopa {
     display: block;
+}
+
+.tablaPosicionesEurocopa>thead>tr>th {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    text-align: center;
+    background-color: black;
+}
+
+.tablaPosicionesEurocopa>tbody>tr>td {
+    border-bottom: 1px solid white;
+    text-align: center;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+/* Asegúrate de que este CSS esté enlazado o incluido en tu documento */
+.tabla-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.ptsTablaPosicionesEurocopa {
+    font-weight: bold;
+}
+
+.highlight-green {
+    background-color: #07ff0779;
+    /* Color verde pastel */
+}
+
+.highlight-red {
+    background-color: #ff070779;
+    /* Color verde pastel */
+}
+
+#divProdePagoFechas {
+    display: none;
+}
+
+.fecha-box {
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
+
+@media (min-width: 576px) {
+
+    /* Estilos para pantallas más grandes (tablet y desktop) */
+    .fecha-box {
+        margin-right: 1%;
+    }
+}
+
+@media (max-width: 575px) {
+
+    /* Estilos para pantallas más pequeñas (móviles) */
+    .fecha-box {
+        width: 100%;
+    }
+}
+
+#tablasFechasProdePago>div>div>table>thead>tr>th {
+    padding: none;
+    background: none;
+    color: white;
+    border: none;
+}
+
+#tablasFechasProdePago>div>div>h4 {
+
+    padding-top: 1rem;
+    
+}
+
+#tablasFechasProdePago>div>div {
+    background: linear-gradient(#ffffff18,
+            #00000094);
+}
+
+.estiloBotones {
+    font-size: 1rem;
+    background-color: #29325042;
+    color: white;
+    text-decoration: none;
+    border-color: #4d5d94;
+    margin: 0 5px;
 }

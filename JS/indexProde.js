@@ -1,6 +1,6 @@
 let currentFechaEuro = 1;  // Inicializa currentFecha como variable global
 let currentFechaAmerica = 1;  // Inicializa currentFecha como variable global COPA AMERICA
-
+var penalesEurocopaFecha1 = 0;
 
 function mostrarFecha32avos() {
     fecha32avos = document.getElementById("fecha32avos");
@@ -2294,3 +2294,122 @@ document.addEventListener("", function () {
     calculadoraPasarAFechaEuro();  // Inicializa la Eurocopa
     calculadoraPasarAFechaAmerica();  // Inicializa América
 });
+
+
+
+
+
+
+
+
+
+
+
+
+function abrirInputEurocopaFecha1() {
+    document.getElementById("campoInputEurocopaFecha1").classList.remove("hidden");
+    document.getElementById("btnAbrirInputEurocopaFecha1").classList.add("hidden");
+}
+
+function volverEurocopaFecha1() {
+    document.getElementById("campoInputEurocopaFecha1").classList.add("hidden");
+    document.getElementById("btnAbrirInputEurocopaFecha1").classList.remove("hidden");
+}
+
+function ajustarAlturaEurocopaFecha1() {
+    var textarea = document.getElementById("inputTextoEurocopaFecha1");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function corroborarEurocopaFecha1() {
+
+    var texto = document.getElementById("inputTextoEurocopaFecha1").value;
+    plenos = 0;
+    parciales = 0;
+    errores = 0;
+    puntosTotales = 0;
+
+    const numeros = texto.match(/\d+/g);
+    if (!numeros) return [];
+
+    const pares = [];
+    for (let i = 0; i < numeros.length; i += 2) {
+        if (i + 1 < numeros.length) {
+            pares.push([parseInt(numeros[i]), parseInt(numeros[i + 1])]);
+        }
+    }
+
+    const fechaCorrecta = [
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"]
+    ];
+
+    const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
+    const errorEurocopaFecha1 = document.getElementById("errorEurocopaFecha1");
+    if (pares.length < fechaSinX.length) {
+        errorEurocopaFecha1.innerHTML = "ERROR: Te faltan partidos.";
+    } else {
+        errorEurocopaFecha1.innerHTML = "";
+    }
+
+    for (let i = 0; i < 12; i++) {
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(pares[i][0]) || isNaN(pares[i][1]))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (pares[i][0] == fechaCorrecta[i][0] && pares[i][1] == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((pares[i][0] > pares[i][1] && fechaCorrecta[i][0] > fechaCorrecta[i][1]) || (pares[i][0] < pares[i][1] && fechaCorrecta[i][0] < fechaCorrecta[i][1])
+            || (pares[i][0] == pares[i][1] && fechaCorrecta[i][0] == fechaCorrecta[i][1] && pares[i][0] !== fechaCorrecta[i][0] && pares[i][1] !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+    }
+    puntosTotales = 3 * plenos + 1 * parciales + penalesEurocopaFecha1;
+
+    var puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    var plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    var parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    var erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    var penalesTexto = penalesEurocopaFecha1 === 1 ? 'PENAL' : 'PENALES';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penalesEurocopaFecha1 + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+
+
+}
+
+
+
+function cambiarPenalesEurocopaFecha1(i) {
+    if (penalesEurocopaFecha1 + i >= 0) {
+        penalesEurocopaFecha1 += i;
+        actualizarPenalesEurocopaFecha1();
+    } else {
+        alert("El número no puede ser menor que 0 pedazo de autista");
+    }   
+}
+
+
+
+function actualizarPenalesEurocopaFecha1() {
+    document.getElementById("penalesEurocopaFecha1").innerText = penalesEurocopaFecha1;
+}
