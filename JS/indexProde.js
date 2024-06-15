@@ -2134,6 +2134,7 @@ function toggleExtintos() {
 
 
 
+
 function fechaCopaAmerica(id) {
     var botonesFecha = document.querySelectorAll('.cajaFECHA'); // Selecciona todos los botones de fecha
     botonesFecha.forEach(function (btn) {
@@ -2150,6 +2151,8 @@ function fechaCopaAmerica(id) {
         }
     });
 }
+
+
 
 function clicFlechaIzquierda() {
     var botonesFecha = document.querySelectorAll('.cajaFECHA');
@@ -2175,6 +2178,7 @@ function clicFlechaDerecha() {
         desplazar(1);
     }
 }
+
 
 document.getElementById('btnIzquierda').addEventListener('click', clicFlechaIzquierda);
 document.getElementById('btnDerecha').addEventListener('click', clicFlechaDerecha);
@@ -2341,7 +2345,7 @@ function corroborarEurocopaFecha1() {
     }
 
     const fechaCorrecta = [
-        ["X", "X"],
+        [5, 1],
         ["X", "X"],
         ["X", "X"],
         ["X", "X"],
