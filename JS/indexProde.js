@@ -2346,10 +2346,10 @@ function corroborarEurocopaFecha1() {
 
     const fechaCorrecta = [
         [5, 1],
-        ["X", "X"],
-        ["X", "X"],
-        ["X", "X"],
-        ["X", "X"],
+        [1, 3],
+        [3, 0],
+        [2, 1],
+        [1, 2],
         ["X", "X"],
         ["X", "X"],
         ["X", "X"],

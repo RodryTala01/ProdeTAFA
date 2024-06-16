@@ -419,6 +419,11 @@ th.p-2,
     color: white;
 }
 
+.colorBonus {
+    color: rgb(0, 255, 0);
+    border-top: 2px white solid;
+}
+
 .colorGoles {
     color: white;
     border-top: 2px white solid;
@@ -432,8 +437,6 @@ div>div>div>table>tbody>tr>th.bg-danger {
 div>div>div>table>tbody>tr>td.col-md-auto {
     color: white;
 }
-
-div>div>div>table>tbody>tr>td.bg-danger {}
 
 .navbar {
     margin-right: none !important;
