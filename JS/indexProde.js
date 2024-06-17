@@ -2,6 +2,8 @@ let currentFechaEuro = 1;  // Inicializa currentFecha como variable global
 let currentFechaAmerica = 1;  // Inicializa currentFecha como variable global COPA AMERICA
 var penalesEurocopaFecha1 = 0;
 
+desplazar(3);
+
 function mostrarFecha32avos() {
     fecha32avos = document.getElementById("fecha32avos");
     fecha1 = document.getElementById("fecha1");
@@ -2153,7 +2155,6 @@ function fechaCopaAmerica(id) {
 }
 
 
-
 function clicFlechaIzquierda() {
     var botonesFecha = document.querySelectorAll('.cajaFECHA');
     var activeIndex = Array.from(botonesFecha).findIndex(btn => btn.classList.contains('btnFechaActivo'));
@@ -2183,12 +2184,14 @@ function clicFlechaDerecha() {
 document.getElementById('btnIzquierda').addEventListener('click', clicFlechaIzquierda);
 document.getElementById('btnDerecha').addEventListener('click', clicFlechaDerecha);
 
+
 function desplazar(cantidad) {
     const contenedor = document.getElementById('contenedorFechas');
     const anchoBoton = document.querySelector('.cajaFECHA').offsetWidth + 10; // Ancho del botón + margen
     const desplazamiento = cantidad * anchoBoton;
     contenedor.scrollLeft += desplazamiento;
 }
+
 
 function calculadoraCopaAmerica() {
     var btnAme = document.getElementById("btnCalculadoraCopaAmerica");
@@ -2303,7 +2306,16 @@ document.addEventListener("", function () {
 
 
 
-
+function enMantenimiento() {
+    Swal.fire({
+        title: "Página en mantenimiento",
+        text: "No molestes",
+        icon: "warning",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Ok, perdón",
+    })
+}
 
 
 

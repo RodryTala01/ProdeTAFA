@@ -28,6 +28,10 @@
     background-size: auto;
     background-repeat: repeat;
     background-attachment: fixed;">
+
+
+
+
     <!-- <nav class="navbar navbar-expand-lg navbar-dark ">
         <div class="container-fluid">
             <div class="d-flex justify-content-center">
@@ -118,10 +122,10 @@
                     <li class="nav-item animado">
                         <a class="nav-link " href="Prode Pago.html" onclick="">PRODE PAGO</a>
                     </li>
-                    <li class="nav-item animado">
+                    <li class="nav-item animado" onclick="enMantenimiento()">
                         <a class="nav-link bi bi-calculator" onclick=""
                             style="display: flex; justify-content: center; font-size: 1.3rem; margin-left: 1rem;"
-                            href="Calculadora.html"></a>
+                            ></a>
                     </li>
             </div>
         </div>
@@ -152,10 +156,10 @@
                 <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn15del6 " id="btn15del6"
                     onclick="fechaCopaAmerica('15del6')">Sáb
                     15/06</button>
-                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn16del6 btnFechaActivo" id="btn16del6"
+                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn16del6" id="btn16del6"
                     onclick="fechaCopaAmerica('16del6')">Dom
                     16/06</button>
-                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn17del6" id="btn17del6"
+                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn17del6 btnFechaActivo" id="btn17del6"
                     onclick="fechaCopaAmerica('17del6')">Lun 17/06</button>
                 <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn18del6" id="btn18del6"
                     onclick="fechaCopaAmerica('18del6')">Mar 18/06</button>
@@ -209,7 +213,7 @@
                 onclick="clicFlechaDerecha()"></button>
         </div>
 
-        <div id="fecha16del6" class="fecha14del6 margenParaPubli">
+        <div id="fecha17del6" class="fecha14del6 margenParaPubli">
 
             <div id="containerPelota" class="containerPelota justify-content-center">
                 <img class="pelota" v-if="!loaded"
@@ -1463,7 +1467,7 @@
             </div>
         </div>
 
-        <!-- <div id="fecha16del6" class="noMostrar margenParaPubli">
+        <div id="fecha16del6" class="noMostrar margenParaPubli">
             <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
@@ -1478,8 +1482,8 @@
                                             src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreLocal6">Polonia</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">2</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante6" src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreVisitante6">Paises Bajos</span>
@@ -1491,8 +1495,8 @@
                                             src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreLocal4">Eslovenia</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante4" src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreVisitante4">Dinamarca</span>
@@ -1504,8 +1508,8 @@
                                             src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreLocal5">Serbia</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">0</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante5" src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreVisitante5">Inglaterra</span>
@@ -1519,9 +1523,9 @@
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
 
-        <div id="fecha17del6" class="noMostrar margenParaPubli">
+        <!-- <div id="fecha17del6" class="noMostrar margenParaPubli">
             <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
@@ -1574,7 +1578,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div id="fecha18del6" class="noMostrar margenParaPubli">
             <div class="containerFecha">
