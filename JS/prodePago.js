@@ -53,32 +53,28 @@ function ordenarTablaProdePago() {
     const rows = Array.from(tbody.rows);
 
     rows.sort((a, b) => {
-        const ptsA = parseInt(a.cells[2].textContent);
-        const ptsB = parseInt(b.cells[2].textContent);
-        const vA = parseInt(a.cells[3].textContent);
-        const vB = parseInt(b.cells[3].textContent);
-        const eA = parseInt(a.cells[4].textContent);
-        const eB = parseInt(b.cells[4].textContent);
-        const dA = parseInt(a.cells[5].textContent);
-        const dB = parseInt(b.cells[5].textContent);
         const pfA = parseInt(a.cells[6].textContent);
         const pfB = parseInt(b.cells[6].textContent);
-        const pcA = parseInt(a.cells[7].textContent);
-        const pcB = parseInt(b.cells[7].textContent);
         const difA = parseInt(a.cells[8].textContent);
         const difB = parseInt(b.cells[8].textContent);
+        const ptsA = parseInt(a.cells[2].textContent);
+        const ptsB = parseInt(b.cells[2].textContent);
         const participanteA = a.cells[1].textContent.toLowerCase();
         const participanteB = b.cells[1].textContent.toLowerCase();
 
+        
         if (ptsA !== ptsB) return ptsB - ptsA;
-        if (vA !== vB) return vB - vA;
-        if (eA !== eB) return eB - eA;
-        if (dA !== dB) return dB - dA;
-        if (pfA !== pfB) return pfB - pfA;
-        if (pcA !== pcB) return pcA - pcB;
         if (difA !== difB) return difB - difA;
+        if (pfA !== pfB) return pfB - pfA;
         if (participanteA < participanteB) return -1;
         if (participanteA > participanteB) return 1;
+        
+
+        
+       
+        
+        
+        
         return 0;
     });
 
@@ -92,6 +88,7 @@ function ordenarTablaProdePago() {
         tbody.appendChild(row);
     });
 }
+
 
 
 
@@ -188,16 +185,16 @@ function copiarTextoGeneradoProdePago() {
 }
 
 
-agregarATablaProdePago('Mario Talarico', 0, 0, 0, 0, 0, 0, 0)
-agregarATablaProdePago('Manu Solbes', 0, 0, 0, 0, 0, 0, 0)
-agregarATablaProdePago('Fabrizio Escolano', 0, 0, 0, 0, 0, 0, 0)
-agregarATablaProdePago('Rodrigo Talarico', 0, 0, 0, 0, 0, 0, 0)
-agregarATablaProdePago('Rodrigo Soca', 0, 0, 0, 0, 0, 0, 0)
-agregarATablaProdePago('Cami', 0, 0, 0, 0, 0, 0, 0)
-agregarATablaProdePago('Gabriel Talarico', 0, 0, 0, 0, 0, 0, 0)
-agregarATablaProdePago('Moreno Perez', 0, 0, 0, 0, 0, 0, 0)
-agregarATablaProdePago('Dante Dragon', 0, 0, 0, 0, 0, 0, 0)
-agregarATablaProdePago('Lucas Aguilera', 0, 0, 0, 0, 0, 0, 0)
+agregarATablaProdePago('Manu Solbes', 3, 1, 0, 0, 6, 3, 3)
+agregarATablaProdePago('Rodrigo Soca', 0, 0, 0, 1, 4, 5, -1)
+agregarATablaProdePago('Mario Talarico', 3, 1, 0, 0, 6, 5, 1)
+agregarATablaProdePago('Gabriel Talarico', 3, 1, 0, 0, 6, 5, 1)
+agregarATablaProdePago('Fabrizio Escolano', 3, 1, 0, 0, 4, 3, 1)
+agregarATablaProdePago('Rodrigo Talarico', 0, 0, 0, 1, 5, 6, -1)
+agregarATablaProdePago('Lucas Aguilera', 0, 0, 0, 1, 5, 6, -1)
+agregarATablaProdePago('Moreno Perez', 0, 0, 0, 1, 3, 4, -1)
+agregarATablaProdePago('Cami', 3, 1, 0, 0, 5, 4, 1)
+agregarATablaProdePago('Dante Dragon', 0, 0, 0, 1, 3, 6, -3)
 
 
 ordenarTablaProdePago()
