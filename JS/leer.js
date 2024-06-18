@@ -18,9 +18,9 @@ const vue = new Vue({
         },
         getLista() {
             // id de la hoja de calculo
-            const idSheets = '169rYxgQwzjatwq4iFgCTPn8y83IdvRH-Guy2PmTtnRk';
+            const idSheets = '1m9pK-SN2dmVYCPrXNa9d17Oy-KTRXyqGirl4Osi1_wk';
             //// nuestra      APIKey
-            const apiKey = 'AIzaSyDS9VtkbPnvgTil44LtEiQ--DLIp5-GE2g';
+            const apiKey = 'AIzaSyB6yQVqcR0Z3sPvFhwBw-aBCTAnZxTCuoE';
             // rango de la hoja de calculo que queremos leer
             const values = 'A2:E10';
             // fetch es un método nativo para hacer peticiones http
