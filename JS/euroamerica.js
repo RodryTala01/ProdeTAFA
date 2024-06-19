@@ -104,91 +104,94 @@ function agregarATablaEuroamerica(Jugador, PTS, Pleno, Parcial, Error, Extra) {
     tbody.appendChild(newRow);
 }
 
-function ordenarTablaEuroamerica() {
-    const tbody = document.querySelector('.tablaPosicionesEuroamerica tbody');
-    const rows = Array.from(tbody.rows);
 
-    rows.sort((a, b) => {
-        const ptsA = parseInt(a.cells[2].textContent);
-        const ptsB = parseInt(b.cells[2].textContent);
-        const plenoA = parseInt(a.cells[3].textContent);
-        const plenoB = parseInt(b.cells[3].textContent);
-        const parcialA = parseInt(a.cells[4].textContent);
-        const parcialB = parseInt(b.cells[4].textContent);
-        const errorA = parseInt(a.cells[5].textContent);
-        const errorB = parseInt(b.cells[5].textContent);
-        const extraA = parseInt(a.cells[6].textContent);
-        const extraB = parseInt(b.cells[6].textContent);
-        const nameA = a.cells[1].textContent.toLowerCase();
-        const nameB = b.cells[1].textContent.toLowerCase();
-
-        if (ptsA !== ptsB) return ptsB - ptsA;
-        if (plenoA !== plenoB) return plenoB - plenoA;
-        if (parcialA !== parcialB) return parcialB - parcialA;
-        if (errorA !== errorB) return errorA - errorB;
-        if (extraA !== extraB) return extraB - extraA;
-        if (nameA < nameB) return -1;
-        if (nameA > nameB) return 1;
-        return 0;
-    });
-
-    rows.forEach((row, index) => {
-        row.cells[0].textContent = index + 1;
-        if (index < 1) {
-            row.cells[0].classList.add('highlight-green');
-        } else {
-            row.cells[0].classList.remove('highlight-green');
+    function ordenarTablaEuroamerica() {
+        const tbody = document.querySelector('.tablaPosicionesEuroamerica tbody');
+        if (!tbody) {
+            console.error('Element not found: .tablaPosicionesEuroamerica tbody');
+            return;
         }
-        tbody.appendChild(row);
-    });
-}
+        const rows = Array.from(tbody.rows);
 
+        rows.sort((a, b) => {
+            const ptsA = parseInt(a.cells[2].textContent);
+            const ptsB = parseInt(b.cells[2].textContent);
+            const plenoA = parseInt(a.cells[3].textContent);
+            const plenoB = parseInt(b.cells[3].textContent);
+            const parcialA = parseInt(a.cells[4].textContent);
+            const parcialB = parseInt(b.cells[4].textContent);
+            const errorA = parseInt(a.cells[5].textContent);
+            const errorB = parseInt(b.cells[5].textContent);
+            const extraA = parseInt(a.cells[6].textContent);
+            const extraB = parseInt(b.cells[6].textContent);
+            const nameA = a.cells[1].textContent.toLowerCase();
+            const nameB = b.cells[1].textContent.toLowerCase();
 
+            if (ptsA !== ptsB) return ptsB - ptsA;
+            if (plenoA !== plenoB) return plenoB - plenoA;
+            if (parcialA !== parcialB) return parcialB - parcialA;
+            if (errorA !== errorB) return errorA - errorB;
+            if (extraA !== extraB) return extraB - extraA;
+            if (nameA < nameB) return -1;
+            if (nameA > nameB) return 1;
+            return 0;
+        });
 
-agregarATablaEuroamerica('Rodrigo Talarico', 14, 2, 6, 2, 2)
-agregarATablaEuroamerica('Anubis', 13, 2, 5, 3, 2)
-agregarATablaEuroamerica('Pancho Muzzio', 12, 2, 6, 2, 0)
-agregarATablaEuroamerica('Cristian Hantis', 12, 2, 4, 4, 2)
-agregarATablaEuroamerica('Bruno Alonso', 12, 1, 6, 3, 3)
-agregarATablaEuroamerica('Lucas Insua', 11, 2, 5, 3, 0)
-agregarATablaEuroamerica('Renzo Badano', 11, 2, 5, 3, 0)
-agregarATablaEuroamerica('Marto', 11, 1, 6, 3, 2)
-agregarATablaEuroamerica('Bautista Coria', 11, 1, 5, 4, 3)
-agregarATablaEuroamerica('Ignacio Cejas', 11, 1, 5, 4, 3)
-agregarATablaEuroamerica('Tomas Delgado', 11, 1, 5, 4, 3)
-agregarATablaEuroamerica('Felipe Galante', 11, 1, 4, 5, 4)
-agregarATablaEuroamerica('Kevin Sivori', 10, 2, 4, 4, 0)
-agregarATablaEuroamerica('Cami', 10, 1, 5, 4, 2)
-agregarATablaEuroamerica('Lucas Aguilera', 10, 1, 4, 5, 3)
-agregarATablaEuroamerica('Joel Alcalde', 10, 0, 7, 3, 3)
-agregarATablaEuroamerica('Manu Solbes', 9, 1, 6, 3, 0)
-agregarATablaEuroamerica('Fabrizio Escolano', 9, 0, 6, 4, 3)
-agregarATablaEuroamerica('Gabriel Talarico', 9, 0, 6, 4, 3)
-agregarATablaEuroamerica('Yago', 9, 0, 6, 4, 3)
-agregarATablaEuroamerica('Benja', 8, 1, 5, 4, 0)
-agregarATablaEuroamerica('Joaco Fernandez', 8, 0, 7, 3, 1)
-agregarATablaEuroamerica('Mario Talarico', 7, 1, 4, 5, 0)
-agregarATablaEuroamerica('Rodri Sebastian', 7, 1, 4, 5, 0)
-agregarATablaEuroamerica('Jhose', 7, 0, 7, 3, 0)
-agregarATablaEuroamerica('Pollo', 7, 0, 7, 3, 0)
-agregarATablaEuroamerica('Dani Bazan', 6, 0, 6, 4, 0)
-agregarATablaEuroamerica('Dante Dragon', 6, 0, 6, 4, 0)
-agregarATablaEuroamerica('Rodrigo Soca', 6, 0, 6, 4, 0)
-agregarATablaEuroamerica('Tomas Torcasio', 6, 0, 6, 4, 0)
-agregarATablaEuroamerica('Verónica Lucchesi', 6, 0, 6, 4, 0)
-agregarATablaEuroamerica('Moreno Perez', 6, 0, 5, 5, 1)
-agregarATablaEuroamerica('Ciro Guarch', 6, 0, 4, 6, 2)
-agregarATablaEuroamerica('Ian Gangai', 5, 0, 5, 5, 0)
-agregarATablaEuroamerica('Eze', 4, 0, 4, 6, 0)
-agregarATablaEuroamerica('Luciano Hufschmid', 3, 0, 3, 7, 0)
-agregarATablaEuroamerica('Nico Avalos', 0, 0, 0, 10, 0)
-agregarATablaEuroamerica('Nico Borea', 0, 0, 0, 10, 0)
+        rows.forEach((row, index) => {
+            row.cells[0].textContent = index + 1;
+            if (index < 1) {
+                row.cells[0].classList.add('highlight-green');
+            } else {
+                row.cells[0].classList.remove('highlight-green');
+            }
+            tbody.appendChild(row);
+        });
+    }
+
+    ordenarTablaEuroamerica();
 
 
 
 
-
-    
+agregarATablaEuroamerica('Anubis', 15, 2, 7, 3, 2)
+agregarATablaEuroamerica('Bautista Coria', 13, 1, 7, 4, 3)
+agregarATablaEuroamerica('Benja', 12, 2, 6, 4, 0)
+agregarATablaEuroamerica('Bruno Alonso', 15, 1, 8, 3, 4)
+agregarATablaEuroamerica('Cami', 14, 2, 6, 5, 2)
+agregarATablaEuroamerica('Ciro Guarch', 10, 1, 5, 6, 2)
+agregarATablaEuroamerica('Cristian Hantis', 17, 3, 5, 4, 3)
+agregarATablaEuroamerica('Dani Bazan', 8, 0, 7, 5, 1)
+agregarATablaEuroamerica('Dante Dragon', 9, 0, 8, 4, 1)
+agregarATablaEuroamerica('Eze', 6, 0, 6, 6, 0)
+agregarATablaEuroamerica('Fabrizio Escolano', 13, 1, 7, 4, 3)
+agregarATablaEuroamerica('Felipe Galante', 13, 1, 6, 5, 4)
+agregarATablaEuroamerica('Gabriel Talarico', 11, 0, 8, 4, 3)
+agregarATablaEuroamerica('Ian Gangai', 6, 0, 6, 6, 0)
+agregarATablaEuroamerica('Ignacio Cejas', 15, 2, 6, 4, 3)
+agregarATablaEuroamerica('Jhose', 10, 0, 9, 3, 1)
+agregarATablaEuroamerica('Joaco Fernandez', 11, 1, 7, 4, 1)
+agregarATablaEuroamerica('Joel Alcalde', 12, 0, 9, 3, 3)
+agregarATablaEuroamerica('Kevin Sivori', 11, 2, 5, 5, 0)
+agregarATablaEuroamerica('Lucas Aguilera', 13, 1, 6, 5, 4)
+agregarATablaEuroamerica('Lucas Insua', 12, 2, 6, 4, 0)
+agregarATablaEuroamerica('Luciano Hufschmid', 7, 1, 4, 7, 0)
+agregarATablaEuroamerica('Manu Solbes', 12, 1, 8, 3, 1)
+agregarATablaEuroamerica('Mario Talarico', 9, 1, 6, 5, 0)
+agregarATablaEuroamerica('Marto', 14, 1, 8, 3, 3)
+agregarATablaEuroamerica('Moreno Perez', 8, 0, 7, 5, 1)
+agregarATablaEuroamerica('Nico Avalos', 3, 0, 2, 10, 1)
+agregarATablaEuroamerica('Nico Borea', 0, 0, 0, 12, 0)
+agregarATablaEuroamerica('Pancho Muzzio', 15, 3, 6, 3, 0)
+agregarATablaEuroamerica('Pollo', 9, 0, 9, 3, 0)
+agregarATablaEuroamerica('Renzo Badano', 15, 3, 6, 3, 0)
+agregarATablaEuroamerica('Rodri Sebastian', 8, 1, 5, 6, 0)
+agregarATablaEuroamerica('Rodrigo Soca', 9, 1, 6, 5, 0)
+agregarATablaEuroamerica('Rodrigo Talarico', 15, 2, 6, 2, 3)
+agregarATablaEuroamerica('Tomas Delgado', 13, 1, 6, 5, 4)
+agregarATablaEuroamerica('Tomas Torcasio', 8, 0, 7, 5, 1)
+agregarATablaEuroamerica('Verónica Lucchesi', 9, 0, 8, 6, 1)
+agregarATablaEuroamerica('Yago', 11, 0, 7, 5, 4)
+  
 ordenarTablaEuroamerica();
 
 // Ordenar la tabla después de agregar todos los jugadores
