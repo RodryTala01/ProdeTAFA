@@ -186,14 +186,14 @@ function copiarTextoGeneradoProdePago() {
 
 
 agregarATablaProdePago('Manu Solbes', 3, 1, 0, 0, 7, 4, 3)
-agregarATablaProdePago('Rodrigo Soca', 0, 0, 0, 1, 7, 6, 1)
-agregarATablaProdePago('Mario Talarico', 3, 1, 0, 0, 7, 6, 1)
-agregarATablaProdePago('Gabriel Talarico', 3, 1, 0, 0, 7, 5, 2)
 agregarATablaProdePago('Fabrizio Escolano', 3, 1, 0, 0, 7, 4, 3)
-agregarATablaProdePago('Rodrigo Talarico', 0, 0, 0, 1, 5, 7, -2)
+agregarATablaProdePago('Gabriel Talarico', 3, 1, 0, 0, 7, 5, 2)
+agregarATablaProdePago('Mario Talarico', 3, 1, 0, 0, 7, 6, 1)
+agregarATablaProdePago('Rodrigo Soca', 3, 1, 0, 0, 7, 6, 1)
+agregarATablaProdePago('Cami', 0, 0, 0, 1, 6, 7, -1)
 agregarATablaProdePago('Lucas Aguilera', 0, 0, 0, 1, 6, 7, -1)
+agregarATablaProdePago('Rodrigo Talarico', 0, 0, 0, 1, 5, 7, -2)
 agregarATablaProdePago('Moreno Perez', 0, 0, 0, 1, 4, 7, -3)
-agregarATablaProdePago('Cami', 3, 1, 0, 0, 6, 7, -1)
 agregarATablaProdePago('Dante Dragon', 0, 0, 0, 1, 4, 7, -3)
 
 
