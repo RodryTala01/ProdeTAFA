@@ -2,7 +2,7 @@ let currentFechaEuro = 1;  // Inicializa currentFecha como variable global
 let currentFechaAmerica = 1;  // Inicializa currentFecha como variable global COPA AMERICA
 var penalesEurocopaFecha1 = 0;
 
-desplazar(3);
+desplazar(6);
 
 function mostrarFecha32avos() {
     fecha32avos = document.getElementById("fecha32avos");

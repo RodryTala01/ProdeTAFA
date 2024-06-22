@@ -651,6 +651,7 @@ textarea {
 @media only screen and (min-width: 768px) {
 
     .tablaPosicionesEurocopa,
+    .tablaPosicionesAmerica,
     .tablaPosicionesEuroamerica {
         width: 30%;
         border-collapse: collapse;
@@ -757,6 +758,7 @@ textarea {
 @media only screen and (max-width: 767px) {
 
     .tablaPosicionesEurocopa,
+    .tablaPosicionesAmerica,
     .tablaPosicionesEuroamerica {
         width: 100%;
         border-collapse: collapse;
@@ -1420,6 +1422,7 @@ div>a {
 }
 
 .tablaPosicionesEurocopa>thead>tr>th,
+.tablaPosicionesAmerica>thead>tr>th,
 .tablaPosicionesEuroamerica>thead>tr>th {
     padding-top: 4px;
     padding-bottom: 4px;
@@ -1428,6 +1431,7 @@ div>a {
 }
 
 .tablaPosicionesEurocopa>tbody>tr>td,
+.tablaPosicionesAmerica>tbody>tr>td,
 .tablaPosicionesEuroamerica>tbody>tr>td {
     border-bottom: 1px solid white;
     text-align: center;
