@@ -42,6 +42,7 @@ const vue = new Vue({
         addFechaRows() {
 
             this.listaDatos.splice(0, 0, { fecha: 'EUROCOPA', colspan: 5 });
+            this.listaDatos.splice(3, 0, { fecha: 'COPA AMERICA', colspan: 5 });
 
         }
 

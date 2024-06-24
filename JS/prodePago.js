@@ -185,16 +185,16 @@ function copiarTextoGeneradoProdePago() {
 }
 
 
-agregarATablaProdePago('Manu Solbes', 3, 1, 0, 0, 7, 4, 3)
-agregarATablaProdePago('Fabrizio Escolano', 3, 1, 0, 0, 7, 4, 3)
-agregarATablaProdePago('Gabriel Talarico', 3, 1, 0, 0, 7, 5, 2)
-agregarATablaProdePago('Mario Talarico', 3, 1, 0, 0, 7, 6, 1)
-agregarATablaProdePago('Rodrigo Soca', 3, 1, 0, 0, 7, 6, 1)
-agregarATablaProdePago('Cami', 0, 0, 0, 1, 6, 7, -1)
-agregarATablaProdePago('Lucas Aguilera', 0, 0, 0, 1, 6, 7, -1)
-agregarATablaProdePago('Rodrigo Talarico', 0, 0, 0, 1, 5, 7, -2)
-agregarATablaProdePago('Moreno Perez', 0, 0, 0, 1, 4, 7, -3)
-agregarATablaProdePago('Dante Dragon', 0, 0, 0, 1, 4, 7, -3)
+agregarATablaProdePago('Mario Talarico', 6, 2, 0, 0, 17, 8, 9)
+agregarATablaProdePago('Fabrizio Escolano', 4, 1, 1, 0, 12, 9, 3)
+agregarATablaProdePago('Gabriel Talarico', 4, 1, 1, 0, 15, 13, 2)
+agregarATablaProdePago('Rodrigo Soca', 3, 1, 0, 1, 13, 13, 0)
+agregarATablaProdePago('Manu Solbes', 3, 1, 0, 1, 9, 14, -5)
+agregarATablaProdePago('Cami', 1, 0, 1, 1, 14, 15, -1)
+agregarATablaProdePago('Lucas Aguilera', 1, 0, 1, 1, 11, 12, -1)
+agregarATablaProdePago('Moreno Perez', 1, 0, 1, 1, 11, 13, -2)
+agregarATablaProdePago('Rodrigo Talarico', 1, 0, 1, 1, 10, 12, -2)
+agregarATablaProdePago('Dante Dragon', 1, 0, 1, 1, 9, 12, -3)
 
 
 ordenarTablaProdePago()

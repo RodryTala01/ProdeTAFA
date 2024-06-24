@@ -162,21 +162,38 @@
             <div class="flex-row justify-content-center mt-4 margenParaPubli" id="fechaCalculadoraEurocopa1"
                 style="display: flex;">
                 <div>
+
+                    <button id="btnAbrirInputEurocopaFecha1"
+                        class="cajaFECHA tamañoMio btn btn-success fw-bold mt-4 mb-4"
+                        style="width: auto !important; height: auto;" onclick="abrirInputColocarAuto()">Colocar
+                        automáticamente</button><button id="btnAbrirInputEurocopaFecha1" class="cajaFECHA tamañoMio btn btn-success fw-bold mt-4 mb-4"
+                            style="width: auto !important; height: auto;" onclick="limpiarAuto()">Limpiar</button>
+
+                    <div id="modalInputAuto" class="modalAuto">
+                        <div class="modalAuto-content">
+                            <span class="close" onclick="cerrarModalAuto()">&times;</span>
+                            <p>Pegá tu fecha (SIN BONUS):</p>
+                            <textarea type="text" id="inputTextoAuto" style="width: 70%; resize: none; overflow-y: hidden;"
+                                oninput="ajustarAlturaAuto()"></textarea><br>
+                            <button onclick="escribirFechaAuto()">Enviar</button>
+                        </div>
+                    </div>
                     <table class="">
                         <tbody>
                             <tr class="">
-                                <th class="tg-nrix estado-columna colorTiempo p-2">Final</th>
+                                <th class="tg-nrix estado-columna colorTiempo p-2">14/06 16:00hs</th>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoLocal0" src=""
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal0">Alemania</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name="" class="inputCalculadora" id=""></td>
-                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name="" class="inputCalculadora" id=""></td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local1"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita1"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante0"
                                         src="" height="30px" alt="">
                                     <br><span id="equipoNombreVisitante0">Escocia</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus">Bonus 1: Sí</td>
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">15/06 10:00hs</th>
@@ -184,13 +201,15 @@
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal1">Hungría</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">1</td>
-                                <td class="tg-nrix numero p-2 colorGoles">3</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local2"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita2"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante1"
                                         src="" height="30px" alt="">
                                     <br><span id="equipoNombreVisitante1">Suiza</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus"></td>
+
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">15/06 13:00hs</th>
@@ -198,13 +217,14 @@
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal2">España</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">3</td>
-                                <td class="tg-nrix numero p-2 colorGoles">0</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local3"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita3"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante2"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante2">Croacia</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus">Bonus 2: 5</td>
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">15/06 16:00hs</th>
@@ -212,13 +232,14 @@
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal3">Italia</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">2</td>
-                                <td class="tg-nrix numero p-2 colorGoles">1</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local4"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita4"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante3"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante3">Albania</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus"></td>
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">16/06 10:00hs</th>
@@ -226,13 +247,14 @@
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal6">Polonia</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">1</td>
-                                <td class="tg-nrix numero p-2 colorGoles">2</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local5"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita5"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante6"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante6">Paises Bajos</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus">Bonus 3: P.B.</td>
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">16/06 13:00hs</th>
@@ -240,13 +262,15 @@
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal4">Eslovenia</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local6"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita6"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante4"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante4">Dinamarca</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus"></td>
+
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">16/06 16:00hs</th>
@@ -254,13 +278,15 @@
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal5">Serbia</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local7"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita7"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante5"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante5">Inglaterra</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus"></td>
+
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">17/06 10:00hs</th>
@@ -268,13 +294,15 @@
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal7">Rumania</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local8"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita8"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante7"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante7">Ucrania</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus"></td>
+
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">17/06 13:00hs</th>
@@ -282,13 +310,15 @@
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal8">Belgica</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local9"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita9"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante8"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante8">Eslovaquia</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus"></td>
+
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">17/06 16:00hs</th>
@@ -296,13 +326,15 @@
                                         height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal9">Austria</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local10"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita10"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante9"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante9">Francia</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus"></td>
+
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">18/06 13:00hs</th>
@@ -310,13 +342,15 @@
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal10">Turquía</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local11"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita11"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante10"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante10">Georgia</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus"></td>
+
                             </tr>
                             <tr class="">
                                 <th class="tg-nrix estado-columna colorTiempo p-2">18/06 16:00hs</th>
@@ -324,13 +358,14 @@
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreLocal11">Portugal</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                <td class="tg-nrix numero p-2 colorGoles "><input type="number" name=""
+                                        class="inputCalculadora" id="local12"></td>
+                                <td class="tg-nrix numero p-2 colorGoles"><input type="number" name=""
+                                        class="inputCalculadora" id="visita12"></td>
                                 <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoVisitante11"
                                         src="" height="30px" width="50px" alt="">
                                     <br><span id="equipoNombreVisitante11">Rep. Checa</span>
                                 </td>
-                                <td class="tg-nrix numero p-2 colorBonus">Bonus 4</td>
                             </tr>
                         </tbody>
                     </table>
@@ -338,37 +373,51 @@
                     <div>
                         <button id="btnAbrirInputEurocopaFecha1"
                             class="cajaFECHA tamañoMio btn btn-success fw-bold mt-4"
-                            style="width: 300px !important; height: 100px;"
-                            onclick="abrirInputEurocopaFecha1()">CALCULAR PUNTOS</button>
+                            style="width: 200px !important; height: 100px;"
+                            onclick="abrirBonus()">CALCULAR</button>
                     </div>
-                    <div id="campoInputEurocopaFecha1" class="hidden fw-bold mt-4 "
-                        style="width: 29rem !important; margin: auto;">
-                        <button id="btnVolverEurocopaFecha1" class="mt-4 p-2 cajaFECHA"
-                            onclick="volverEurocopaFecha1()">VOLVER</button>
-                        <h6 style="color: red;  width: 70%; margin: auto;" class="mt-4 mb-2">Pegar la fecha separando
-                            los números al menos por un
-                            espacio</h6>
-                        <textarea id="inputTextoEurocopaFecha1" placeholder="Pegá tu fecha acá"
-                            style="width: 70%; resize: none; overflow-y: hidden;"
-                            oninput=" ajustarAlturaEurocopaFecha1()"></textarea>
-                        <p style="color: white; margin-top: 2rem;">Penales:</p>
-                        <h6 style="color: orange; margin-top: none; font-size: 0.7rem; width: 70%; margin: auto;">Por
-                            algunos motivos no se pueden
-                            sumar los penales
-                            automáticamente así que indicá abajo cuántos puntos por penales sacaste:</h6>
-                        <h5 id="errorEurocopaFecha1"
-                            style="color: red; margin-top: none; font-size: 1rem;  width: 70%; margin: auto;"></h5>
-                        <div>
-                            <div id="penalesEurocopaFecha1" style="color: white; font-weight: bold;">0</div>
-                            <button onclick="cambiarPenalesEurocopaFecha1(1)" id="btnMasEurocopaFecha1"
-                                class="me-2 estiloBotones">+</button>
-                            <button onclick="cambiarPenalesEurocopaFecha1(-1)" id="btnMenosEurocopaFecha1"
-                                class="ms-2 estiloBotones">-</button>
 
+                    <div id="modalBonus" class="modalBonus">
+                        <div class="modalBonus-content">
+                            <span class="close" onclick="cerrarModalBonus()">&times;</span>
+                            <div id="bonusList" >
+                                <div class="bonus-item" >
+                                    <span class="bonus-label" >Bonus 1:</span><br>
+                                    <span class="bonus-label" style="font-size: 0.7rem;">¿Habrá un expulsado?:</span>
+                                    <div class="bonus-options" >
+                                        <label style="color: rgb(0, 255, 0);"><input type="radio" name="bonus1" id="bonus1" value="check">✔</label>
+                                        <label style="color: rgb(255, 0, 0);"><input type="radio" name="bonus1" id="bonus1no" value="cross">✘</label>
+                                    </div>
+                                </div>
+                                <div class="bonus-item">
+                                    <span class="bonus-label">Bonus 2:</span><br>
+                                    <span class="bonus-label" style="font-size: 0.7rem;">¿Cuántos corners habrá?:</span>
+                                    <div class="bonus-options">
+                                        <label style="color: rgb(0, 255, 0);"><input type="radio" name="bonus2" id="bonus2" value="check">✔</label>
+                                        <label style="color: rgb(255, 0, 0);"><input type="radio" name="bonus2" id="bonus2no" value="cross">✘</label>
+                                    </div>
+                                </div>
+                                <div class="bonus-item">
+                                    <span class="bonus-label">Bonus 3:</span><br>
+                                    <span class="bonus-label" style="font-size: 0.7rem;">¿Qué país tendrá más amarillas?:</span>
+                                    <div class="bonus-options">
+                                        <label style="color: rgb(0, 255, 0);"><input type="radio" name="bonus3" id="bonus3" value="check">✔</label>
+                                        <label style="color: rgb(255, 0, 0);"><input type="radio" name="bonus3" id="bonus3no" value="cross">✘</label>
+                                    </div>
+                                </div>
+                                <div class="bonus-item">
+                                    <span class="bonus-label">Bonus 4:</span><br>
+                                    <span class="bonus-label" style="font-size: 0.7rem;">¿CR7 mete un gol?:</span>
+                                    <div class="bonus-options">
+                                        <label style="color: rgb(0, 255, 0);"><input type="radio" name="bonus4" id="bonus4" value="check">✔</label>
+                                        <label style="color: rgb(255, 0, 0);"><input type="radio" name="bonus4" id="bonus4no" value="cross">✘</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="compararResultados()">Enviar</button>
                         </div>
-                        <button id="btnEnviarEurocopaFecha1" class="p-2 estiloBotones mt-4"
-                            onclick="corroborarEurocopaFecha1()">Enviar</button>
                     </div>
+        
 
 
                 </div>

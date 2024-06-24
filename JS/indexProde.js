@@ -2,7 +2,7 @@ let currentFechaEuro = 1;  // Inicializa currentFecha como variable global
 let currentFechaAmerica = 1;  // Inicializa currentFecha como variable global COPA AMERICA
 var penalesEurocopaFecha1 = 0;
 
-desplazar(6);
+desplazar(10);
 
 function mostrarFecha32avos() {
     fecha32avos = document.getElementById("fecha32avos");
@@ -2260,7 +2260,7 @@ function calculadoraPasarAFechaEuro(direction) {
 
 function calculadoraPasarAFechaAmerica(direction) {
 
-    
+
 
     let totalFechas = 3;
 
@@ -2295,7 +2295,7 @@ function calculadoraPasarAFechaAmerica(direction) {
     let btnDerecha = document.getElementById('btnDerechaAmerica');
     btnIzquierda.disabled = currentFechaAmerica === 1;
     btnDerecha.disabled = currentFechaAmerica === totalFechas;
-    
+
 }
 document.addEventListener("", function () {
     calculadoraPasarAFechaEuro();  // Inicializa la Eurocopa
@@ -2322,39 +2322,75 @@ function enMantenimiento() {
 
 
 
-function abrirInputEurocopaFecha1() {
-    document.getElementById("campoInputEurocopaFecha1").classList.remove("hidden");
-    document.getElementById("btnAbrirInputEurocopaFecha1").classList.add("hidden");
+
+
+function abrirInputColocarAuto() {
+    var modal = document.getElementById("modalInputAuto");
+    modal.style.display = "block";
 }
 
-function volverEurocopaFecha1() {
-    document.getElementById("campoInputEurocopaFecha1").classList.add("hidden");
-    document.getElementById("btnAbrirInputEurocopaFecha1").classList.remove("hidden");
+function cerrarModalAuto() {
+    var modal = document.getElementById("modalInputAuto");
+    modal.style.display = "none";
 }
 
-function ajustarAlturaEurocopaFecha1() {
-    var textarea = document.getElementById("inputTextoEurocopaFecha1");
+function ajustarAlturaAuto() {
+    var textarea = document.getElementById("inputTextoAuto");
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
 }
 
-function corroborarEurocopaFecha1() {
+function escribirFechaAuto() {
 
-    var texto = document.getElementById("inputTextoEurocopaFecha1").value;
-    plenos = 0;
-    parciales = 0;
-    errores = 0;
-    puntosTotales = 0;
+    var inputTexto = document.getElementById("inputTextoAuto").value;
+    var numeros = inputTexto.match(/\d+/g);
 
-    const numeros = texto.match(/\d+/g);
-    if (!numeros) return [];
+    for (var i = 0; i < numeros.length; i++) {
+        var index = Math.floor(i / 2) + 1;
+        var tipo = (i % 2 === 0) ? 'local' : 'visita';
+        var inputId = tipo + index;
+        var inputElement = document.getElementById(inputId);
 
-    const pares = [];
-    for (let i = 0; i < numeros.length; i += 2) {
-        if (i + 1 < numeros.length) {
-            pares.push([parseInt(numeros[i]), parseInt(numeros[i + 1])]);
+        if (inputElement) {
+            inputElement.value = numeros[i];
         }
     }
+
+    cerrarModalAuto();
+
+}
+
+function limpiarAuto() {
+    for (var i = 1; i <= 12; i++) {
+        var localInput = document.getElementById('local' + i);
+        var visitaInput = document.getElementById('visita' + i);
+
+        if (localInput) {
+            localInput.value = '';
+        }
+
+        if (visitaInput) {
+            visitaInput.value = '';
+        }
+    }
+}
+
+function cerrarModalBonus() {
+    var modal = document.getElementById("modalBonus");
+    modal.style.display = "none";
+}
+
+function abrirBonus() {
+    var modal = document.getElementById("modalBonus");
+    modal.style.display = "block";
+}
+
+function compararResultados() {
+    let plenos = 0;
+    let parciales = 0;
+    let errores = 0;
+    let penales = 0;
+    let puntosTotales = 0;
 
     const fechaCorrecta = [
         [5, 1],
@@ -2367,65 +2403,84 @@ function corroborarEurocopaFecha1() {
         [3, 0],
         [0, 1],
         [0, 1],
-        ["X", "X"],
-        ["X", "X"]
+        [3, 1],
+        [2, 1]
     ];
 
-    const fechaSinX = fechaCorrecta.filter(item => item[0] !== "X" && item[1] !== "X");
-    const errorEurocopaFecha1 = document.getElementById("errorEurocopaFecha1");
-    if (pares.length < fechaSinX.length) {
-        errorEurocopaFecha1.innerHTML = "ERROR: Te faltan partidos.";
-    } else {
-        errorEurocopaFecha1.innerHTML = "";
+    const fechaEnviada = [];
+
+    // Obtener valores de los inputs de local y visita y agregar a fechaEnviada
+    for (let i = 1; i <= 12; i++) {
+        const localInput = document.getElementById('local' + i);
+        const visitaInput = document.getElementById('visita' + i);
+
+        if (localInput && visitaInput && localInput.value.trim() !== '' && visitaInput.value.trim() !== '') {
+            const localValor = localInput.value;
+            const visitaValor = visitaInput.value;
+
+            fechaEnviada.push([localValor, visitaValor]);
+        } else {
+            // Si uno de los inputs está vacío, continuar con la siguiente iteración
+            continue;
+        }
     }
 
-    for (let i = 0; i < 12; i++) {
-        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(pares[i][0]) || isNaN(pares[i][1]))) {
+    // Contar plenos, parciales y errores
+    for (let i = 0; i < fechaEnviada.length; i++) {
+        const localValor = fechaEnviada[i][0];
+        const visitaValor = fechaEnviada[i][1];
+
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(localValor) || isNaN(visitaValor))) {
             continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
         }
 
-        if (pares[i][0] == fechaCorrecta[i][0] && pares[i][1] == fechaCorrecta[i][1]) {
+        if (localValor == fechaCorrecta[i][0] && visitaValor == fechaCorrecta[i][1]) {
             plenos++;
-        } else if ((pares[i][0] > pares[i][1] && fechaCorrecta[i][0] > fechaCorrecta[i][1]) || (pares[i][0] < pares[i][1] && fechaCorrecta[i][0] < fechaCorrecta[i][1])
-            || (pares[i][0] == pares[i][1] && fechaCorrecta[i][0] == fechaCorrecta[i][1] && pares[i][0] !== fechaCorrecta[i][0] && pares[i][1] !== fechaCorrecta[i][1])) {
+        } else if ((localValor > visitaValor && fechaCorrecta[i][0] > fechaCorrecta[i][1]) ||
+            (localValor < visitaValor && fechaCorrecta[i][0] < fechaCorrecta[i][1]) ||
+            (localValor == visitaValor && fechaCorrecta[i][0] == fechaCorrecta[i][1] &&
+                localValor !== fechaCorrecta[i][0] && visitaValor !== fechaCorrecta[i][1])) {
             parciales++;
         } else {
             errores++;
         }
     }
-    puntosTotales = 3 * plenos + 1 * parciales + penalesEurocopaFecha1;
 
-    var puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
-    var plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
-    var parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
-    var erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
-    var penalesTexto = penalesEurocopaFecha1 === 1 ? 'PENAL' : 'PENALES';
+    // Sumar puntos adicionales por bonus (verificar existencia antes de acceder a 'checked')
+    let bonus1Checked = document.getElementById('bonus1') ? document.getElementById('bonus1').checked : false;
+    let bonus2Checked = document.getElementById('bonus2') ? document.getElementById('bonus2').checked : false;
+    let bonus3Checked = document.getElementById('bonus3') ? document.getElementById('bonus3').checked : false;
+    let bonus4Checked = document.getElementById('bonus4') ? document.getElementById('bonus4').checked : false;
+
+    if (bonus1Checked) {
+        penales += 1;
+    }
+    if (bonus2Checked) {
+        penales += 3;
+    }
+    if (bonus3Checked) {
+        penales += 2;
+    }
+    if (bonus4Checked) {
+        penales += 1;
+    }
+
+    // Calcular puntos totales
+    puntosTotales = 3 * plenos + 1 * parciales + penales;
+
+    // Mostrar resultado usando SweetAlert
+    let puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    let plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    let parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    let erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    let penalesTexto = penales === 1 ? 'EXTRA' : 'EXTRAS';
 
     Swal.fire({
         title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
         html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
             '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
             '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
-            '<span style="color:orange">' + penalesEurocopaFecha1 + ' ' + penalesTexto + '</span>',
+            '<span style="color:orange">' + penales + ' ' + penalesTexto + '</span>',
         confirmButtonText: 'OK'
     });
-
-
-}
-
-
-
-function cambiarPenalesEurocopaFecha1(i) {
-    if (penalesEurocopaFecha1 + i >= 0) {
-        penalesEurocopaFecha1 += i;
-        actualizarPenalesEurocopaFecha1();
-    } else {
-        alert("El número no puede ser menor que 0 pedazo de autista");
-    }   
-}
-
-
-
-function actualizarPenalesEurocopaFecha1() {
-    document.getElementById("penalesEurocopaFecha1").innerText = penalesEurocopaFecha1;
 }
