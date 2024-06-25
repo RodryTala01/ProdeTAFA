@@ -2484,3 +2484,810 @@ function compararResultados() {
         confirmButtonText: 'OK'
     });
 }
+
+
+
+
+
+
+
+
+
+function abrirInputColocarAuto2() {
+    var modal = document.getElementById("modalInputAuto2");
+    modal.style.display = "block";
+}
+
+function cerrarModalAuto2() {
+    var modal = document.getElementById("modalInputAuto2");
+    modal.style.display = "none";
+}
+
+function ajustarAlturaAuto2() {
+    var textarea = document.getElementById("inputTextoAuto2");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function escribirFechaAuto2() {
+    var inputTexto = document.getElementById("inputTextoAuto2").value;
+    var numeros = inputTexto.match(/\d+/g);
+
+
+    for (var i = 0; i < numeros.length; i++) {
+        var index = Math.floor(i / 2) + 13;
+        var tipo = (i % 2 === 0) ? 'local' : 'visita';
+        var inputId = tipo + index;
+        var inputElement = document.getElementById(inputId);
+
+        if (inputElement) {
+            inputElement.value = numeros[i];
+        }
+    }
+
+    cerrarModalAuto2();
+}
+
+function limpiarAuto2() {
+    for (var i = 13; i <= 24; i++) {
+        var localInput = document.getElementById('local' + i);
+        var visitaInput = document.getElementById('visita' + i);
+
+        if (localInput) {
+            localInput.value = '';
+        }
+
+        if (visitaInput) {
+            visitaInput.value = '';
+        }
+    }
+}
+
+function cerrarModalBonus2() {
+    var modal = document.getElementById("modalBonus2");
+    modal.style.display = "none";
+}
+
+function abrirBonus2() {
+    var modal = document.getElementById("modalBonus2");
+    modal.style.display = "block";
+}
+
+function compararResultados2() {
+    let plenos = 0;
+    let parciales = 0;
+    let errores = 0;
+    let penales = 0;
+    let puntosTotales = 0;
+
+    const fechaCorrecta = [
+        [2, 2],
+        [2, 0],
+        [1, 1],
+        [1, 1],
+        [1, 1],
+        [1, 0],
+        [1, 2],
+        [1, 3],
+        [0, 0],
+        [1, 1],
+        [0, 3],
+        [2, 0]
+    ];
+
+    const fechaEnviada = [];
+
+    // Obtener valores de los inputs de local y visita y agregar a fechaEnviada
+    for (let i = 13; i <= 24; i++) {
+        const localInput = document.getElementById('local' + i);
+        const visitaInput = document.getElementById('visita' + i);
+
+        if (localInput && visitaInput && localInput.value.trim() !== '' && visitaInput.value.trim() !== '') {
+            const localValor = localInput.value;
+            const visitaValor = visitaInput.value;
+
+            fechaEnviada.push([localValor, visitaValor]);
+        } else {
+            // Si uno de los inputs está vacío, continuar con la siguiente iteración
+            continue;
+        }
+    }
+
+    // Contar plenos, parciales y errores
+    for (let i = 0; i < fechaEnviada.length; i++) {
+        const localValor = fechaEnviada[i][0];
+        const visitaValor = fechaEnviada[i][1];
+
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(localValor) || isNaN(visitaValor))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (localValor == fechaCorrecta[i][0] && visitaValor == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((localValor > visitaValor && fechaCorrecta[i][0] > fechaCorrecta[i][1]) ||
+            (localValor < visitaValor && fechaCorrecta[i][0] < fechaCorrecta[i][1]) ||
+            (localValor == visitaValor && fechaCorrecta[i][0] == fechaCorrecta[i][1] &&
+                localValor !== fechaCorrecta[i][0] && visitaValor !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+    }
+
+    // Sumar puntos adicionales por bonus (verificar existencia antes de acceder a 'checked')
+    let bonus1Checked = document.getElementById('bonus5') ? document.getElementById('bonus5').checked : false;
+    let bonus2Checked = document.getElementById('bonus6') ? document.getElementById('bonus6').checked : false;
+
+    if (bonus1Checked) {
+        penales += 2;
+    }
+    if (bonus2Checked) {
+        penales += 2;
+    }
+
+    // Calcular puntos totales
+    puntosTotales = 3 * plenos + 1 * parciales + penales;
+
+    // Mostrar resultado usando SweetAlert
+    let puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    let plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    let parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    let erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    let penalesTexto = penales === 1 ? 'EXTRA' : 'EXTRAS';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penales + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+}
+
+
+
+
+
+function abrirInputColocarAuto3() {
+    var modal = document.getElementById("modalInputAuto3");
+    modal.style.display = "block";
+}
+
+function cerrarModalAuto3() {
+    var modal = document.getElementById("modalInputAuto3");
+    modal.style.display = "none";
+}
+
+function ajustarAlturaAuto3() {
+    var textarea = document.getElementById("inputTextoAuto3");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function escribirFechaAuto3() {
+    var inputTexto = document.getElementById("inputTextoAuto3").value;
+    var numeros = inputTexto.match(/\d+/g);
+
+
+    for (var i = 0; i < numeros.length; i++) {
+        var index = Math.floor(i / 2) + 25;
+        var tipo = (i % 2 === 0) ? 'local' : 'visita';
+        var inputId = tipo + index;
+        var inputElement = document.getElementById(inputId);
+
+        if (inputElement) {
+            inputElement.value = numeros[i];
+        }
+    }
+
+    cerrarModalAuto3();
+}
+
+function limpiarAuto3() {
+    for (var i = 25; i <= 36; i++) {
+        var localInput = document.getElementById('local' + i);
+        var visitaInput = document.getElementById('visita' + i);
+
+        if (localInput) {
+            localInput.value = '';
+        }
+
+        if (visitaInput) {
+            visitaInput.value = '';
+        }
+    }
+}
+
+function cerrarModalBonus3() {
+    var modal = document.getElementById("modalBonus3");
+    modal.style.display = "none";
+}
+
+function abrirBonus3() {
+    var modal = document.getElementById("modalBonus3");
+    modal.style.display = "block";
+}
+
+function compararResultados3() {
+    let plenos = 0;
+    let parciales = 0;
+    let errores = 0;
+    let penales = 0;
+    let puntosTotales = 0;
+
+    const fechaCorrecta = [
+        [1, 1],
+        [0, 1],
+        [0, 1],
+        [1, 1],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"]
+    ];
+
+    const fechaEnviada = [];
+
+    // Obtener valores de los inputs de local y visita y agregar a fechaEnviada
+    for (let i = 25; i <= 36; i++) {
+        const localInput = document.getElementById('local' + i);
+        const visitaInput = document.getElementById('visita' + i);
+
+        if (localInput && visitaInput && localInput.value.trim() !== '' && visitaInput.value.trim() !== '') {
+            const localValor = localInput.value;
+            const visitaValor = visitaInput.value;
+
+            fechaEnviada.push([localValor, visitaValor]);
+        } else {
+            // Si uno de los inputs está vacío, continuar con la siguiente iteración
+            continue;
+        }
+    }
+
+    // Contar plenos, parciales y errores
+    for (let i = 0; i < fechaEnviada.length; i++) {
+        const localValor = fechaEnviada[i][0];
+        const visitaValor = fechaEnviada[i][1];
+
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(localValor) || isNaN(visitaValor))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (localValor == fechaCorrecta[i][0] && visitaValor == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((localValor > visitaValor && fechaCorrecta[i][0] > fechaCorrecta[i][1]) ||
+            (localValor < visitaValor && fechaCorrecta[i][0] < fechaCorrecta[i][1]) ||
+            (localValor == visitaValor && fechaCorrecta[i][0] == fechaCorrecta[i][1] &&
+                localValor !== fechaCorrecta[i][0] && visitaValor !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+    }
+
+    // Sumar puntos adicionales por bonus (verificar existencia antes de acceder a 'checked')
+    let bonus1Checked = document.getElementById('bonus7') ? document.getElementById('bonus7').checked : false;
+    let bonus2Checked = document.getElementById('bonus8') ? document.getElementById('bonus8').checked : false;
+    let bonus3Checked = document.getElementById('bonus9') ? document.getElementById('bonus9').checked : false;
+
+    if (bonus1Checked) {
+        penales += 1;
+    }
+    if (bonus2Checked) {
+        penales += 3;
+    }
+    if (bonus3Checked) {
+        penales += 2;
+    }
+
+    // Calcular puntos totales
+    puntosTotales = 3 * plenos + 1 * parciales + penales;
+
+    // Mostrar resultado usando SweetAlert
+    let puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    let plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    let parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    let erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    let penalesTexto = penales === 1 ? 'EXTRA' : 'EXTRAS';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penales + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+}
+
+
+
+
+
+
+
+
+
+
+function abrirInputColocarAuto4() {
+    var modal = document.getElementById("modalInputAuto4");
+    modal.style.display = "block";
+}
+
+function cerrarModalAuto4() {
+    var modal = document.getElementById("modalInputAuto4");
+    modal.style.display = "none";
+}
+
+function ajustarAlturaAuto4() {
+    var textarea = document.getElementById("inputTextoAuto4");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function escribirFechaAuto4() {
+    var inputTexto = document.getElementById("inputTextoAuto4").value;
+    var numeros = inputTexto.match(/\d+/g);
+
+
+    for (var i = 0; i < numeros.length; i++) {
+        var index = Math.floor(i / 2) + 37;
+        var tipo = (i % 2 === 0) ? 'local' : 'visita';
+        var inputId = tipo + index;
+        var inputElement = document.getElementById(inputId);
+
+        if (inputElement) {
+            inputElement.value = numeros[i];
+        }
+    }
+
+    cerrarModalAuto4();
+}
+
+function limpiarAuto4() {
+    for (var i = 37; i <= 44; i++) {
+        var localInput = document.getElementById('local' + i);
+        var visitaInput = document.getElementById('visita' + i);
+
+        if (localInput) {
+            localInput.value = '';
+        }
+
+        if (visitaInput) {
+            visitaInput.value = '';
+        }
+    }
+}
+
+function cerrarModalBonus4() {
+    var modal = document.getElementById("modalBonus4");
+    modal.style.display = "none";
+}
+
+function abrirBonus4() {
+    var modal = document.getElementById("modalBonus4");
+    modal.style.display = "block";
+}
+
+function compararResultados4() {
+    let plenos = 0;
+    let parciales = 0;
+    let errores = 0;
+    let penales = 0;
+    let puntosTotales = 0;
+
+    const fechaCorrecta = [
+        [2, 0],
+        [0, 0],
+        [1, 2],
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [2, 1],
+        [0, 0]
+    ];
+
+    const fechaEnviada = [];
+
+    // Obtener valores de los inputs de local y visita y agregar a fechaEnviada
+    for (let i = 37; i <= 44; i++) {
+        const localInput = document.getElementById('local' + i);
+        const visitaInput = document.getElementById('visita' + i);
+
+        if (localInput && visitaInput && localInput.value.trim() !== '' && visitaInput.value.trim() !== '') {
+            const localValor = localInput.value;
+            const visitaValor = visitaInput.value;
+
+            fechaEnviada.push([localValor, visitaValor]);
+        } else {
+            // Si uno de los inputs está vacío, continuar con la siguiente iteración
+            continue;
+        }
+    }
+
+    // Contar plenos, parciales y errores
+    for (let i = 0; i < fechaEnviada.length; i++) {
+        const localValor = fechaEnviada[i][0];
+        const visitaValor = fechaEnviada[i][1];
+
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(localValor) || isNaN(visitaValor))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (localValor == fechaCorrecta[i][0] && visitaValor == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((localValor > visitaValor && fechaCorrecta[i][0] > fechaCorrecta[i][1]) ||
+            (localValor < visitaValor && fechaCorrecta[i][0] < fechaCorrecta[i][1]) ||
+            (localValor == visitaValor && fechaCorrecta[i][0] == fechaCorrecta[i][1] &&
+                localValor !== fechaCorrecta[i][0] && visitaValor !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+    }
+
+    // Sumar puntos adicionales por bonus (verificar existencia antes de acceder a 'checked')
+    let bonus1Checked = document.getElementById('bonus10') ? document.getElementById('bonus10').checked : false;
+    let bonus2Checked = document.getElementById('bonus11') ? document.getElementById('bonus11').checked : false;
+    let bonus3Checked = document.getElementById('bonus12') ? document.getElementById('bonus12').checked : false;
+
+    if (bonus1Checked) {
+        penales += 3;
+    }
+    if (bonus2Checked) {
+        penales += 2;
+    }
+    if (bonus3Checked) {
+        penales += 1;
+    }
+
+    // Calcular puntos totales
+    puntosTotales = 3 * plenos + 1 * parciales + penales;
+
+    // Mostrar resultado usando SweetAlert
+    let puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    let plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    let parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    let erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    let penalesTexto = penales === 1 ? 'EXTRA' : 'EXTRAS';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penales + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+function abrirInputColocarAuto5() {
+    var modal = document.getElementById("modalInputAuto5");
+    modal.style.display = "block";
+}
+
+function cerrarModalAuto5() {
+    var modal = document.getElementById("modalInputAuto5");
+    modal.style.display = "none";
+}
+
+function ajustarAlturaAuto5() {
+    var textarea = document.getElementById("inputTextoAuto5");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function escribirFechaAuto5() {
+    var inputTexto = document.getElementById("inputTextoAuto5").value;
+    var numeros = inputTexto.match(/\d+/g);
+
+
+    for (var i = 0; i < numeros.length; i++) {
+        var index = Math.floor(i / 2) + 45;
+        var tipo = (i % 2 === 0) ? 'local' : 'visita';
+        var inputId = tipo + index;
+        var inputElement = document.getElementById(inputId);
+
+        if (inputElement) {
+            inputElement.value = numeros[i];
+        }
+    }
+
+    cerrarModalAuto5();
+}
+
+function limpiarAuto5() {
+    for (var i = 45; i <= 52; i++) {
+        var localInput = document.getElementById('local' + i);
+        var visitaInput = document.getElementById('visita' + i);
+
+        if (localInput) {
+            localInput.value = '';
+        }
+
+        if (visitaInput) {
+            visitaInput.value = '';
+        }
+    }
+}
+
+function cerrarModalBonus5() {
+    var modal = document.getElementById("modalBonus5");
+    modal.style.display = "none";
+}
+
+function abrirBonus5() {
+    var modal = document.getElementById("modalBonus5");
+    modal.style.display = "block";
+}
+
+function compararResultados5() {
+    let plenos = 0;
+    let parciales = 0;
+    let errores = 0;
+    let penales = 0;
+    let puntosTotales = 0;
+
+    const fechaCorrecta = [
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"]
+    ];
+
+    const fechaEnviada = [];
+
+    // Obtener valores de los inputs de local y visita y agregar a fechaEnviada
+    for (let i = 45; i <= 52; i++) {
+        const localInput = document.getElementById('local' + i);
+        const visitaInput = document.getElementById('visita' + i);
+
+        if (localInput && visitaInput && localInput.value.trim() !== '' && visitaInput.value.trim() !== '') {
+            const localValor = localInput.value;
+            const visitaValor = visitaInput.value;
+
+            fechaEnviada.push([localValor, visitaValor]);
+        } else {
+            // Si uno de los inputs está vacío, continuar con la siguiente iteración
+            continue;
+        }
+    }
+
+    // Contar plenos, parciales y errores
+    for (let i = 0; i < fechaEnviada.length; i++) {
+        const localValor = fechaEnviada[i][0];
+        const visitaValor = fechaEnviada[i][1];
+
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(localValor) || isNaN(visitaValor))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (localValor == fechaCorrecta[i][0] && visitaValor == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((localValor > visitaValor && fechaCorrecta[i][0] > fechaCorrecta[i][1]) ||
+            (localValor < visitaValor && fechaCorrecta[i][0] < fechaCorrecta[i][1]) ||
+            (localValor == visitaValor && fechaCorrecta[i][0] == fechaCorrecta[i][1] &&
+                localValor !== fechaCorrecta[i][0] && visitaValor !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+    }
+
+    // Sumar puntos adicionales por bonus (verificar existencia antes de acceder a 'checked')
+    let bonus1Checked = document.getElementById('bonus13') ? document.getElementById('bonus13').checked : false;
+    let bonus2Checked = document.getElementById('bonus14') ? document.getElementById('bonus14').checked : false;
+    let bonus3Checked = document.getElementById('bonus15') ? document.getElementById('bonus15').checked : false;
+
+    if (bonus1Checked) {
+        penales += 1;
+    }
+    if (bonus2Checked) {
+        penales += 1;
+    }
+    if (bonus3Checked) {
+        penales += 3;
+    }
+
+    // Calcular puntos totales
+    puntosTotales = 3 * plenos + 1 * parciales + penales;
+
+    // Mostrar resultado usando SweetAlert
+    let puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    let plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    let parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    let erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    let penalesTexto = penales === 1 ? 'EXTRA' : 'EXTRAS';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penales + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+function abrirInputColocarAuto6() {
+    var modal = document.getElementById("modalInputAuto6");
+    modal.style.display = "block";
+}
+
+function cerrarModalAuto6() {
+    var modal = document.getElementById("modalInputAuto6");
+    modal.style.display = "none";
+}
+
+function ajustarAlturaAuto6() {
+    var textarea = document.getElementById("inputTextoAuto6");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function escribirFechaAuto6() {
+    var inputTexto = document.getElementById("inputTextoAuto6").value;
+    var numeros = inputTexto.match(/\d+/g);
+
+
+    for (var i = 0; i < numeros.length; i++) {
+        var index = Math.floor(i / 2) + 53;
+        var tipo = (i % 2 === 0) ? 'local' : 'visita';
+        var inputId = tipo + index;
+        var inputElement = document.getElementById(inputId);
+
+        if (inputElement) {
+            inputElement.value = numeros[i];
+        }
+    }
+
+    cerrarModalAuto6();
+}
+
+function limpiarAuto6() {
+    for (var i = 53; i <= 60; i++) {
+        var localInput = document.getElementById('local' + i);
+        var visitaInput = document.getElementById('visita' + i);
+
+        if (localInput) {
+            localInput.value = '';
+        }
+
+        if (visitaInput) {
+            visitaInput.value = '';
+        }
+    }
+}
+
+function cerrarModalBonus6() {
+    var modal = document.getElementById("modalBonus6");
+    modal.style.display = "none";
+}
+
+function abrirBonus6() {
+    var modal = document.getElementById("modalBonus6");
+    modal.style.display = "block";
+}
+
+function compararResultados6() {
+    let plenos = 0;
+    let parciales = 0;
+    let errores = 0;
+    let penales = 0;
+    let puntosTotales = 0;
+
+    const fechaCorrecta = [
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"],
+        ["X", "X"]
+    ];
+
+    const fechaEnviada = [];
+
+    // Obtener valores de los inputs de local y visita y agregar a fechaEnviada
+    for (let i = 53; i <= 60; i++) {
+        const localInput = document.getElementById('local' + i);
+        const visitaInput = document.getElementById('visita' + i);
+
+        if (localInput && visitaInput && localInput.value.trim() !== '' && visitaInput.value.trim() !== '') {
+            const localValor = localInput.value;
+            const visitaValor = visitaInput.value;
+
+            fechaEnviada.push([localValor, visitaValor]);
+        } else {
+            // Si uno de los inputs está vacío, continuar con la siguiente iteración
+            continue;
+        }
+    }
+
+    // Contar plenos, parciales y errores
+    for (let i = 0; i < fechaEnviada.length; i++) {
+        const localValor = fechaEnviada[i][0];
+        const visitaValor = fechaEnviada[i][1];
+
+        if ((isNaN(fechaCorrecta[i][0]) || isNaN(fechaCorrecta[i][1])) || (isNaN(localValor) || isNaN(visitaValor))) {
+            continue; // Si uno de los valores es "X" o no es un número, continuar con la siguiente iteración
+        }
+
+        if (localValor == fechaCorrecta[i][0] && visitaValor == fechaCorrecta[i][1]) {
+            plenos++;
+        } else if ((localValor > visitaValor && fechaCorrecta[i][0] > fechaCorrecta[i][1]) ||
+            (localValor < visitaValor && fechaCorrecta[i][0] < fechaCorrecta[i][1]) ||
+            (localValor == visitaValor && fechaCorrecta[i][0] == fechaCorrecta[i][1] &&
+                localValor !== fechaCorrecta[i][0] && visitaValor !== fechaCorrecta[i][1])) {
+            parciales++;
+        } else {
+            errores++;
+        }
+    }
+
+    // Sumar puntos adicionales por bonus (verificar existencia antes de acceder a 'checked')
+    let bonus1Checked = document.getElementById('bonus16') ? document.getElementById('bonus16').checked : false;
+    let bonus2Checked = document.getElementById('bonus17') ? document.getElementById('bonus17').checked : false;
+    let bonus3Checked = document.getElementById('bonus18') ? document.getElementById('bonus18').checked : false;
+
+    if (bonus1Checked) {
+        penales += 0;
+    }
+    if (bonus2Checked) {
+        penales += 0;
+    }
+    if (bonus3Checked) {
+        penales += 0;
+    }
+
+    // Calcular puntos totales
+    puntosTotales = 3 * plenos + 1 * parciales + penales;
+
+    // Mostrar resultado usando SweetAlert
+    let puntosTotalesTexto = puntosTotales === 1 ? 'PUNTITO' : 'PUNTOS';
+    let plenosTexto = plenos === 1 ? 'PLENO' : 'PLENOS';
+    let parcialesTexto = parciales === 1 ? 'PARCIAL' : 'PARCIALES';
+    let erroresTexto = errores === 1 ? 'ERROR' : 'ERRORES';
+    let penalesTexto = penales === 1 ? 'EXTRA' : 'EXTRAS';
+
+    Swal.fire({
+        title: '<span style="color:black">' + puntosTotales + ' ' + puntosTotalesTexto + '</span>',
+        html: '<span style="color:green">' + plenos + ' ' + plenosTexto + '</span><br>' +
+            '<span style="color:rgb(131, 131, 2)">' + parciales + ' ' + parcialesTexto + '</span><br>' +
+            '<span style="color:red">' + errores + ' ' + erroresTexto + '</span><br>' +
+            '<span style="color:orange">' + penales + ' ' + penalesTexto + '</span>',
+        confirmButtonText: 'OK'
+    });
+}

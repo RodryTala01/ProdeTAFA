@@ -147,7 +147,7 @@ function ordenarTablaEurocopa() {
 }
 
 
-agregarATablaEurocopa('Anubis', 21, 3, 10, 13, 2)
+agregarATablaEurocopa('Anubis', 24, 3, 10, 13, 5)
 agregarATablaEurocopa('Bautista Coria', 29, 4, 10, 12, 7)
 agregarATablaEurocopa('Benja', 22, 4, 8, 14, 2)
 agregarATablaEurocopa('Bruno Alonso', 27, 2, 13, 11, 8)

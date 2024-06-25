@@ -1649,3 +1649,9 @@ input[type=number]::-webkit-outer-spin-button {
 .bonus-options input {
     margin-right: 5px;
 }
+
+input:disabled {
+    background-color: #494949;
+    color: #494949;
+    /* Cambia esto al color de fondo que prefieras */
+}
