@@ -2721,10 +2721,10 @@ function compararResultados3() {
         [0, 1],
         [0, 1],
         [1, 1],
-        ["X", "X"],
-        ["X", "X"],
-        ["X", "X"],
-        ["X", "X"],
+        [2, 3],
+        [1, 1],
+        [0, 0],
+        [0, 0],
         ["X", "X"],
         ["X", "X"],
         ["X", "X"],
@@ -3046,8 +3046,8 @@ function compararResultados5() {
     let puntosTotales = 0;
 
     const fechaCorrecta = [
-        ["X", "X"],
-        ["X", "X"],
+        [0, 1],
+        [0, 1],
         ["X", "X"],
         ["X", "X"],
         ["X", "X"],
