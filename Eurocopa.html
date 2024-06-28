@@ -140,16 +140,31 @@
             <img src="Imagenes/Banner.png" class="img-fluid mt-4" alt="banner" height=auto width="600 rem">
         </div>
 
+
+
+
         <div style="color: white;" class="margenParaPubli">
             <div class="container">
-                <div style="background-color: #081836a4; padding-bottom: 1.4rem; padding-left: 1.4rem; padding-right: 1.4rem; border-radius: 15px;" >
+                <div
+                    style="background-color: #081836a4; padding-bottom: 1.4rem; padding-left: 1.4rem; padding-right: 1.4rem; border-radius: 15px;">
                     <h1 class="mt-4">EUROCOPA</h1>
-                    <h5 >Tabla de Posiciones Play Offs</h5>
+                    <h5>Tabla de Posiciones Play Offs</h5>
                 </div>
                 <div><img src="Imagenes/Eurocopa.png" height="100px" style="margin-left: 2rem;" alt=""></div>
             </div>
-            <div class="tabla-wrapper">
-                <table class="tablaPosicionesEurocopa mt-4" id="tablaPosicionesEurocopa">
+
+
+            <div class="text-center cajaBotonesFechas mt-4">
+                <div id="contenedorFechas">
+                    <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btnFechaActivo"
+                        id="btnEurocopaFase2" onclick="seleccionarEurocopa('EurocopaFase2')">FASE 2</button>
+                    <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold" id="btnEurocopaFase1"
+                        onclick="seleccionarEurocopa('EurocopaFase1')">FASE 1</button>
+                </div>
+            </div>
+
+            <div class="tabla-wrapper" id="tablaPosicionesEurocopaFase2">
+                <table class="tablaPosicionesEurocopa mt-4">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -166,6 +181,369 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="tabla-wrapper" id="tablaPosicionesEurocopaFase1" style="display: none;">
+                <table class="tablaPosicionesEurocopa mt-4">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Participante</th>
+                            <th>PTS</th>
+                            <th>🟢</th>
+                            <th>🟡</th>
+                            <th>🔴</th>
+                            <th>🟠</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyEurocopaFase1">
+
+                        <tr>
+                            <td class="highlight-green">1</td>
+                            <td class="highlight-green">Lucas Insua</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">46</td>
+                            <td class="highlight-green">6</td>
+                            <td class="highlight-green">11</td>
+                            <td class="highlight-green">19</td>
+                            <td class="highlight-green">17</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">2</td>
+                            <td class="highlight-green">Gabriel Talarico</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">44</td>
+                            <td class="highlight-green">3</td>
+                            <td class="highlight-green">16</td>
+                            <td class="highlight-green">17</td>
+                            <td class="highlight-green">19</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">3</td>
+                            <td class="highlight-green">Bautista Coria</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">43</td>
+                            <td class="highlight-green">5</td>
+                            <td class="highlight-green">12</td>
+                            <td class="highlight-green">19</td>
+                            <td class="highlight-green">16</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">4</td>
+                            <td class="highlight-green">Rodrigo Talarico</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">42</td>
+                            <td class="highlight-green">5</td>
+                            <td class="highlight-green">11</td>
+                            <td class="highlight-green">18</td>
+                            <td class="highlight-green">16</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">5</td>
+                            <td class="highlight-green">Bruno Alonso</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">41</td>
+                            <td class="highlight-green">4</td>
+                            <td class="highlight-green">14</td>
+                            <td class="highlight-green">18</td>
+                            <td class="highlight-green">15</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">6</td>
+                            <td class="highlight-green">Anubis</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">40</td>
+                            <td class="highlight-green">5</td>
+                            <td class="highlight-green">11</td>
+                            <td class="highlight-green">20</td>
+                            <td class="highlight-green">14</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">7</td>
+                            <td class="highlight-green">Verónica Lucchesi</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">40</td>
+                            <td class="highlight-green">4</td>
+                            <td class="highlight-green">13</td>
+                            <td class="highlight-green">21</td>
+                            <td class="highlight-green">15</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">8</td>
+                            <td class="highlight-green">Fabrizio Escolano</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">40</td>
+                            <td class="highlight-green">4</td>
+                            <td class="highlight-green">12</td>
+                            <td class="highlight-green">20</td>
+                            <td class="highlight-green">16</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">9</td>
+                            <td class="highlight-green">Cami</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">39</td>
+                            <td class="highlight-green">6</td>
+                            <td class="highlight-green">10</td>
+                            <td class="highlight-green">20</td>
+                            <td class="highlight-green">11</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">10</td>
+                            <td class="highlight-green">Pancho Muzzio</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">39</td>
+                            <td class="highlight-green">5</td>
+                            <td class="highlight-green">9</td>
+                            <td class="highlight-green">22</td>
+                            <td class="highlight-green">15</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">11</td>
+                            <td class="highlight-green">Luciano Hufschmid</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">39</td>
+                            <td class="highlight-green">5</td>
+                            <td class="highlight-green">8</td>
+                            <td class="highlight-green">23</td>
+                            <td class="highlight-green">16</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">12</td>
+                            <td class="highlight-green">Ian Gangai</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">39</td>
+                            <td class="highlight-green">4</td>
+                            <td class="highlight-green">12</td>
+                            <td class="highlight-green">20</td>
+                            <td class="highlight-green">15</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">13</td>
+                            <td class="highlight-green">Jhose</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">39</td>
+                            <td class="highlight-green">3</td>
+                            <td class="highlight-green">15</td>
+                            <td class="highlight-green">18</td>
+                            <td class="highlight-green">15</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">14</td>
+                            <td class="highlight-green">Marto</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">39</td>
+                            <td class="highlight-green">2</td>
+                            <td class="highlight-green">17</td>
+                            <td class="highlight-green">17</td>
+                            <td class="highlight-green">16</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">15</td>
+                            <td class="highlight-green">Yago</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">39</td>
+                            <td class="highlight-green">2</td>
+                            <td class="highlight-green">15</td>
+                            <td class="highlight-green">19</td>
+                            <td class="highlight-green">18</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-green">16</td>
+                            <td class="highlight-green">Kevin Sivori</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-green">37</td>
+                            <td class="highlight-green">5</td>
+                            <td class="highlight-green">9</td>
+                            <td class="highlight-green">22</td>
+                            <td class="highlight-green">13</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">17</td>
+                            <td class="highlight-red">Renzo Badano</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">36</td>
+                            <td class="highlight-red">5</td>
+                            <td class="highlight-red">12</td>
+                            <td class="highlight-red">19</td>
+                            <td class="highlight-red">9</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">18</td>
+                            <td class="highlight-red">Tomas Torcasio</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">36</td>
+                            <td class="highlight-red">4</td>
+                            <td class="highlight-red">13</td>
+                            <td class="highlight-red">19</td>
+                            <td class="highlight-red">11</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">19</td>
+                            <td class="highlight-red">Mario Talarico</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">36</td>
+                            <td class="highlight-red">4</td>
+                            <td class="highlight-red">10</td>
+                            <td class="highlight-red">22</td>
+                            <td class="highlight-red">14</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">20</td>
+                            <td class="highlight-red">Tomas Delgado</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">36</td>
+                            <td class="highlight-red">3</td>
+                            <td class="highlight-red">12</td>
+                            <td class="highlight-red">21</td>
+                            <td class="highlight-red">15</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">21</td>
+                            <td class="highlight-red">Cristian Hantis</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">35</td>
+                            <td class="highlight-red">5</td>
+                            <td class="highlight-red">9</td>
+                            <td class="highlight-red">22</td>
+                            <td class="highlight-red">11</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">22</td>
+                            <td class="highlight-red">Moreno Perez</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">35</td>
+                            <td class="highlight-red">4</td>
+                            <td class="highlight-red">9</td>
+                            <td class="highlight-red">23</td>
+                            <td class="highlight-red">14</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">23</td>
+                            <td class="highlight-red">Nico Avalos</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">35</td>
+                            <td class="highlight-red">4</td>
+                            <td class="highlight-red">5</td>
+                            <td class="highlight-red">27</td>
+                            <td class="highlight-red">18</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">24</td>
+                            <td class="highlight-red">Felipe Galante</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">35</td>
+                            <td class="highlight-red">3</td>
+                            <td class="highlight-red">13</td>
+                            <td class="highlight-red">20</td>
+                            <td class="highlight-red">13</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">25</td>
+                            <td class="highlight-red">Joel Alcalde</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">35</td>
+                            <td class="highlight-red">1</td>
+                            <td class="highlight-red">15</td>
+                            <td class="highlight-red">20</td>
+                            <td class="highlight-red">17</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">26</td>
+                            <td class="highlight-red">Benja</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">34</td>
+                            <td class="highlight-red">4</td>
+                            <td class="highlight-red">10</td>
+                            <td class="highlight-red">22</td>
+                            <td class="highlight-red">12</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">27</td>
+                            <td class="highlight-red">Pollo</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">34</td>
+                            <td class="highlight-red">1</td>
+                            <td class="highlight-red">13</td>
+                            <td class="highlight-red">22</td>
+                            <td class="highlight-red">18</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">28</td>
+                            <td class="highlight-red">Rodrigo Soca</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">33</td>
+                            <td class="highlight-red">3</td>
+                            <td class="highlight-red">14</td>
+                            <td class="highlight-red">19</td>
+                            <td class="highlight-red">10</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">29</td>
+                            <td class="highlight-red">Manu Solbes</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">31</td>
+                            <td class="highlight-red">2</td>
+                            <td class="highlight-red">13</td>
+                            <td class="highlight-red">21</td>
+                            <td class="highlight-red">12</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">30</td>
+                            <td class="highlight-red">Ciro Guarch</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">30</td>
+                            <td class="highlight-red">5</td>
+                            <td class="highlight-red">8</td>
+                            <td class="highlight-red">23</td>
+                            <td class="highlight-red">7</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">31</td>
+                            <td class="highlight-red">Ignacio Cejas</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">30</td>
+                            <td class="highlight-red">4</td>
+                            <td class="highlight-red">9</td>
+                            <td class="highlight-red">23</td>
+                            <td class="highlight-red">9</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">32</td>
+                            <td class="highlight-red">Lucas Aguilera</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">30</td>
+                            <td class="highlight-red">2</td>
+                            <td class="highlight-red">9</td>
+                            <td class="highlight-red">25</td>
+                            <td class="highlight-red">15</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">33</td>
+                            <td class="highlight-red">Dani Bazan</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">29</td>
+                            <td class="highlight-red">1</td>
+                            <td class="highlight-red">15</td>
+                            <td class="highlight-red">20</td>
+                            <td class="highlight-red">11</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">34</td>
+                            <td class="highlight-red">Dante Dragon</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">29</td>
+                            <td class="highlight-red">1</td>
+                            <td class="highlight-red">12</td>
+                            <td class="highlight-red">23</td>
+                            <td class="highlight-red">14</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">35</td>
+                            <td class="highlight-red">Rodri Sebastian</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">25</td>
+                            <td class="highlight-red">2</td>
+                            <td class="highlight-red">7</td>
+                            <td class="highlight-red">27</td>
+                            <td class="highlight-red">12</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">36</td>
+                            <td class="highlight-red">Joaco Fernandez</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">21</td>
+                            <td class="highlight-red">2</td>
+                            <td class="highlight-red">12</td>
+                            <td class="highlight-red">22</td>
+                            <td class="highlight-red">3</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">37</td>
+                            <td class="highlight-red">Eze</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">12</td>
+                            <td class="highlight-red">1</td>
+                            <td class="highlight-red">9</td>
+                            <td class="highlight-red">26</td>
+                            <td class="highlight-red">0</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight-red">38</td>
+                            <td class="highlight-red">Nico Borea</td>
+                            <td class="ptsTablaPosicionesEurocopa highlight-red">0</td>
+                            <td class="highlight-red">0</td>
+                            <td class="highlight-red">0</td>
+                            <td class="highlight-red">36</td>
+                            <td class="highlight-red">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
         </div>
 
         <!--<button id="btnAbrirInput32avos" class="margenParaPubli p-2" onclick="abrirInput32avos()">CALCULADORA DE

@@ -2223,7 +2223,7 @@ function calculadoraEurocopa() {
 
 
 function calculadoraPasarAFechaEuro(direction) {
-    let totalFechas = 3;
+    let totalFechas = 4;
 
     if (direction === 'next' && currentFechaEuro < totalFechas) {
         currentFechaEuro++;
@@ -2248,8 +2248,13 @@ function calculadoraPasarAFechaEuro(direction) {
     // Actualiza el texto del contenedor de fechas
     let contenedorFechas = document.getElementById('nombreFechaEurocopa');
     if (contenedorFechas) {
-        contenedorFechas.innerText = 'FECHA ' + currentFechaEuro;
-    }
+        if (currentFechaEuro <= 3) {
+            contenedorFechas.innerText = 'FECHA ' + currentFechaEuro;
+        }
+        if (currentFechaEuro == 4) {
+            contenedorFechas.innerHTML = 'OCTAVOS DE FINAL';
+        }
+    } 
 
     // Habilita o deshabilita los botones en función de la fecha actual
     let btnIzquierda = document.getElementById('btnIzquierdaEuro');
@@ -2889,7 +2894,11 @@ function compararResultados4() {
         [2, 0],
         [3, 1],
         [2, 1],
-        [0, 0]
+        [0, 0],
+        [1, 1],
+        [0, 0],
+        [2, 0],
+        [1, 2]
     ];
 
     const fechaEnviada = [];

@@ -62,7 +62,7 @@ function copiarTextoGeneradoEurocopa() {
 
 
 function agregarATablaEurocopa(Jugador, PTS, Pleno, Parcial, Error, Extra) {
-    const tbody = document.querySelector('#tablaPosicionesEurocopa tbody');
+    const tbody = document.querySelector('#tablaPosicionesEurocopaFase2 tbody');
     const rowCount = tbody.rows.length;
     const nextNumber = rowCount + 1;
 
@@ -135,80 +135,55 @@ function ordenarTablaEurocopa() {
 
     rows.forEach((row, index) => {
         row.cells[0].textContent = index + 1;
-        if (index < 16) {
+        if (index < 4) {
             row.cells[0].classList.add('highlight-green');
             row.cells[0].classList.remove('highlight-red');
-            row.cells[1].classList.add('highlight-green');
-            row.cells[1].classList.remove('highlight-red');
-            row.cells[2].classList.add('highlight-green');
-            row.cells[2].classList.remove('highlight-red');
-            row.cells[3].classList.add('highlight-green');
-            row.cells[3].classList.remove('highlight-red');
-            row.cells[4].classList.add('highlight-green');
-            row.cells[4].classList.remove('highlight-red');
-            row.cells[5].classList.add('highlight-green');
-            row.cells[5].classList.remove('highlight-red');
-            row.cells[6].classList.add('highlight-green');
-            row.cells[6].classList.remove('highlight-red');
         } else {
             row.cells[0].classList.add('highlight-red');
             row.cells[0].classList.remove('highlight-green');
-            row.cells[1].classList.add('highlight-red');
-            row.cells[1].classList.remove('highlight-green');
-            row.cells[2].classList.add('highlight-red');
-            row.cells[2].classList.remove('highlight-green');
-            row.cells[3].classList.add('highlight-red');
-            row.cells[3].classList.remove('highlight-green');
-            row.cells[4].classList.add('highlight-red');
-            row.cells[4].classList.remove('highlight-green');
-            row.cells[5].classList.add('highlight-red');
-            row.cells[5].classList.remove('highlight-green');
-            row.cells[6].classList.add('highlight-red');
-            row.cells[6].classList.remove('highlight-green');
         }
         tbody.appendChild(row);
     });
 }
 
+function seleccionarEurocopa(seleccion) {
+    var botonesFecha = document.querySelectorAll('.cajaFECHA'); // Selecciona todos los botones de fecha
+    botonesFecha.forEach(function (btn) {
+        btn.classList.remove('btnFechaActivo'); // Quita la clase 'btnFechaActivo' a todos los botones
+    });
+    document.getElementById("btn" + seleccion).classList.add('btnFechaActivo'); // Agrega la clase 'btnFechaActivo' al botón clicado
 
-agregarATablaEurocopa('Anubis', 40, 5, 11, 20, 14)
-agregarATablaEurocopa('Bautista Coria', 43, 5, 12, 19, 16)
-agregarATablaEurocopa('Benja', 34, 4, 10, 22, 12)
-agregarATablaEurocopa('Bruno Alonso', 41, 4, 14, 18, 15)
-agregarATablaEurocopa('Cami', 39, 6, 10, 20, 11)
-agregarATablaEurocopa('Ciro Guarch', 30, 5, 8, 23, 7)
-agregarATablaEurocopa('Cristian Hantis', 35, 5, 9, 22, 11)
-agregarATablaEurocopa('Dani Bazan', 29, 1, 15, 20, 11)
-agregarATablaEurocopa('Dante Dragon', 29, 1, 12, 23, 14)
-agregarATablaEurocopa('Eze', 12, 1, 9, 26, 0)
-agregarATablaEurocopa('Fabrizio Escolano', 40, 4, 12, 20, 16)
-agregarATablaEurocopa('Felipe Galante', 35, 3, 13, 20, 13)
-agregarATablaEurocopa('Gabriel Talarico', 44, 3, 16, 17, 19)
-agregarATablaEurocopa('Ian Gangai', 39, 4, 12, 20, 15)
-agregarATablaEurocopa('Ignacio Cejas', 30, 4, 9, 23, 9)
-agregarATablaEurocopa('Jhose', 39, 3, 15, 18, 15)
-agregarATablaEurocopa('Joaco Fernandez', 21, 2, 12, 22, 3)
-agregarATablaEurocopa('Joel Alcalde', 35, 1, 15, 20, 17)
-agregarATablaEurocopa('Kevin Sivori', 37, 5, 9, 22, 13)
-agregarATablaEurocopa('Lucas Aguilera', 30, 2, 9, 25, 15)
-agregarATablaEurocopa('Lucas Insua', 46, 6, 11, 19, 17)
-agregarATablaEurocopa('Luciano Hufschmid', 39, 5, 8, 23, 16)
-agregarATablaEurocopa('Manu Solbes', 31, 2, 13, 21, 12)
-agregarATablaEurocopa('Mario Talarico', 36, 4, 10, 22, 14)
-agregarATablaEurocopa('Marto', 39, 2, 17, 17, 16)
-agregarATablaEurocopa('Moreno Perez', 35, 4, 9, 23, 14)
-agregarATablaEurocopa('Nico Avalos', 35, 4, 5, 27, 18)
-agregarATablaEurocopa('Nico Borea', 0, 0, 0, 36, 0)
-agregarATablaEurocopa('Pancho Muzzio', 39, 5, 9, 22, 15)
-agregarATablaEurocopa('Pollo', 34, 1, 13, 22, 18)
-agregarATablaEurocopa('Renzo Badano', 36, 5, 12, 19, 9)
-agregarATablaEurocopa('Rodri Sebastian', 25, 2, 7, 27, 12)
-agregarATablaEurocopa('Rodrigo Soca', 33, 3, 14, 19, 10)
-agregarATablaEurocopa('Rodrigo Talarico', 42, 5, 11, 18, 16)
-agregarATablaEurocopa('Tomas Delgado', 36, 3, 12, 21, 15)
-agregarATablaEurocopa('Tomas Torcasio', 36, 4, 13, 19, 11)
-agregarATablaEurocopa('Verónica Lucchesi', 40, 4, 13, 21, 15)
-agregarATablaEurocopa('Yago', 39, 2, 15, 19, 18)
+
+
+
+    var divsFechas = document.querySelectorAll('[id^="tablaPosicionesEurocopaFase"]'); // Selecciona todos los divs de fecha
+    divsFechas.forEach(function (div) {
+        if (div.id === "tablaPosiciones" + seleccion) {
+            div.style.display = "flex"; // Muestra el div correspondiente al ID
+        } else {
+            div.style.display = "none"; // Oculta los demás divs
+        }
+    });
+
+}
+
+
+agregarATablaEurocopa('Lucas Insua', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Gabriel Talarico', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Bautista Coria', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Rodrigo Talarico', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Bruno Alonso', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Anubis', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Verónica Lucchesi', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Fabrizio Escolano', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Cami', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Pancho Muzzio', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Luciano Hufschmid', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Ian Gangai', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Jhose', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Marto', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Yago', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Kevin Sivori', 0, 0, 0, 0, 0)
 
 ordenarTablaEurocopa();
 
