@@ -168,22 +168,22 @@ function seleccionarEurocopa(seleccion) {
 }
 
 
-agregarATablaEurocopa('Lucas Insua', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Gabriel Talarico', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Bautista Coria', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Rodrigo Talarico', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Bruno Alonso', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Anubis', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Verónica Lucchesi', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Fabrizio Escolano', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Cami', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Pancho Muzzio', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Luciano Hufschmid', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Ian Gangai', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Jhose', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Marto', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Yago', 0, 0, 0, 0, 0)
-agregarATablaEurocopa('Kevin Sivori', 0, 0, 0, 0, 0)
+agregarATablaEurocopa('Anubis', 5, 1, 1, 2, 1)
+agregarATablaEurocopa('Bautista Coria', 4, 0, 2, 2, 2)
+agregarATablaEurocopa('Bruno Alonso', 8, 1, 2, 1, 3)
+agregarATablaEurocopa('Cami', 6, 0, 3, 1, 3)
+agregarATablaEurocopa('Fabrizio Escolano', 7, 1, 2, 1, 2)
+agregarATablaEurocopa('Gabriel Talarico', 10, 1, 2, 1, 5)
+agregarATablaEurocopa('Ian Gangai', 10, 2, 1, 1, 3)
+agregarATablaEurocopa('Jhose', 6, 0, 3, 1, 3)
+agregarATablaEurocopa('Kevin Sivori', 8, 1, 2, 1, 3)
+agregarATablaEurocopa('Lucas Insua', 4, 0, 4, 0, 0)
+agregarATablaEurocopa('Luciano Hufschmid', 5, 0, 2, 2, 3)
+agregarATablaEurocopa('Marto', 5, 0, 3, 1, 2)
+agregarATablaEurocopa('Pancho Muzzio', 8, 1, 2, 1, 3)
+agregarATablaEurocopa('Rodrigo Talarico', 7, 0, 4, 0, 3)
+agregarATablaEurocopa('Verónica Lucchesi', 7, 1, 2, 1, 2)
+agregarATablaEurocopa('Yago', 5, 0, 3, 1, 2)
 
 ordenarTablaEurocopa();
 
