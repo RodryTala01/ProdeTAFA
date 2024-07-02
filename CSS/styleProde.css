@@ -1655,3 +1655,11 @@ input:disabled {
     color: #494949;
     /* Cambia esto al color de fondo que prefieras */
 }
+
+.colorGris {
+    background: grey;
+}
+
+.colorBronce {
+    background: sienna;
+}

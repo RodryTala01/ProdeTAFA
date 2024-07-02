@@ -2267,7 +2267,7 @@ function calculadoraPasarAFechaAmerica(direction) {
 
 
 
-    let totalFechas = 3;
+    let totalFechas = 4;
 
     if (direction === 'next' && currentFechaAmerica < totalFechas) {
         currentFechaAmerica++;
@@ -2292,8 +2292,13 @@ function calculadoraPasarAFechaAmerica(direction) {
     // Actualiza el texto del contenedor de fechas
     let contenedorFechas = document.getElementById('nombreFechaAmerica');
     if (contenedorFechas) {
-        contenedorFechas.innerText = 'FECHA ' + currentFechaAmerica;
-    }
+        if (currentFechaAmerica <= 3) {
+            contenedorFechas.innerText = 'FECHA ' + currentFechaAmerica;
+        }
+        if (currentFechaAmerica == 4) {
+            contenedorFechas.innerHTML = 'CUARTOS DE FINAL';
+        }
+    } 
 
     // Habilita o deshabilita los botones en función de la fecha actual
     let btnIzquierda = document.getElementById('btnIzquierdaAmerica');

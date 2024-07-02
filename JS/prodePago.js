@@ -85,6 +85,16 @@ function ordenarTablaProdePago() {
         } else {
             row.cells[0].classList.remove('highlight-green');
         }
+        if (index === 1) {
+            row.cells[0].classList.add('colorGris');
+        } else {
+            row.cells[0].classList.remove('colorGris');
+        }
+        if (index === 2) {
+            row.cells[0].classList.add('colorBronce');
+        } else {
+            row.cells[0].classList.remove('colorBronce');
+        }
         tbody.appendChild(row);
     });
 }
@@ -185,16 +195,16 @@ function copiarTextoGeneradoProdePago() {
 }
 
 
-agregarATablaProdePago('Mario Talarico', 9, 3, 0, 1, 26, 18, 8)
-agregarATablaProdePago('Rodrigo Soca', 9, 3, 0, 1, 28, 22, 6)
-agregarATablaProdePago('Gabriel Talarico', 8, 2, 2, 0, 25, 16, 9)
-agregarATablaProdePago('Rodrigo Talarico', 7, 2, 1, 1, 25, 15, 10)
-agregarATablaProdePago('Cami', 7, 2, 1, 1, 24, 15, 9)
-agregarATablaProdePago('Moreno Perez', 5, 1, 2, 1, 21, 15, 6)
-agregarATablaProdePago('Fabrizio Escolano', 4, 1, 1, 2, 23, 24, -1)
-agregarATablaProdePago('Manu Solbes', 3, 1, 0, 3, 9, 29, -20)
-agregarATablaProdePago('Lucas Aguilera', 1, 0, 1, 3, 14, 26, -12)
-agregarATablaProdePago('Dante Dragon', 1, 0, 1, 3, 9, 24, -15)
+agregarATablaProdePago('Rodrigo Soca', 12, 4, 0, 1, 33, 26, 7)
+agregarATablaProdePago('Mario Talarico', 9, 3, 0, 2, 30, 23, 7)
+agregarATablaProdePago('Moreno Perez', 8, 2, 2, 1, 26, 15, 11)
+agregarATablaProdePago('Rodrigo Talarico', 8, 2, 2, 1, 30, 20, 10)
+agregarATablaProdePago('Cami', 8, 2, 2, 1, 29, 20, 9)
+agregarATablaProdePago('Gabriel Talarico', 8, 2, 2, 1, 32, 25, 7)
+agregarATablaProdePago('Fabrizio Escolano', 7, 2, 1, 2, 32, 31, 1)
+agregarATablaProdePago('Lucas Aguilera', 4, 1, 1, 3, 18, 26, -8)
+agregarATablaProdePago('Manu Solbes', 3, 1, 0, 4, 9, 34, -25)
+agregarATablaProdePago('Dante Dragon', 1, 0, 1, 4, 9, 28, -19)
 
 
 ordenarTablaProdePago()
