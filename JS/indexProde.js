@@ -2223,7 +2223,7 @@ function calculadoraEurocopa() {
 
 
 function calculadoraPasarAFechaEuro(direction) {
-    let totalFechas = 4;
+    let totalFechas = 5;
 
     if (direction === 'next' && currentFechaEuro < totalFechas) {
         currentFechaEuro++;
@@ -2253,6 +2253,9 @@ function calculadoraPasarAFechaEuro(direction) {
         }
         if (currentFechaEuro == 4) {
             contenedorFechas.innerHTML = 'OCTAVOS DE FINAL';
+        }
+        if (currentFechaEuro == 5) {
+            contenedorFechas.innerHTML = 'CUARTOS DE FINAL';
         }
     } 
 

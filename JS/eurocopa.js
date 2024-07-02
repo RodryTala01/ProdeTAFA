@@ -142,6 +142,56 @@ function ordenarTablaEurocopa() {
             row.cells[0].classList.add('highlight-red');
             row.cells[0].classList.remove('highlight-green');
         }
+
+        if (index < 4) {
+            row.cells[1].classList.add('highlight-green');
+            row.cells[1].classList.remove('highlight-red');
+        } else {
+            row.cells[1].classList.add('highlight-red');
+            row.cells[1].classList.remove('highlight-green');
+        }
+
+        if (index < 4) {
+            row.cells[2].classList.add('highlight-green');
+            row.cells[2].classList.remove('highlight-red');
+        } else {
+            row.cells[2].classList.add('highlight-red');
+            row.cells[2].classList.remove('highlight-green');
+        }
+
+        if (index < 4) {
+            row.cells[3].classList.add('highlight-green');
+            row.cells[3].classList.remove('highlight-red');
+        } else {
+            row.cells[3].classList.add('highlight-red');
+            row.cells[3].classList.remove('highlight-green');
+        }
+
+        if (index < 4) {
+            row.cells[4].classList.add('highlight-green');
+            row.cells[4].classList.remove('highlight-red');
+        } else {
+            row.cells[4].classList.add('highlight-red');
+            row.cells[4].classList.remove('highlight-green');
+        }
+
+        if (index < 4) {
+            row.cells[5].classList.add('highlight-green');
+            row.cells[5].classList.remove('highlight-red');
+        } else {
+            row.cells[5].classList.add('highlight-red');
+            row.cells[5].classList.remove('highlight-green');
+        }
+
+        if (index < 4) {
+            row.cells[6].classList.add('highlight-green');
+            row.cells[6].classList.remove('highlight-red');
+        } else {
+            row.cells[6].classList.add('highlight-red');
+            row.cells[6].classList.remove('highlight-green');
+        }
+
+
         tbody.appendChild(row);
     });
 }
@@ -168,23 +218,22 @@ function seleccionarEurocopa(seleccion) {
 }
 
 
-agregarATablaEurocopa('Anubis', 5, 1, 1, 2, 1)
-agregarATablaEurocopa('Bautista Coria', 4, 0, 2, 2, 2)
-agregarATablaEurocopa('Bruno Alonso', 8, 1, 2, 1, 3)
-agregarATablaEurocopa('Cami', 6, 0, 3, 1, 3)
-agregarATablaEurocopa('Fabrizio Escolano', 7, 1, 2, 1, 2)
-agregarATablaEurocopa('Gabriel Talarico', 10, 1, 2, 1, 5)
-agregarATablaEurocopa('Ian Gangai', 10, 2, 1, 1, 3)
-agregarATablaEurocopa('Jhose', 6, 0, 3, 1, 3)
-agregarATablaEurocopa('Kevin Sivori', 8, 1, 2, 1, 3)
-agregarATablaEurocopa('Lucas Insua', 4, 0, 4, 0, 0)
-agregarATablaEurocopa('Luciano Hufschmid', 5, 0, 2, 2, 3)
-agregarATablaEurocopa('Marto', 5, 0, 3, 1, 2)
-agregarATablaEurocopa('Pancho Muzzio', 8, 1, 2, 1, 3)
-agregarATablaEurocopa('Rodrigo Talarico', 7, 0, 4, 0, 3)
-agregarATablaEurocopa('Verónica Lucchesi', 7, 1, 2, 1, 2)
-agregarATablaEurocopa('Yago', 5, 0, 3, 1, 2)
-
+agregarATablaEurocopa('Anubis', 9, 1, 2, 5, 4)
+agregarATablaEurocopa('Bautista Coria', 8, 1, 3, 4, 2)
+agregarATablaEurocopa('Bruno Alonso', 13, 1, 3, 4, 7)
+agregarATablaEurocopa('Cami', 13, 0, 5, 3, 8)
+agregarATablaEurocopa('Fabrizio Escolano', 15, 2, 3, 3, 6)
+agregarATablaEurocopa('Gabriel Talarico', 19, 2, 3, 3, 10)
+agregarATablaEurocopa('Ian Gangai', 14, 3, 1, 4, 4)
+agregarATablaEurocopa('Jhose', 10, 0, 5, 3, 5)
+agregarATablaEurocopa('Kevin Sivori', 12, 1, 3, 4, 6)
+agregarATablaEurocopa('Lucas Insua', 8, 0, 5, 3, 3)
+agregarATablaEurocopa('Luciano Hufschmid', 16, 1, 3, 4, 10)
+agregarATablaEurocopa('Marto', 11, 1, 5, 2, 3)
+agregarATablaEurocopa('Pancho Muzzio', 15, 2, 3, 3, 6)
+agregarATablaEurocopa('Rodrigo Talarico', 14, 0, 6, 2, 8)
+agregarATablaEurocopa('Verónica Lucchesi', 11, 1, 4, 3, 4)
+agregarATablaEurocopa('Yago', 12, 0, 5, 3, 7)
 ordenarTablaEurocopa();
 
 
