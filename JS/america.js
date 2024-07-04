@@ -64,7 +64,7 @@ function copiarTextoGeneradoAmerica() {
 
 
 function agregarATablaAmerica(Jugador, PTS, Pleno, Parcial, Error, Extra) {
-    const tbody = document.querySelector('#tablaPosicionesAmerica tbody');
+    const tbody = document.querySelector('#tablaPosicionesAmericaFase2 tbody');
     const rowCount = tbody.rows.length;
     const nextNumber = rowCount + 1;
 
@@ -137,57 +137,56 @@ function ordenarTablaAmerica() {
 
     rows.forEach((row, index) => {
         row.cells[0].textContent = index + 1;
-        if (index < 8) {
+        if (index < 2) {
             row.cells[0].classList.add('highlight-green');
             row.cells[0].classList.remove('highlight-red');
         } else {
             row.cells[0].classList.add('highlight-red');
             row.cells[0].classList.remove('highlight-green');
         }
+
+
+
+
+
         tbody.appendChild(row);
     });
 }
 
 
 
-agregarATablaAmerica('Anubis', 30, 4, 11, 7, 7)
-agregarATablaAmerica('Bautista Coria', 29, 2, 14, 6, 9)
-agregarATablaAmerica('Benja', 32, 4, 11, 7, 9)
-agregarATablaAmerica('Bruno Alonso', 30, 4, 11, 7, 7)
-agregarATablaAmerica('Cami', 30, 4, 10, 8, 8)
-agregarATablaAmerica('Ciro Guarch', 25, 2, 11, 9, 8)
-agregarATablaAmerica('Cristian Hantis', 19, 0, 12, 10, 7)
-agregarATablaAmerica('Dani Bazan', 28, 5, 9, 8, 4)
-agregarATablaAmerica('Dante Dragon', 11, 1, 4, 17, 4)
-agregarATablaAmerica('Eze', 15, 2, 9, 11, 0)
-agregarATablaAmerica('Fabrizio Escolano', 33, 6, 8, 8, 7)
-agregarATablaAmerica('Felipe Galante', 21, 2, 9, 11, 6)
-agregarATablaAmerica('Gabriel Talarico', 34, 4, 12, 6, 10)
-agregarATablaAmerica('Ian Gangai', 24, 2, 12, 8, 6)
-agregarATablaAmerica('Ignacio Cejas', 26, 3, 10, 9, 7)
-agregarATablaAmerica('Jhose', 31, 4, 12, 6, 7)
-agregarATablaAmerica('Joaco Fernandez', 25, 1, 14, 7, 8)
-agregarATablaAmerica('Joel Alcalde', 25, 3, 11, 8, 5)
-agregarATablaAmerica('Kevin Sivori', 24, 4, 7, 11, 5)
-agregarATablaAmerica('Lucas Aguilera', 26, 2, 12, 8, 8)
-agregarATablaAmerica('Lucas Insua', 32, 4, 12, 6, 8)
-agregarATablaAmerica('Luciano Hufschmid', 28, 4, 10, 8, 6)
-agregarATablaAmerica('Manu Solbes', 0, 0, 0, 22, 0)
-agregarATablaAmerica('Mario Talarico', 30, 3, 10, 9, 11)
-agregarATablaAmerica('Marto', 28, 4, 10, 8, 6)
-agregarATablaAmerica('Moreno Perez', 29, 2, 15, 5, 8)
-agregarATablaAmerica('Nico Avalos', 32, 5, 12, 5, 5)
-agregarATablaAmerica('Nico Borea', 0, 0, 0, 22, 0)
-agregarATablaAmerica('Pancho Muzzio', 24, 2, 13, 7, 5)
-agregarATablaAmerica('Pollo', 36, 5, 11, 6, 10)
-agregarATablaAmerica('Renzo Badano', 24, 1, 13, 8, 8)
-agregarATablaAmerica('Rodri Sebastian', 21, 2, 9, 11, 6)
-agregarATablaAmerica('Rodrigo Soca', 35, 5, 10, 7, 10)
-agregarATablaAmerica('Rodrigo Talarico', 23, 2, 11, 9, 6)
-agregarATablaAmerica('Tomas Delgado', 14, 0, 9, 13, 5)
-agregarATablaAmerica('Tomas Torcasio', 26, 4, 10, 8, 4)
-agregarATablaAmerica('Verónica Lucchesi', 35, 5, 10, 7, 10)
-agregarATablaAmerica('Yago', 30, 5, 8, 9, 7)
+function seleccionarAmerica(seleccion) {
+    var botonesFecha = document.querySelectorAll('.cajaFECHA'); // Selecciona todos los botones de fecha
+    botonesFecha.forEach(function (btn) {
+        btn.classList.remove('btnFechaActivo'); // Quita la clase 'btnFechaActivo' a todos los botones
+    });
+    document.getElementById("btn" + seleccion).classList.add('btnFechaActivo'); // Agrega la clase 'btnFechaActivo' al botón clicado
+
+
+
+
+    var divsFechas = document.querySelectorAll('[id^="tablaPosicionesAmericaFase"]'); // Selecciona todos los divs de fecha
+    divsFechas.forEach(function (div) {
+        if (div.id === "tablaPosiciones" + seleccion) {
+            div.style.display = "flex"; // Muestra el div correspondiente al ID
+        } else {
+            div.style.display = "none"; // Oculta los demás divs
+        }
+    });
+
+}
+
+
+
+agregarATablaAmerica('Fabrizio Escolano', 0, 0, 0, 0, 0)
+agregarATablaAmerica('Pollo', 0, 0, 0, 0, 0)
+agregarATablaAmerica('Verónica Lucchesi', 0, 0, 0, 0, 0)
+agregarATablaAmerica('Jhose', 0, 0, 0, 0, 0)
+agregarATablaAmerica('Lucas Insua', 0, 0, 0, 0, 0)
+agregarATablaAmerica('Cami', 0, 0, 0, 0, 0)
+agregarATablaAmerica('Rodrigo Soca', 0, 0, 0, 0, 0)
+agregarATablaAmerica('Gabriel Talarico', 0, 0, 0, 0, 0)
+
 
 ordenarTablaAmerica();
 

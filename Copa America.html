@@ -134,13 +134,20 @@
     <main>
 
 
+        
 
 
         <div class="text-center banner col-md">
             <img src="Imagenes/Banner.png" class="img-fluid mt-4" alt="banner" height=auto width="600 rem">
         </div>
 
-        <div style="color: white;" class="margenParaPubli">
+
+
+
+        
+
+
+        <div style="color: white;">
             <div class="container">
                 <div
                     style="background-color: #081836a4; padding-bottom: 1.4rem; padding-left: 1.4rem; padding-right: 1.4rem; border-radius: 15px;">
@@ -149,8 +156,23 @@
                 </div>
                 <div><img src="Imagenes/Copa America.png" height="110px" style="margin-left: 2rem;" alt=""></div>
             </div>
-            <div class="tabla-wrapper">
-                <table class="tablaPosicionesAmerica mt-4" id="tablaPosicionesAmerica">
+
+
+
+            <div class="text-center cajaBotonesFechas mt-4">
+                <div id="contenedorFechas">
+                    <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btnFechaActivo" id="btnAmericaFase2"
+                        onclick="seleccionarAmerica('AmericaFase2')">FASE 2</button>
+                    <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold" id="btnAmericaFase1"
+                        onclick="seleccionarAmerica('AmericaFase1')">FASE 1</button>
+            
+                </div>
+            </div>
+
+
+
+            <div class="tabla-wrapper margenParaPubli"  id="tablaPosicionesAmericaFase2">
+                <table class="tablaPosicionesAmerica mt-4">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -168,6 +190,369 @@
                 </table>
             </div>
         </div>
+        
+        <div class="tabla-wrapper margenParaPubli"  id="tablaPosicionesAmericaFase1" style="display: none; color: white;">
+            <table class="tablaPosicionesAmerica mt-4">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Participante</th>
+                        <th>PTS</th>
+                        <th>🟢</th>
+                        <th>🟡</th>
+                        <th>🔴</th>
+                        <th>🟠</th>
+                    </tr>
+                </thead>
+                <tbody>
+            
+                    <tr>
+                        <td class="highlight-green">1</td>
+                        <td class="highlight-green">Fabrizio Escolano</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-green">43</td>
+                        <td class="highlight-green">8</td>
+                        <td class="highlight-green">8</td>
+                        <td class="highlight-green">8</td>
+                        <td class="highlight-green">11</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-green">2</td>
+                        <td class="highlight-green">Pollo</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-green">41</td>
+                        <td class="highlight-green">5</td>
+                        <td class="highlight-green">12</td>
+                        <td class="highlight-green">7</td>
+                        <td class="highlight-green">14</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-green">3</td>
+                        <td class="highlight-green">Verónica Lucchesi</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-green">40</td>
+                        <td class="highlight-green">6</td>
+                        <td class="highlight-green">10</td>
+                        <td class="highlight-green">8</td>
+                        <td class="highlight-green">12</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-green">4</td>
+                        <td class="highlight-green">Jhose</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-green">36</td>
+                        <td class="highlight-green">5</td>
+                        <td class="highlight-green">12</td>
+                        <td class="highlight-green">7</td>
+                        <td class="highlight-green">9</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-green">5</td>
+                        <td class="highlight-green">Lucas Insua</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-green">35</td>
+                        <td class="highlight-green">5</td>
+                        <td class="highlight-green">12</td>
+                        <td class="highlight-green">7</td>
+                        <td class="highlight-green">8</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-green">6</td>
+                        <td class="highlight-green">Cami</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-green">35</td>
+                        <td class="highlight-green">5</td>
+                        <td class="highlight-green">10</td>
+                        <td class="highlight-green">9</td>
+                        <td class="highlight-green">10</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-green">7</td>
+                        <td class="highlight-green">Rodrigo Soca</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-green">35</td>
+                        <td class="highlight-green">5</td>
+                        <td class="highlight-green">10</td>
+                        <td class="highlight-green">9</td>
+                        <td class="highlight-green">10</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-green">8</td>
+                        <td class="highlight-green">Gabriel Talarico</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-green">34</td>
+                        <td class="highlight-green">4</td>
+                        <td class="highlight-green">12</td>
+                        <td class="highlight-green">8</td>
+                        <td class="highlight-green">10</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">Bruno Alonso</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">33</td>
+                        <td class="highlight-red">5</td>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">8</td>
+                        <td class="highlight-red">7</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">Anubis</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">33</td>
+                        <td class="highlight-red">4</td>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">10</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">Nico Avalos</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">32</td>
+                        <td class="highlight-red">5</td>
+                        <td class="highlight-red">12</td>
+                        <td class="highlight-red">7</td>
+                        <td class="highlight-red">5</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">12</td>
+                        <td class="highlight-red">Benja</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">32</td>
+                        <td class="highlight-red">4</td>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">9</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">13</td>
+                        <td class="highlight-red">Moreno Perez</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">32</td>
+                        <td class="highlight-red">3</td>
+                        <td class="highlight-red">15</td>
+                        <td class="highlight-red">6</td>
+                        <td class="highlight-red">8</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">14</td>
+                        <td class="highlight-red">Mario Talarico</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">32</td>
+                        <td class="highlight-red">3</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">13</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">15</td>
+                        <td class="highlight-red">Dani Bazan</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">31</td>
+                        <td class="highlight-red">6</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">4</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">16</td>
+                        <td class="highlight-red">Lucas Aguilera</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">31</td>
+                        <td class="highlight-red">3</td>
+                        <td class="highlight-red">12</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">10</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">17</td>
+                        <td class="highlight-red">Yago</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">30</td>
+                        <td class="highlight-red">5</td>
+                        <td class="highlight-red">8</td>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">7</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">18</td>
+                        <td class="highlight-red">Pancho Muzzio</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">29</td>
+                        <td class="highlight-red">3</td>
+                        <td class="highlight-red">13</td>
+                        <td class="highlight-red">8</td>
+                        <td class="highlight-red">7</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">19</td>
+                        <td class="highlight-red">Ian Gangai</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">29</td>
+                        <td class="highlight-red">3</td>
+                        <td class="highlight-red">12</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">8</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">20</td>
+                        <td class="highlight-red">Ignacio Cejas</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">29</td>
+                        <td class="highlight-red">3</td>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">9</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">21</td>
+                        <td class="highlight-red">Bautista Coria</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">29</td>
+                        <td class="highlight-red">2</td>
+                        <td class="highlight-red">14</td>
+                        <td class="highlight-red">8</td>
+                        <td class="highlight-red">9</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">22</td>
+                        <td class="highlight-red">Luciano Hufschmid</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">28</td>
+                        <td class="highlight-red">4</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">6</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">23</td>
+                        <td class="highlight-red">Marto</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">28</td>
+                        <td class="highlight-red">4</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">6</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">24</td>
+                        <td class="highlight-red">Tomas Torcasio</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">28</td>
+                        <td class="highlight-red">4</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">6</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">25</td>
+                        <td class="highlight-red">Joel Alcalde</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">27</td>
+                        <td class="highlight-red">3</td>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">7</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">26</td>
+                        <td class="highlight-red">Ciro Guarch</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">26</td>
+                        <td class="highlight-red">2</td>
+                        <td class="highlight-red">12</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">8</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">27</td>
+                        <td class="highlight-red">Kevin Sivori</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">25</td>
+                        <td class="highlight-red">4</td>
+                        <td class="highlight-red">8</td>
+                        <td class="highlight-red">12</td>
+                        <td class="highlight-red">5</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">28</td>
+                        <td class="highlight-red">Felipe Galante</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">25</td>
+                        <td class="highlight-red">2</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">13</td>
+                        <td class="highlight-red">10</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">29</td>
+                        <td class="highlight-red">Joaco Fernandez</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">25</td>
+                        <td class="highlight-red">1</td>
+                        <td class="highlight-red">14</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">8</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">30</td>
+                        <td class="highlight-red">Renzo Badano</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">25</td>
+                        <td class="highlight-red">1</td>
+                        <td class="highlight-red">14</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">8</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">31</td>
+                        <td class="highlight-red">Rodrigo Talarico</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">23</td>
+                        <td class="highlight-red">2</td>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">11</td>
+                        <td class="highlight-red">6</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">32</td>
+                        <td class="highlight-red">Rodri Sebastian</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">23</td>
+                        <td class="highlight-red">2</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">13</td>
+                        <td class="highlight-red">8</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">33</td>
+                        <td class="highlight-red">Cristian Hantis</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">22</td>
+                        <td class="highlight-red">0</td>
+                        <td class="highlight-red">12</td>
+                        <td class="highlight-red">12</td>
+                        <td class="highlight-red">10</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">34</td>
+                        <td class="highlight-red">Eze</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">16</td>
+                        <td class="highlight-red">2</td>
+                        <td class="highlight-red">10</td>
+                        <td class="highlight-red">12</td>
+                        <td class="highlight-red">0</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">35</td>
+                        <td class="highlight-red">Tomas Delgado</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">16</td>
+                        <td class="highlight-red">0</td>
+                        <td class="highlight-red">9</td>
+                        <td class="highlight-red">15</td>
+                        <td class="highlight-red">7</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">36</td>
+                        <td class="highlight-red">Dante Dragon</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">11</td>
+                        <td class="highlight-red">1</td>
+                        <td class="highlight-red">4</td>
+                        <td class="highlight-red">19</td>
+                        <td class="highlight-red">4</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">37</td>
+                        <td class="highlight-red">Manu Solbes</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">0</td>
+                        <td class="highlight-red">0</td>
+                        <td class="highlight-red">0</td>
+                        <td class="highlight-red">24</td>
+                        <td class="highlight-red">0</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight-red">38</td>
+                        <td class="highlight-red">Nico Borea</td>
+                        <td class="ptsTablaPosicionesAmerica highlight-red">0</td>
+                        <td class="highlight-red">0</td>
+                        <td class="highlight-red">0</td>
+                        <td class="highlight-red">24</td>
+                        <td class="highlight-red">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
 
         <!--<button id="btnAbrirInput32avos" class="margenParaPubli p-2" onclick="abrirInput32avos()">CALCULADORA DE
             PUNTOS</button>
