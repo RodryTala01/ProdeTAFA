@@ -2223,7 +2223,7 @@ function calculadoraEurocopa() {
 
 
 function calculadoraPasarAFechaEuro(direction) {
-    let totalFechas = 5;
+    let totalFechas = 6;
 
     if (direction === 'next' && currentFechaEuro < totalFechas) {
         currentFechaEuro++;
@@ -2257,6 +2257,9 @@ function calculadoraPasarAFechaEuro(direction) {
         if (currentFechaEuro == 5) {
             contenedorFechas.innerHTML = 'CUARTOS DE FINAL';
         }
+        if (currentFechaEuro == 6) {
+            contenedorFechas.innerHTML = 'SEMIFINAL';
+        }
     } 
 
     // Habilita o deshabilita los botones en función de la fecha actual
@@ -2270,7 +2273,7 @@ function calculadoraPasarAFechaAmerica(direction) {
 
 
 
-    let totalFechas = 4;
+    let totalFechas = 5;
 
     if (direction === 'next' && currentFechaAmerica < totalFechas) {
         currentFechaAmerica++;
@@ -2300,6 +2303,9 @@ function calculadoraPasarAFechaAmerica(direction) {
         }
         if (currentFechaAmerica == 4) {
             contenedorFechas.innerHTML = 'CUARTOS DE FINAL';
+        }
+        if (currentFechaAmerica == 5) {
+            contenedorFechas.innerHTML = 'SEMIFINAL';
         }
     } 
 

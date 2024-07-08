@@ -190,13 +190,13 @@
                     onclick="fechaCopaAmerica('1del7')">Lun 01/07</button>
                 <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn2del7 " id="btn2del7"
                     onclick="fechaCopaAmerica('2del7')">Mar 02/07</button>
-                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn4del7 btnFechaActivo" id="btn4del7"
+                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn4del7" id="btn4del7"
                     onclick="fechaCopaAmerica('4del7')">Jue 04/07</button>
                 <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn5del7" id="btn5del7"
                     onclick="fechaCopaAmerica('5del7')">Vie 05/07</button>
                 <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn6del7" id="btn6del7"
                     onclick="fechaCopaAmerica('6del7')">Sáb 06/07</button>
-                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn9del7" id="btn9del7"
+                <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn9del7 btnFechaActivo" id="btn9del7"
                     onclick="fechaCopaAmerica('9del7')">Mar 09/07</button>
                 <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btn10del7" id="btn10del7"
                     onclick="fechaCopaAmerica('10del7')">Mié 10/07</button>
@@ -212,7 +212,7 @@
                 onclick="clicFlechaDerecha()"></button>
         </div>
 
-        <div id="fecha4del7" class="fecha14del6 margenParaPubli">
+        <div id="fecha9del7" class="fecha14del6 margenParaPubli">
 
             <div id="containerPelota" class="containerPelota justify-content-center">
                 <img class="pelota" v-if="!loaded"
@@ -232,7 +232,7 @@
                         <tbody>
 
                             <tr v-for="(lista, index) in listaDatos">
-                                <template v-if="index === 0 || index === 3">
+                                <template v-if="index === 0 || index === 2">
                                     <td colspan="6" class=" fecha ">{{ lista.fecha }}</td>
                                 </template>
                                 <template v-else>
@@ -2782,7 +2782,7 @@
             </div>
         </div>
 
-        <!-- <div id="fecha4del7" class="noMostrar margenParaPubli">
+        <div id="fecha4del7" class="noMostrar margenParaPubli">
             <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
@@ -2797,8 +2797,8 @@
                                             src="" height="30px" alt="">
                                         <br><span id="equipoNombreLocal68">Argentina</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1*</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante68" src="" width="50px" height="30px" alt="">
                                         <br><span id="equipoNombreVisitante68">Ecuador</span>
@@ -2809,7 +2809,7 @@
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
 
         <div id="fecha5del7" class="noMostrar margenParaPubli">
             <div class="containerFecha">
@@ -2826,8 +2826,8 @@
                                             src="" height="30px" alt="">
                                         <br><span id="equipoNombreLocal69">España</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1*</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante69" src="" width="50px" height="30px" alt="">
                                         <br><span id="equipoNombreVisitante69">Alemania</span>
@@ -2839,8 +2839,8 @@
                                             src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreLocal70">Portugal</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">0</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">0*</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante70" src="" height="30px" alt="" width="50px">
                                         <br><span id="equipoNombreVisitante70">Francia</span>
@@ -2855,8 +2855,8 @@
                                             src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreLocal71">Venezuela</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1*</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante71" src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreVisitante71">Canadá</span>
@@ -2884,8 +2884,8 @@
                                             src="" height="30px" alt="">
                                         <br><span id="equipoNombreLocal72">Inglaterra</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1*</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante72" src="" width="50px" height="30px" alt="">
                                         <br><span id="equipoNombreVisitante72">Suiza</span>
@@ -2897,8 +2897,8 @@
                                             src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreLocal73">Paises Bajos</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">2</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">1</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante73" src="" height="30px" alt="" width="50px">
                                         <br><span id="equipoNombreVisitante73">Turquía</span>
@@ -2913,8 +2913,8 @@
                                             src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreLocal74">Colombia</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">5</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">0</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante74" src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreVisitante74">Panamá</span>
@@ -2926,8 +2926,8 @@
                                             src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreLocal75">Uruguay</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">0*</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">0</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante75" src="" height="30px" width="50px" alt="">
                                         <br><span id="equipoNombreVisitante75">Brasil</span>
@@ -2940,7 +2940,7 @@
             </div>
         </div>
 
-        <div id="fecha9del7" class="noMostrar margenParaPubli">
+        <!-- <div id="fecha9del7" class="noMostrar margenParaPubli">
             <div class="containerFecha">
                 <div class="table-responsive">
                     <div class="d-flex flex-row justify-content-center mt-4">
@@ -2953,13 +2953,13 @@
                                     <th class="tg-nrix estado-columna colorTiempo p-2">16:00</th>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoLocal76"
                                             src="" height="30px" alt="">
-                                        <br><span id="equipoNombreLocal76">Ganador 45</span>
+                                        <br><span id="equipoNombreLocal76">España</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">4</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">9</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante76" src="" width="50px" height="30px" alt="">
-                                        <br><span id="equipoNombreVisitante76">Ganador 46</span>
+                                        <br><span id="equipoNombreVisitante76">Francia</span>
                                     </td>
                                 </tr>
                                 <tr class="fecha">
@@ -2969,13 +2969,13 @@
                                     <th class="tg-nrix estado-columna colorTiempo p-2">21:00</th>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoLocal77"
                                             src="" height="30px" width="50px" alt="">
-                                        <br><span id="equipoNombreLocal77">Ganador 25</span>
+                                        <br><span id="equipoNombreLocal77">Argentina</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">2</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">9</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante77" src="" height="30px" width="50px" alt="">
-                                        <br><span id="equipoNombreVisitante77">Ganador 26</span>
+                                        <br><span id="equipoNombreVisitante77">Canadá</span>
                                     </td>
                                 </tr>
 
@@ -2984,7 +2984,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div id="fecha10del7" class="noMostrar margenParaPubli">
             <div class="containerFecha">
@@ -2999,13 +2999,13 @@
                                     <th class="tg-nrix estado-columna colorTiempo p-2">16:00</th>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoLocal78"
                                             src="" height="30px" alt="">
-                                        <br><span id="equipoNombreLocal78">Ganador 47</span>
+                                        <br><span id="equipoNombreLocal78">Paises Bajos</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">5</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">0</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante78" src="" width="50px" height="30px" alt="">
-                                        <br><span id="equipoNombreVisitante78">Ganador 48</span>
+                                        <br><span id="equipoNombreVisitante78">Inglaterra</span>
                                     </td>
                                 </tr>
                                 <tr class="fecha">
@@ -3015,13 +3015,13 @@
                                     <th class="tg-nrix estado-columna colorTiempo p-2">21:00</th>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img id="equipoEscudoLocal79"
                                             src="" height="30px" width="50px" alt="">
-                                        <br><span id="equipoNombreLocal79">Ganador 27</span>
+                                        <br><span id="equipoNombreLocal79">Uruguay</span>
                                     </td>
-                                    <td class="tg-nrix numero p-2 colorGoles">3</td>
-                                    <td class="tg-nrix numero p-2 colorGoles">0</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
+                                    <td class="tg-nrix numero p-2 colorGoles">X</td>
                                     <td class="col-md-auto p-2 tamañoPerso2 colorEquipo"><img
                                             id="equipoEscudoVisitante79" src="" height="30px" width="50px" alt="">
-                                        <br><span id="equipoNombreVisitante79">Ganador 28</span>
+                                        <br><span id="equipoNombreVisitante79">Colombia</span>
                                     </td>
                                 </tr>
 

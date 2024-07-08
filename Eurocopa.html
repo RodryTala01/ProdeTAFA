@@ -155,18 +155,27 @@
 
 
             <div class="text-center cajaBotonesFechas mt-4">
-                <div id="contenedorFechas">
-                    <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btnFechaActivo" id="btnEurocopaFaseSemis"
+                <div id="">
+                    <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold btnFechaActivo" id="btnEurocopaFaseFinal"
+                        onclick="seleccionarEurocopa('EurocopaFaseFinal')">FINAL</button>
+                    <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold " id="btnEurocopaFaseSemis"
                         onclick="seleccionarEurocopa('EurocopaFaseSemis')">SEMIFINAL</button>
                     <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold"
                         id="btnEurocopaFase2" onclick="seleccionarEurocopa('EurocopaFase2')">FASE 2</button>
                     <button type="button" class="cajaFECHA tamañoMio btn btn-success fw-bold" id="btnEurocopaFase1"
                         onclick="seleccionarEurocopa('EurocopaFase1')">FASE 1</button>
+                        
                     
                 </div>
             </div>
 
-            <div class="tabla-wrapper margenParaPubli" id="tablaPosicionesEurocopaFaseSemis">
+            <div class="tabla-wrapper margenParaPubli" id="tablaPosicionesEurocopaFaseFinal">
+                <div class="container">
+                    
+                </div>
+            </div>
+
+            <div class="tabla-wrapper margenParaPubli" id="tablaPosicionesEurocopaFaseSemis" style="display: none;">
                 <div class="container">
                     <div style="width: 500px" class="row" id="tablasFechasProdePago">
                         <div>
