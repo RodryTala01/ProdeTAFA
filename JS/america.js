@@ -144,6 +144,49 @@ function ordenarTablaAmerica() {
             row.cells[0].classList.add('highlight-red');
             row.cells[0].classList.remove('highlight-green');
         }
+        if (index < 2) {
+            row.cells[1].classList.add('highlight-green');
+            row.cells[1].classList.remove('highlight-red');
+        } else {
+            row.cells[1].classList.add('highlight-red');
+            row.cells[1].classList.remove('highlight-green');
+        }
+        if (index < 2) {
+            row.cells[2].classList.add('highlight-green');
+            row.cells[2].classList.remove('highlight-red');
+        } else {
+            row.cells[2].classList.add('highlight-red');
+            row.cells[2].classList.remove('highlight-green');
+        }
+        if (index < 2) {
+            row.cells[3].classList.add('highlight-green');
+            row.cells[3].classList.remove('highlight-red');
+        } else {
+            row.cells[3].classList.add('highlight-red');
+            row.cells[3].classList.remove('highlight-green');
+        }
+        if (index < 2) {
+            row.cells[4].classList.add('highlight-green');
+            row.cells[4].classList.remove('highlight-red');
+        } else {
+            row.cells[4].classList.add('highlight-red');
+            row.cells[4].classList.remove('highlight-green');
+        }
+        if (index < 2) {
+            row.cells[5].classList.add('highlight-green');
+            row.cells[5].classList.remove('highlight-red');
+        } else {
+            row.cells[5].classList.add('highlight-red');
+            row.cells[5].classList.remove('highlight-green');
+        }
+        if (index < 2) {
+            row.cells[6].classList.add('highlight-green');
+            row.cells[6].classList.remove('highlight-red');
+        } else {
+            row.cells[6].classList.add('highlight-red');
+            row.cells[6].classList.remove('highlight-green');
+        }
+        
 
 
 
@@ -178,14 +221,14 @@ function seleccionarAmerica(seleccion) {
 
 
 
-agregarATablaAmerica('Fabrizio Escolano', 0, 0, 0, 0, 0)
-agregarATablaAmerica('Pollo', 0, 0, 0, 0, 0)
-agregarATablaAmerica('Verónica Lucchesi', 0, 0, 0, 0, 0)
-agregarATablaAmerica('Jhose', 0, 0, 0, 0, 0)
-agregarATablaAmerica('Lucas Insua', 0, 0, 0, 0, 0)
-agregarATablaAmerica('Cami', 0, 0, 0, 0, 0)
-agregarATablaAmerica('Rodrigo Soca', 0, 0, 0, 0, 0)
-agregarATablaAmerica('Gabriel Talarico', 0, 0, 0, 0, 0)
+agregarATablaAmerica('Gabriel Talarico', 9, 1, 2, 1, 4)
+agregarATablaAmerica('Pollo', 9, 1, 1, 2, 5)
+agregarATablaAmerica('Verónica Lucchesi', 8, 1, 1, 2, 4)
+agregarATablaAmerica('Fabrizio Escolano', 7, 1, 2, 1, 2)
+agregarATablaAmerica('Rodrigo Soca', 4, 1, 1, 2, 0)
+agregarATablaAmerica('Lucas Insua', 4, 0, 2, 2, 2)
+agregarATablaAmerica('Jhose', 3, 0, 1, 3, 2)
+agregarATablaAmerica('Cami', 2, 0, 1, 3, 1)
 
 
 ordenarTablaAmerica();
