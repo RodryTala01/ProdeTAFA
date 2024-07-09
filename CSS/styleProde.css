@@ -1475,6 +1475,11 @@ div>a {
     .fecha-box {
         margin-right: 1%;
     }
+
+    .imagenEuroamerica{
+        text-align: center;
+        width: 70%;
+    }
 }
 
 @media (max-width: 575px) {
@@ -1483,6 +1488,10 @@ div>a {
     .fecha-box {
         width: 100%;
     }
+        .imagenEuroamerica {
+            text-align: center;
+            width: 100%;
+        }
 }
 
 #tablasFechasProdePago>div>div>table>thead>tr>th {
