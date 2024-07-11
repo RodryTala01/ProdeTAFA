@@ -145,7 +145,7 @@ function agregarATablaEuroamerica(Jugador, PTS, Pleno, Parcial, Error, Extra) {
                 row.cells[0].classList.remove('highlight-green');
             }
 
-            if (index > 26) {
+            if (index > 4) {
                 row.cells[0].classList.add('highlight-red');
                 row.cells[1].classList.add('highlight-red');
                 row.cells[2].classList.add('highlight-red');
@@ -169,46 +169,44 @@ function agregarATablaEuroamerica(Jugador, PTS, Pleno, Parcial, Error, Extra) {
     ordenarTablaEuroamerica();
 
 
-
-
-agregarATablaEuroamerica('Anubis', 82, 10, 24, 44, 28)
-agregarATablaEuroamerica('Bautista Coria', 97, 10, 32, 36, 35)
-agregarATablaEuroamerica('Benja', 104, 13, 26, 39, 39)
-agregarATablaEuroamerica('Bruno Alonso', 116, 13, 30, 35, 47)
-agregarATablaEuroamerica('Cami', 108, 12, 27, 39, 45)
-agregarATablaEuroamerica('Ciro Guarch', 77, 9, 25, 44, 25)
-agregarATablaEuroamerica('Cristian Hantis', 66, 5, 24, 49, 27)
-agregarATablaEuroamerica('Dani Bazan', 82, 12, 29, 37, 17)
-agregarATablaEuroamerica('Dante Dragon', 40, 2, 16, 60, 18)
-agregarATablaEuroamerica('Eze', 44, 4, 27, 47, 5)
-agregarATablaEuroamerica('Fabrizio Escolano', 129, 18, 26, 34, 49)
-agregarATablaEuroamerica('Felipe Galante', 60, 5, 22, 51, 23)
-agregarATablaEuroamerica('Gabriel Talarico', 123, 12, 34, 32, 53)
-agregarATablaEuroamerica('Ian Gangai', 82, 10, 25, 43, 27)
-agregarATablaEuroamerica('Ignacio Cejas', 84, 8, 27, 43, 33)
-agregarATablaEuroamerica('Jhose', 94, 8, 34, 36, 36)
-agregarATablaEuroamerica('Joaco Fernandez', 70, 6, 31, 41, 21)
-agregarATablaEuroamerica('Joel Alcalde', 91, 6, 33, 39, 40)
-agregarATablaEuroamerica('Kevin Sivori', 102, 12, 23, 43, 43)
-agregarATablaEuroamerica('Lucas Aguilera', 78, 7, 26, 45, 31)
-agregarATablaEuroamerica('Lucas Insua', 106, 11, 33, 34, 40)
-agregarATablaEuroamerica('Luciano Hufschmid', 101, 11, 24, 43, 44)
-agregarATablaEuroamerica('Manu Solbes', 31, 2, 13, 63, 12)
-agregarATablaEuroamerica('Mario Talarico', 88, 8, 25, 45, 39)
-agregarATablaEuroamerica('Marto', 96, 8, 37, 33, 35)
-agregarATablaEuroamerica('Moreno Perez', 105, 11, 31, 36, 41)
-agregarATablaEuroamerica('Nico Avalos', 98, 12, 25, 41, 37)
-agregarATablaEuroamerica('Nico Borea', 0, 0, 0, 78, 0)
-agregarATablaEuroamerica('Pancho Muzzio', 99, 11, 27, 40, 39)
-agregarATablaEuroamerica('Pollo', 114, 11, 30, 37, 51)
-agregarATablaEuroamerica('Renzo Badano', 91, 8, 32, 38, 35)
-agregarATablaEuroamerica('Rodri Sebastian', 48, 4, 16, 58, 20)
-agregarATablaEuroamerica('Rodrigo Soca', 92, 12, 31, 35, 25)
-agregarATablaEuroamerica('Rodrigo Talarico', 109, 10, 29, 39, 50)
-agregarATablaEuroamerica('Tomas Delgado', 63, 4, 28, 46, 23)
-agregarATablaEuroamerica('Tomas Torcasio', 68, 8, 27, 43, 17)
-agregarATablaEuroamerica('Verónica Lucchesi', 112, 13, 29, 36, 44)
-agregarATablaEuroamerica('Yago', 102, 11, 29, 38, 40)
+agregarATablaEuroamerica('Anubis', 82, 10, 24, 46, 28)
+agregarATablaEuroamerica('Bautista Coria', 100, 11, 32, 37, 35)
+agregarATablaEuroamerica('Benja', 104, 13, 26, 41, 39)
+agregarATablaEuroamerica('Bruno Alonso', 116, 13, 30, 36, 47)
+agregarATablaEuroamerica('Cami', 108, 12, 27, 41, 45)
+agregarATablaEuroamerica('Ciro Guarch', 78, 9, 26, 45, 25)
+agregarATablaEuroamerica('Cristian Hantis', 66, 5, 24, 51, 27)
+agregarATablaEuroamerica('Dani Bazan', 89, 14, 30, 36, 17)
+agregarATablaEuroamerica('Dante Dragon', 40, 2, 16, 62, 18)
+agregarATablaEuroamerica('Eze', 44, 4, 27, 49, 5)
+agregarATablaEuroamerica('Fabrizio Escolano', 130, 18, 27, 35, 49)
+agregarATablaEuroamerica('Felipe Galante', 60, 5, 22, 53, 23)
+agregarATablaEuroamerica('Gabriel Talarico', 126, 13, 34, 33, 53)
+agregarATablaEuroamerica('Ian Gangai', 82, 10, 25, 45, 27)
+agregarATablaEuroamerica('Ignacio Cejas', 84, 8, 27, 45, 33)
+agregarATablaEuroamerica('Jhose', 94, 8, 34, 38, 36)
+agregarATablaEuroamerica('Joaco Fernandez', 73, 6, 33, 42, 22)
+agregarATablaEuroamerica('Joel Alcalde', 93, 6, 35, 39, 40)
+agregarATablaEuroamerica('Kevin Sivori', 103, 12, 24, 44, 43)
+agregarATablaEuroamerica('Lucas Aguilera', 78, 7, 26, 47, 31)
+agregarATablaEuroamerica('Lucas Insua', 106, 11, 33, 36, 40)
+agregarATablaEuroamerica('Luciano Hufschmid', 104, 12, 24, 44, 44)
+agregarATablaEuroamerica('Manu Solbes', 31, 2, 13, 65, 12)
+agregarATablaEuroamerica('Mario Talarico', 91, 8, 25, 47, 42)
+agregarATablaEuroamerica('Marto', 96, 8, 37, 35, 35)
+agregarATablaEuroamerica('Moreno Perez', 108, 11, 31, 38, 44)
+agregarATablaEuroamerica('Nico Avalos', 98, 12, 25, 43, 37)
+agregarATablaEuroamerica('Nico Borea', 0, 0, 0, 80, 0)
+agregarATablaEuroamerica('Pancho Muzzio', 102, 12, 27, 41, 39)
+agregarATablaEuroamerica('Pollo', 117, 12, 30, 38, 51)
+agregarATablaEuroamerica('Renzo Badano', 91, 8, 32, 40, 35)
+agregarATablaEuroamerica('Rodri Sebastian', 48, 4, 16, 60, 20)
+agregarATablaEuroamerica('Rodrigo Soca', 93, 12, 31, 37, 26)
+agregarATablaEuroamerica('Rodrigo Talarico', 111, 10, 30, 40, 51)
+agregarATablaEuroamerica('Tomas Delgado', 69, 6, 28, 46, 23)
+agregarATablaEuroamerica('Tomas Torcasio', 68, 8, 27, 45, 17)
+agregarATablaEuroamerica('Verónica Lucchesi', 114, 13, 30, 37, 45)
+agregarATablaEuroamerica('Yago', 102, 11, 29, 40, 40)
   
 ordenarTablaEuroamerica();
 
