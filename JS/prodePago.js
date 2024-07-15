@@ -82,18 +82,50 @@ function ordenarTablaProdePago() {
         row.cells[0].textContent = index + 1;
         if (index === 0) {
             row.cells[0].classList.add('highlight-green');
+            row.cells[1].classList.add('highlight-green');
+            row.cells[2].classList.add('highlight-green');
+            row.cells[3].classList.add('highlight-green');
+            row.cells[4].classList.add('highlight-green');
+            row.cells[5].classList.add('highlight-green');
+            row.cells[6].classList.add('highlight-green');
+            row.cells[7].classList.add('highlight-green');
+            row.cells[8].classList.add('highlight-green');
         } else {
             row.cells[0].classList.remove('highlight-green');
         }
         if (index === 1) {
             row.cells[0].classList.add('colorGris');
+            row.cells[1].classList.add('colorGris');
+            row.cells[2].classList.add('colorGris');
+            row.cells[3].classList.add('colorGris');
+            row.cells[4].classList.add('colorGris');
+            row.cells[5].classList.add('colorGris');
+            row.cells[6].classList.add('colorGris');
+            row.cells[7].classList.add('colorGris');
+            row.cells[8].classList.add('colorGris');
         } else {
             row.cells[0].classList.remove('colorGris');
         }
         if (index === 2) {
             row.cells[0].classList.add('colorBronce');
-        } else {
-            row.cells[0].classList.remove('colorBronce');
+            row.cells[1].classList.add('colorBronce');
+            row.cells[2].classList.add('colorBronce');
+            row.cells[3].classList.add('colorBronce');
+            row.cells[4].classList.add('colorBronce');
+            row.cells[5].classList.add('colorBronce');
+            row.cells[6].classList.add('colorBronce');
+            row.cells[7].classList.add('colorBronce');
+            row.cells[8].classList.add('colorBronce');
+        } if (index > 2) {
+            row.cells[0].classList.add('highlight-red');
+            row.cells[1].classList.add('highlight-red');
+            row.cells[2].classList.add('highlight-red');
+            row.cells[3].classList.add('highlight-red');
+            row.cells[4].classList.add('highlight-red');
+            row.cells[5].classList.add('highlight-red');
+            row.cells[6].classList.add('highlight-red');
+            row.cells[7].classList.add('highlight-red');
+            row.cells[8].classList.add('highlight-red');
         }
         tbody.appendChild(row);
     });
@@ -195,16 +227,16 @@ function copiarTextoGeneradoProdePago() {
 }
 
 
-agregarATablaProdePago('Rodrigo Soca', 19, 6, 1, 1, 44, 27, 17)
-agregarATablaProdePago('Mario Talarico', 13, 4, 1, 3, 46, 43, 3)
-agregarATablaProdePago('Moreno Perez', 17, 5, 2, 1, 51, 20, 31)
-agregarATablaProdePago('Rodrigo Talarico', 14, 4, 2, 2, 44, 36, 8)
-agregarATablaProdePago('Cami', 12, 3, 3, 4, 41, 36, 5)
-agregarATablaProdePago('Gabriel Talarico', 12, 3, 3, 2, 45, 36, 9)
-agregarATablaProdePago('Fabrizio Escolano', 13, 4, 1, 3, 51, 39, 12)
-agregarATablaProdePago('Lucas Aguilera', 7, 2, 1, 5, 29, 35, -6)
-agregarATablaProdePago('Manu Solbes', 3, 1, 0, 7, 9, 54, -45)
-agregarATablaProdePago('Dante Dragon', 1, 0, 1, 7, 9, 43, -34)
+agregarATablaProdePago('Rodrigo Soca', 22, 7, 1, 1, 48, 29, 19)
+agregarATablaProdePago('Mario Talarico', 14, 4, 2, 3, 46, 43, 3)
+agregarATablaProdePago('Moreno Perez', 20, 6, 2, 1, 53, 20, 33)
+agregarATablaProdePago('Rodrigo Talarico', 14, 4, 2, 3, 46, 40, 6)
+agregarATablaProdePago('Cami', 12, 3, 3, 5, 42, 38, 4)
+agregarATablaProdePago('Gabriel Talarico', 15, 4, 3, 2, 49, 36, 13)
+agregarATablaProdePago('Fabrizio Escolano', 16, 5, 1, 3, 53, 40, 13)
+agregarATablaProdePago('Lucas Aguilera', 7, 2, 1, 6, 29, 37, -8)
+agregarATablaProdePago('Manu Solbes', 3, 1, 0, 8, 9, 58, -49)
+agregarATablaProdePago('Dante Dragon', 2, 0, 2, 7, 9, 43, -34)
 
 ordenarTablaProdePago()
 
