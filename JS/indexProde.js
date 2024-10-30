@@ -2,6 +2,11 @@ let currentFechaEuro = 1;  // Inicializa currentFecha como variable global
 let currentFechaAmerica = 1;  // Inicializa currentFecha como variable global COPA AMERICA
 var penalesEurocopaFecha1 = 0;
 
+for (var i = 1; i <= 60; i++) {
+        document.getElementById("extinto" + i).style.display = 'none';
+        console.log("extinto" + i)
+    }
+
 desplazar(22);
 
 function mostrarFecha32avos() {
@@ -2120,9 +2125,9 @@ window.addEventListener('click', function (event) {
 });
 
 function toggleExtintos() {
-    for (var i = 1; i <= 50; i++) {
+    for (var i = 1; i <= 60; i++) {
         var extinto = document.getElementById("extinto" + i);
-        if (extinto.style.display === 'none') {
+         if (extinto.style.display === 'none') {
             extinto.style.display = 'flex';
             document.getElementById("textoOcultarExtintos").innerHTML = "Ocultar clubes extintos";
         } else {
