@@ -1348,7 +1348,8 @@ div>a {
 
 .cardEquipo {
     border: 1px solid #ccc;
-    background-color: rgba(148, 146, 146, 0.205);
+    color: white;
+    background-color: rgba(148, 146, 146, 0.2);
     border-radius: 8px;
     padding: 20px;
     width: 350px;
@@ -1363,11 +1364,17 @@ div>a {
     /* ajusta el tamaño según sea necesario */
 }
 
+.card-total-points{
+    color: black;
+}
+
+
+
 .card-team-name {
     text-align: center;
     margin-top: 10px;
     font-weight: bold;
-    color: #012c47;
+    color: #86ca8f;
 }
 
 .card-stats {
@@ -1409,8 +1416,8 @@ div>a {
 
 
 #posRanking {
-    font-weight: 100;
-    color: white;
+    font-weight: bold;
+    color: black;
 }
 
 .noMostrar {

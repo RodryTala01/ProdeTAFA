@@ -6236,6 +6236,126 @@ agregarResultado("Rodrigo Talarico", "5-3", "Nico Avalos", "CUARTOS DE FINAL COP
 
 agregarResultado("Nico Avalos", "3-5", "Rodrigo Talarico", "CUARTOS DE FINAL COPA CAMPEONES T23");
 
+agregarResultado("Benja", "4-7", "Joel Alcalde", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "7-4", "Benja", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "8-8", "Nico Avalos", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "8-8", "Rodrigo Talarico", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Ignacio Cejas", "0-11", "Marto", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Marto", "11-0", "Ignacio Cejas", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Yago", "8-5", "Pollo", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Pollo", "5-8", "Yago", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Luciano Hufschmid", "4-5", "Cami", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Cami", "5-4", "Luciano Hufschmid", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "12-6", "Moreno Perez", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Moreno Perez", "6-12", "Rodrigo Soca", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Jhose", "6-8", "Lucas Aguilera", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "8-6", "Jhose", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "11-9", "Gabriel Talarico", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Gabriel Talarico", "9-11", "Pancho Muzzio", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "2-2", "Nico Avalos", "DESEMPATE OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "2-2", "Rodrigo Talarico", "DESEMPATE OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "4-4", "Nico Avalos", "DESEMPATE 2 OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "4-4", "Rodrigo Talarico", "DESEMPATE 2 OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "1-0", "Nico Avalos", "DESEMPATE 3 OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "0-1", "Rodrigo Talarico", "DESEMPATE 3 OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "5-3", "Joel Alcalde", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "3-5", "Lucas Aguilera", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "5-8", "Pancho Muzzio", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "8-5", "Rodrigo Talarico", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Marto", "3-7", "Cami", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Cami", "7-3", "Marto", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "5-3", "Yago", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Yago", "3-5", "Rodrigo Soca", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Mario Talarico", "16-10", "Yago", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Yago", "10-16", "Mario Talarico", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Rodrigo Soca", "15-14", "Fabrizio Escolano", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Fabrizio Escolano", "14-15", "Rodrigo Soca", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Benja", "5-19", "Jhose", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Jhose", "19-5", "Benja", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Veronica Lucchesi", "12-15", "Ignacio Cejas", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Ignacio Cejas", "15-12", "Veronica Lucchesi", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Luciano Hufschmid", "10-14", "Kevin Sivori", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Kevin Sivori", "14-10", "Luciano Hufschmid", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Pancho Muzzio", "13-16", "Lucas Insua", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Lucas Insua", "16-13", "Pancho Muzzio", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Pollo", "10-12", "Gabriel Talarico", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Gabriel Talarico", "12-10", "Pollo", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Rodrigo Talarico", "20-0", "Anubis", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Anubis", "0-20", "Rodrigo Talarico", "OCTAVOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Rodrigo Talarico", "4-10", "Lucas Insua", "CUARTOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Lucas Insua", "10-4", "Rodrigo Talarico", "CUARTOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Mario Talarico", "8-11", "Ignacio Cejas", "CUARTOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Ignacio Cejas", "11-8", "Mario Talarico", "CUARTOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Kevin Sivori", "8-3", "Gabriel Talarico", "CUARTOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Gabriel Talarico", "3-8", "Kevin Sivori", "CUARTOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Jhose", "8-6", "Rodrigo Soca", "CUARTOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Rodrigo Soca", "6-8", "Jhose", "CUARTOS DE FINAL COPA TOTAL T22");
+
+agregarResultado("Kevin Sivori", "9-3", "Jhose", "SEMIFINALES COPA TOTAL T22");
+
+agregarResultado("Jhose", "3-9", "Kevin Sivori", "SEMIFINALES COPA TOTAL T22");
+
+agregarResultado("Lucas Insua", "6-9", "Ignacio Cejas", "SEMIFINALES COPA TOTAL T22");
+
+agregarResultado("Ignacio Cejas", "9-6", "Lucas Insua", "SEMIFINALES COPA TOTAL T22");
+
+agregarResultado("Kevin Sivori", "9-6", "Ignacio Cejas", "FINAL COPA TOTAL T22");
+
+agregarResultado("Ignacio Cejas", "6-9", "Kevin Sivori", "FINAL COPA TOTAL T22");
+
 
 
 
