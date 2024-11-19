@@ -6356,6 +6356,656 @@ agregarResultado("Kevin Sivori", "9-6", "Ignacio Cejas", "FINAL COPA TOTAL T22")
 
 agregarResultado("Ignacio Cejas", "6-9", "Kevin Sivori", "FINAL COPA TOTAL T22");
 
+agregarResultado("Jhose", "11-4", "Veronica Lucchesi", "PROMOCION T23");
+
+agregarResultado("Veronica Lucchesi", "4-11", "Jhose", "PROMOCION T23");
+
+agregarResultado("Renzo Badano", "11-6", "Joel Alcalde", "PROMOCION T23");
+
+agregarResultado("Joel Alcalde", "6-11", "Renzo Badano", "PROMOCION T23");
+
+agregarResultado("Yago", "8-4", "Bruno Alonso", "OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Bruno Alonso", "4-8", "Yago", "OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Lucas Aguilera", "8-9", "Gabriel Talarico", "OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Gabriel Talarico", "9-8", "Lucas Aguilera", "OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Fabrizio Escolano", "5-5", "Cami", "OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Cami", "5-5", "Fabrizio Escolano", "OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Pancho Muzzio", "11-6", "Jhose", "OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Jhose", "6-11", "Pancho Muzzio", "OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Fabrizio Escolano", "2-3", "Cami", "DESEMPATE OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Cami", "3-2", "Fabrizio Escolano", "DESEMPATE OCTAVOS DE FINAL COPA A T23");
+
+agregarResultado("Yago", "3-7", "Luciano Hufschmid", "CUARTOS DE FINAL COPA A T23");
+
+agregarResultado("Luciano Hufschmid", "7-3", "Yago", "CUARTOS DE FINAL COPA A T23");
+
+agregarResultado("Gabriel Talarico", "9-5", "Pollo", "CUARTOS DE FINAL COPA A T23");
+
+agregarResultado("Pollo", "5-9", "Gabriel Talarico", "CUARTOS DE FINAL COPA A T23");
+
+agregarResultado("Cami", "7-5", "Rodrigo Talarico", "CUARTOS DE FINAL COPA A T23");
+
+agregarResultado("Rodrigo Talarico", "5-7", "Cami", "CUARTOS DE FINAL COPA A T23");
+
+agregarResultado("Pancho Muzzio", "8-5", "Rodrigo Soca", "CUARTOS DE FINAL COPA A T23");
+
+agregarResultado("Rodrigo Soca", "5-8", "Pancho Muzzio", "CUARTOS DE FINAL COPA A T23");
+
+agregarResultado("Cami", "9-8", "Gabriel Talarico", "SEMIFINAL COPA A T23");
+
+agregarResultado("Gabriel Talarico", "8-9", "Cami", "SEMIFINAL COPA A T23");
+
+agregarResultado("Pancho Muzzio", "1-4", "Luciano Hufschmid", "SEMIFINAL COPA A T23");
+
+agregarResultado("Luciano Hufschmid", "4-1", "Pancho Muzzio", "SEMIFINAL COPA A T23");
+
+agregarResultado("Cami", "6-11", "Luciano Hufschmid", "FINAL COPA A T23");
+
+agregarResultado("Luciano Hufschmid", "11-6", "Cami", "FINAL COPA A T23");
+
+agregarResultado("Joel Alcalde", "3-6", "Veronica Lucchesi", "CUARTOS DE FINAL COPA B T23");
+
+agregarResultado("Veronica Lucchesi", "6-3", "Joel Alcalde", "CUARTOS DE FINAL COPA B T23");
+
+agregarResultado("Kevin Sivori", "3-4", "Ignacio Cejas", "CUARTOS DE FINAL COPA B T23");
+
+agregarResultado("Ignacio Cejas", "4-3", "Kevin Sivori", "CUARTOS DE FINAL COPA B T23");
+
+agregarResultado("Benja", "5-0", "Dani Bazan", "CUARTOS DE FINAL COPA B T23");
+
+agregarResultado("Dani Bazan", "0-5", "Benja", "CUARTOS DE FINAL COPA B T23");
+
+agregarResultado("Marto", "3-5", "Lucas Insua", "CUARTOS DE FINAL COPA B T23");
+
+agregarResultado("Lucas Insua", "5-3", "Marto", "CUARTOS DE FINAL COPA B T23");
+
+agregarResultado("Benja", "9-4", "Veronica Lucchesi", "SEMIFINAL COPA B T23");
+
+agregarResultado("Veronica Lucchesi", "4-9", "Benja", "SEMIFINAL COPA B T23");
+
+agregarResultado("Lucas Insua", "7-9", "Ignacio Cejas", "SEMIFINAL COPA B T23");
+
+agregarResultado("Ignacio Cejas", "9-7", "Lucas Insua", "SEMIFINAL COPA B T23");
+
+agregarResultado("Benja", "8-8", "Ignacio Cejas", "FINAL COPA B T23");
+
+agregarResultado("Ignacio Cejas", "8-8", "Benja", "FINAL COPA B T23");
+
+agregarResultado("Benja", "1-0", "Ignacio Cejas", "DESEMPATE FINAL COPA B T23");
+
+agregarResultado("Ignacio Cejas", "0-1", "Benja", "DESEMPATE FINAL COPA B T23");
+
+agregarResultado("Renzo Badano", "1-7", "Benja", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Benja", "7-1", "Renzo Badano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cami", "4-7", "Kevin Sivori", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Kevin Sivori", "7-4", "Cami", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Kevin Sivori", "1-3", "Benja", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Benja", "3-1", "Kevin Sivori", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Renzo Badano", "1-4", "Cami", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cami", "4-1", "Renzo Badano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "9-4", "Marto", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Marto", "4-9", "Pancho Muzzio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Insua", "2-6", "Fabrizio Escolano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Fabrizio Escolano", "6-2", "Lucas Insua", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Fabrizio Escolano", "7-1", "Marto", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Marto", "1-7", "Fabrizio Escolano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "0-1", "Lucas Insua", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Insua", "1-0", "Pancho Muzzio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "8-2", "Santi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Santi", "2-8", "Joel Alcalde", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ian Gangai", "0-7", "Rodrigo Soca", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "7-0", "Ian Gangai", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "4-2", "Santi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Santi", "2-4", "Rodrigo Soca", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "1-0", "Ian Gangai", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ian Gangai", "0-1", "Joel Alcalde", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Torcasio", "3-1", "Veronica Lucchesi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Veronica Lucchesi", "1-3", "Tomas Torcasio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Jhose", "6-4", "Moreno Perez", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Moreno Perez", "4-6", "Jhose", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Moreno Perez", "4-4", "Veronica Lucchesi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Veronica Lucchesi", "4-4", "Moreno Perez", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Torcasio", "2-6", "Jhose", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Jhose", "6-2", "Tomas Torcasio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Felipe Galante", "1-0", "Ciro Guarch", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ciro Guarch", "0-1", "Felipe Galante", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Yago", "12-7", "Nico Avalos", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "7-12", "Yago", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "3-0", "Ciro Guarch", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ciro Guarch", "0-3", "Nico Avalos", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Felipe Galante", "4-7", "Yago", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Yago", "7-4", "Felipe Galante", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Delgado", "0-2", "Dani Bazan", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Dani Bazan", "2-0", "Tomas Delgado", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Luciano Hufschmid", "10-6", "Pollo", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pollo", "6-10", "Luciano Hufschmid", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pollo", "5-4", "Dani Bazan", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Dani Bazan", "4-5", "Pollo", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Delgado", "0-6", "Luciano Hufschmid", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Luciano Hufschmid", "6-0", "Tomas Delgado", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Mario Talarico", "0-0", "Anubis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Anubis", "0-0", "Mario Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "5-10", "Lucas Aguilera", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "10-5", "Rodrigo Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "1-0", "Anubis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Anubis", "0-1", "Lucas Aguilera", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Mario Talarico", "0-5", "Rodrigo Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "5-0", "Mario Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ignacio Cejas", "1-2", "Cristian Hantis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cristian Hantis", "2-1", "Ignacio Cejas", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Bruno Alonso", "2-4", "Gabriel Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Gabriel Talarico", "4-2", "Bruno Alonso", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Gabriel Talarico", "4-1", "Cristian Hantis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cristian Hantis", "1-4", "Gabriel Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ignacio Cejas", "4-4", "Bruno Alonso", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Bruno Alonso", "4-4", "Ignacio Cejas", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cami", "3-2", "Benja", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Benja", "2-3", "Cami", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Kevin Sivori", "2-3", "Renzo Badano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Renzo Badano", "3-2", "Kevin Sivori", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Benja", "1-0", "Renzo Badano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Renzo Badano", "0-1", "Benja", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Kevin Sivori", "0-3", "Cami", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cami", "3-0", "Kevin Sivori", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Insua", "0-2", "Marto", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Marto", "2-0", "Lucas Insua", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Fabrizio Escolano", "2-2", "Pancho Muzzio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "2-2", "Fabrizio Escolano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Marto", "2-1", "Pancho Muzzio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "1-2", "Marto", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Fabrizio Escolano", "0-4", "Lucas Insua", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Insua", "4-0", "Fabrizio Escolano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ian Gangai", "0-1", "Santi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Santi", "1-0", "Ian Gangai", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "2-2", "Joel Alcalde", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "2-2", "Rodrigo Soca", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Santi", "3-0", "Joel Alcalde", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "0-3", "Santi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "0-0", "Ian Gangai", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ian Gangai", "0-0", "Rodrigo Soca", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Jhose", "0-2", "Veronica Lucchesi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Veronica Lucchesi", "2-0", "Jhose", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Moreno Perez", "5-1", "Tomas Torcasio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Torcasio", "1-5", "Moreno Perez", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Veronica Lucchesi", "0-0", "Tomas Torcasio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Torcasio", "0-0", "Veronica Lucchesi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Moreno Perez", "0-0", "Jhose", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Jhose", "0-0", "Moreno Perez", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Yago", "1-0", "Ciro Guarch", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ciro Guarch", "0-1", "Yago", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "2-5", "Felipe Galante", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Felipe Galante", "5-2", "Nico Avalos", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ciro Guarch", "0-0", "Felipe Galante", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Felipe Galante", "0-0", "Ciro Guarch", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "0-1", "Yago", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Yago", "1-0", "Nico Avalos", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Luciano Hufschmid", "2-4", "Dani Bazan", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Dani Bazan", "4-2", "Luciano Hufschmid", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pollo", "5-0", "Tomas Delgado", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Delgado", "0-5", "Pollo", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Dani Bazan", "1-3", "Tomas Delgado", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Delgado", "3-1", "Dani Bazan", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pollo", "3-4", "Luciano Hufschmid", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Luciano Hufschmid", "4-3", "Pollo", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "6-0", "Anubis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Anubis", "0-6", "Rodrigo Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "1-0", "Mario Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Mario Talarico", "0-1", "Lucas Aguilera", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Anubis", "4-1", "Mario Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Mario Talarico", "1-4", "Anubis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "0-4", "Rodrigo Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "4-0", "Lucas Aguilera", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Bruno Alonso", "4-1", "Cristian Hantis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cristian Hantis", "1-4", "Bruno Alonso", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Gabriel Talarico", "1-2", "Ignacio Cejas", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ignacio Cejas", "2-1", "Gabriel Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cristian Hantis", "0-0", "Ignacio Cejas", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ignacio Cejas", "0-0", "Cristian Hantis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Gabriel Talarico", "1-1", "Bruno Alonso", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Bruno Alonso", "1-1", "Gabriel Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Benja", "6-5", "Kevin Sivori", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Kevin Sivori", "5-6", "Benja", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cami", "6-4", "Renzo Badano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Renzo Badano", "4-6", "Cami", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Benja", "1-1", "Cami", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cami", "1-1", "Benja", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Renzo Badano", "1-1", "Kevin Sivori", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Kevin Sivori", "1-1", "Renzo Badano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Marto", "6-4", "Fabrizio Escolano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Fabrizio Escolano", "4-6", "Marto", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Insua", "3-9", "Pancho Muzzio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "9-3", "Lucas Insua", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Marto", "1-1", "Lucas Insua", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Insua", "1-1", "Marto", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "1-0", "Fabrizio Escolano", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Fabrizio Escolano", "0-1", "Pancho Muzzio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Santi", "1-10", "Rodrigo Soca", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "10-1", "Santi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ian Gangai", "0-6", "Joel Alcalde", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "6-0", "Ian Gangai", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Santi", "4-0", "Ian Gangai", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ian Gangai", "0-4", "Santi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "0-1", "Rodrigo Soca", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "1-0", "Joel Alcalde", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Veronica Lucchesi", "2-0", "Moreno Perez", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Moreno Perez", "0-2", "Veronica Lucchesi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Jhose", "5-1", "Tomas Torcasio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Torcasio", "1-5", "Jhose", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Veronica Lucchesi", "0-3", "Jhose", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Jhose", "3-0", "Veronica Lucchesi", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Torcasio", "2-3", "Moreno Perez", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Moreno Perez", "3-2", "Tomas Torcasio", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ciro Guarch", "0-4", "Nico Avalos", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "4-0", "Ciro Guarch", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Yago", "4-3", "Felipe Galante", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Felipe Galante", "3-4", "Yago", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ciro Guarch", "0-1", "Yago", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Yago", "1-0", "Ciro Guarch", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Felipe Galante", "1-2", "Nico Avalos", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "2-1", "Felipe Galante", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Dani Bazan", "1-2", "Pollo", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pollo", "2-1", "Dani Bazan", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Luciano Hufschmid", "3-4", "Tomas Delgado", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Delgado", "4-3", "Luciano Hufschmid", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Dani Bazan", "0-0", "Luciano Hufschmid", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Luciano Hufschmid", "0-0", "Dani Bazan", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Tomas Delgado", "4-1", "Pollo", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Pollo", "1-4", "Tomas Delgado", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Anubis", "4-7", "Lucas Aguilera", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "7-4", "Anubis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "6-0", "Mario Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Mario Talarico", "0-6", "Rodrigo Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Anubis", "1-1", "Rodrigo Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "1-1", "Anubis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Mario Talarico", "2-0", "Lucas Aguilera", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "0-2", "Mario Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cristian Hantis", "3-5", "Gabriel Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Gabriel Talarico", "5-3", "Cristian Hantis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Bruno Alonso", "0-4", "Ignacio Cejas", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ignacio Cejas", "4-0", "Bruno Alonso", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Cristian Hantis", "4-1", "Bruno Alonso", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Bruno Alonso", "1-4", "Cristian Hantis", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Ignacio Cejas", "4-1", "Gabriel Talarico", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Gabriel Talarico", "1-4", "Ignacio Cejas", "FASE DE GRUPOS COPA TOTAL T23");
+
+agregarResultado("Benja", "4-7", "Joel Alcalde", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "7-4", "Benja", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "8-8", "Nico Avalos", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "8-8", "Rodrigo Talarico", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Ignacio Cejas", "0-11", "Marto", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Marto", "11-0", "Ignacio Cejas", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Yago", "8-5", "Pollo", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Pollo", "5-8", "Yago", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Luciano Hufschmid", "4-5", "Cami", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Cami", "5-4", "Luciano Hufschmid", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "12-6", "Moreno Perez", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Moreno Perez", "6-12", "Rodrigo Soca", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Jhose", "6-8", "Lucas Aguilera", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "8-6", "Jhose", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "11-9", "Gabriel Talarico", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Gabriel Talarico", "9-11", "Pancho Muzzio", "OCTAVOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "2-2", "Nico Avalos", "DESEMPATE OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "2-2", "Rodrigo Talarico", "DESEMPATE OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "4-4", "Nico Avalos", "DESEMPATE 2 OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "4-4", "Rodrigo Talarico", "DESEMPATE 2 OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "1-0", "Nico Avalos", "DESEMPATE 3 OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Nico Avalos", "0-1", "Rodrigo Talarico", "DESEMPATE 3 OCTAVOS COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "5-3", "Joel Alcalde", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Joel Alcalde", "3-5", "Lucas Aguilera", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Talarico", "5-8", "Pancho Muzzio", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "8-5", "Rodrigo Talarico", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Marto", "3-7", "Cami", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Cami", "7-3", "Marto", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "5-3", "Yago", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Yago", "3-5", "Rodrigo Soca", "CUARTOS DE FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "12-9", "Cami", "SEMIFINAL COPA TOTAL T23");
+
+agregarResultado("Cami", "9-12", "Rodrigo Soca", "SEMIFINAL COPA TOTAL T23");
+
+agregarResultado("Pancho Muzzio", "1-19", "Lucas Aguilera", "SEMIFINAL COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "19-1", "Pancho Muzzio", "SEMIFINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "10-10", "Lucas Aguilera", "FINAL COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "10-10", "Rodrigo Soca", "FINAL COPA TOTAL T23");
+
+agregarResultado("Rodrigo Soca", "0-3", "Lucas Aguilera", "DESEMPATE COPA TOTAL T23");
+
+agregarResultado("Lucas Aguilera", "3-0", "Rodrigo Soca", "DESEMPATE COPA TOTAL T23");
+
+agregarResultado("Gabriel Talarico", "16-18", "Cami", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Cami", "18-16", "Gabriel Talarico", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Gabriel Talarico", "16-18", "Rodrigo Talarico", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Rodrigo Talarico", "18-16", "Gabriel Talarico", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Felipe Galante", "16-18", "Cami", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Cami", "18-16", "Felipe Galante", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Felipe Galante", "16-18", "Rodrigo Talarico", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Rodrigo Talarico", "18-16", "Felipe Galante", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Lucas Aguilera", "22-11", "Luciano Hufschmid", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Luciano Hufschmid", "11-22", "Lucas Aguilera", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Lucas Aguilera", "22-11", "Renzo Badano", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Renzo Badano", "11-22", "Lucas Aguilera", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Pancho Muzzio", "22-11", "Luciano Hufschmid", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Luciano Hufschmid", "11-22", "Pancho Muzzio", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Pancho Muzzio", "22-11", "Renzo Badano", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Renzo Badano", "11-22", "Pancho Muzzio", "SEMIFINAL COPA DUOS T23");
+
+agregarResultado("Lucas Aguilera", "22-18", "Cami", "FINAL COPA DUOS T23");
+
+agregarResultado("Cami", "18-22", "Lucas Aguilera", "FINAL COPA DUOS T23");
+
+agregarResultado("Lucas Aguilera", "22-18", "Rodrigo Talarico", "FINAL COPA DUOS T23");
+
+agregarResultado("Rodrigo Talarico", "18-22", "Lucas Aguilera", "FINAL COPA DUOS T23");
+
+agregarResultado("Pancho Muzzio", "22-18", "Cami", "FINAL COPA DUOS T23");
+
+agregarResultado("Cami", "18-22", "Pancho Muzzio", "FINAL COPA DUOS T23");
+
+agregarResultado("Pancho Muzzio", "22-18", "Rodrigo Talarico", "FINAL COPA DUOS T23");
+
+agregarResultado("Rodrigo Talarico", "18-22", "Pancho Muzzio", "FINAL COPA DUOS T23");
+
+agregarResultado("Gabriel Talarico", "9-16", "Pollo", "32AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Pollo", "16-9", "Gabriel Talarico", "32AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Fabrizio Escolano", "15-11", "Pancho Muzzio", "32AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Pancho Muzzio", "11-15", "Fabrizio Escolano", "32AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Rodrigo Talarico", "16-13", "Moreno Perez", "32AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Moreno Perez", "13-16", "Rodrigo Talarico", "32AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Pollo", "6-10", "Cami", "16AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Cami", "10-6", "Pollo", "16AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Fabrizio Escolano", "4-11", "Rodrigo Talarico", "16AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Rodrigo Talarico", "11-4", "Fabrizio Escolano", "16AVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Cami", "5-0", "Ignacio Cejas", "OCTAVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Ignacio Cejas", "0-5", "Cami", "OCTAVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Rodrigo Talarico", "8-5", "Felipe Galante", "OCTAVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Felipe Galante", "5-8", "Rodrigo Talarico", "OCTAVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Nico Avalos", "8-4", "Luciano Hufschmid", "OCTAVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Luciano Hufschmid", "4-8", "Nico Avalos", "OCTAVOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Cami", "7-3", "Yago", "CUARTOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Yago", "3-7", "Cami", "CUARTOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Rodrigo Talarico", "5-3", "Nico Avalos", "CUARTOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Nico Avalos", "3-5", "Rodrigo Talarico", "CUARTOS DE FINAL COPA CAMPEONES T23");
+
+agregarResultado("Cami", "9-8", "Kevin Sivori", "SEMIFINAL COPA CAMPEONES T23");
+
+agregarResultado("Kevin Sivori", "8-9", "Cami", "SEMIFINAL COPA CAMPEONES T23");
+
+agregarResultado("Rodrigo Talarico", "9-7", "Bruno Alonso", "SEMIFINAL COPA CAMPEONES T23");
+
+agregarResultado("Bruno Alonso", "7-9", "Rodrigo Talarico", "SEMIFINAL COPA CAMPEONES T23");
+
+agregarResultado("Cami", "6-12", "Rodrigo Talarico", "FINAL COPA CAMPEONES T23");
+
+agregarResultado("Rodrigo Talarico", "12-6", "Cami", "FINAL COPA CAMPEONES T23");
+
+
+
 
 
 
@@ -6408,72 +7058,72 @@ function agregarDatos(pos, nombre, puntos, promedio, plenos, parciales, errores,
 }
 
 
-agregarDatos("1", "Nico Avalos", "1775", "0,742677824", "287", "808", "1295", "106");
-agregarDatos("2", "Fabrizio Escolano", "1749", "0,79753762", "265", "829", "1099", "125");
-agregarDatos("3", "Mario Talarico", "1624", "0,740538076", "279", "658", "1256", "129");
-agregarDatos("4", "Jhose", "1602", "0,735199633", "235", "776", "1168", "121");
-agregarDatos("5", "Rodrigo Talarico", "1600", "0,716204118", "241", "740", "1253", "137");
-agregarDatos("6", "Gabriel Talarico", "1587", "0,745770677", "240", "715", "1173", "152");
-agregarDatos("7", "Pancho Muzzio", "1581", "0,725562184", "235", "757", "1187", "119");
-agregarDatos("8", "Kevin Sivori", "1551", "0,725783809", "227", "747", "1163", "123");
-agregarDatos("9", "Luciano Hufschmid", "1548", "0,7065267", "230", "712", "1249", "146");
-agregarDatos("10", "Rodrigo Soca", "1514", "0,769700051", "255", "665", "1047", "84");
-agregarDatos("11", "Bruno Alonso", "1481", "0,712019231", "219", "710", "1151", "114");
-agregarDatos("12", "Moreno Perez", "1460", "0,747567844", "236", "650", "1067", "102");
-agregarDatos("13", "Ian Gangai", "1337", "0,729405346", "217", "598", "1018", "88");
-agregarDatos("14", "Eze", "1275", "0,681453768", "193", "637", "1041", "59");
-agregarDatos("15", "Lucas Aguilera", "1255", "0,720850086", "199", "575", "967", "83");
-agregarDatos("16", "Matheo Olivera", "1216", "0,681232493", "198", "552", "1035", "70");
-agregarDatos("17", "Joel Marasco", "1208", "0,652267819", "182", "598", "1072", "64");
-agregarDatos("18", "Lucas Insua", "1188", "0,683937824", "188", "535", "1014", "89");
-agregarDatos("19", "Tomas Delgado", "1156", "0,688095238", "175", "553", "952", "78");
-agregarDatos("20", "Tomas Torcasio", "1151", "0,678255745", "174", "567", "956", "62");
-agregarDatos("21", "Anubis", "1127", "0,551100244", "139", "614", "1292", "96");
-agregarDatos("22", "Pollo", "999", "0,705508475", "136", "509", "771", "82");
-agregarDatos("23", "Renzo Badano", "997", "0,635436584", "143", "494", "932", "74");
-agregarDatos("24", "Benja", "996", "0,654402102", "139", "503", "880", "76");
-agregarDatos("25", "Joel Alcalde", "956", "0,596754057", "149", "443", "1010", "66");
+agregarDatos("1", "Nico Avalos", "1855", "0,742594075", "302", "843", "1353", "106");
+agregarDatos("2", "Fabrizio Escolano", "1818", "0,79423329", "278", "859", "1152", "125");
+agregarDatos("3", "Rodrigo Talarico", "1710", "0,7227388", "262", "786", "1318", "138");
+agregarDatos("4", "Gabriel Talarico", "1692", "0,752669039", "262", "753", "1233", "153");
+agregarDatos("5", "Jhose", "1676", "0,732837779", "249", "807", "1231", "122");
+agregarDatos("6", "Pancho Muzzio", "1674", "0,724361748", "254", "792", "1265", "120");
+agregarDatos("7", "Mario Talarico", "1666", "0,731664471", "287", "675", "1315", "130");
+agregarDatos("8", "Luciano Hufschmid", "1636", "0,704261731", "245", "754", "1324", "147");
+agregarDatos("9", "Kevin Sivori", "1619", "0,717323881", "236", "787", "1234", "124");
+agregarDatos("10", "Rodrigo Soca", "1615", "0,769414007", "271", "717", "1111", "85");
+agregarDatos("11", "Bruno Alonso", "1552", "0,705454545", "227", "757", "1216", "114");
+agregarDatos("12", "Moreno Perez", "1529", "0,741872877", "247", "685", "1129", "103");
+agregarDatos("13", "Lucas Aguilera", "1339", "0,714895889", "215", "611", "1047", "83");
+agregarDatos("14", "Ian Gangai", "1337", "0,729405346", "217", "598", "1018", "88");
+agregarDatos("15", "Lucas Insua", "1275", "0,686591276", "204", "573", "1080", "90");
+agregarDatos("16", "Eze", "1275", "0,681453768", "193", "637", "1041", "59");
+agregarDatos("17", "Matheo Olivera", "1216", "0,681232493", "198", "552", "1035", "70");
+agregarDatos("18", "Joel Marasco", "1208", "0,652267819", "182", "598", "1072", "64");
+agregarDatos("19", "Tomas Torcasio", "1160", "0,650953984", "174", "576", "1032", "62");
+agregarDatos("20", "Tomas Delgado", "1156", "0,688095238", "175", "553", "952", "78");
+agregarDatos("21", "Anubis", "1142", "0,53339561", "142", "620", "1379", "96");
+agregarDatos("22", "Pollo", "1075", "0,705380577", "146", "554", "824", "83");
+agregarDatos("23", "Benja", "1073", "0,648730351", "151", "543", "960", "77");
+agregarDatos("24", "Renzo Badano", "1068", "0,627865961", "155", "529", "1017", "74");
+agregarDatos("25", "Joel Alcalde", "1037", "0,602206736", "164", "479", "1079", "66");
 agregarDatos("26", "Nico Luchetti (R)", "939", "0,612524462", "122", "516", "895", "57");
-agregarDatos("27", "Rodri Sebastian", "912", "0,643613267", "118", "464", "835", "94");
-agregarDatos("28", "Lautaro Scocier", "904", "0,683865684", "133", "436", "652", "69");
-agregarDatos("29", "Santi", "895", "0,570790816", "140", "421", "1007", "54");
-agregarDatos("30", "Ignacio Cejas", "869", "0,626532084", "123", "439", "825", "61");
-agregarDatos("31", "Dani Bazan", "860", "0,565417488", "129", "430", "962", "43");
-agregarDatos("32", "Santi", "840", "0,570652174", "131", "396", "945", "51");
-agregarDatos("33", "Cami", "823", "0,741441441", "128", "371", "611", "68");
-agregarDatos("34", "Joaquin Sampadaro", "797", "0,586029412", "116", "397", "847", "52");
-agregarDatos("35", "Nacho Soto", "778", "0,626913779", "106", "420", "715", "40");
-agregarDatos("36", "Nahuel Scocier", "764", "0,663568773", "117", "363", "596", "50");
-agregarDatos("37", "Yago", "757", "0,704841713", "122", "326", "626", "65");
+agregarDatos("27", "Ignacio Cejas", "938", "0,618325643", "133", "477", "907", "62");
+agregarDatos("28", "Cami", "920", "0,740740741", "146", "413", "683", "69");
+agregarDatos("29", "Santi", "915", "0,549879808", "143", "432", "1089", "54");
+agregarDatos("30", "Rodri Sebastian", "912", "0,643613267", "118", "464", "835", "94");
+agregarDatos("31", "Lautaro Scocier", "904", "0,683865684", "133", "436", "652", "69");
+agregarDatos("32", "Dani Bazan", "900", "0,552486188", "133", "458", "1038", "43");
+agregarDatos("33", "Santi", "840", "0,570652174", "131", "396", "945", "51");
+agregarDatos("34", "Yago", "826", "0,698815567", "133", "361", "688", "66");
+agregarDatos("35", "Joaquin Sampadaro", "797", "0,586029412", "116", "397", "847", "52");
+agregarDatos("36", "Nacho Soto", "778", "0,626913779", "106", "420", "715", "40");
+agregarDatos("37", "Nahuel Scocier", "764", "0,663568773", "117", "363", "596", "50");
 agregarDatos("38", "Bautista Coria", "718", "0,592409241", "95", "362", "755", "71");
 agregarDatos("39", "Natanael", "643", "0,553846154", "94", "330", "681", "31");
 agregarDatos("40", "Martin Bustos", "643", "0,54561879", "72", "388", "647", "39");
-agregarDatos("41", "Valentina Scocier", "587", "0,550200803", "78", "314", "604", "39");
-agregarDatos("42", "Azul Quispe", "571", "0,579695431", "86", "282", "617", "31");
-agregarDatos("43", "Facundo Marchese", "571", "0,569292124", "85", "282", "636", "34");
-agregarDatos("44", "Alexis Segovia", "562", "0,624444444", "83", "283", "534", "30");
-agregarDatos("45", "Veronica Lucchesi", "529", "0,842356688", "76", "242", "310", "59");
+agregarDatos("41", "Veronica Lucchesi", "597", "0,785526316", "81", "294", "385", "60");
+agregarDatos("42", "Valentina Scocier", "587", "0,550200803", "78", "314", "604", "39");
+agregarDatos("43", "Azul Quispe", "571", "0,579695431", "86", "282", "617", "31");
+agregarDatos("44", "Facundo Marchese", "571", "0,569292124", "85", "282", "636", "34");
+agregarDatos("45", "Alexis Segovia", "562", "0,624444444", "83", "283", "534", "30");
 agregarDatos("46", "Ramiro Vita", "524", "0,645833333", "81", "253", "434", "28");
 agregarDatos("47", "Matias Varela", "459", "0,506602641", "56", "254", "523", "37");
 agregarDatos("48", "Antonella Lopez", "363", "0,48015873", "49", "193", "514", "23");
 agregarDatos("49", "Manu Solbes", "347", "4,180722892", "2", "13", "68", "12");
 agregarDatos("50", "Joaco Fernandez", "346", "0,260346125", "120", "449", "760", "81");
-agregarDatos("51", "Felipe Galante", "338", "0,338677355", "109", "287", "602", "58");
+agregarDatos("51", "Felipe Galante", "338", "0,302867384", "118", "318", "680", "58");
 agregarDatos("52", "Kraiizer", "333", "0,438547486", "39", "197", "480", "19");
 agregarDatos("53", "Veronica Lucchesi", "322", "0,755447942", "52", "156", "205", "10");
 agregarDatos("54", "Diego", "294", "0,609302326", "48", "118", "264", "32");
 agregarDatos("55", "Tomas Gonzalez", "288", "0,617169374", "38", "152", "241", "22");
 agregarDatos("56", "Fede Gerez", "274", "0,542194093", "40", "137", "297", "17");
 agregarDatos("57", "Axel", "269", "0,56979405", "35", "144", "258", "20");
-agregarDatos("58", "Tomas Hon", "224", "0,62611276", "29", "124", "184", "13");
-agregarDatos("59", "Ciro Guarch", "216", "0,624277457", "36", "78", "232", "30");
-agregarDatos("60", "Juli Boetsch", "210", "0,641025641", "29", "113", "170", "10");
-agregarDatos("61", "Facu Montes", "207", "0,544117647", "29", "93", "214", "27");
-agregarDatos("62", "Cristian Hantis", "201", "0,582608696", "24", "94", "227", "35");
-agregarDatos("63", "Franco Przepiorka", "174", "0,648979592", "28", "75", "142", "15");
-agregarDatos("64", "Koke", "161", "0,588014981", "16", "109", "142", "4");
-agregarDatos("65", "Aylen Benedetti", "149", "0,542600897", "16", "73", "134", "28");
-agregarDatos("66", "Marto", "131", "0,731843575", "13", "54", "112", "38");
+agregarDatos("58", "Cristian Hantis", "241", "0,546485261", "28", "121", "292", "36");
+agregarDatos("59", "Tomas Hon", "224", "0,62611276", "29", "124", "184", "13");
+agregarDatos("60", "Ciro Guarch", "216", "0,624277457", "36", "78", "232", "30");
+agregarDatos("61", "Juli Boetsch", "210", "0,641025641", "29", "113", "170", "10");
+agregarDatos("62", "Facu Montes", "207", "0,544117647", "29", "93", "214", "27");
+agregarDatos("63", "Marto", "191", "0,665505226", "19", "96", "172", "38");
+agregarDatos("64", "Franco Przepiorka", "174", "0,648979592", "28", "75", "142", "15");
+agregarDatos("65", "Koke", "161", "0,588014981", "16", "109", "142", "4");
+agregarDatos("66", "Aylen Benedetti", "149", "0,542600897", "16", "73", "134", "28");
 agregarDatos("67", "Nico Luchetti (C)", "102", "0,364285714", "13", "61", "206", "2");
 agregarDatos("68", "Manu Solbes", "100", "0,763358779", "21", "35", "75", "2");
 agregarDatos("69", "Helyy", "96", "0,55", "17", "37", "106", "8");
@@ -6492,3 +7142,4 @@ agregarDatos("81", "Facundo Di Paola", "28", "0,555555556", "2", "9", "16", "13"
 agregarDatos("82", "Cristian", "20", "0,487804878", "2", "14", "25", "0");
 agregarDatos("83", "Ramiro Caruso", "9", "0,15", "2", "3", "55", "0");
 agregarDatos("84", "Franco Kin", "7", "0,134615385", "0", "7", "45", "0");
+
