@@ -93,12 +93,11 @@
                 <img src="../Imagenes/Escudos/sinEscudo.png" alt="Escudo" class="card-shield-image">
                 <h3 class="card-team-name">Agustin</h3>
                 <h5 style="font-size: 14px; color: #ffffff; ">Fundación: T7</h5>
-                <h5 style="font-size: 14px; color: #ffffff; ">Fundación: </h5>
                 <div class="card-stats">
                     <h4>Puntos totales: <span class="card-total-points" id="numPtsTotales"></span></h4>
                     <p>Pos. Ranking: <span class="posRanking" id="posRanking"></span></p>
                     <p>
-                        
+
                         Plenos: <span class="card-full" id="numPlenos"></span>
                         Parciales: <span class="card-partial" id="numParciales"></span>
                         Errores: <span class="card-errors" id="numErrores"></span>
@@ -110,12 +109,74 @@
         </div>
 
 
+        <!-- Modal de Trofeo -->
+<div id="modalPalmares" class="modalPalmares">
+    <div class="modalPalmares-content">
+        <span class="closePalmares" onclick="closeModalPalmares()">&times;</span>
+        <h2 id="tituloModalPalmares"></h2>
+        <img id="imagenModalPalmares" src="" height="100px" alt="" class="imgTrofeoPalmares">
+        <p><strong>Cantidad ganada:</strong> <span id="cantidadGanadaPalmares"></span></p>
+        <p><strong>Temporadas:</strong> <span id="temporadasGanadasPalmares"></span></p>
+        <p><strong>Subcampeonatos:</strong> <span id="subcampeonatosPalmares"></span></p>
+        <p><strong>Finales jugadas:</strong> <span id="finalesJugadasPalmares"></span></p>
+    </div>
+</div>
+        <div class="palmaresClub-container" id="palmaresAgustin">
+            
+            <div class="palmaresClub">
+
+
+
+                <div class="trofeo-container" id="trofeo1" onclick="toggleTemporadas(1)">
+                    <img src="../Imagenes/Trofeos/CopaC.png" alt="" class="trofeoPalmares">
+                    <div class="cantidadPalmares">3</div>
+                </div>
+
+                <div class="trofeo-container" id="trofeo2" onclick="toggleTemporadas(2)">
+                    <img src="../Imagenes/Trofeos/CopaCampeones.png" alt="" class="trofeoPalmares">
+                    <div class="cantidadPalmares">5</div>
+                </div>
+
+
+                <div class="trofeo-container" id="trofeo3" onclick="toggleTemporadas(3)">
+                    <img src="../Imagenes/Trofeos/CopaTotal.png" alt="" class="trofeoPalmares">
+                    <div class="cantidadPalmares">5</div>
+                </div>
+
+
+                <div class="trofeo-container" id="trofeo4" onclick="toggleTemporadas(4)">
+                    <img src="../Imagenes/Trofeos/CopaTotal.png" alt="" class="trofeoPalmares">
+                    <div class="cantidadPalmares">5</div>
+                </div>
+
+
+                <div class="trofeo-container" id="trofeo5" onclick="toggleTemporadas(5)">
+                    <img src="../Imagenes/Trofeos/CopaTotal.png" alt="" class="trofeoPalmares">
+                    <div class="cantidadPalmares">5</div>
+                </div>
+
+
+                <div class="trofeo-container" id="trofeo6" onclick="toggleTemporadas(6)">
+                    <img src="../Imagenes/Trofeos/CopaTotal.png" alt="" class="trofeoPalmares">
+                    <div class="cantidadPalmares">5</div>
+                </div>
+
+                
+
+
+
+
+            </div>
+
+        </div>
+
+
         <div class="contenedorHistorial d-flex justify-content-center">
             <table id="historialAgustin" class="tablaHistorial mt-5">
                 <thead>
                     <tr>
-                        <th class="tituloHistorial" colspan="8">HISTORIAL<img
-                                src="../Imagenes/Escudos/sinEscudo.png" class="imgHistorial" alt="Escudo"></th>
+                        <th class="tituloHistorial" colspan="8">HISTORIAL<img src="../Imagenes/Escudos/sinEscudo.png"
+                                class="imgHistorial" alt="Escudo"></th>
                     </tr>
                     <tr class="subtituloHistorial">
                         <th>Rival</th>

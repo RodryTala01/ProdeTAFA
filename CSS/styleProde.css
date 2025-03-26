@@ -3,8 +3,8 @@ body {
 
     background-image: url(../Imagenes/FondoOriginal.png);
     background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 
 
     text-align: center;
@@ -64,10 +64,10 @@ body {
     border: rgb(121, 116, 116) 1px solid !important;
 }
 
-nav{
+nav {
     background-size: auto !important;
-        background-repeat: no-repeat !important;
-        background-color: #ff00006c !important;
+    background-repeat: no-repeat !important;
+    background-color: #ff00006c !important;
 }
 
 .cajaFECHA:hover {
@@ -1364,7 +1364,7 @@ div>a {
     /* ajusta el tamaño según sea necesario */
 }
 
-.card-total-points{
+.card-total-points {
     color: black;
 }
 
@@ -1701,4 +1701,103 @@ input:disabled {
 
 .colorBronce {
     background: sienna;
+}
+
+
+
+
+.palmaresClub-container {
+    display: flex;
+    /* Aplica Flexbox */
+    justify-content: center;
+    /* Espacio entre los elementos */
+    width: 100%; /* Asegura que el contenedor ocupe todo el ancho de la pantalla */
+    overflow: hidden; /* Evita el desbordamiento */
+}
+
+
+.palmaresClub {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: row;
+    /* Alinea los elementos en fila */
+    align-items: center;
+    /* Alinea los elementos verticalmente */
+    flex-wrap: wrap; /* Asegura que los elementos se acomoden en varias líneas cuando sea necesario */
+    justify-content: center; /* Centra los elementos */
+    border: 1px solid #ccc;
+    color: white;
+    background-color: rgba(148, 146, 146, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    width: auto;
+    height: auto;
+}
+
+.trofeo-container {
+    margin-left: 2rem;
+    margin-right: 2rem;
+    cursor: pointer;
+    margin-bottom: 20px; /* Espacio entre las filas */
+}
+
+
+.trofeoPalmares {
+    height: 70px;
+    
+    
+}
+
+.cantidadPalmares {
+    margin-top: 10px; /* Añade un pequeño margen entre la imagen y el número */
+    font-size: 1.4em;
+    font-weight: bold;
+    color: white;
+  
+}
+
+.trofeoAgrandado {
+    transform: scale(1.2); /* Aumenta el tamaño del trofeo */
+    transition: transform 0.3s ease; /* Suaviza la transición */
+    z-index: 10; /* Asegura que el trofeo esté por encima de los demás */
+}
+
+
+
+/* Estilos del modal */
+.modalPalmares {
+    min-width: 350px;
+    max-width: 600px;
+    display: none; /* Oculto por defecto */
+    z-index: 1;
+    margin: auto;
+    color: white;
+
+}
+
+.modalPalmares-content {
+    background-color: #000000;
+    margin: 5% auto;
+    border: 1px solid #888;
+    width: 80%; /* Tamaño del modal */
+}
+
+.closePalmares {
+    color: #ff0000;
+    font-size: 28px;
+    font-weight: bold;
+    right: 25px;
+    top: 0;
+}
+
+.closePalmares:hover,
+.closePalmares:focus {
+    color: rgb(121, 3, 3);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.imgTrofeoPalmares {
+    height: 200px;
+    margin-bottom: 1rem;
 }
