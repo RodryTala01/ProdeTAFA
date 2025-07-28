@@ -1923,7 +1923,7 @@ function generarInstrucciones() {
         var equipo1 = componentes[0];
         var resultado1 = parseInt(componentes[1]);
         var resultado2 = parseInt(componentes[3]);
-        var equipo2 = compoanentes[4];
+        var equipo2 = componentes[4];
 
         // Generar las instrucciones
         var instruccion1 = 'agregarResultado("' + equipo1 + '", "' + resultado1 + '-' + resultado2 + '", "' + equipo2 + '", "' + torneo + '");';
