@@ -25,7 +25,7 @@ const vue = new Vue({
             const values = 'A2:E10';
             // fetch es un método nativo para hacer peticiones http
             // en el navegador 
-            fetch("https://content-sheets.googleapis.com/v4/spreadsheets/" + idSheets + "/values/"+ values +"?access_token=" + apiKey + "&key=" + apiKey)
+            fetch("https://content-sheets.googleapis.com/v4/spreadsheets/" + idSheets + "/values/" + values + "?access_token=" + apiKey + "&key=" + apiKey)
                 .then((lista) => {
                     return lista.json()
                 }).then((valores) => {
@@ -41,9 +41,10 @@ const vue = new Vue({
 
         addFechaRows() {
 
-            this.listaDatos.splice(0, 0, { fecha: 'COPA AMERICA', colspan: 5 });
+            this.listaDatos.splice(0, 0, { fecha: 'FECHA', colspan: 5, isFecha: true });
 
         }
+
 
     } // fin methods
 });

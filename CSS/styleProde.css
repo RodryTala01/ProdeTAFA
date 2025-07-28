@@ -67,7 +67,7 @@ body {
 nav {
     background-size: auto !important;
     background-repeat: no-repeat !important;
-    background-color: #ff00006c !important;
+
 }
 
 .cajaFECHA:hover {
@@ -662,7 +662,8 @@ textarea {
     }
 
     .resultado {
-        margin: auto;
+        display: table;
+        margin: 0 auto;
         padding-right: 5px;
         padding-left: 5px;
         margin-top: 5px;
@@ -1336,7 +1337,7 @@ div>a {
 }
 
 .tablaResultadosPartidos {
-
+    
     width: 100%;
 }
 
@@ -1800,4 +1801,9 @@ input:disabled {
 .imgTrofeoPalmares {
     height: 200px;
     margin-bottom: 1rem;
+}
+
+.tablaResultadosPartidosPalmares{
+    border-radius: 0 !important;
+    width: 100% !important;
 }

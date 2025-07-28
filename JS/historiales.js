@@ -5,52 +5,7 @@ function toggleTemporadas(trofeoId) {
     // Definir la información de los trofeos
     const trofeos = [
         {
-            nombre: "Copa C",
-            imagen: "../Imagenes/Trofeos/CopaC.png",
-            cantidad: "3",
-            temporadas: "T1",
-            subcampeonatos: "2",
-            finales: "5"
-        },
-        {
-            nombre: "Copa Campeones",
-            imagen: "../Imagenes/Trofeos/CopaCampeones.png",
-            cantidad: "5",
-            temporadas: "T1 - T2",
-            subcampeonatos: "1",
-            finales: "6"
-        },
-        {
-            nombre: "Copa Total",
-            imagen: "../Imagenes/Trofeos/CopaTotal.png",
-            cantidad: "5",
-            temporadas: "T1 - T10",
-            subcampeonatos: "0",
-            finales: "7"
-        },
-        {
-            nombre: "Copa Final",
-            imagen: "../Imagenes/Trofeos/CopaTotal.png",
-            cantidad: "5",
-            temporadas: "T10",
-            subcampeonatos: "1",
-            finales: "3"
-        },
-        {
-            nombre: "Copa Total",
-            imagen: "../Imagenes/Trofeos/CopaTotal.png",
-            cantidad: "5",
-            temporadas: "T1",
-            subcampeonatos: "0",
-            finales: "4"
-        },
-        {
-            nombre: "Copa Total",
-            imagen: "../Imagenes/Trofeos/CopaTotal.png",
-            cantidad: "5",
-            temporadas: "T2 - T10",
-            subcampeonatos: "2",
-            finales: "8"
+            
         }
     ];
 
@@ -63,7 +18,11 @@ function toggleTemporadas(trofeoId) {
     document.getElementById("cantidadGanadaPalmares").innerText = trofeo.cantidad;
     document.getElementById("temporadasGanadasPalmares").innerText = trofeo.temporadas;
     document.getElementById("subcampeonatosPalmares").innerText = trofeo.subcampeonatos;
-    document.getElementById("finalesJugadasPalmares").innerText = trofeo.finales;
+
+    
+
+    // Insertar la tabla en el modal
+    document.getElementById("finalesJugadasPalmares").innerHTML = finalesHTML;
 
     // Eliminar la clase de agrandado de todos los trofeos
     const trofeosElements = document.querySelectorAll('.trofeo-container');
@@ -87,6 +46,118 @@ function closeModalPalmares() {
         trofeoElement.classList.remove('trofeoAgrandado');
     });
 }
+
+function campeonato(equipo1, resultado1, resultado2, equipo2, competicion, temporada) {
+    function formatearID(nombre) {
+        return nombre.replace(/\s+/g, "");
+    }
+
+    function formatearImagen(nombre) {
+        return nombre.replace(/\s+/g, "");
+    }
+
+    let ganador, perdedor, resultado;
+    if (parseInt(resultado1) > parseInt(resultado2)) {
+        ganador = equipo1;
+        perdedor = equipo2;
+        resultado = `${resultado1}-${resultado2}`;
+    } else {
+        ganador = equipo2;
+        perdedor = equipo1;
+        resultado = `${resultado2}-${resultado1}`;
+    }
+
+    function actualizarPalmares(equipo, esGanador) {
+        const contenedor = document.getElementById(`palmares${formatearID(equipo)}`);
+        if (!contenedor) return;
+
+        let trofeoExistente = contenedor.querySelector(`#trofeo-${competicion}`);
+        if (esGanador) {
+            if (trofeoExistente) {
+                let cantidadDiv = trofeoExistente.querySelector(".cantidadPalmares");
+                cantidadDiv.innerText = parseInt(cantidadDiv.innerText) + 1;
+            } else {
+                let nuevoTrofeo = document.createElement("div");
+                nuevoTrofeo.className = "trofeo-container";
+                nuevoTrofeo.id = `trofeo-${competicion}`;
+                nuevoTrofeo.setAttribute("onclick", `toggleTemporadas('${competicion}')`);
+                nuevoTrofeo.innerHTML = `
+                    <img src="../Imagenes/Trofeos/${formatearImagen(competicion)}.png" alt="" class="trofeoPalmares">
+                    <div class="cantidadPalmares">1</div>
+                `;
+                contenedor.querySelector(".palmaresClub").appendChild(nuevoTrofeo);
+            }
+        } else {
+            let trofeoExistente = contenedor.querySelector(`#trofeo-${competicion}`);
+            if (!trofeoExistente) {
+                let nuevoTrofeo = document.createElement("div");
+                nuevoTrofeo.className = "trofeo-container";
+                nuevoTrofeo.id = `trofeo-${competicion}`;
+                nuevoTrofeo.setAttribute("onclick", `toggleTemporadas('${competicion}')`);
+                nuevoTrofeo.innerHTML = `
+                    <img src="../Imagenes/Trofeos/${formatearImagen(competicion)}.png" alt="" class="trofeoPalmares">
+                    <div class="cantidadPalmares">0</div>
+                `;
+                contenedor.querySelector(".palmaresClub").appendChild(nuevoTrofeo);
+            }
+        }
+    }
+
+    actualizarPalmares(ganador, true);
+    actualizarPalmares(perdedor, false);
+
+    const modalPalmares = {
+        nombre: competicion,
+        imagen: `../Imagenes/Trofeos/${formatearImagen(competicion)}.png`,
+        cantidad: isNaN(parseInt(document.getElementById("cantidadGanadaPalmares").innerText)) ? 1 : parseInt(document.getElementById("cantidadGanadaPalmares").innerText) + 1,
+        temporadas: document.getElementById("temporadasGanadasPalmares").innerText ? `${document.getElementById("temporadasGanadasPalmares").innerText} - T${temporada}` : `T${temporada}`,
+        subcampeonatos: isNaN(parseInt(document.getElementById("subcampeonatosPalmares").innerText)) ? 1 : parseInt(document.getElementById("subcampeonatosPalmares").innerText) + (ganador === equipo1 ? 0 : 1),
+        finales: isNaN(parseInt(document.getElementById("finalesJugadasPalmares").dataset.count)) ? 1 : parseInt(document.getElementById("finalesJugadasPalmares").dataset.count) + 1,
+    };
+
+    document.getElementById("tituloModalPalmares").innerText = modalPalmares.nombre;
+    document.getElementById("imagenModalPalmares").src = modalPalmares.imagen;
+    document.getElementById("cantidadGanadaPalmares").innerText = modalPalmares.cantidad;
+    document.getElementById("temporadasGanadasPalmares").innerText = modalPalmares.temporadas;
+    document.getElementById("subcampeonatosPalmares").innerText = modalPalmares.subcampeonatos;
+    document.getElementById("finalesJugadasPalmares").dataset.count = modalPalmares.finales;
+
+    function agregarTablaFinales(equipo, esGanador) {
+        const modalFinales = document.getElementById("finalesJugadasPalmares");
+        if (modalFinales) {
+            let color = esGanador ? "verde" : "rojo";  // Asignamos rojo si es el perdedor
+            let nuevaTabla = `
+                <div class="resultado ${color} tablaResultadosPartidosPalmares">
+                    <table style="margin: 0 auto;">
+                        <thead>
+                            <tr>
+                                <th colspan="3" style="text-align: center;">Temporada ${temporada}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="width: 30%; text-align: start">${equipo}</td>
+                                <td style="width: 14%; text-align: center">${resultado}</td>
+                                <td style="width: 30%; text-align: end">${equipo === ganador ? perdedor : ganador}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            modalFinales.innerHTML += nuevaTabla;
+        }
+    }
+
+    agregarTablaFinales(ganador, true);
+    agregarTablaFinales(perdedor, false);
+}
+
+
+
+
+campeonato("Alexis Segovia","6","1","Agustin","Copa Total", "7")
+campeonato("Alexis Segovia","12","11","Mario Talarico","Copa Total", "10")
+campeonato("Alexis Segovia","12","15","Veronica Lucchesi","Copa Total", "13")
 
 
 

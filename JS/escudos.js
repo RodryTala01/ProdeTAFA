@@ -294,7 +294,7 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/ARRobSqsCAE23mzPdOHJYQ_96x96.png";
             break;
 
-        case "Talleres (C)":
+        case "Talleres":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/MW12yOtJtAqfvt7JKt4iUg_96x96.png";
             break;
 
@@ -512,6 +512,10 @@ function asignarEscudo(nombreEquipo, elementoEscudo) {
         
         case "Deportivo Pereira":
             elementoEscudo.src = "https://ssl.gstatic.com/onebox/media/sports/logos/5uF-LNu9tpUdI3tz-juutw_96x96.png";
+            break;
+
+        case "Deportivo Riestra":
+            elementoEscudo.src = "https://www.google.com/url?sa=i&url=https%3A%2F%2Fes.m.wikipedia.org%2Fwiki%2FArchivo%3AEscudo_del_Club_Deportivo_Riestra.svg&psig=AOvVaw1-39mPRDcLpZtg6ccLO9VW&ust=1753757013784000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCOCKtY_E3o4DFQAAAAAdAAAAABAE";
             break;
 
         case "Túnez":
