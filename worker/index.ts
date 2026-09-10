@@ -1,3 +1,5 @@
+import { handleAdminRounds } from './rounds';
+
 export interface Env {
   DB: D1Database;
   FOOTBALL_API_KEY?: string;
@@ -428,6 +430,9 @@ export default {
       if (passwordResetMatch && request.method === 'PUT') {
         return resetParticipantPassword(request, env, decodeURIComponent(passwordResetMatch[1]));
       }
+
+      const roundsResponse = await handleAdminRounds(request, env);
+      if (roundsResponse) return roundsResponse;
 
       if (pathname.startsWith('/api/')) {
         return error('Not found', 404);
