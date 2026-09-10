@@ -247,22 +247,14 @@ async function savePrediction(request: Request, env: Env, matchId: number) {
   let extraTeamId: string | null = null;
 
   try {
-    if (match.match_type === 'NORMAL') {
-      homeScore = nullableScore(body.homeScore ?? null);
-      awayScore = nullableScore(body.awayScore ?? null);
-      if (body.extraTeamId) {
-        if (body.extraTeamId !== match.home_team_provider_id && body.extraTeamId !== match.away_team_provider_id) {
-          return error('Equipo extra inválido');
-        }
-        extraTeamId = body.extraTeamId;
+    homeScore = nullableScore(body.homeScore ?? null);
+    awayScore = nullableScore(body.awayScore ?? null);
+
+    if (body.extraTeamId) {
+      if (body.extraTeamId !== match.home_team_provider_id && body.extraTeamId !== match.away_team_provider_id) {
+        return error(match.match_type === 'PENALTIES_ONLY' ? 'Equipo elegido para penales inválido' : 'Equipo extra inválido');
       }
-    } else {
-      if (body.extraTeamId) {
-        if (body.extraTeamId !== match.home_team_provider_id && body.extraTeamId !== match.away_team_provider_id) {
-          return error('Equipo elegido inválido');
-        }
-        extraTeamId = body.extraTeamId;
-      }
+      extraTeamId = body.extraTeamId;
     }
   } catch (caught) {
     return error(caught instanceof Error ? caught.message : 'Pronóstico inválido');
@@ -314,9 +306,12 @@ async function submitRound(request: Request, env: Env, roundId: number) {
   for (const match of rows.results ?? []) {
     if (isLocked(match.kickoff_at)) continue;
     openCount += 1;
+
+    const hasScore = match.predicted_home_score !== null && match.predicted_away_score !== null;
     const complete = match.match_type === 'PENALTIES_ONLY'
-      ? Boolean(match.predicted_extra_team_provider_id)
-      : match.predicted_home_score !== null && match.predicted_away_score !== null;
+      ? hasScore && Boolean(match.predicted_extra_team_provider_id)
+      : hasScore;
+
     if (!complete) missing.push(match.id);
   }
 
