@@ -1,6 +1,7 @@
 import { handleAdminRounds } from './rounds';
 import { handlePredictions } from './predictions';
 import { handleResults, syncEligibleRounds } from './results';
+import { handleRanking } from './ranking';
 
 export interface Env {
   DB: D1Database;
@@ -435,6 +436,9 @@ export default {
 
       const resultsResponse = await handleResults(request, env);
       if (resultsResponse) return resultsResponse;
+
+      const rankingResponse = await handleRanking(request, env);
+      if (rankingResponse) return rankingResponse;
 
       const roundsResponse = await handleAdminRounds(request, env);
       if (roundsResponse) return roundsResponse;
