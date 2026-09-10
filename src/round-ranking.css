@@ -1,0 +1,82 @@
+.ranking-card {
+  padding: 22px;
+}
+
+.ranking-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.ranking-heading h2 {
+  margin: 4px 0 0;
+}
+
+.ranking-provisional {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(96,165,250,.35);
+  background: rgba(59,130,246,.1);
+  color: #bfdbfe;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.ranking-empty {
+  margin: 0;
+  color: #94a3b8;
+}
+
+.ranking-table-wrap {
+  overflow-x: auto;
+}
+
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 660px;
+}
+
+.ranking-table th,
+.ranking-table td {
+  padding: 12px 10px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ranking-table th:nth-child(2),
+.ranking-table td:nth-child(2) {
+  text-align: left;
+  width: 100%;
+}
+
+.ranking-table thead th {
+  color: #94a3b8;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-top: 0;
+}
+
+.ranking-table tbody tr:first-child {
+  background: rgba(250,204,21,.06);
+}
+
+.ranking-table td small {
+  color: #93c5fd;
+  font-weight: 600;
+}
+
+.ranking-points {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+@media (max-width: 700px) {
+  .ranking-card {
+    padding: 18px;
+  }
+}
