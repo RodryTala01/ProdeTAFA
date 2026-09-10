@@ -128,6 +128,18 @@ function utcDay(value: string) {
   return Date.UTC(year, month - 1, day);
 }
 
+function dateFromUtc(timestamp: number) {
+  return new Date(timestamp).toISOString().slice(0, 10);
+}
+
+function apiErrorMessage(errors: FixtureApiResponse['errors']) {
+  if (!errors) return '';
+  if (Array.isArray(errors)) return errors.filter(Boolean).join(' · ');
+  return Object.entries(errors)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(' · ');
+}
+
 async function listRounds(env: Env) {
   const result = await env.DB.prepare(
     `SELECT r.id, r.name, r.status, r.published_at, r.finished_at,
@@ -244,6 +256,31 @@ async function getRound(env: Env, roundId: number) {
   });
 }
 
+async function fetchFixturesForDate(date: string, env: Env) {
+  const endpoint = new URL('https://v3.football.api-sports.io/fixtures');
+  endpoint.searchParams.set('date', date);
+  endpoint.searchParams.set('timezone', 'America/Argentina/Buenos_Aires');
+
+  const response = await fetch(endpoint.toString(), {
+    headers: {
+      'x-apisports-key': env.FOOTBALL_API_KEY!,
+      accept: 'application/json',
+    },
+  });
+
+  const data = await response.json().catch(() => null) as FixtureApiResponse | null;
+  if (!response.ok || !data) {
+    throw new Error(`No se pudo consultar API-Football para ${date}`);
+  }
+
+  const details = apiErrorMessage(data.errors);
+  if (details) {
+    throw new Error(`API-Football (${date}): ${details}`);
+  }
+
+  return data.response ?? [];
+}
+
 async function searchFixtures(url: URL, env: Env) {
   const from = url.searchParams.get('from') ?? '';
   const to = url.searchParams.get('to') ?? '';
@@ -256,34 +293,33 @@ async function searchFixtures(url: URL, env: Env) {
   if (rangeDays > 7) return error('La búsqueda puede abarcar como máximo 7 días');
   if (!env.FOOTBALL_API_KEY) return error('Falta configurar FOOTBALL_API_KEY', 503);
 
-  const endpoint = new URL('https://v3.football.api-sports.io/fixtures');
-  endpoint.searchParams.set('from', from);
-  endpoint.searchParams.set('to', to);
-  endpoint.searchParams.set('timezone', 'America/Argentina/Buenos_Aires');
+  const dates = Array.from({ length: rangeDays }, (_, index) =>
+    dateFromUtc(fromTime + index * 86_400_000),
+  );
 
-  const response = await fetch(endpoint.toString(), {
-    headers: {
-      'x-apisports-key': env.FOOTBALL_API_KEY,
-      accept: 'application/json',
-    },
-  });
+  try {
+    const dailyResults = await Promise.all(dates.map((date) => fetchFixturesForDate(date, env)));
+    const byId = new Map<number, ApiFixture>();
+    for (const day of dailyResults) {
+      for (const fixture of day) byId.set(fixture.fixture.id, fixture);
+    }
 
-  const data = await response.json().catch(() => null) as FixtureApiResponse | null;
-  if (!response.ok || !data) return error('No se pudo consultar API-Football', 502);
+    const fixtures = Array.from(byId.values())
+      .map(fixtureToPublic)
+      .sort((a, b) => a.kickoffAt.localeCompare(b.kickoffAt));
 
-  const hasErrors = Array.isArray(data.errors)
-    ? data.errors.length > 0
-    : Boolean(data.errors && Object.keys(data.errors).length > 0);
-  if (hasErrors) {
-    console.error('API-Football errors', data.errors);
-    return error('API-Football devolvió un error. Revisá la clave o el límite diario.', 502);
+    return json({
+      from,
+      to,
+      rangeDays,
+      requestCount: dates.length,
+      fixtures,
+    });
+  } catch (caught) {
+    const message = caught instanceof Error ? caught.message : 'API-Football devolvió un error';
+    console.error(caught);
+    return error(message, 502);
   }
-
-  const fixtures = (data.response ?? [])
-    .map(fixtureToPublic)
-    .sort((a, b) => a.kickoffAt.localeCompare(b.kickoffAt));
-
-  return json({ from, to, rangeDays, fixtures });
 }
 
 async function addMatch(request: Request, env: Env, admin: UserRow, roundId: number) {
