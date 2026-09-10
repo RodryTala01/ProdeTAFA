@@ -22,9 +22,18 @@ type MatchRow = {
   kickoff_at: string;
   status: string;
   match_type: 'NORMAL' | 'PENALTIES_ONLY';
+  home_score_current: number | null;
+  away_score_current: number | null;
+  home_score_regulation: number | null;
+  away_score_regulation: number | null;
+  winning_team_provider_id: string | null;
+  went_to_penalties: number;
+  is_void: number;
   predicted_home_score: number | null;
   predicted_away_score: number | null;
   predicted_extra_team_provider_id: string | null;
+  score_base_points: number | null;
+  score_extra_points: number | null;
   score_total_points: number | null;
   score_result_type: string | null;
   score_is_provisional: number | null;
@@ -143,8 +152,13 @@ async function getParticipantRound(request: Request, env: Env) {
             m.home_team_provider_id, m.home_team_name, m.home_team_logo_url,
             m.away_team_provider_id, m.away_team_name, m.away_team_logo_url,
             m.kickoff_at, m.status, m.match_type,
+            m.home_score_current, m.away_score_current,
+            m.home_score_regulation, m.away_score_regulation,
+            m.winning_team_provider_id, m.went_to_penalties, m.is_void,
             p.predicted_home_score, p.predicted_away_score,
             p.predicted_extra_team_provider_id,
+            ps.base_points AS score_base_points,
+            ps.extra_points AS score_extra_points,
             ps.total_points AS score_total_points,
             ps.result_type AS score_result_type,
             ps.is_provisional AS score_is_provisional
@@ -166,7 +180,10 @@ async function getParticipantRound(request: Request, env: Env) {
     submission_count: number;
   }>();
 
+  const resultRows = matches.results ?? [];
   const now = Date.now();
+  const pointsTotal = resultRows.reduce((total, match) => total + Number(match.score_total_points ?? 0), 0);
+
   return json({
     round: {
       id: round.id,
@@ -176,8 +193,9 @@ async function getParticipantRound(request: Request, env: Env) {
       submitted: Boolean(submission),
       lastSubmittedAt: submission?.last_submitted_at ?? null,
       submissionCount: Number(submission?.submission_count ?? 0),
+      pointsTotal,
       serverNow: new Date(now).toISOString(),
-      matches: (matches.results ?? []).map((match) => ({
+      matches: resultRows.map((match) => ({
         id: match.id,
         competitionName: match.competition_name,
         competitionLogoUrl: match.competition_logo_url,
@@ -201,8 +219,19 @@ async function getParticipantRound(request: Request, env: Env) {
           awayScore: match.predicted_away_score,
           extraTeamId: match.predicted_extra_team_provider_id,
         },
+        result: {
+          homeCurrent: match.home_score_current,
+          awayCurrent: match.away_score_current,
+          homeRegulation: match.home_score_regulation,
+          awayRegulation: match.away_score_regulation,
+          winningTeamId: match.winning_team_provider_id,
+          wentToPenalties: Boolean(match.went_to_penalties),
+          isVoid: Boolean(match.is_void),
+        },
         score: match.score_total_points === null ? null : {
           points: match.score_total_points,
+          basePoints: Number(match.score_base_points ?? 0),
+          extraPoints: Number(match.score_extra_points ?? 0),
           resultType: match.score_result_type,
           provisional: Boolean(match.score_is_provisional),
         },
