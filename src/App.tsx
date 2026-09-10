@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import AdminRounds from './AdminRounds';
 
 type Role = 'admin' | 'participant';
 
@@ -149,6 +150,7 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
 }
 
 function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
+  const [section, setSection] = useState<'rounds' | 'participants'>('rounds');
   const [users, setUsers] = useState<User[]>([]);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -232,59 +234,70 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
       </header>
 
       <section className="dashboard">
-        <div className="dashboard-heading">
-          <div>
-            <span className="eyebrow">PRIMER MÓDULO</span>
-            <h1>Participantes</h1>
-            <p>Creá las cuentas que van a usar para enviar sus pronósticos.</p>
-          </div>
-          <div className="stat-card">
-            <span>Participantes</span>
-            <strong>{users.filter((entry) => entry.role === 'participant').length}</strong>
-          </div>
-        </div>
+        <nav className="admin-tabs" aria-label="Administración">
+          <button className={`admin-tab ${section === 'rounds' ? 'admin-tab--active' : ''}`} onClick={() => setSection('rounds')}>Fechas</button>
+          <button className={`admin-tab ${section === 'participants' ? 'admin-tab--active' : ''}`} onClick={() => setSection('participants')}>Participantes</button>
+        </nav>
 
-        <div className="grid-two">
-          <section className="card panel">
-            <h2>Agregar participante</h2>
-            <form className="form-stack" onSubmit={createParticipant}>
-              <Field label="Nombre y apellido" value={fullName} onChange={setFullName} placeholder="Nombre del participante" />
-              <Field label="Teléfono" value={phone} onChange={setPhone} placeholder="11 1234 5678" />
-              <Field label="Contraseña inicial" value={password} onChange={setPassword} type="password" placeholder="Mínimo 6 caracteres" />
-              <button className="button button--primary" disabled={loading}>{loading ? 'Guardando…' : 'Agregar participante'}</button>
-            </form>
-          </section>
-
-          <section className="card panel panel--wide">
-            <div className="panel-heading">
+        {section === 'rounds' ? (
+          <AdminRounds />
+        ) : (
+          <>
+            <div className="dashboard-heading">
               <div>
-                <h2>Cuentas creadas</h2>
-                <p>Las contraseñas no pueden verse; sí podés reemplazarlas.</p>
+                <span className="eyebrow">CUENTAS</span>
+                <h1>Participantes</h1>
+                <p>Creá las cuentas que van a usar para enviar sus pronósticos.</p>
               </div>
-              <button className="button button--ghost" onClick={() => void loadUsers()}>Actualizar</button>
+              <div className="stat-card">
+                <span>Participantes</span>
+                <strong>{users.filter((entry) => entry.role === 'participant').length}</strong>
+              </div>
             </div>
 
-            {error && <div className="alert alert--error">{error}</div>}
-            {success && <div className="alert alert--success">{success}</div>}
+            <div className="grid-two">
+              <section className="card panel">
+                <h2>Agregar participante</h2>
+                <form className="form-stack" onSubmit={createParticipant}>
+                  <Field label="Nombre y apellido" value={fullName} onChange={setFullName} placeholder="Nombre del participante" />
+                  <Field label="Teléfono" value={phone} onChange={setPhone} placeholder="11 1234 5678" />
+                  <Field label="Contraseña inicial" value={password} onChange={setPassword} type="password" placeholder="Mínimo 6 caracteres" />
+                  <button className="button button--primary" disabled={loading}>{loading ? 'Guardando…' : 'Agregar participante'}</button>
+                </form>
+              </section>
 
-            <div className="user-list">
-              {users.map((entry) => (
-                <div className="user-row" key={entry.id}>
-                  <div className="avatar">{entry.fullName.slice(0, 1).toUpperCase()}</div>
-                  <div className="user-data">
-                    <strong>{entry.fullName}</strong>
-                    <span>{entry.phone} · {entry.role === 'admin' ? 'Administrador' : 'Participante'}</span>
+              <section className="card panel panel--wide">
+                <div className="panel-heading">
+                  <div>
+                    <h2>Cuentas creadas</h2>
+                    <p>Las contraseñas no pueden verse; sí podés reemplazarlas.</p>
                   </div>
-                  {entry.role === 'participant' && (
-                    <button className="button button--secondary" onClick={() => { setResetUser(entry); setNewPassword(''); }}>
-                      Cambiar clave
-                    </button>
-                  )}
+                  <button className="button button--ghost" onClick={() => void loadUsers()}>Actualizar</button>
                 </div>
-              ))}
+
+                {error && <div className="alert alert--error">{error}</div>}
+                {success && <div className="alert alert--success">{success}</div>}
+
+                <div className="user-list">
+                  {users.map((entry) => (
+                    <div className="user-row" key={entry.id}>
+                      <div className="avatar">{entry.fullName.slice(0, 1).toUpperCase()}</div>
+                      <div className="user-data">
+                        <strong>{entry.fullName}</strong>
+                        <span>{entry.phone} · {entry.role === 'admin' ? 'Administrador' : 'Participante'}</span>
+                      </div>
+                      {entry.role === 'participant' && (
+                        <button className="button button--secondary" onClick={() => { setResetUser(entry); setNewPassword(''); }}>
+                          Cambiar clave
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
-          </section>
-        </div>
+          </>
+        )}
       </section>
 
       {resetUser && (
