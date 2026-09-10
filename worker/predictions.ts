@@ -140,8 +140,8 @@ async function getParticipantRound(request: Request, env: Env) {
   const round = await env.DB.prepare(
     `SELECT id, name, status, published_at
      FROM rounds
-     WHERE status = 'open'
-     ORDER BY id DESC
+     WHERE status IN ('open', 'finished')
+     ORDER BY CASE status WHEN 'open' THEN 0 ELSE 1 END, id DESC
      LIMIT 1`,
   ).first<{ id: number; name: string; status: string; published_at: string | null }>();
 
@@ -201,7 +201,7 @@ async function getParticipantRound(request: Request, env: Env) {
         competitionLogoUrl: match.competition_logo_url,
         kickoffAt: match.kickoff_at,
         lockedAt: new Date(lockTime(match.kickoff_at)).toISOString(),
-        isLocked: now >= lockTime(match.kickoff_at),
+        isLocked: round.status === 'finished' || now >= lockTime(match.kickoff_at),
         status: match.status,
         matchType: match.match_type,
         home: {
