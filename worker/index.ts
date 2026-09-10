@@ -1,4 +1,5 @@
 import { handleAdminRounds } from './rounds';
+import { handlePredictions } from './predictions';
 
 export interface Env {
   DB: D1Database;
@@ -433,6 +434,9 @@ export default {
 
       const roundsResponse = await handleAdminRounds(request, env);
       if (roundsResponse) return roundsResponse;
+
+      const predictionsResponse = await handlePredictions(request, env);
+      if (predictionsResponse) return predictionsResponse;
 
       if (pathname.startsWith('/api/')) {
         return error('Not found', 404);
