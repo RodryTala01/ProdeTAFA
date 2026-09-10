@@ -11,8 +11,9 @@
     {
       "binding": "DB",
       "database_name": "prode-tafa",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
-      "migrations_dir": "migrations"
+      "database_id": "e20ca9e8-b98c-443b-8e21-a92f8a3fe1c4",
+      "migrations_dir": "migrations",
+      "remote": true
     }
   ]
 }
