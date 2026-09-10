@@ -17,8 +17,19 @@ type Match = {
     awayScore: number | null;
     extraTeamId: string | null;
   };
+  result: {
+    homeCurrent: number | null;
+    awayCurrent: number | null;
+    homeRegulation: number | null;
+    awayRegulation: number | null;
+    winningTeamId: string | null;
+    wentToPenalties: boolean;
+    isVoid: boolean;
+  };
   score: null | {
     points: number;
+    basePoints: number;
+    extraPoints: number;
     resultType: string | null;
     provisional: boolean;
   };
@@ -31,6 +42,7 @@ type Round = {
   submitted: boolean;
   lastSubmittedAt: string | null;
   submissionCount: number;
+  pointsTotal: number;
   serverNow: string;
   matches: Match[];
 };
@@ -42,6 +54,9 @@ type Draft = {
 };
 
 type ApiError = { error?: string };
+
+const FINAL_STATUSES = new Set(['FT', 'AET', 'PEN']);
+const LIVE_STATUSES = new Set(['1H', 'HT', '2H', 'ET', 'BT', 'P', 'LIVE']);
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
@@ -86,6 +101,14 @@ function countdownLabel(match: Match, now: number) {
   return `Empieza en ${formatDuration(kickoff - now)}`;
 }
 
+function scoreLabel(resultType: string | null) {
+  if (resultType === 'FULL') return 'PLENO';
+  if (resultType === 'PARTIAL') return 'PARCIAL';
+  if (resultType === 'PENALTIES') return 'PENALES';
+  if (resultType === 'VOID') return 'ANULADO';
+  return 'ERROR';
+}
+
 function Team({ name, logoUrl }: { name: string; logoUrl: string | null }) {
   return (
     <div className="prediction-team">
@@ -108,37 +131,45 @@ export default function ParticipantRound() {
   const awayInputs = useRef<Record<number, HTMLInputElement | null>>({});
   const serverOffset = useRef(0);
 
-  async function loadRound() {
-    setLoading(true);
-    setError('');
+  async function loadRound(initial = false) {
+    if (initial) {
+      setLoading(true);
+      setError('');
+    }
     try {
       const data = await api<{ round: Round | null }>('/api/participant/round');
       setRound(data.round);
       if (data.round) {
         serverOffset.current = new Date(data.round.serverNow).getTime() - Date.now();
         setNow(Date.now() + serverOffset.current);
-        const next: Record<number, Draft> = {};
-        for (const match of data.round.matches) {
-          next[match.id] = {
-            homeScore: match.prediction.homeScore === null ? '' : String(match.prediction.homeScore),
-            awayScore: match.prediction.awayScore === null ? '' : String(match.prediction.awayScore),
-            extraTeamId: match.prediction.extraTeamId,
-          };
-        }
-        setDrafts(next);
+        setDrafts((current) => {
+          const next = { ...current };
+          for (const match of data.round!.matches) {
+            if (!next[match.id]) {
+              next[match.id] = {
+                homeScore: match.prediction.homeScore === null ? '' : String(match.prediction.homeScore),
+                awayScore: match.prediction.awayScore === null ? '' : String(match.prediction.awayScore),
+                extraTeamId: match.prediction.extraTeamId,
+              };
+            }
+          }
+          return next;
+        });
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo cargar la fecha');
+      if (initial) setError(caught instanceof Error ? caught.message : 'No se pudo cargar la fecha');
     } finally {
-      setLoading(false);
+      if (initial) setLoading(false);
     }
   }
 
   useEffect(() => {
-    void loadRound();
+    void loadRound(true);
     const clock = setInterval(() => setNow(Date.now() + serverOffset.current), 1000);
+    const refresh = setInterval(() => void loadRound(false), 60_000);
     return () => {
       clearInterval(clock);
+      clearInterval(refresh);
       Object.values(timers.current).forEach(clearTimeout);
     };
   }, []);
@@ -240,9 +271,12 @@ export default function ParticipantRound() {
           <h1>{round.name}</h1>
           <p>{openMatches.length} partido{openMatches.length === 1 ? '' : 's'} todavía abierto{openMatches.length === 1 ? '' : 's'}.</p>
         </div>
-        <div className={`submission-state ${round.submitted ? 'submission-state--ok' : ''}`}>
-          <strong>{round.submitted ? 'Enviado' : 'Borrador'}</strong>
-          <span>{round.submitted ? `Envíos: ${round.submissionCount}` : 'Todavía no presentado'}</span>
+        <div className="participant-summary">
+          <div className="points-total"><span>Puntos actuales</span><strong>{round.pointsTotal}</strong></div>
+          <div className={`submission-state ${round.submitted ? 'submission-state--ok' : ''}`}>
+            <strong>{round.submitted ? 'Enviado' : 'Borrador'}</strong>
+            <span>{round.submitted ? `Envíos: ${round.submissionCount}` : 'Todavía no presentado'}</span>
+          </div>
         </div>
       </section>
 
@@ -250,6 +284,15 @@ export default function ParticipantRound() {
         {round.matches.map((match) => {
           const draft = drafts[match.id] ?? { homeScore: '', awayScore: '', extraTeamId: null };
           const isLocked = locked(match);
+          const isFinal = FINAL_STATUSES.has(match.status);
+          const isLive = LIVE_STATUSES.has(match.status);
+          const resultHome = isFinal ? (match.result.homeRegulation ?? match.result.homeCurrent) : match.result.homeCurrent;
+          const resultAway = isFinal ? (match.result.awayRegulation ?? match.result.awayCurrent) : match.result.awayCurrent;
+          const penaltyWinner = match.result.winningTeamId === match.home.id
+            ? match.home.name
+            : match.result.winningTeamId === match.away.id
+              ? match.away.name
+              : null;
 
           const scoreInputs = (
             <div className="score-prediction">
@@ -321,9 +364,29 @@ export default function ParticipantRound() {
                 </div>
               )}
 
+              {(match.result.isVoid || resultHome !== null || resultAway !== null) && (
+                <div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
+                  {match.result.isVoid ? (
+                    <strong>Partido anulado · no suma ni resta puntos</strong>
+                  ) : (
+                    <>
+                      <span>{isFinal ? 'Resultado 90′' : isLive ? 'Resultado actual' : 'Resultado'}</span>
+                      <strong>{resultHome ?? '-'} - {resultAway ?? '-'}</strong>
+                      {isFinal && match.result.wentToPenalties && penaltyWinner && <small>Ganó por penales: {penaltyWinner}</small>}
+                    </>
+                  )}
+                </div>
+              )}
+
               <div className="prediction-footer">
                 <small>{isLocked ? 'El pronóstico ya no puede modificarse.' : (saveState[match.id] || 'Se guarda automáticamente.')}</small>
-                {match.score && <strong>{match.score.points} pt{match.score.points === 1 ? '' : 's'}</strong>}
+                {match.score && (
+                  <div className="score-earned">
+                    <strong>{match.score.points} pt{match.score.points === 1 ? '' : 's'} · {scoreLabel(match.score.resultType)}</strong>
+                    {match.score.extraPoints > 0 && <small>+{match.score.extraPoints} por penales</small>}
+                    {match.score.provisional && <small>provisional</small>}
+                  </div>
+                )}
               </div>
             </article>
           );
