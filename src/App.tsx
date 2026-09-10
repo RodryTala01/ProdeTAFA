@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import AdminRounds from './AdminRounds';
+import ParticipantRound from './ParticipantRound';
 
 type Role = 'admin' | 'participant';
 
@@ -328,15 +329,13 @@ function ParticipantDashboard({ user, onLogout }: { user: User; onLogout: () => 
           <div className="brand-mark brand-mark--small">T</div>
           <div><strong>Prode TAFA</strong><span>Participante</span></div>
         </div>
-        <button className="button button--ghost" onClick={onLogout}>Salir</button>
+        <div className="topbar-actions">
+          <span className="user-chip">{user.fullName}</span>
+          <button className="button button--ghost" onClick={onLogout}>Salir</button>
+        </div>
       </header>
       <section className="dashboard dashboard--narrow">
-        <section className="card welcome-card">
-          <span className="eyebrow">HOLA, {user.fullName.toUpperCase()}</span>
-          <h1>Tu cuenta ya funciona.</h1>
-          <p>El próximo módulo va a mostrar acá la fecha activa, los partidos y los casilleros para cargar el pronóstico.</p>
-          <div className="status-line"><span className="dot dot--ok" /> Sesión conectada a Cloudflare D1</div>
-        </section>
+        <ParticipantRound />
       </section>
     </main>
   );
