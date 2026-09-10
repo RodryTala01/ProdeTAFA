@@ -153,12 +153,12 @@ export default function AdminRounds() {
     setSuccess('');
     try {
       const query = new URLSearchParams({ from: searchFrom, to: searchTo });
-      const data = await api<{ fixtures: Fixture[]; from: string; to: string; rangeDays: number }>(`/api/admin/fixtures?${query.toString()}`);
+      const data = await api<{ fixtures: Fixture[]; from: string; to: string; rangeDays: number; requestCount: number }>(`/api/admin/fixtures?${query.toString()}`);
       setFixtures(data.fixtures);
       if (data.fixtures.length === 0) {
-        setSuccess('No se encontraron partidos en ese rango.');
+        setSuccess(`No se encontraron partidos en ese rango. Se usaron ${data.requestCount} consultas.`);
       } else {
-        setSuccess(`${data.fixtures.length} partidos encontrados con 1 consulta a API-Football.`);
+        setSuccess(`${data.fixtures.length} partidos encontrados. Se usaron ${data.requestCount} consultas a API-Football.`);
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudieron buscar partidos');
@@ -305,7 +305,7 @@ export default function AdminRounds() {
                 <div className="section-heading">
                   <div>
                     <h2>Buscar partidos reales</h2>
-                    <p>Buscá hasta 7 días completos con una sola consulta a API-Football.</p>
+                    <p>Buscá hasta 7 días completos. Para mezclar ligas usamos una consulta diaria y unimos los resultados automáticamente.</p>
                   </div>
                 </div>
                 <form className="fixture-search-form" onSubmit={searchMatches}>
@@ -323,7 +323,7 @@ export default function AdminRounds() {
                 {fixtures.length > 0 && (
                   <>
                     <input className="fixture-filter" value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="Filtrar por equipo, liga o país…" />
-                    <p className="fixture-results-count">{filteredFixtures.length} de {fixtures.length} partidos · búsqueda local, sin consumir más API</p>
+                    <p className="fixture-results-count">{filteredFixtures.length} de {fixtures.length} partidos · el filtro es local y no consume más API</p>
                     <div className="fixture-list">
                       {filteredFixtures.map((fixture) => {
                         const alreadyAdded = addedFixtureIds.has(fixture.providerFixtureId);
