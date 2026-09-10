@@ -2,6 +2,22 @@
 
 Nueva versión del Prode TAFA, reconstruida desde cero.
 
+## Estado actual
+
+Infraestructura y primer módulo funcional:
+
+- React + TypeScript + Vite.
+- Cloudflare Worker para frontend + API.
+- Cloudflare D1 remota.
+- Configuración inicial del primer administrador desde la propia web.
+- Login por teléfono + contraseña.
+- Sesiones seguras mediante cookie HttpOnly.
+- Alta de participantes desde el panel Admin.
+- Restablecimiento de contraseña por el administrador.
+- Registro de auditoría para altas y cambios de contraseña.
+
+El siguiente módulo es Fechas + selección de partidos reales + pronósticos.
+
 ## Objetivo del MVP
 
 Permitir que el administrador cree una fecha y seleccione partidos reales; que los participantes carguen y envíen sus pronósticos; que cada partido se bloquee automáticamente un minuto después del horario oficial; y que los resultados reales se obtengan desde un proveedor de fútbol para calcular los puntos automáticamente.
@@ -14,18 +30,31 @@ Permitir que el administrador cree una fecha y seleccione partidos reales; que l
 - Cloudflare Vite Plugin
 - PWA como objetivo de instalación en Android
 
-La aplicación se desplegará como una única unidad en Cloudflare Workers: frontend estático + API Worker.
+La aplicación se despliega como una única unidad en Cloudflare Workers: frontend estático + API Worker.
 
 ## Desarrollo
 
-1. `npm install`
-2. Crear una base D1 y reemplazar `REPLACE_WITH_D1_DATABASE_ID` en `wrangler.jsonc`.
-3. `npm run db:migrate:local`
-4. `npm run dev`
+```bash
+npm install
+npm run dev
+```
+
+La configuración actual conecta D1 localmente contra la base remota del proyecto.
+
+## Base de datos
+
+Aplicar migraciones remotas:
+
+```bash
+npm run db:migrate:remote
+```
 
 ## Deploy
 
-1. Aplicar migraciones remotas con `npm run db:migrate:remote`.
-2. Ejecutar `npm run deploy`.
+```bash
+npm run deploy
+```
+
+Antes del primer deploy público conviene abrir la aplicación localmente y crear el administrador inicial. Una vez que existe un administrador, el endpoint de configuración inicial queda deshabilitado.
 
 Ver `AGENTS.md` para las reglas funcionales que Codex debe respetar.
