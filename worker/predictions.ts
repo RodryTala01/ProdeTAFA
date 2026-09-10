@@ -351,7 +351,7 @@ export async function handlePredictions(request: Request, env: Env): Promise<Res
   const url = new URL(request.url);
   const pathname = url.pathname;
 
-  const publishMatch = pathname.match(/^\/api\/admin\/rounds\/(\d+)\/publish$/);
+  const publishMatch = pathname.match(/^\/api\/admin\/publish-round\/(\d+)$/);
   if (publishMatch && request.method === 'PUT') {
     return publishRound(request, env, Number(publishMatch[1]));
   }
