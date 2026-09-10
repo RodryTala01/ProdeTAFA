@@ -1,5 +1,6 @@
 import { handleAdminRounds } from './rounds';
 import { handlePredictions } from './predictions';
+import { handleResults, syncEligibleRounds } from './results';
 
 export interface Env {
   DB: D1Database;
@@ -432,6 +433,9 @@ export default {
         return resetParticipantPassword(request, env, decodeURIComponent(passwordResetMatch[1]));
       }
 
+      const resultsResponse = await handleResults(request, env);
+      if (resultsResponse) return resultsResponse;
+
       const roundsResponse = await handleAdminRounds(request, env);
       if (roundsResponse) return roundsResponse;
 
@@ -447,5 +451,9 @@ export default {
       console.error(caught);
       return error('Error interno del servidor', 500);
     }
+  },
+
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(syncEligibleRounds(env));
   },
 } satisfies ExportedHandler<Env>;
