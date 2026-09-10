@@ -98,6 +98,10 @@ function sign(home: number, away: number) {
   return home === away ? 0 : home > away ? 1 : -1;
 }
 
+function hasScore(side: ScoreSide) {
+  return Boolean(side && (side.home !== null || side.away !== null));
+}
+
 function overallWinner(item: ApiFixture) {
   if (item.teams.home.winner === true) return String(item.teams.home.id);
   if (item.teams.away.winner === true) return String(item.teams.away.id);
@@ -226,8 +230,8 @@ export async function syncRoundResults(roundId: number, env: Env) {
     const currentAway = item.goals?.away ?? null;
     const regulationHome = fulltime?.home ?? (status === 'FT' ? currentHome : null);
     const regulationAway = fulltime?.away ?? (status === 'FT' ? currentAway : null);
-    const wentToExtra = ['ET', 'BT', 'P', 'AET', 'PEN'].includes(status) || Boolean(item.score?.extratime);
-    const wentToPenalties = ['P', 'PEN'].includes(status) || Boolean(item.score?.penalty);
+    const wentToExtra = ['ET', 'BT', 'P', 'AET', 'PEN'].includes(status) || hasScore(item.score?.extratime ?? null);
+    const wentToPenalties = ['P', 'PEN'].includes(status) || hasScore(item.score?.penalty ?? null);
     const winner = overallWinner(item);
 
     await env.DB.prepare(
