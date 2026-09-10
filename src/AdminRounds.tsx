@@ -58,10 +58,16 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
-function localDateInputValue() {
-  const now = new Date();
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+function localDateInputValue(date = new Date()) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
   return local.toISOString().slice(0, 10);
+}
+
+function addDaysToInput(value: string, days: number) {
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  date.setDate(date.getDate() + days);
+  return localDateInputValue(date);
 }
 
 function formatKickoff(value: string) {
@@ -84,10 +90,12 @@ function Team({ name, logoUrl }: { name: string; logoUrl: string | null }) {
 }
 
 export default function AdminRounds() {
+  const today = localDateInputValue();
   const [rounds, setRounds] = useState<RoundSummary[]>([]);
   const [selected, setSelected] = useState<RoundDetail | null>(null);
   const [newRoundName, setNewRoundName] = useState('');
-  const [searchDate, setSearchDate] = useState(localDateInputValue());
+  const [searchFrom, setSearchFrom] = useState(today);
+  const [searchTo, setSearchTo] = useState(addDaysToInput(today, 6));
   const [searchText, setSearchText] = useState('');
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [loading, setLoading] = useState(false);
@@ -144,14 +152,24 @@ export default function AdminRounds() {
     setError('');
     setSuccess('');
     try {
-      const data = await api<{ fixtures: Fixture[] }>(`/api/admin/fixtures?date=${encodeURIComponent(searchDate)}`);
+      const query = new URLSearchParams({ from: searchFrom, to: searchTo });
+      const data = await api<{ fixtures: Fixture[]; from: string; to: string; rangeDays: number }>(`/api/admin/fixtures?${query.toString()}`);
       setFixtures(data.fixtures);
-      if (data.fixtures.length === 0) setSuccess('No se encontraron partidos para ese día.');
+      if (data.fixtures.length === 0) {
+        setSuccess('No se encontraron partidos en ese rango.');
+      } else {
+        setSuccess(`${data.fixtures.length} partidos encontrados con 1 consulta a API-Football.`);
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudieron buscar partidos');
     } finally {
       setSearching(false);
     }
+  }
+
+  function changeSearchFrom(value: string) {
+    setSearchFrom(value);
+    if (value) setSearchTo(addDaysToInput(value, 6));
   }
 
   async function addFixture(fixture: Fixture, matchType: 'NORMAL' | 'PENALTIES_ONLY') {
@@ -285,17 +303,27 @@ export default function AdminRounds() {
             {selected.matches.length < 12 && (
               <section className="card fixture-search-card">
                 <div className="section-heading">
-                  <div><h2>Buscar partidos reales</h2><p>Una consulta a API-Football por día elegido.</p></div>
+                  <div>
+                    <h2>Buscar partidos reales</h2>
+                    <p>Buscá hasta 7 días completos con una sola consulta a API-Football.</p>
+                  </div>
                 </div>
                 <form className="fixture-search-form" onSubmit={searchMatches}>
-                  <label><span>Día</span><input type="date" value={searchDate} onChange={(event) => setSearchDate(event.target.value)} required /></label>
-                  <button className="button button--primary" disabled={searching}>{searching ? 'Buscando…' : 'Buscar partidos'}</button>
+                  <label>
+                    <span>Desde</span>
+                    <input type="date" value={searchFrom} onChange={(event) => changeSearchFrom(event.target.value)} required />
+                  </label>
+                  <label>
+                    <span>Hasta</span>
+                    <input type="date" value={searchTo} onChange={(event) => setSearchTo(event.target.value)} required />
+                  </label>
+                  <button className="button button--primary" disabled={searching}>{searching ? 'Buscando…' : 'Buscar semana'}</button>
                 </form>
 
                 {fixtures.length > 0 && (
                   <>
                     <input className="fixture-filter" value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="Filtrar por equipo, liga o país…" />
-                    <p className="fixture-results-count">{filteredFixtures.length} de {fixtures.length} partidos</p>
+                    <p className="fixture-results-count">{filteredFixtures.length} de {fixtures.length} partidos · búsqueda local, sin consumir más API</p>
                     <div className="fixture-list">
                       {filteredFixtures.map((fixture) => {
                         const alreadyAdded = addedFixtureIds.has(fixture.providerFixtureId);
