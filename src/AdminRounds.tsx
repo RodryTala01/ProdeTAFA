@@ -77,6 +77,7 @@ export default function AdminRounds() {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -121,6 +122,21 @@ export default function AdminRounds() {
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo publicar la fecha');
     } finally { setLoading(false); }
+  }
+
+  async function syncResults() {
+    if (!selected) return;
+    setSyncing(true); setError(''); setSuccess('');
+    try {
+      const data = await api<{ updated: number; finalized: number; calculated: number; requestCount: number }>(
+        `/api/admin/sync-round/${selected.id}`,
+        { method: 'POST', body: '{}' },
+      );
+      setSuccess(`Resultados actualizados: ${data.updated} partidos, ${data.finalized} finalizados y ${data.calculated} pronósticos recalculados. Se usó ${data.requestCount} consulta a API-Football.`);
+      await loadRounds(selected.id);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No se pudieron actualizar los resultados');
+    } finally { setSyncing(false); }
   }
 
   async function searchMatches(event: FormEvent) {
@@ -221,6 +237,11 @@ export default function AdminRounds() {
                 {isDraft && selected.matches.length === 12 && (
                   <button className="button button--primary" disabled={loading} onClick={() => void publishRound()}>Publicar fecha</button>
                 )}
+                {!isDraft && (
+                  <button className="button button--secondary" disabled={syncing} onClick={() => void syncResults()}>
+                    {syncing ? 'Actualizando…' : 'Actualizar resultados'}
+                  </button>
+                )}
                 {!isDraft && <span className="added-badge">✓ Visible para participantes</span>}
                 <div className="round-progress"><strong>{selected.matches.length}</strong><span>/ 12</span></div>
               </div>
@@ -228,13 +249,14 @@ export default function AdminRounds() {
 
             {selected.matches.length > 0 && (
               <section className="card selected-matches">
-                <div className="section-heading"><h2>Partidos agregados</h2><span>Se guardan en D1</span></div>
+                <div className="section-heading"><h2>Partidos agregados</h2><span>{isDraft ? 'Se guardan en D1' : 'Resultados desde API-Football'}</span></div>
                 <div className="stored-match-list">
                   {selected.matches.map((match) => (
                     <div className="stored-match" key={match.id}>
                       <div className="stored-match-main">
-                        <small>{match.competitionName || 'Competencia'} · {formatKickoff(match.kickoffAt)}</small>
+                        <small>{match.competitionName || 'Competencia'} · {formatKickoff(match.kickoffAt)} · {match.status}</small>
                         <div className="stored-teams"><Team name={match.home.name} logoUrl={match.home.logoUrl} /><span>vs</span><Team name={match.away.name} logoUrl={match.away.logoUrl} /></div>
+                        {match.goals.home !== null && match.goals.away !== null && <span className="penalty-badge">Resultado {match.goals.home} - {match.goals.away}</span>}
                         {match.matchType === 'PENALTIES_ONLY' && <span className="penalty-badge">PENALES</span>}
                       </div>
                       {isDraft && <button className="button button--ghost button--danger" disabled={loading} onClick={() => void removeMatch(match)}>Quitar</button>}
