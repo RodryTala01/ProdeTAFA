@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import RoundRanking from './RoundRanking';
 import './admin-rounds.css';
 
 type RoundSummary = { id: number; name: string; status: string; matchCount: number };
@@ -78,6 +79,8 @@ export default function AdminRounds() {
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const [rankingRefresh, setRankingRefresh] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -132,11 +135,25 @@ export default function AdminRounds() {
         `/api/admin/sync-round/${selected.id}`,
         { method: 'POST', body: '{}' },
       );
-      setSuccess(`Resultados actualizados: ${data.updated} partidos, ${data.finalized} finalizados y ${data.calculated} pronósticos recalculados. Se usó ${data.requestCount} consulta a API-Football.`);
+      setSuccess(`Resultados actualizados: ${data.updated} partidos, ${data.finalized} finalizados y ${data.calculated} pronósticos recalculados. Se usaron ${data.requestCount} consulta${data.requestCount === 1 ? '' : 's'} a API-Football.`);
+      setRankingRefresh((value) => value + 1);
       await loadRounds(selected.id);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudieron actualizar los resultados');
     } finally { setSyncing(false); }
+  }
+
+  async function finishRound() {
+    if (!selected) return;
+    setClosing(true); setError(''); setSuccess('');
+    try {
+      await api<{ ok: true }>(`/api/admin/finish-round/${selected.id}`, { method: 'PUT', body: '{}' });
+      setSuccess(`${selected.name} cerrada. El ranking final ya está visible para los participantes.`);
+      setRankingRefresh((value) => value + 1);
+      await loadRounds(selected.id);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No se pudo cerrar la fecha');
+    } finally { setClosing(false); }
   }
 
   async function searchMatches(event: FormEvent) {
@@ -196,6 +213,9 @@ export default function AdminRounds() {
 
   const addedFixtureIds = new Set(selected?.matches.map((match) => match.providerFixtureId) ?? []);
   const isDraft = selected?.status === 'draft';
+  const isOpen = selected?.status === 'open';
+  const isFinished = selected?.status === 'finished';
+  const statusLabel = isDraft ? 'Borrador' : isOpen ? 'Publicada' : 'Cerrada';
 
   return (
     <div className="rounds-layout">
@@ -211,7 +231,7 @@ export default function AdminRounds() {
         <div className="round-list">
           {rounds.map((round) => (
             <button type="button" className={`round-item ${selected?.id === round.id ? 'round-item--active' : ''}`} key={round.id} onClick={() => void loadRound(round.id)}>
-              <span><strong>{round.name}</strong><small>{round.status === 'draft' ? 'Borrador' : round.status === 'open' ? 'Publicada' : round.status}</small></span>
+              <span><strong>{round.name}</strong><small>{round.status === 'draft' ? 'Borrador' : round.status === 'open' ? 'Publicada' : 'Cerrada'}</small></span>
               <b>{round.matchCount}/12</b>
             </button>
           ))}
@@ -231,7 +251,7 @@ export default function AdminRounds() {
               <div>
                 <span className="eyebrow">FECHA SELECCIONADA</span>
                 <h1>{selected.name}</h1>
-                <p>{selected.matches.length} de 12 partidos cargados · {isDraft ? 'Borrador' : 'Publicada'}.</p>
+                <p>{selected.matches.length} de 12 partidos cargados · {statusLabel}.</p>
               </div>
               <div className="topbar-actions">
                 {isDraft && selected.matches.length === 12 && (
@@ -242,7 +262,13 @@ export default function AdminRounds() {
                     {syncing ? 'Actualizando…' : 'Actualizar resultados'}
                   </button>
                 )}
-                {!isDraft && <span className="added-badge">✓ Visible para participantes</span>}
+                {isOpen && (
+                  <button className="button button--primary" disabled={closing || syncing} onClick={() => void finishRound()}>
+                    {closing ? 'Cerrando…' : 'Cerrar fecha'}
+                  </button>
+                )}
+                {isOpen && <span className="added-badge">✓ Visible para participantes</span>}
+                {isFinished && <span className="added-badge">✓ Fecha cerrada</span>}
                 <div className="round-progress"><strong>{selected.matches.length}</strong><span>/ 12</span></div>
               </div>
             </section>
@@ -265,6 +291,8 @@ export default function AdminRounds() {
                 </div>
               </section>
             )}
+
+            {!isDraft && <RoundRanking roundId={selected.id} mode="admin" refreshToken={rankingRefresh} />}
 
             {isDraft && selected.matches.length < 12 && (
               <section className="card fixture-search-card">
