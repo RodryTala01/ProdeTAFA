@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import RoundRanking from './RoundRanking';
 import './participant-round.css';
 
 type Match = {
@@ -175,7 +176,7 @@ export default function ParticipantRound() {
   }, []);
 
   function locked(match: Match) {
-    return now >= new Date(match.lockedAt).getTime();
+    return round?.status === 'finished' || now >= new Date(match.lockedAt).getTime();
   }
 
   async function saveMatch(match: Match, draft: Draft) {
@@ -213,7 +214,7 @@ export default function ParticipantRound() {
   }
 
   async function submitRound() {
-    if (!round) return;
+    if (!round || round.status !== 'open') return;
     setSubmitting(true);
     setError('');
     setSuccess('');
@@ -241,7 +242,9 @@ export default function ParticipantRound() {
   }
 
   const openMatches = useMemo(
-    () => round?.matches.filter((match) => now < new Date(match.lockedAt).getTime()) ?? [],
+    () => round?.status === 'open'
+      ? round.matches.filter((match) => now < new Date(match.lockedAt).getTime())
+      : [],
     [round, now],
   );
 
@@ -257,28 +260,34 @@ export default function ParticipantRound() {
     return (
       <section className="card participant-empty">
         <span className="eyebrow">PRODE TAFA</span>
-        <h1>No hay una fecha abierta todavía</h1>
+        <h1>No hay una fecha disponible todavía</h1>
         <p>Cuando el administrador publique la próxima fecha, los partidos van a aparecer acá.</p>
       </section>
     );
   }
 
+  const isFinished = round.status === 'finished';
+
   return (
     <div className="participant-round">
       <section className="card participant-round-header">
         <div>
-          <span className="eyebrow">FECHA ABIERTA</span>
+          <span className="eyebrow">{isFinished ? 'FECHA FINALIZADA' : 'FECHA ABIERTA'}</span>
           <h1>{round.name}</h1>
-          <p>{openMatches.length} partido{openMatches.length === 1 ? '' : 's'} todavía abierto{openMatches.length === 1 ? '' : 's'}.</p>
+          <p>{isFinished
+            ? 'La fecha está cerrada y los puntos son definitivos.'
+            : `${openMatches.length} partido${openMatches.length === 1 ? '' : 's'} todavía abierto${openMatches.length === 1 ? '' : 's'}.`}</p>
         </div>
         <div className="participant-summary">
-          <div className="points-total"><span>Puntos actuales</span><strong>{round.pointsTotal}</strong></div>
+          <div className="points-total"><span>{isFinished ? 'Puntos finales' : 'Puntos actuales'}</span><strong>{round.pointsTotal}</strong></div>
           <div className={`submission-state ${round.submitted ? 'submission-state--ok' : ''}`}>
-            <strong>{round.submitted ? 'Enviado' : 'Borrador'}</strong>
-            <span>{round.submitted ? `Envíos: ${round.submissionCount}` : 'Todavía no presentado'}</span>
+            <strong>{isFinished ? 'Finalizado' : round.submitted ? 'Enviado' : 'Borrador'}</strong>
+            <span>{round.submitted ? `Envíos: ${round.submissionCount}` : 'Sin envío registrado'}</span>
           </div>
         </div>
       </section>
+
+      {isFinished && <RoundRanking roundId={round.id} mode="participant" />}
 
       <div className="prediction-list">
         {round.matches.map((match) => {
@@ -333,7 +342,7 @@ export default function ParticipantRound() {
                 <span>{match.competitionName || 'Competencia'}</span>
                 <time>{formatKickoff(match.kickoffAt)}</time>
                 <b className={isLocked ? 'match-countdown match-countdown--closed' : 'match-countdown'}>
-                  {countdownLabel(match, now)}
+                  {isFinished ? 'Finalizado' : countdownLabel(match, now)}
                 </b>
               </div>
 
@@ -393,17 +402,19 @@ export default function ParticipantRound() {
         })}
       </div>
 
-      <section className="card submit-card">
-        <div className="submit-copy">
-          <strong>{round.submitted ? 'Actualizar envío' : 'Enviar pronóstico'}</strong>
-          <p>Todos los partidos que todavía estén abiertos deben estar completos.</p>
-          {error && <div className="alert alert--error submit-alert">{error}</div>}
-          {success && <div className="alert alert--success submit-alert">{success}</div>}
-        </div>
-        <button className="button button--primary" disabled={submitting || openMatches.length === 0} onClick={() => void submitRound()}>
-          {submitting ? 'Enviando…' : round.submitted ? 'Volver a enviar' : 'Enviar pronóstico'}
-        </button>
-      </section>
+      {!isFinished && (
+        <section className="card submit-card">
+          <div className="submit-copy">
+            <strong>{round.submitted ? 'Actualizar envío' : 'Enviar pronóstico'}</strong>
+            <p>Todos los partidos que todavía estén abiertos deben estar completos.</p>
+            {error && <div className="alert alert--error submit-alert">{error}</div>}
+            {success && <div className="alert alert--success submit-alert">{success}</div>}
+          </div>
+          <button className="button button--primary" disabled={submitting || openMatches.length === 0} onClick={() => void submitRound()}>
+            {submitting ? 'Enviando…' : round.submitted ? 'Volver a enviar' : 'Enviar pronóstico'}
+          </button>
+        </section>
+      )}
     </div>
   );
 }
