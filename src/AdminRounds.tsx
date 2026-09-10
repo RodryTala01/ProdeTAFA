@@ -115,7 +115,7 @@ export default function AdminRounds() {
     if (!selected) return;
     setLoading(true); setError(''); setSuccess('');
     try {
-      await api<{ ok: true }>(`/api/admin/rounds/${selected.id}/publish`, { method: 'PUT', body: '{}' });
+      await api<{ ok: true }>(`/api/admin/publish-round/${selected.id}`, { method: 'PUT', body: '{}' });
       setSuccess(`${selected.name} publicada. Los participantes ya pueden pronosticar.`);
       await loadRounds(selected.id);
     } catch (caught) {
