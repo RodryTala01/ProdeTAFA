@@ -123,6 +123,11 @@ function validDate(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
+function utcDay(value: string) {
+  const [year, month, day] = value.split('-').map(Number);
+  return Date.UTC(year, month - 1, day);
+}
+
 async function listRounds(env: Env) {
   const result = await env.DB.prepare(
     `SELECT r.id, r.name, r.status, r.published_at, r.finished_at,
@@ -240,12 +245,20 @@ async function getRound(env: Env, roundId: number) {
 }
 
 async function searchFixtures(url: URL, env: Env) {
-  const date = url.searchParams.get('date') ?? '';
-  if (!validDate(date)) return error('Fecha inválida. Usá AAAA-MM-DD');
+  const from = url.searchParams.get('from') ?? '';
+  const to = url.searchParams.get('to') ?? '';
+  if (!validDate(from) || !validDate(to)) return error('Rango inválido. Usá fechas AAAA-MM-DD');
+
+  const fromTime = utcDay(from);
+  const toTime = utcDay(to);
+  const rangeDays = Math.round((toTime - fromTime) / 86_400_000) + 1;
+  if (toTime < fromTime) return error('La fecha Hasta no puede ser anterior a Desde');
+  if (rangeDays > 7) return error('La búsqueda puede abarcar como máximo 7 días');
   if (!env.FOOTBALL_API_KEY) return error('Falta configurar FOOTBALL_API_KEY', 503);
 
   const endpoint = new URL('https://v3.football.api-sports.io/fixtures');
-  endpoint.searchParams.set('date', date);
+  endpoint.searchParams.set('from', from);
+  endpoint.searchParams.set('to', to);
   endpoint.searchParams.set('timezone', 'America/Argentina/Buenos_Aires');
 
   const response = await fetch(endpoint.toString(), {
@@ -270,7 +283,7 @@ async function searchFixtures(url: URL, env: Env) {
     .map(fixtureToPublic)
     .sort((a, b) => a.kickoffAt.localeCompare(b.kickoffAt));
 
-  return json({ date, fixtures });
+  return json({ from, to, rangeDays, fixtures });
 }
 
 async function addMatch(request: Request, env: Env, admin: UserRow, roundId: number) {
