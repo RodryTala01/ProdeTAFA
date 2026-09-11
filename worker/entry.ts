@@ -62,10 +62,26 @@ export function mutationAllowed(request: Request) {
   return fetchSite !== 'cross-site';
 }
 
-async function syncOpenLeagueParticipants(env: Env) {
+export async function syncOpenLeagueParticipants(env: Env) {
   await env.DB.prepare(
-    `INSERT OR IGNORE INTO league_participants (season_id, user_id)
-     SELECT s.id, u.id
+    `INSERT OR IGNORE INTO league_participants (season_id, user_id, eligible_from_slot)
+     SELECT
+       s.id,
+       u.id,
+       COALESCE(
+         (
+           SELECT MIN(lr.slot_number)
+           FROM league_rounds lr
+           JOIN rounds r ON r.id = lr.round_id
+           WHERE lr.season_id = s.id
+             AND r.status <> 'finished'
+         ),
+         (
+           SELECT COUNT(*) + 1
+           FROM league_rounds lr2
+           WHERE lr2.season_id = s.id
+         )
+       )
      FROM league_seasons s
      CROSS JOIN users u
      WHERE s.status = 'open'
@@ -82,9 +98,22 @@ async function deepHealth(env: Env) {
        AND name IN ('league_seasons', 'league_rounds', 'league_participants')`,
   ).all<{ name: string }>();
   const found = new Set((result.results ?? []).map((row) => row.name));
-  const missing = required.filter((name) => !found.has(name));
-  const ok = missing.length === 0;
-  return json({ ok, app: 'prode-tafa', leagueSchemaReady: ok, missingTables: missing }, ok ? 200 : 503);
+  const missingTables = required.filter((name) => !found.has(name));
+
+  let eligibilityColumnReady = false;
+  if (missingTables.length === 0) {
+    const columns = await env.DB.prepare('PRAGMA table_info(league_participants)').all<{ name: string }>();
+    eligibilityColumnReady = (columns.results ?? []).some((column) => column.name === 'eligible_from_slot');
+  }
+
+  const ok = missingTables.length === 0 && eligibilityColumnReady;
+  return json({
+    ok,
+    app: 'prode-tafa',
+    leagueSchemaReady: ok,
+    missingTables,
+    missingColumns: eligibilityColumnReady ? [] : ['league_participants.eligible_from_slot'],
+  }, ok ? 200 : 503);
 }
 
 export async function protectPublishedRoundMatches(request: Request, env: Env) {
@@ -173,6 +202,11 @@ async function publishRoundSafely(request: Request, env: Env) {
   return json({ ok: true, status: 'open' });
 }
 
+function shouldSyncLeagueParticipants(pathname: string, method: string) {
+  if (method === 'POST' && pathname === '/api/admin/users') return true;
+  return method === 'PUT' && /^\/api\/admin\/users\/[^/]+\/status$/.test(pathname);
+}
+
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const pathname = new URL(request.url).pathname;
@@ -207,7 +241,11 @@ export default {
       if (response) return response;
     }
 
-    return baseWorker.fetch(request, env);
+    const response = await baseWorker.fetch(request, env);
+    if (response.ok && shouldSyncLeagueParticipants(pathname, request.method)) {
+      await syncOpenLeagueParticipants(env);
+    }
+    return response;
   },
 
   async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
