@@ -322,10 +322,8 @@ async function savePrediction(request: Request, env: Env, matchId: number) {
   let extraTeamId: string | null = null;
 
   try {
-    if (match.match_type === 'NORMAL') {
-      homeScore = nullableScore(body.homeScore ?? null);
-      awayScore = nullableScore(body.awayScore ?? null);
-    }
+    homeScore = nullableScore(body.homeScore ?? null);
+    awayScore = nullableScore(body.awayScore ?? null);
 
     if (body.extraTeamId) {
       if (body.extraTeamId !== match.home_team_provider_id && body.extraTeamId !== match.away_team_provider_id) {
@@ -386,7 +384,7 @@ async function submitRound(request: Request, env: Env, roundId: number) {
 
     const hasScore = match.predicted_home_score !== null && match.predicted_away_score !== null;
     const complete = match.match_type === 'PENALTIES_ONLY'
-      ? Boolean(match.predicted_extra_team_provider_id)
+      ? hasScore && Boolean(match.predicted_extra_team_provider_id)
       : hasScore;
 
     if (!complete) missing.push(match.id);
