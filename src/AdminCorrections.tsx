@@ -107,8 +107,8 @@ function ResultEditor({
         body: JSON.stringify({
           homeScore: homeScore === '' ? null : Number(homeScore),
           awayScore: awayScore === '' ? null : Number(awayScore),
-          wentToPenalties: penaltyOnly ? true : wentToPenalties,
-          winningTeamId: winningTeamId || null,
+          wentToPenalties,
+          winningTeamId: wentToPenalties ? winningTeamId || null : null,
           isVoid,
           reason,
         }),
@@ -141,14 +141,14 @@ function ResultEditor({
 
       <div className="correction-checks">
         <label><input type="checkbox" checked={isVoid} onChange={(event) => setIsVoid(event.target.checked)} /> Partido anulado / sin puntos</label>
-        {!isVoid && !penaltyOnly && (
-          <label><input type="checkbox" checked={wentToPenalties} onChange={(event) => setWentToPenalties(event.target.checked)} /> Se definió por penales</label>
+        {!isVoid && (
+          <label><input type="checkbox" checked={wentToPenalties} onChange={(event) => setWentToPenalties(event.target.checked)} /> {penaltyOnly ? 'Llegó a penales' : 'Se definió por penales'}</label>
         )}
       </div>
 
-      {!isVoid && (penaltyOnly || wentToPenalties) && (
+      {!isVoid && wentToPenalties && (
         <label className="correction-wide-field">
-          <span>{penaltyOnly ? 'Ganador de la tanda' : 'Ganador por penales'}</span>
+          <span>Ganador de la tanda</span>
           <select value={winningTeamId} onChange={(event) => setWinningTeamId(event.target.value)} required>
             <option value="">Elegir equipo</option>
             <option value={match.home.id ?? ''}>{match.home.name}</option>
@@ -157,7 +157,7 @@ function ResultEditor({
         </label>
       )}
 
-      {penaltyOnly && !isVoid && <small className="correction-muted">Corregí el resultado de los 90 minutos y el ganador de la tanda.</small>}
+      {penaltyOnly && !isVoid && <small className="correction-muted">El marcador corregido es el de los 90 minutos. Marcá “Llegó a penales” sólo si efectivamente hubo tanda; el punto extra se aplica únicamente en ese caso.</small>}
 
       <label className="correction-wide-field">
         <span>Motivo de la corrección</span>
@@ -234,7 +234,7 @@ function PredictionEditor({
           </select>
         </label>
       )}
-      {penaltyOnly && <small className="correction-muted">El marcador es el pronóstico de los 90 minutos; la selección es el ganador de la tanda.</small>}
+      {penaltyOnly && <small className="correction-muted">El marcador es el pronóstico de los 90 minutos; la selección es el ganador de la tanda si el partido efectivamente llega a penales.</small>}
       <label className="correction-wide-field">
         <span>Motivo de la edición excepcional</span>
         <input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Ej: corrección solicitada por el participante" required minLength={3} />
@@ -317,7 +317,7 @@ export default function AdminCorrections({
             const resultLabel = match.result.isVoid
               ? 'Anulado'
               : hasScore
-                ? `${match.result.homeScore} - ${match.result.awayScore}${match.matchType === 'PENALTIES_ONLY' && winner ? ` · penales: ${winner}` : ''}`
+                ? `${match.result.homeScore} - ${match.result.awayScore}${match.result.wentToPenalties && winner ? ` · penales: ${winner}` : ''}`
                 : 'Sin resultado definitivo';
             return (
               <div className="correction-match" key={match.id}>
