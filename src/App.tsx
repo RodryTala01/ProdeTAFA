@@ -218,6 +218,30 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
     }
   }
 
+  async function toggleParticipant(entry: User) {
+    if (entry.role !== 'participant') return;
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const data = await api<{ ok: true; isActive: boolean }>(`/api/admin/users/${encodeURIComponent(entry.id)}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ isActive: !entry.isActive }),
+      });
+      setUsers((current) => current.map((item) => item.id === entry.id ? { ...item, isActive: data.isActive } : item));
+      setSuccess(data.isActive
+        ? `${entry.fullName} fue reactivado y puede volver a ingresar.`
+        : `${entry.fullName} fue desactivado. Su historial y puntajes se conservan.`);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'No se pudo cambiar el estado del participante');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const participantUsers = users.filter((entry) => entry.role === 'participant');
+  const activeParticipants = participantUsers.filter((entry) => entry.isActive).length;
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -251,8 +275,8 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
                 <p>Creá las cuentas que van a usar para enviar sus pronósticos.</p>
               </div>
               <div className="stat-card">
-                <span>Participantes</span>
-                <strong>{users.filter((entry) => entry.role === 'participant').length}</strong>
+                <span>Activos</span>
+                <strong>{activeParticipants}/{participantUsers.length}</strong>
               </div>
             </div>
 
@@ -271,7 +295,7 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
                 <div className="panel-heading">
                   <div>
                     <h2>Cuentas creadas</h2>
-                    <p>Las contraseñas no pueden verse; sí podés reemplazarlas.</p>
+                    <p>Desactivar una cuenta bloquea el acceso sin borrar su historial.</p>
                   </div>
                   <button className="button button--ghost" onClick={() => void loadUsers()}>Actualizar</button>
                 </div>
@@ -285,12 +309,20 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
                       <div className="avatar">{entry.fullName.slice(0, 1).toUpperCase()}</div>
                       <div className="user-data">
                         <strong>{entry.fullName}</strong>
-                        <span>{entry.phone} · {entry.role === 'admin' ? 'Administrador' : 'Participante'}</span>
+                        <span>
+                          {entry.phone} · {entry.role === 'admin' ? 'Administrador' : 'Participante'}
+                          {entry.role === 'participant' ? ` · ${entry.isActive ? 'Activo' : 'Inactivo'}` : ''}
+                        </span>
                       </div>
                       {entry.role === 'participant' && (
-                        <button className="button button--secondary" onClick={() => { setResetUser(entry); setNewPassword(''); }}>
-                          Cambiar clave
-                        </button>
+                        <div className="topbar-actions">
+                          <button className="button button--secondary" onClick={() => { setResetUser(entry); setNewPassword(''); }}>
+                            Cambiar clave
+                          </button>
+                          <button className="button button--ghost" disabled={loading} onClick={() => void toggleParticipant(entry)}>
+                            {entry.isActive ? 'Desactivar' : 'Reactivar'}
+                          </button>
+                        </div>
                       )}
                     </div>
                   ))}
