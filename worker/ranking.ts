@@ -19,6 +19,24 @@ type RankingRow = {
   provisional_count: number;
 };
 
+type RevealMatchRow = {
+  id: number;
+  match_type: 'NORMAL' | 'PENALTIES_ONLY';
+  home_team_provider_id: string | null;
+  home_team_name: string;
+  away_team_provider_id: string | null;
+  away_team_name: string;
+};
+
+type RevealPredictionRow = {
+  user_id: string;
+  match_id: number;
+  predicted_home_score: number | null;
+  predicted_away_score: number | null;
+  predicted_extra_team_provider_id: string | null;
+  total_points: number | null;
+};
+
 const SESSION_COOKIE = 'prode_session';
 const encoder = new TextEncoder();
 
@@ -153,6 +171,81 @@ async function participantRanking(request: Request, env: Env, roundId: number) {
   });
 }
 
+async function participantReveal(request: Request, env: Env, roundId: number) {
+  const user = await sessionUser(request, env);
+  if (!user || user.role !== 'participant') return error('Acceso de participante requerido', 403);
+
+  const round = await roundInfo(roundId, env);
+  if (!round) return error('Fecha no encontrada', 404);
+  if (round.status !== 'finished') return error('Los pronósticos de los demás se revelan cuando finaliza la fecha', 403);
+
+  const matchResult = await env.DB.prepare(
+    `SELECT id, match_type,
+            home_team_provider_id, home_team_name,
+            away_team_provider_id, away_team_name
+     FROM matches
+     WHERE round_id = ?
+     ORDER BY kickoff_at, id`,
+  ).bind(roundId).all<RevealMatchRow>();
+
+  const participantResult = await env.DB.prepare(
+    `SELECT u.id, u.full_name
+     FROM round_submissions rs
+     JOIN users u ON u.id = rs.user_id
+     WHERE rs.round_id = ? AND u.role = 'participant'
+     ORDER BY u.full_name COLLATE NOCASE`,
+  ).bind(roundId).all<{ id: string; full_name: string }>();
+
+  const predictionResult = await env.DB.prepare(
+    `SELECT p.user_id, p.match_id,
+            p.predicted_home_score, p.predicted_away_score,
+            p.predicted_extra_team_provider_id,
+            ps.total_points
+     FROM predictions p
+     JOIN matches m ON m.id = p.match_id
+     JOIN round_submissions rs ON rs.round_id = m.round_id AND rs.user_id = p.user_id
+     LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id
+     WHERE m.round_id = ?`,
+  ).bind(roundId).all<RevealPredictionRow>();
+
+  const matches = matchResult.results ?? [];
+  const predictionsByUser = new Map<string, Map<number, RevealPredictionRow>>();
+  for (const prediction of predictionResult.results ?? []) {
+    const predictions = predictionsByUser.get(prediction.user_id) ?? new Map<number, RevealPredictionRow>();
+    predictions.set(prediction.match_id, prediction);
+    predictionsByUser.set(prediction.user_id, predictions);
+  }
+
+  return json({
+    round: { id: round.id, name: round.name, finishedAt: round.finished_at },
+    matches: matches.map((match) => ({
+      id: match.id,
+      matchType: match.match_type,
+      home: { id: match.home_team_provider_id, name: match.home_team_name },
+      away: { id: match.away_team_provider_id, name: match.away_team_name },
+    })),
+    participants: (participantResult.results ?? []).map((participant) => {
+      const predictions = predictionsByUser.get(participant.id) ?? new Map<number, RevealPredictionRow>();
+      const items = matches.map((match) => {
+        const prediction = predictions.get(match.id);
+        return {
+          matchId: match.id,
+          homeScore: prediction?.predicted_home_score ?? null,
+          awayScore: prediction?.predicted_away_score ?? null,
+          extraTeamId: prediction?.predicted_extra_team_provider_id ?? null,
+          points: Number(prediction?.total_points ?? 0),
+        };
+      });
+      return {
+        id: participant.id,
+        fullName: participant.full_name,
+        points: items.reduce((total, item) => total + item.points, 0),
+        predictions: items,
+      };
+    }),
+  });
+}
+
 async function finishRound(request: Request, env: Env, roundId: number) {
   const user = await sessionUser(request, env);
   if (!user || user.role !== 'admin') return error('Acceso de administrador requerido', 403);
@@ -241,6 +334,11 @@ export async function handleRanking(request: Request, env: Env): Promise<Respons
   const participantRankingMatch = pathname.match(/^\/api\/participant\/ranking\/(\d+)$/);
   if (participantRankingMatch && request.method === 'GET') {
     return participantRanking(request, env, Number(participantRankingMatch[1]));
+  }
+
+  const participantRevealMatch = pathname.match(/^\/api\/participant\/reveal\/(\d+)$/);
+  if (participantRevealMatch && request.method === 'GET') {
+    return participantReveal(request, env, Number(participantRevealMatch[1]));
   }
 
   const finishMatch = pathname.match(/^\/api\/admin\/finish-round\/(\d+)$/);
