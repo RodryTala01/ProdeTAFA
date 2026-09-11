@@ -68,7 +68,11 @@ export default function LeagueView() {
     }
   }
 
-  useEffect(() => { void load(null); }, []);
+  useEffect(() => {
+    void load(null);
+    const timer = window.setInterval(() => { void load(); }, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   if (loading && !data) return <section className="card panel"><p>Cargando Liga...</p></section>;
   if (error && !data) return <section className="card panel"><div className="alert alert--error">{error}</div></section>;
