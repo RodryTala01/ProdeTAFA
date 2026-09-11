@@ -57,18 +57,20 @@
 - [x] Ícono SVG base.
 - [x] Historial de fechas para participantes.
 - [x] Revelar los pronósticos enviados por todos los participantes sólo después de finalizar la fecha.
+- [x] Tabla general acumulada entre fechas finalizadas.
+- [x] Estadísticas acumuladas por participante: puntos, promedio, plenos, parciales, errores, extras y fechas jugadas.
+- [x] Resumen de las últimas fechas del participante.
+- [x] Protección adicional contra operaciones API iniciadas desde sitios externos.
 
 ### Próximo alcance recomendado
 
 - [ ] Confirmar instalación PWA en Android desde producción.
 - [ ] Agregar íconos PNG 192x192 y 512x512 / maskable si el navegador o Android lo requieren.
-- [ ] Enriquecer el historial con resumen por fecha.
 - [ ] Mejorar estado en vivo y feedback de actualización.
-- [ ] Pantalla general de posiciones acumuladas entre fechas.
-- [ ] Palmarés e historial del Prode.
-- [ ] Estadísticas por participante: plenos, parciales, errores, puntos por fecha, rachas.
+- [ ] Palmarés e historial de ganadores del Prode.
+- [ ] Estadísticas avanzadas por participante: rachas, mejor fecha, peor fecha y evolución.
 - [ ] Mejoras de UX móvil y accesibilidad.
-- [ ] Hardening adicional de seguridad: validación explícita de Origin/CSRF para operaciones mutantes.
+- [ ] Revisar CSRF/Origin nuevamente después de tener el dominio final.
 
 ## Fase 3 — Automatización y distribución
 
