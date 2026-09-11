@@ -13,7 +13,7 @@ function jsonError(message: string, status: number) {
   return json({ error: message }, status);
 }
 
-function mutationAllowed(request: Request) {
+export function mutationAllowed(request: Request) {
   if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return true;
   const url = new URL(request.url);
   const origin = request.headers.get('origin');
@@ -69,13 +69,16 @@ export default {
       return deepHealth(env);
     }
 
+    if (pathname.startsWith('/api/') && !mutationAllowed(request)) {
+      return jsonError('Origen de solicitud no permitido', 403);
+    }
+
     const immutableRoundResponse = await protectPublishedRoundMatches(request, env);
     if (immutableRoundResponse) return immutableRoundResponse;
 
     const leagueRoute = pathname === '/api/league' || pathname.startsWith('/api/admin/leagues');
 
     if (leagueRoute) {
-      if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido', 403);
       await syncOpenLeagueParticipants(env);
       const response = await handleLeague(request, env);
       if (response) return response;
