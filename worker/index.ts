@@ -2,6 +2,7 @@ import { handleAdminRounds } from './rounds';
 import { handlePredictions } from './predictions';
 import { handleResults, syncEligibleRounds } from './results';
 import { handleRanking } from './ranking';
+import { handleAdminCorrections } from './admin-corrections';
 
 export interface Env {
   DB: D1Database;
@@ -433,6 +434,9 @@ export default {
       if (passwordResetMatch && request.method === 'PUT') {
         return resetParticipantPassword(request, env, decodeURIComponent(passwordResetMatch[1]));
       }
+
+      const correctionsResponse = await handleAdminCorrections(request, env);
+      if (correctionsResponse) return correctionsResponse;
 
       const resultsResponse = await handleResults(request, env);
       if (resultsResponse) return resultsResponse;
