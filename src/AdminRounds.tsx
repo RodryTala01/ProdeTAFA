@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import RoundRanking from './RoundRanking';
+import AdminCorrections from './AdminCorrections';
 import './admin-rounds.css';
 
 type RoundSummary = { id: number; name: string; status: string; matchCount: number };
@@ -293,6 +294,17 @@ export default function AdminRounds() {
             )}
 
             {!isDraft && <RoundRanking roundId={selected.id} mode="admin" refreshToken={rankingRefresh} />}
+
+            {!isDraft && (
+              <AdminCorrections
+                roundId={selected.id}
+                refreshToken={rankingRefresh}
+                onChanged={() => {
+                  setRankingRefresh((value) => value + 1);
+                  void loadRound(selected.id);
+                }}
+              />
+            )}
 
             {isDraft && selected.matches.length < 12 && (
               <section className="card fixture-search-card">
