@@ -4,7 +4,7 @@ Nueva versión del Prode TAFA, reconstruida desde cero como aplicación permanen
 
 ## Estado actual
 
-La Fase 1 / MVP está funcionalmente muy avanzada y la Fase 2 ya comenzó con la preparación PWA.
+La Fase 1 / MVP está funcionalmente completa a nivel código y pendiente de validación final en producción. La Fase 2 ya comenzó con la preparación PWA.
 
 ### Núcleo implementado
 
@@ -22,17 +22,21 @@ La Fase 1 / MVP está funcionalmente muy avanzada y la Fase 2 ya comenzó con la
 - Publicación de fechas.
 - Pronósticos con autosave y envío explícito.
 - Bloqueo individual en kickoff + 1 minuto validado en backend.
-- Tipo especial `PENALTIES_ONLY`, sin marcador: sólo se elige el ganador de la tanda.
+- Tipo especial `PENALTIES_ONLY`: se pronostica el marcador de los 90 minutos y además quién gana la tanda.
+- Puntaje 3/1/0 sobre los 90 minutos y +1 si corresponde y se acierta el ganador por penales.
 - Sincronización automática de resultados mediante Cron Trigger cada 10 minutos durante ventanas relevantes.
 - Sincronización manual desde el panel Admin.
-- Puntaje automático e idempotente: pleno 3, parcial 1, error 0 y definición especial 1.
+- Puntaje automático e idempotente.
 - Puntos provisionales cuando el proveedor informa un partido en vivo.
 - Partidos anulados/suspendidos definitivos sin penalizar al participante.
 - Ranking con desempates por puntos, plenos, parciales, errores y extras.
 - Cierre de fecha y ranking final para participantes.
 - Historial de fechas finalizadas para participantes.
+- Revelado de pronósticos enviados una vez cerrada la fecha.
 - Corrección manual de resultados, edición excepcional de pronósticos y auditoría.
-- GitHub Actions ejecutando `npm run build` en cada push.
+- Tests automáticos para las reglas críticas de scoring.
+- GitHub Actions ejecutando tests + build en cada push.
+- Smoke test preparado para validar producción.
 
 ### Fase 2 iniciada
 
@@ -65,6 +69,15 @@ npm run dev
 
 La configuración actual conecta D1 localmente contra la base remota del proyecto.
 
+## Tests y build
+
+```bash
+npm test
+npm run build
+```
+
+Los tests unitarios usan una configuración separada de Vitest para no conectarse a Cloudflare ni a la D1 remota.
+
 ## Base de datos
 
 Aplicar migraciones remotas:
@@ -75,17 +88,36 @@ npm run db:migrate:remote
 
 ## Deploy
 
-Antes del deploy público hay que configurar `FOOTBALL_API_KEY` como secreto del Worker y luego desplegar:
+`FOOTBALL_API_KEY` está declarada como secreto obligatorio del Worker.
+
+Para el primer deploy, con la clave ya presente en `.dev.vars`:
 
 ```bash
-npx wrangler secret put FOOTBALL_API_KEY
+npm run deploy:first
+```
+
+Ese comando ejecuta tests + build y despliega usando `.dev.vars` como archivo de secretos. El valor no se guarda en Git.
+
+Para deploys posteriores:
+
+```bash
 npm run deploy
 ```
+
+Después del primer deploy se puede validar la URL pública con:
+
+```bash
+BASE_URL=https://prode-tafa.<subdominio>.workers.dev npm run smoke:prod
+```
+
+En PowerShell, definir primero `$env:BASE_URL`.
 
 El administrador inicial ya fue creado en la base remota, por lo que el endpoint de setup inicial queda bloqueado.
 
 ## Próximos pasos
 
-Ver `ROADMAP.md` para el checklist de cierre de Fase 1 y el alcance propuesto de Fase 2.
+Ver `PRODUCTION.md` para el procedimiento de cierre de Fase 1 y la prueba end-to-end.
+
+Ver `ROADMAP.md` para el estado de Fase 1 y el alcance propuesto de Fase 2.
 
 Ver `AGENTS.md` para las reglas funcionales que Codex debe respetar.
