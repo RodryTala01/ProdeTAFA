@@ -1,0 +1,48 @@
+const baseUrl = (process.env.BASE_URL || process.argv[2] || '').replace(/\/$/, '');
+
+if (!baseUrl) {
+  console.error('Falta BASE_URL. Ejemplo: BASE_URL=https://prode-tafa.<subdominio>.workers.dev npm run smoke:prod');
+  process.exit(1);
+}
+
+async function check(path, validate) {
+  const response = await fetch(`${baseUrl}${path}`, { redirect: 'follow' });
+  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+  await validate(response);
+  console.log(`✓ ${path}`);
+}
+
+try {
+  await check('/api/health', async (response) => {
+    const data = await response.json();
+    if (data?.ok !== true || data?.app !== 'prode-tafa') {
+      throw new Error('/api/health: respuesta inesperada');
+    }
+  });
+
+  await check('/', async (response) => {
+    const html = await response.text();
+    if (!html.includes('id="root"') || !html.includes('Prode TAFA')) {
+      throw new Error('/: no parece ser el frontend de Prode TAFA');
+    }
+  });
+
+  await check('/manifest.webmanifest', async (response) => {
+    const manifest = await response.json();
+    if (!manifest?.name || !manifest?.start_url) {
+      throw new Error('/manifest.webmanifest: manifest inválido');
+    }
+  });
+
+  await check('/service-worker.js', async (response) => {
+    const source = await response.text();
+    if (!source.includes('fetch') || !source.includes('/api/')) {
+      throw new Error('/service-worker.js: service worker inesperado');
+    }
+  });
+
+  console.log(`\nSmoke test OK: ${baseUrl}`);
+} catch (error) {
+  console.error(`\nSmoke test FALLÓ: ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+}
