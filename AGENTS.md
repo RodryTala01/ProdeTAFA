@@ -85,23 +85,16 @@ Ejemplo con resultado 2-1:
 - pronóstico 1-1 = 0
 - pronóstico 1-2 = 0
 
-### Extras por definición
+### Extra por penales
 
-Algunos partidos eliminatorios pueden requerir pronosticar también quién clasifica/vence si la definición llega a alargue o penales.
+Cuando el administrador agrega un partido como tipo `PENALTIES_ONLY` (nombre interno conservado por compatibilidad), el participante debe cargar dos cosas:
 
-- El extra vale +1.
-- Sólo se concede cuando la condición de definición realmente ocurrió y el usuario acertó al equipo correspondiente.
-- Por lo tanto un pleno de 3 puede terminar valiendo 4 si además corresponde y acierta el extra.
-- Diseñar la UI con selección clara del equipo; no usar la sintaxis histórica de asteriscos.
+- El resultado de los 90 minutos, que puntúa con la regla normal 3/1/0.
+- Qué equipo gana la tanda de penales, que vale +1 si la definición realmente llega a penales y el equipo elegido es correcto.
 
-### Partido especial PENALES
+Por lo tanto un pleno de 3 puede terminar valiendo 4 si además se acierta el ganador de la tanda. No usar la sintaxis histórica de asteriscos; la elección del ganador se hace con una selección clara del equipo.
 
-El administrador puede marcar un ítem como tipo `PENALTIES_ONLY`.
-
-- No se pronostica marcador.
-- El participante elige únicamente qué equipo gana por penales.
-- Acertar = 1 punto.
-- Fallar = 0 puntos.
+En el MVP no existe un selector extra separado para partidos `NORMAL`: cuando se necesita este pronóstico adicional, el administrador carga ese partido como `PENALTIES_ONLY`.
 
 ### Resultados y estados
 
