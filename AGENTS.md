@@ -67,6 +67,7 @@ Una fecha contiene los partidos seleccionados por el administrador. Puede conten
 - No confiar solamente en bloqueos de UI: el backend debe rechazar una escritura posterior al cierre.
 - El administrador puede hacer una corrección excepcional luego del cierre.
 - Toda modificación administrativa posterior al cierre debe quedar registrada en auditoría.
+- Una fecha deja de permitir alta o baja de partidos en cuanto sale de estado `draft`. Una fecha publicada o finalizada es inmutable respecto de su lista de partidos, también desde backend.
 
 ### Puntuación normal
 
@@ -124,9 +125,9 @@ Los puntos durante un partido deben marcarse claramente como `provisionales`. S�
 - No borrar los pronósticos existentes.
 - Si es simplemente reprogramado, conservar los pronósticos y actualizar el kickoff según la regla definida por negocio.
 
-### Desempates futuros
+### Desempates
 
-Guardar desde ahora los datos necesarios para ordenar posteriormente por:
+Ordenar por:
 
 1. Puntos totales.
 2. Cantidad de plenos.
@@ -134,7 +135,69 @@ Guardar desde ahora los datos necesarios para ordenar posteriormente por:
 4. Menor cantidad de errores.
 5. Cantidad de extras.
 
-El ranking visual completo no forma parte del primer núcleo si retrasa el MVP.
+## Fase 2 — Liga
+
+La Fase 2 está enfocada exclusivamente en dejar lista la `Liga`. No mezclar todavía Copas, tabla histórica general, palmarés, perfiles avanzados ni estadísticas divertidas.
+
+### Temporada de Liga
+
+- El administrador crea una temporada de Liga como entidad separada.
+- Luego vincula exactamente 5 fechas del Prode a esa temporada.
+- Las fechas se numeran del 1 al 5 según el orden en que se vinculan.
+- Una misma fecha del Prode no puede pertenecer a dos temporadas de Liga.
+- La base de datos debe impedir slots fuera de 1–5, slots duplicados y fechas vinculadas a más de una Liga.
+- Una temporada no puede finalizar hasta tener exactamente 5 fechas y hasta que las 5 estén cerradas.
+- Una vez finalizada la Liga, sus fechas vinculadas quedan inmutables.
+- Las temporadas finalizadas siguen visibles como histórico.
+
+### Participantes de Liga
+
+- Al crear una temporada se incorporan todos los participantes activos.
+- Un participante que no presenta una fecha simplemente suma 0 en esa fecha y continúa en la tabla.
+- Si se crea o reactiva un participante cuando la Liga ya está en curso, puede incorporarse desde ese momento.
+- Ese alta tardía no genera puntos retroactivos: empieza con 0 en todo lo anterior.
+- Desactivar una cuenta no debe borrar su historial dentro de una Liga en la que ya participó.
+
+### Tabla de Liga
+
+- La tabla acumula los puntos obtenidos en las 5 fechas vinculadas.
+- Se actualiza partido por partido, pero sólo cuando cada partido tiene resultado definitivo.
+- Los puntos provisionales de partidos en juego NO entran en la tabla de Liga.
+- Un partido anulado conserva su tratamiento de 0 puntos sin error.
+- Usar exactamente los mismos desempates del Prode: puntos, plenos, parciales, menos errores y extras.
+- Mostrar a participantes y administradores la misma clasificación de temporada.
+- La vista puede refrescar periódicamente desde D1; nunca consultar directamente al proveedor de fútbol desde el frontend.
+
+### Navegación de Fase 2
+
+Participante:
+
+- `Pronósticos`
+- `Liga`
+- `Historial`
+
+En móvil, estas tres secciones deben sentirse como navegación de una app, preferentemente con barra inferior fija y respeto de safe areas.
+
+Administrador:
+
+- `Fechas`
+- `Liga`
+- `Participantes`
+
+La tabla general histórica del Prode no forma parte de esta fase aunque exista código experimental previo. No exponerla como navegación principal.
+
+### Fuera de Fase 2
+
+Dejar para fases posteriores:
+
+- Copas.
+- Tabla general histórica entre temporadas/formatos.
+- Palmarés.
+- Perfil completo de participante.
+- Estadísticas avanzadas o divertidas.
+- WhatsApp.
+- Push notifications.
+- Automatizaciones de distribución.
 
 ## Seguridad y consistencia
 
@@ -145,6 +208,7 @@ El ranking visual completo no forma parte del primer núcleo si retrasa el MVP.
 - Las operaciones de puntaje deben ser idempotentes.
 - Fechas en base de datos: UTC ISO-8601. Mostrar al usuario en `America/Argentina/Buenos_Aires`.
 - Nunca almacenar secretos reales en el repositorio. Usar `wrangler secret`/variables de entorno.
+- Operaciones mutantes deben rechazar requests cross-site cuando sea posible sin romper el flujo legítimo.
 
 ## Criterio de implementación
 
