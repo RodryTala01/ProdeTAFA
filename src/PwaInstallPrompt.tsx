@@ -42,7 +42,17 @@ export default function PwaInstallPrompt() {
   }
 
   return (
-    <section className="card panel">
+    <section
+      className="card panel"
+      style={{
+        position: 'fixed',
+        right: '16px',
+        bottom: '16px',
+        zIndex: 100,
+        maxWidth: '360px',
+        width: 'calc(100% - 32px)',
+      }}
+    >
       <div className="panel-heading">
         <div>
           <strong>Instalar Prode TAFA</strong>
