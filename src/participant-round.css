@@ -3,6 +3,33 @@
   gap: 18px;
 }
 
+.round-history-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 20px;
+}
+
+.round-history-card > div {
+  display: grid;
+  gap: 3px;
+}
+
+.round-history-card select {
+  min-width: 240px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.round-history-card select option {
+  color: #0f172a;
+}
+
 .participant-round-header,
 .submit-card {
   display: flex;
@@ -160,6 +187,12 @@
   border-top: 1px dashed rgba(255,255,255,.12);
 }
 
+.penalty-prediction--only {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
 .penalty-prediction p {
   margin: 0 0 12px;
 }
@@ -267,10 +300,16 @@
 }
 
 @media (max-width: 700px) {
+  .round-history-card,
   .participant-round-header,
   .submit-card {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .round-history-card select {
+    min-width: 0;
+    width: 100%;
   }
 
   .participant-summary {
