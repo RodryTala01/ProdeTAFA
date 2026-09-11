@@ -20,6 +20,13 @@ try {
     }
   });
 
+  await check('/api/health/deep', async (response) => {
+    const data = await response.json();
+    if (data?.ok !== true || data?.leagueSchemaReady !== true || !Array.isArray(data?.missingTables) || data.missingTables.length !== 0) {
+      throw new Error('/api/health/deep: la D1 desplegada no tiene listo el esquema de Liga');
+    }
+  });
+
   await check('/', async (response) => {
     const html = await response.text();
     if (!html.includes('id="root"') || !html.includes('Prode TAFA')) {
@@ -29,15 +36,15 @@ try {
 
   await check('/manifest.webmanifest', async (response) => {
     const manifest = await response.json();
-    if (!manifest?.name || !manifest?.start_url) {
+    if (!manifest?.name || !manifest?.start_url || manifest?.display !== 'standalone') {
       throw new Error('/manifest.webmanifest: manifest inválido');
     }
   });
 
-  await check('/service-worker.js', async (response) => {
+  await check('/sw.js', async (response) => {
     const source = await response.text();
     if (!source.includes('fetch') || !source.includes('/api/')) {
-      throw new Error('/service-worker.js: service worker inesperado');
+      throw new Error('/sw.js: service worker inesperado');
     }
   });
 
