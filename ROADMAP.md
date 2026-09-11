@@ -47,40 +47,57 @@
 - [ ] Verificar sincronización automática del Cron Trigger desplegado.
 - [ ] Medir el consumo real de cuota de API-Football y ajustar la frecuencia si fuera necesario.
 
-## Fase 2 — Producto usable y móvil
+## Fase 2 — Liga
 
-### Ya implementado/iniciado
+Objetivo: dejar lista una Liga de temporada compuesta por 5 fechas del Prode. No incluir todavía copas, tabla histórica general, palmarés ni perfiles avanzados.
 
-- [x] Manifest PWA.
-- [x] Service worker para assets estáticos sin cachear `/api/*`.
-- [x] Metadatos de instalación móvil.
-- [x] Ícono SVG base.
-- [x] Historial de fechas para participantes.
-- [x] Revelar los pronósticos enviados por todos los participantes sólo después de finalizar la fecha.
-- [x] Tabla general acumulada entre fechas finalizadas.
-- [x] Estadísticas acumuladas por participante: puntos, promedio, plenos, parciales, errores, extras y fechas jugadas.
-- [x] Resumen de las últimas fechas del participante.
+### Reglas confirmadas
+
+- [x] El admin crea una temporada de Liga y luego vincula sus fechas.
+- [x] Cada Liga tiene exactamente 5 fechas.
+- [x] Un participante que no juega una fecha suma 0.
+- [x] Se puede incorporar un participante a mitad de temporada; arranca con 0 en las fechas anteriores.
+- [x] La tabla se actualiza partido por partido, pero sólo cuando cada resultado queda definitivo.
+- [x] No sumar puntos provisionales a la tabla de Liga.
+- [x] Desempate: puntos → plenos → parciales → menos errores → extras.
+- [x] La Liga está disponible tanto para admin como para participantes.
+
+### Implementado
+
+- [x] Esquema `league_seasons`, `league_rounds` y `league_participants` en migración `0002_league_seasons.sql`.
+- [x] Crear temporadas.
+- [x] Vincular hasta 5 fechas en orden.
+- [x] Desvincular fechas mientras la Liga siga abierta.
+- [x] Incorporación automática de participantes activos a Ligas abiertas.
+- [x] Soporte para altas tardías sin puntos retroactivos.
+- [x] Tabla de Liga calculada sólo con partidos definitivos.
+- [x] Cierre de Liga sólo cuando las 5 fechas están vinculadas y finalizadas.
+- [x] Vista Admin: Fechas | Liga | Participantes.
+- [x] Vista Participante: Pronósticos | Liga | Historial.
+- [x] Historial de fechas separado de la pantalla de pronósticos.
+- [x] PWA base y aviso de instalación cuando el navegador lo permite.
 - [x] Protección adicional contra operaciones API iniciadas desde sitios externos.
 
-### Próximo alcance recomendado
+### Pendiente de validación
 
+- [ ] Aplicar `0002_league_seasons.sql` a D1 remota.
+- [ ] Crear una Liga de prueba y vincular 5 fechas.
+- [ ] Verificar alta de participante a mitad de temporada.
+- [ ] Confirmar que un no-presentado suma 0.
+- [ ] Confirmar que la tabla se mueve al finalizar cada partido, no antes.
+- [ ] Confirmar cierre de Liga tras la quinta fecha.
 - [ ] Confirmar instalación PWA en Android desde producción.
-- [ ] Agregar íconos PNG 192x192 y 512x512 / maskable si el navegador o Android lo requieren.
-- [ ] Mejorar estado en vivo y feedback de actualización.
-- [ ] Palmarés e historial de ganadores del Prode.
-- [ ] Estadísticas avanzadas por participante: rachas, mejor fecha, peor fecha y evolución.
-- [ ] Mejoras de UX móvil y accesibilidad.
-- [ ] Revisar CSRF/Origin nuevamente después de tener el dominio final.
+- [ ] Agregar íconos PNG 192x192 y 512x512 / maskable si Android los requiere.
 
-## Fase 3 — Automatización y distribución
+## Fases posteriores
 
-- [ ] Recordatorios automáticos antes del cierre.
-- [ ] Integración WhatsApp para recordatorios y resultados.
-- [ ] Generación automática de tabla/imagen para compartir por WhatsApp.
-- [ ] Notificaciones push PWA.
-- [ ] Herramientas administrativas para temporadas, palmarés e históricos.
-- [ ] Monitoreo de errores y métricas de uso.
+- Copas: formato y reglas a definir después de cerrar la Liga.
+- Tabla general histórica: postergar hasta después de Copas.
+- Palmarés: postergar.
+- Perfil individual y estadísticas avanzadas: postergar.
+- Estadísticas divertidas/rachas: postergar.
+- WhatsApp y automatizaciones: mantener separado por ahora.
 
 ## Regla de avance
 
-No bloquear el desarrollo por estética o estadísticas avanzadas. Primero garantizar que el ciclo completo `crear fecha → pronosticar → bloquear → sincronizar → puntuar → cerrar` funcione correctamente en producción.
+Primero garantizar que el ciclo completo de Liga `crear temporada → vincular 5 fechas → pronosticar → puntuar partidos definitivos → acumular tabla → cerrar Liga` funcione correctamente en producción.
