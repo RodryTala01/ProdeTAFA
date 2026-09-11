@@ -16,8 +16,9 @@
 - [x] Envío explícito de pronóstico.
 - [x] Edición hasta kickoff + 1 minuto.
 - [x] Bloqueo real en backend.
-- [x] `PENALTIES_ONLY` sin marcador, sólo ganador de la tanda.
-- [x] Corrección administrativa de `PENALTIES_ONLY` sin marcador.
+- [x] Partido marcado `PENALTIES_ONLY`: marcador de 90 minutos + ganador de la tanda.
+- [x] 3/1/0 sobre los 90 minutos + hasta 1 punto extra por acertar penales.
+- [x] Corrección administrativa de marcador + ganador de penales.
 - [x] Sincronización automática de resultados por Cron Trigger.
 - [x] Sincronización manual de resultados.
 - [x] Pleno 3 / parcial 1 / error 0.
@@ -29,15 +30,22 @@
 - [x] Corrección manual de resultados.
 - [x] Edición excepcional de pronósticos por admin.
 - [x] Auditoría de intervenciones.
+- [x] Revelado de pronósticos enviados después del cierre de la fecha.
 - [x] Build automático en GitHub Actions.
+- [x] Tests automáticos de reglas de scoring.
+- [x] Smoke test para producción.
+- [x] `FOOTBALL_API_KEY` declarada como secreto obligatorio de Cloudflare.
+- [x] Flujo de primer deploy preparado con carga segura del secreto.
+- [x] Checklist de puesta en producción documentado en `PRODUCTION.md`.
 
 ### Pendiente para declarar Fase 1 cerrada
 
-- [ ] Probar end-to-end con una fecha real o de prueba: crear 12 partidos, publicar, pronosticar desde un participante, enviar, simular cierre y verificar puntaje.
-- [ ] Definir/implementar el selector extra para partidos eliminatorios normales cuando corresponda pronosticar quién clasifica. El scoring ya acepta el extra; falta una bandera explícita por partido y su UI.
-- [ ] Configurar `FOOTBALL_API_KEY` como secreto del Worker de producción.
-- [ ] Hacer el primer deploy real a `workers.dev` y smoke test con D1 remota.
-- [ ] Revisar el comportamiento del Cron Trigger ya desplegado y el consumo real de cuota de API-Football.
+- [ ] Hacer el primer deploy real a `workers.dev` desde una sesión autenticada de Cloudflare.
+- [ ] Ejecutar el smoke test contra la URL real.
+- [ ] Probar end-to-end Admin + Participante con una fecha real o de prueba.
+- [ ] Verificar en producción el bloqueo efectivo en kickoff + 1 minuto.
+- [ ] Verificar sincronización automática del Cron Trigger desplegado.
+- [ ] Medir el consumo real de cuota de API-Football y ajustar la frecuencia si fuera necesario.
 
 ## Fase 2 — Producto usable y móvil
 
