@@ -54,6 +54,13 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
+function roundStatusLabel(status: string) {
+  if (status === 'draft') return 'Borrador';
+  if (status === 'open') return 'En curso';
+  if (status === 'finished') return 'Cerrada';
+  return status;
+}
+
 export default function AdminLeague() {
   const [data, setData] = useState<AdminLeagueData | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -63,8 +70,8 @@ export default function AdminLeague() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function load(preferredId?: number | null) {
-    setError('');
+  async function load(preferredId?: number | null, silent = false) {
+    if (!silent) setError('');
     try {
       const next = await api<AdminLeagueData>('/api/admin/leagues');
       setData(next);
@@ -72,11 +79,16 @@ export default function AdminLeague() {
       if (candidate && next.seasons.some((season) => season.id === candidate)) setSelectedId(candidate);
       else setSelectedId(next.seasons[0]?.id ?? null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo cargar la Liga');
+      if (!silent) setError(caught instanceof Error ? caught.message : 'No se pudo cargar la Liga');
     }
   }
 
   useEffect(() => { void load(null); }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => { void load(selectedId, true); }, 60_000);
+    return () => window.clearInterval(timer);
+  }, [selectedId]);
 
   const selected = useMemo(() => data?.seasons.find((season) => season.id === selectedId) ?? null, [data, selectedId]);
 
@@ -107,11 +119,13 @@ export default function AdminLeague() {
     } finally { setLoading(false); }
   }
 
-  async function unlinkRound(targetRoundId: number) {
+  async function unlinkRound(target: Round) {
     if (!selected) return;
+    const confirmed = window.confirm(`¿Desvincular ${target.name} de ${selected.name}? Los puntos de esa fecha dejarán de contar en la Liga.`);
+    if (!confirmed) return;
     setLoading(true); setError(''); setSuccess('');
     try {
-      await api(`/api/admin/leagues/${selected.id}/rounds/${targetRoundId}`, { method: 'DELETE' });
+      await api(`/api/admin/leagues/${selected.id}/rounds/${target.id}`, { method: 'DELETE' });
       setSuccess('Fecha desvinculada.');
       await load(selected.id);
     } catch (caught) {
@@ -121,6 +135,8 @@ export default function AdminLeague() {
 
   async function finishSeason() {
     if (!selected) return;
+    const confirmed = window.confirm(`¿Finalizar ${selected.name}? Después no se podrán cambiar sus fechas vinculadas.`);
+    if (!confirmed) return;
     setLoading(true); setError(''); setSuccess('');
     try {
       await api(`/api/admin/leagues/${selected.id}/finish`, { method: 'PUT', body: '{}' });
@@ -164,6 +180,7 @@ export default function AdminLeague() {
           <div className="grid-two">
             <div className="card stat-card"><span>Fechas vinculadas</span><strong>{selected.roundCount}/5</strong></div>
             <div className="card stat-card"><span>Partidos definidos</span><strong>{selected.finalizedMatches}/{selected.totalMatches || 0}</strong></div>
+            <div className="card stat-card"><span>Estado</span><strong>{selected.status === 'finished' ? 'Finalizada' : 'En curso'}</strong></div>
           </div>
 
           <section className="card panel panel--wide">
@@ -173,7 +190,7 @@ export default function AdminLeague() {
               <div className="round-create">
                 <select value={roundId} onChange={(event) => setRoundId(event.target.value ? Number(event.target.value) : '')}>
                   <option value="">Elegir fecha...</option>
-                  {data?.availableRounds.map((round) => <option key={round.id} value={round.id}>{round.name} · {round.status}</option>)}
+                  {data?.availableRounds.map((round) => <option key={round.id} value={round.id}>{round.name} · {roundStatusLabel(round.status)}</option>)}
                 </select>
                 <button className="button button--primary" disabled={loading || roundId === ''} onClick={() => void linkRound()}>Vincular</button>
               </div>
@@ -187,9 +204,9 @@ export default function AdminLeague() {
                     <div className="avatar">{slot}</div>
                     <div className="user-data">
                       <strong>{round?.name ?? `Fecha ${slot} sin vincular`}</strong>
-                      <span>{round ? `${round.finalizedMatches}/${round.matchCount} partidos definidos · ${round.status}` : 'Pendiente'}</span>
+                      <span>{round ? `${round.finalizedMatches}/${round.matchCount} partidos definidos · ${roundStatusLabel(round.status)}` : 'Pendiente'}</span>
                     </div>
-                    {round && selected.status === 'open' && <button className="button button--ghost" disabled={loading} onClick={() => void unlinkRound(round.id)}>Desvincular</button>}
+                    {round && selected.status === 'open' && <button className="button button--ghost" disabled={loading} onClick={() => void unlinkRound(round)}>Desvincular</button>}
                   </div>
                 );
               })}
@@ -203,7 +220,7 @@ export default function AdminLeague() {
           </section>
 
           <section className="card panel panel--wide">
-            <div className="panel-heading"><div><h2>Tabla de Liga</h2><p>Solo suma partidos con resultado definitivo.</p></div></div>
+            <div className="panel-heading"><div><h2>Tabla de Liga</h2><p>Solo suma partidos con resultado definitivo. Se actualiza automáticamente cada minuto.</p></div></div>
             <div className="user-list">
               {selected.standings.map((entry) => (
                 <div className="user-row" key={entry.userId}>
