@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import './overall-standings.css';
 
 type Standing = {
   position: number;
@@ -14,108 +13,72 @@ type Standing = {
   extras: number;
 };
 
-type StandingsData = {
+type Data = {
   finishedRounds: number;
   currentUserId: string;
   standings: Standing[];
 };
 
-type ApiError = { error?: string };
-
-async function api<T>(url: string): Promise<T> {
-  const response = await fetch(url);
-  const data = (await response.json().catch(() => ({}))) as T & ApiError;
-  if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
-  return data;
-}
-
 export default function OverallStandings() {
-  const [data, setData] = useState<StandingsData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState('');
 
   async function load() {
-    setLoading(true);
     setError('');
     try {
-      setData(await api<StandingsData>('/api/standings/overall'));
+      const response = await fetch('/api/standings/overall');
+      const next = await response.json() as Data & { error?: string };
+      if (!response.ok) throw new Error(next.error || `Error ${response.status}`);
+      setData(next);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo cargar la tabla general');
-    } finally {
-      setLoading(false);
     }
   }
 
   useEffect(() => { void load(); }, []);
 
-  if (loading) return <section className="card standings-empty"><p>Cargando tabla general…</p></section>;
-  if (error) return <section className="card standings-empty"><div className="alert alert--error">{error}</div></section>;
-  if (!data) return null;
+  if (error) return <section className="card panel"><div className="alert alert--error">{error}</div></section>;
+  if (!data) return <section className="card panel"><p>Cargando tabla general...</p></section>;
 
   const mine = data.standings.find((entry) => entry.userId === data.currentUserId) ?? null;
 
   if (data.finishedRounds === 0) {
-    return (
-      <section className="card standings-empty">
-        <span className="eyebrow">TABLA GENERAL</span>
-        <h1>Todavía no hay fechas cerradas</h1>
-        <p>La clasificación acumulada empieza a contar cuando finaliza la primera fecha.</p>
-      </section>
-    );
+    return <section className="card panel"><h1>Tabla general</h1><p>Todavia no hay fechas cerradas.</p></section>;
   }
 
   return (
-    <div className="overall-standings">
-      <section className="card overall-header">
-        <div>
-          <span className="eyebrow">TEMPORADA</span>
-          <h1>Tabla general</h1>
-          <p>Acumulado de todas las fechas finalizadas del Prode.</p>
+    <div className="form-stack">
+      <section className="card panel">
+        <div className="panel-heading">
+          <div><span className="eyebrow">TEMPORADA</span><h1>Tabla general</h1><p>Acumulado de todas las fechas finalizadas.</p></div>
+          <button className="button button--ghost" onClick={() => void load()}>Actualizar</button>
         </div>
-        <button className="button button--ghost" onClick={() => void load()}>Actualizar</button>
       </section>
 
-      <div className="overall-summary">
-        <div className="card overall-stat"><span>Fechas cerradas</span><strong>{data.finishedRounds}</strong></div>
-        {mine && <div className="card overall-stat"><span>Tu posición</span><strong>#{mine.position}</strong></div>}
-        {mine && <div className="card overall-stat"><span>Tus puntos</span><strong>{mine.points}</strong></div>}
-        {mine && <div className="card overall-stat"><span>Promedio</span><strong>{mine.averagePoints}</strong></div>}
+      <div className="grid-two">
+        <div className="card stat-card"><span>Fechas cerradas</span><strong>{data.finishedRounds}</strong></div>
+        {mine && <div className="card stat-card"><span>Tu posicion</span><strong>#{mine.position}</strong></div>}
+        {mine && <div className="card stat-card"><span>Tus puntos</span><strong>{mine.points}</strong></div>}
+        {mine && <div className="card stat-card"><span>Promedio</span><strong>{mine.averagePoints}</strong></div>}
       </div>
 
-      <section className="card overall-table-card">
-        <div className="overall-table-wrap">
-          <table className="overall-table">
-            <thead>
-              <tr>
-                <th>Pos.</th>
-                <th>Participante</th>
-                <th>Pts.</th>
-                <th>Plenos</th>
-                <th>Parciales</th>
-                <th>Errores</th>
-                <th>Extras</th>
-                <th>Fechas</th>
-                <th>Prom.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.standings.map((entry) => (
-                <tr key={entry.userId} className={entry.userId === data.currentUserId ? 'overall-table__me' : ''}>
-                  <td><strong>#{entry.position}</strong></td>
-                  <td>{entry.fullName}{entry.userId === data.currentUserId ? <small> vos</small> : null}</td>
-                  <td><strong>{entry.points}</strong></td>
-                  <td>{entry.fulls}</td>
-                  <td>{entry.partials}</td>
-                  <td>{entry.errors}</td>
-                  <td>{entry.extras}</td>
-                  <td>{entry.roundsPlayed}</td>
-                  <td>{entry.averagePoints}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <section className="card panel panel--wide">
+        <div className="user-list">
+          {data.standings.map((entry) => (
+            <div className="user-row" key={entry.userId}>
+              <div className="avatar">{entry.position}</div>
+              <div className="user-data">
+                <strong>{entry.fullName}{entry.userId === data.currentUserId ? ' - Vos' : ''}</strong>
+                <span>{entry.roundsPlayed} fechas | {entry.fulls} plenos | {entry.partials} parciales | {entry.errors} errores | {entry.extras} extras</span>
+              </div>
+              <div className="topbar-actions">
+                <span className="user-chip">Prom. {entry.averagePoints}</span>
+                <span className="user-chip">{entry.points} pts</span>
+              </div>
+            </div>
+          ))}
         </div>
-        <p className="overall-tiebreak">Desempate: puntos → plenos → parciales → menos errores → extras.</p>
+        <p>Desempate: puntos, plenos, parciales, menos errores y extras.</p>
       </section>
     </div>
   );
