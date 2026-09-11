@@ -133,17 +133,63 @@ async function publishRound(request: Request, env: Env, roundId: number) {
   return json({ ok: true, status: 'open' });
 }
 
+async function listParticipantRounds(request: Request, env: Env) {
+  const user = await sessionUser(request, env);
+  if (!user || user.role !== 'participant') return error('Acceso de participante requerido', 403);
+
+  const result = await env.DB.prepare(
+    `SELECT r.id, r.name, r.status, r.published_at, r.finished_at,
+            COUNT(m.id) AS match_count
+     FROM rounds r
+     LEFT JOIN matches m ON m.round_id = r.id
+     WHERE r.status IN ('open', 'finished')
+     GROUP BY r.id, r.name, r.status, r.published_at, r.finished_at
+     ORDER BY CASE r.status WHEN 'open' THEN 0 ELSE 1 END, r.id DESC`,
+  ).all<{
+    id: number;
+    name: string;
+    status: 'open' | 'finished';
+    published_at: string | null;
+    finished_at: string | null;
+    match_count: number;
+  }>();
+
+  return json({
+    rounds: (result.results ?? []).map((round) => ({
+      id: round.id,
+      name: round.name,
+      status: round.status,
+      publishedAt: round.published_at,
+      finishedAt: round.finished_at,
+      matchCount: Number(round.match_count ?? 0),
+    })),
+  });
+}
+
 async function getParticipantRound(request: Request, env: Env) {
   const user = await sessionUser(request, env);
   if (!user || user.role !== 'participant') return error('Acceso de participante requerido', 403);
 
-  const round = await env.DB.prepare(
-    `SELECT id, name, status, published_at
-     FROM rounds
-     WHERE status IN ('open', 'finished')
-     ORDER BY CASE status WHEN 'open' THEN 0 ELSE 1 END, id DESC
-     LIMIT 1`,
-  ).first<{ id: number; name: string; status: string; published_at: string | null }>();
+  const requestedRoundIdRaw = new URL(request.url).searchParams.get('roundId');
+  const requestedRoundId = requestedRoundIdRaw === null ? null : Number(requestedRoundIdRaw);
+  if (requestedRoundIdRaw !== null && (!Number.isInteger(requestedRoundId) || requestedRoundId! <= 0)) {
+    return error('Fecha inválida');
+  }
+
+  const round = requestedRoundId === null
+    ? await env.DB.prepare(
+      `SELECT id, name, status, published_at
+       FROM rounds
+       WHERE status IN ('open', 'finished')
+       ORDER BY CASE status WHEN 'open' THEN 0 ELSE 1 END, id DESC
+       LIMIT 1`,
+    ).first<{ id: number; name: string; status: string; published_at: string | null }>()
+    : await env.DB.prepare(
+      `SELECT id, name, status, published_at
+       FROM rounds
+       WHERE id = ? AND status IN ('open', 'finished')
+       LIMIT 1`,
+    ).bind(requestedRoundId).first<{ id: number; name: string; status: string; published_at: string | null }>();
 
   if (!round) return json({ round: null });
 
@@ -276,8 +322,10 @@ async function savePrediction(request: Request, env: Env, matchId: number) {
   let extraTeamId: string | null = null;
 
   try {
-    homeScore = nullableScore(body.homeScore ?? null);
-    awayScore = nullableScore(body.awayScore ?? null);
+    if (match.match_type === 'NORMAL') {
+      homeScore = nullableScore(body.homeScore ?? null);
+      awayScore = nullableScore(body.awayScore ?? null);
+    }
 
     if (body.extraTeamId) {
       if (body.extraTeamId !== match.home_team_provider_id && body.extraTeamId !== match.away_team_provider_id) {
@@ -338,7 +386,7 @@ async function submitRound(request: Request, env: Env, roundId: number) {
 
     const hasScore = match.predicted_home_score !== null && match.predicted_away_score !== null;
     const complete = match.match_type === 'PENALTIES_ONLY'
-      ? hasScore && Boolean(match.predicted_extra_team_provider_id)
+      ? Boolean(match.predicted_extra_team_provider_id)
       : hasScore;
 
     if (!complete) missing.push(match.id);
@@ -381,6 +429,10 @@ export async function handlePredictions(request: Request, env: Env): Promise<Res
   }
 
   if (!pathname.startsWith('/api/participant/')) return null;
+
+  if (pathname === '/api/participant/rounds' && request.method === 'GET') {
+    return listParticipantRounds(request, env);
+  }
 
   if (pathname === '/api/participant/round' && request.method === 'GET') {
     return getParticipantRound(request, env);
