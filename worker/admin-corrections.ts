@@ -108,6 +108,13 @@ function reasonValue(value: unknown) {
   return reason.slice(0, 500);
 }
 
+function validateTeam(teamId: string | null | undefined, match: MatchRow) {
+  if (!teamId || (teamId !== match.home_team_provider_id && teamId !== match.away_team_provider_id)) {
+    throw new Error('Elegí correctamente un equipo');
+  }
+  return teamId;
+}
+
 async function getRoundMatches(roundId: number, env: Env) {
   const result = await env.DB.prepare(
     `SELECT id, round_id, provider, provider_fixture_id, competition_name,
@@ -285,28 +292,38 @@ async function overrideResult(request: Request, env: Env, matchId: number) {
   let status = 'CANC';
 
   if (!isVoid) {
-    try {
-      homeScore = scoreValue(body.homeScore);
-      awayScore = scoreValue(body.awayScore);
-    } catch (caught) {
-      return error(caught instanceof Error ? caught.message : 'Resultado inválido');
-    }
-
-    wentToPenalties = Boolean(body.wentToPenalties);
-    if (wentToPenalties) {
-      if (
-        !body.winningTeamId ||
-        (body.winningTeamId !== match.home_team_provider_id && body.winningTeamId !== match.away_team_provider_id)
-      ) return error('Elegí correctamente quién ganó por penales');
-      winningTeamId = body.winningTeamId;
+    if (match.match_type === 'PENALTIES_ONLY') {
+      try {
+        winningTeamId = validateTeam(body.winningTeamId, match);
+      } catch (caught) {
+        return error(caught instanceof Error ? caught.message : 'Equipo inválido');
+      }
+      wentToPenalties = true;
       status = 'PEN';
     } else {
-      winningTeamId = homeScore === awayScore
-        ? null
-        : homeScore > awayScore
-          ? match.home_team_provider_id
-          : match.away_team_provider_id;
-      status = 'FT';
+      try {
+        homeScore = scoreValue(body.homeScore);
+        awayScore = scoreValue(body.awayScore);
+      } catch (caught) {
+        return error(caught instanceof Error ? caught.message : 'Resultado inválido');
+      }
+
+      wentToPenalties = Boolean(body.wentToPenalties);
+      if (wentToPenalties) {
+        try {
+          winningTeamId = validateTeam(body.winningTeamId, match);
+        } catch (caught) {
+          return error(caught instanceof Error ? caught.message : 'Equipo inválido');
+        }
+        status = 'PEN';
+      } else {
+        winningTeamId = homeScore === awayScore
+          ? null
+          : homeScore > awayScore
+            ? match.home_team_provider_id
+            : match.away_team_provider_id;
+        status = 'FT';
+      }
     }
   }
 
@@ -327,7 +344,7 @@ async function overrideResult(request: Request, env: Env, matchId: number) {
     awayScore,
     winningTeamId,
     winningTeamId,
-    wentToPenalties ? 1 : 0,
+    match.match_type === 'NORMAL' && wentToPenalties ? 1 : 0,
     wentToPenalties ? 1 : 0,
     isVoid ? 1 : 0,
     matchId,
@@ -446,12 +463,14 @@ async function overridePrediction(
   } | null;
   if (!body) return error('Datos inválidos');
 
-  let homeScore: number;
-  let awayScore: number;
+  let homeScore: number | null = null;
+  let awayScore: number | null = null;
   let reason: string;
   try {
-    homeScore = scoreValue(body.homeScore);
-    awayScore = scoreValue(body.awayScore);
+    if (match.match_type === 'NORMAL') {
+      homeScore = scoreValue(body.homeScore);
+      awayScore = scoreValue(body.awayScore);
+    }
     reason = reasonValue(body.reason);
   } catch (caught) {
     return error(caught instanceof Error ? caught.message : 'Pronóstico inválido');
@@ -465,7 +484,7 @@ async function overridePrediction(
     extraTeamId = body.extraTeamId;
   }
   if (match.match_type === 'PENALTIES_ONLY' && !extraTeamId) {
-    return error('En este partido también tenés que indicar el ganador por penales');
+    return error('Indicá qué equipo fue pronosticado como ganador por penales');
   }
 
   const existing = await env.DB.prepare(
