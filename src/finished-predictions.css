@@ -1,0 +1,96 @@
+.reveal-card {
+  padding: 22px;
+}
+
+.reveal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.reveal-heading h2 {
+  margin: 4px 0 6px;
+}
+
+.reveal-heading p {
+  margin: 0;
+  color: #94a3b8;
+}
+
+.reveal-body {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.reveal-participant {
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 16px;
+  background: rgba(255,255,255,.03);
+  overflow: hidden;
+}
+
+.reveal-participant-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.reveal-participant-heading span {
+  color: #bfdbfe;
+  font-weight: 800;
+}
+
+.reveal-prediction-list {
+  display: grid;
+}
+
+.reveal-prediction {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.reveal-prediction:last-child {
+  border-bottom: 0;
+}
+
+.reveal-prediction > span {
+  color: #cbd5e1;
+}
+
+.reveal-prediction > strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.reveal-prediction > small {
+  color: #94a3b8;
+  min-width: 44px;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .reveal-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reveal-heading .button {
+    width: 100%;
+  }
+
+  .reveal-prediction {
+    grid-template-columns: 1fr auto;
+  }
+
+  .reveal-prediction > span {
+    grid-column: 1 / -1;
+  }
+}
