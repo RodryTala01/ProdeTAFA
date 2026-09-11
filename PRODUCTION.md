@@ -1,6 +1,6 @@
 # ProdeTAFA — Puesta en producción
 
-Este documento cubre el cierre de la Fase 1 en Cloudflare Workers.
+Este documento cubre la puesta en producción del MVP y de la estructura de Liga agregada en Fase 2.
 
 ## Antes del primer deploy
 
@@ -14,13 +14,23 @@ FOOTBALL_API_KEY=tu_clave_real
 
 `.dev.vars` está ignorado por Git.
 
+## Actualizar la base remota
+
+Antes de desplegar el código actual, aplicar las migraciones pendientes sobre D1 remoto:
+
+```powershell
+git pull
+npm install
+npm run db:migrate:remote
+```
+
+Wrangler debe aplicar `0002_league_seasons.sql` además de cualquier migración futura todavía pendiente. No desplegar la interfaz de Liga contra una base que todavía no tenga estas tablas.
+
 ## Primer deploy
 
 Desde PowerShell, dentro de `ProdeTAFA`:
 
 ```powershell
-git pull
-npm install
 npm test
 npm run build
 npm run deploy:first
@@ -84,6 +94,24 @@ Usar una fecha real o de prueba con 12 partidos y verificar, en este orden:
 15. Confirmar ranking final, historial y revelado de pronósticos enviados.
 16. Probar una corrección manual de resultado y verificar recálculo.
 17. Probar una edición excepcional de pronóstico y verificar auditoría.
+18. Confirmar que una fecha publicada no permite agregar ni quitar partidos, ni siquiera llamando a la API directamente.
+
+## Prueba inicial de Liga — Fase 2
+
+Después de validar una fecha individual, comprobar la Liga:
+
+1. Crear una temporada desde Admin → Liga.
+2. Vincular cinco fechas distintas en orden 1 a 5.
+3. Verificar que una fecha no pueda vincularse a dos temporadas.
+4. Verificar que la tabla arranque con todos los participantes activos en 0.
+5. Finalizar un partido de una fecha vinculada y confirmar que la tabla de Liga incorpora esos puntos definitivos.
+6. Confirmar que puntos provisionales de partidos en juego no entren en la tabla.
+7. Crear o reactivar un participante con la Liga abierta y comprobar que aparezca con 0 puntos previos.
+8. Dejar a un participante sin enviar una fecha y comprobar que esa fecha le aporte 0.
+9. Confirmar los desempates: puntos, plenos, parciales, menos errores y extras.
+10. Confirmar que la Liga no pueda finalizar hasta tener exactamente cinco fechas cerradas.
+11. Finalizar las cinco fechas y cerrar la Liga.
+12. Confirmar que una Liga cerrada siga visible como histórico y ya no permita cambiar sus fechas.
 
 ## Cron y cuota de API-Football
 
@@ -101,16 +129,18 @@ Una vez que el secreto ya existe en el Worker:
 ```powershell
 git pull
 npm install
+npm run db:migrate:remote
 npm run deploy
 ```
 
-`npm run deploy` ejecuta tests y build antes de publicar.
+`npm run deploy` ejecuta tests y build antes de publicar. El comando de migración debe ejecutarse antes cuando existan migraciones nuevas.
 
 ## Criterio para cerrar Fase 1
 
 Fase 1 se considera cerrada cuando:
 
 - tests automáticos están verdes;
+- migraciones remotas están al día;
 - deploy a `workers.dev` funciona;
 - smoke test funciona;
 - flujo end-to-end funciona con Admin + Participante;
