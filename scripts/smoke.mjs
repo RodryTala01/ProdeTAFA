@@ -22,8 +22,16 @@ try {
 
   await check('/api/health/deep', async (response) => {
     const data = await response.json();
-    if (data?.ok !== true || data?.leagueSchemaReady !== true || !Array.isArray(data?.missingTables) || data.missingTables.length !== 0) {
-      throw new Error('/api/health/deep: la D1 desplegada no tiene listo el esquema de Liga');
+    const missingTables = Array.isArray(data?.missingTables) ? data.missingTables : null;
+    const missingColumns = Array.isArray(data?.missingColumns) ? data.missingColumns : null;
+    if (
+      data?.ok !== true ||
+      data?.leagueSchemaReady !== true ||
+      data?.singleOpenRoundReady !== true ||
+      missingTables === null || missingTables.length !== 0 ||
+      missingColumns === null || missingColumns.length !== 0
+    ) {
+      throw new Error('/api/health/deep: esquema de Liga o consistencia de fechas abiertas inválidos');
     }
   });
 
