@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import AdminRounds from './AdminRounds';
 import ParticipantRound from './ParticipantRound';
+import OverallStandings from './OverallStandings';
 
 type Role = 'admin' | 'participant';
 
@@ -354,6 +355,8 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
 }
 
 function ParticipantDashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
+  const [section, setSection] = useState<'round' | 'standings'>('round');
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -367,7 +370,11 @@ function ParticipantDashboard({ user, onLogout }: { user: User; onLogout: () => 
         </div>
       </header>
       <section className="dashboard dashboard--narrow">
-        <ParticipantRound />
+        <nav className="admin-tabs" aria-label="Prode">
+          <button className={`admin-tab ${section === 'round' ? 'admin-tab--active' : ''}`} onClick={() => setSection('round')}>Fecha</button>
+          <button className={`admin-tab ${section === 'standings' ? 'admin-tab--active' : ''}`} onClick={() => setSection('standings')}>Tabla general</button>
+        </nav>
+        {section === 'round' ? <ParticipantRound /> : <OverallStandings />}
       </section>
     </main>
   );
