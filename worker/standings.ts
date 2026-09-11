@@ -19,6 +19,17 @@ type StandingRow = {
   extras: number;
 };
 
+type RecentRoundRow = {
+  id: number;
+  name: string;
+  finished_at: string | null;
+  points: number;
+  fulls: number;
+  partials: number;
+  errors: number;
+  extras: number;
+};
+
 const SESSION_COOKIE = 'prode_session';
 const encoder = new TextEncoder();
 
@@ -95,6 +106,26 @@ async function overallStandings(request: Request, env: Env) {
      ORDER BY points DESC, fulls DESC, partials DESC, errors ASC, extras DESC, u.full_name COLLATE NOCASE`,
   ).all<StandingRow>();
 
+  const recentResult = user.role === 'participant'
+    ? await env.DB.prepare(
+      `SELECT r.id, r.name, r.finished_at,
+              COALESCE(SUM(ps.total_points), 0) AS points,
+              COALESCE(SUM(CASE WHEN ps.base_points = 3 THEN 1 ELSE 0 END), 0) AS fulls,
+              COALESCE(SUM(CASE WHEN ps.base_points = 1 THEN 1 ELSE 0 END), 0) AS partials,
+              COALESCE(SUM(CASE WHEN ps.base_points = 0 AND ps.result_type <> 'VOID' THEN 1 ELSE 0 END), 0) AS errors,
+              COALESCE(SUM(ps.extra_points), 0) AS extras
+       FROM round_submissions rs
+       JOIN rounds r ON r.id = rs.round_id AND r.status = 'finished'
+       LEFT JOIN matches m ON m.round_id = r.id
+       LEFT JOIN predictions p ON p.user_id = rs.user_id AND p.match_id = m.id
+       LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id
+       WHERE rs.user_id = ?
+       GROUP BY r.id, r.name, r.finished_at
+       ORDER BY r.id DESC
+       LIMIT 10`,
+    ).bind(user.id).all<RecentRoundRow>()
+    : { results: [] as RecentRoundRow[] };
+
   const standings = (result.results ?? []).map((row, index) => {
     const points = Number(row.points ?? 0);
     const roundsPlayed = Number(row.rounds_played ?? 0);
@@ -116,6 +147,16 @@ async function overallStandings(request: Request, env: Env) {
     finishedRounds: Number(rounds?.total ?? 0),
     currentUserId: user.id,
     standings,
+    recentRounds: (recentResult.results ?? []).map((round) => ({
+      id: round.id,
+      name: round.name,
+      finishedAt: round.finished_at,
+      points: Number(round.points ?? 0),
+      fulls: Number(round.fulls ?? 0),
+      partials: Number(round.partials ?? 0),
+      errors: Number(round.errors ?? 0),
+      extras: Number(round.extras ?? 0),
+    })),
   });
 }
 
