@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import FinishedPredictions from './FinishedPredictions';
 import RoundRanking from './RoundRanking';
 import './participant-round.css';
 
@@ -353,6 +354,7 @@ export default function ParticipantRound() {
       </section>
 
       {isFinished && <RoundRanking roundId={round.id} mode="participant" />}
+      {isFinished && <FinishedPredictions roundId={round.id} />}
 
       <div className="prediction-list">
         {round.matches.map((match) => {
