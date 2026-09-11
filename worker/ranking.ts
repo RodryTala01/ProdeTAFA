@@ -98,7 +98,6 @@ async function buildRanking(roundId: number, env: Env) {
      LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id
      WHERE rs.round_id = ?
        AND u.role = 'participant'
-       AND u.is_active = 1
      GROUP BY u.id, u.full_name
      ORDER BY points DESC, fulls DESC, partials DESC, errors ASC, extras DESC, u.full_name COLLATE NOCASE`,
   ).bind(roundId, roundId).all<RankingRow>();
@@ -190,6 +189,47 @@ async function finishRound(request: Request, env: Env, roundId: number) {
   return json({ ok: true, status: 'finished' });
 }
 
+async function setParticipantStatus(request: Request, env: Env, userId: string) {
+  const admin = await sessionUser(request, env);
+  if (!admin || admin.role !== 'admin') return error('Acceso de administrador requerido', 403);
+
+  const target = await env.DB.prepare(
+    `SELECT id, full_name, is_active, role
+     FROM users
+     WHERE id = ? LIMIT 1`,
+  ).bind(userId).first<{ id: string; full_name: string; is_active: number; role: string }>();
+  if (!target || target.role !== 'participant') return error('Participante no encontrado', 404);
+
+  const body = await request.json().catch(() => null) as { isActive?: boolean } | null;
+  if (!body || typeof body.isActive !== 'boolean') return error('Estado inválido');
+
+  const nextActive = body.isActive ? 1 : 0;
+  if (target.is_active === nextActive) {
+    return json({ ok: true, isActive: Boolean(nextActive) });
+  }
+
+  await env.DB.prepare(
+    `UPDATE users SET is_active = ?, updated_at = datetime('now') WHERE id = ?`,
+  ).bind(nextActive, userId).run();
+
+  if (!body.isActive) {
+    await env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(userId).run();
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO audit_log (actor_user_id, action, entity_type, entity_id, before_json, after_json)
+     VALUES (?, ?, 'user', ?, ?, ?)`,
+  ).bind(
+    admin.id,
+    body.isActive ? 'participant.reactivated' : 'participant.deactivated',
+    userId,
+    JSON.stringify({ fullName: target.full_name, isActive: Boolean(target.is_active) }),
+    JSON.stringify({ fullName: target.full_name, isActive: body.isActive }),
+  ).run();
+
+  return json({ ok: true, isActive: body.isActive });
+}
+
 export async function handleRanking(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
 
@@ -206,6 +246,11 @@ export async function handleRanking(request: Request, env: Env): Promise<Respons
   const finishMatch = pathname.match(/^\/api\/admin\/finish-round\/(\d+)$/);
   if (finishMatch && request.method === 'PUT') {
     return finishRound(request, env, Number(finishMatch[1]));
+  }
+
+  const statusMatch = pathname.match(/^\/api\/admin\/users\/([^/]+)\/status$/);
+  if (statusMatch && request.method === 'PUT') {
+    return setParticipantStatus(request, env, decodeURIComponent(statusMatch[1]));
   }
 
   return null;
