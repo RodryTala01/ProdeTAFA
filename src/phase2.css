@@ -14,15 +14,26 @@
   border-color: rgba(96, 165, 250, 0.8);
 }
 
+@supports (padding: env(safe-area-inset-top)) {
+  .topbar {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+
+  .shell--centered {
+    padding-top: max(24px, env(safe-area-inset-top));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 700px) {
   .dashboard--narrow {
-    padding-bottom: 92px;
+    padding-bottom: calc(104px + env(safe-area-inset-bottom));
   }
 
   .dashboard--narrow > .admin-tabs {
     position: fixed;
-    left: 12px;
-    right: 12px;
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
     bottom: max(12px, env(safe-area-inset-bottom));
     z-index: 40;
     width: auto;
@@ -30,6 +41,7 @@
     grid-template-columns: repeat(3, 1fr);
     margin: 0;
     padding: 6px;
+    border-radius: 16px;
     background: rgba(10, 15, 31, 0.94);
     backdrop-filter: blur(18px);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
@@ -37,9 +49,11 @@
 
   .dashboard--narrow > .admin-tabs .admin-tab {
     min-width: 0;
+    min-height: 46px;
     padding: 11px 6px;
     font-size: 0.78rem;
     text-align: center;
+    touch-action: manipulation;
   }
 
   .dashboard--narrow > .admin-tabs .admin-tab--active {
