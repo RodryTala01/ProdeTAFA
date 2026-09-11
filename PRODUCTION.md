@@ -14,29 +14,24 @@ FOOTBALL_API_KEY=tu_clave_real
 
 `.dev.vars` está ignorado por Git.
 
-## Actualizar la base remota
-
-Antes de desplegar el código actual, aplicar las migraciones pendientes sobre D1 remoto:
-
-```powershell
-git pull
-npm install
-npm run db:migrate:remote
-```
-
-Wrangler debe aplicar `0002_league_seasons.sql` además de cualquier migración futura todavía pendiente. No desplegar la interfaz de Liga contra una base que todavía no tenga estas tablas.
-
 ## Primer deploy
 
 Desde PowerShell, dentro de `ProdeTAFA`:
 
 ```powershell
-npm test
-npm run build
+git pull
+npm install
 npm run deploy:first
 ```
 
-`deploy:first` ejecuta tests, build y luego `wrangler deploy --secrets-file .dev.vars`. Esto sube el código y el secreto de API-Football en la misma operación.
+`deploy:first` ejecuta automáticamente, en este orden:
+
+1. tests;
+2. build;
+3. migraciones pendientes sobre D1 remota, incluida `0002_league_seasons.sql`;
+4. deploy del Worker usando `.dev.vars` para cargar `FOOTBALL_API_KEY` como secreto.
+
+No hace falta ejecutar las migraciones por separado. Si cualquiera de esos pasos falla, el deploy no continúa.
 
 Al finalizar, Wrangler debe mostrar la URL `https://prode-tafa.<subdominio>.workers.dev`.
 
@@ -51,10 +46,11 @@ npm run smoke:prod
 
 El smoke test comprueba:
 
-- `/api/health`
-- frontend principal
-- manifest PWA
-- service worker
+- `/api/health`;
+- `/api/health/deep`, incluyendo que la D1 desplegada tenga `league_seasons`, `league_rounds` y `league_participants`;
+- frontend principal;
+- manifest PWA en modo `standalone` con iconos 192x192 y 512x512 declarados;
+- service worker real en `/sw.js`.
 
 Debe terminar con `Smoke test OK`.
 
@@ -69,8 +65,8 @@ En `secret list` debe figurar `FOOTBALL_API_KEY` sin mostrar su valor.
 
 En Cloudflare Dashboard revisar además que el Worker `prode-tafa` tenga:
 
-- D1 binding `DB` apuntando a `prode-tafa`.
-- Cron Trigger `*/10 * * * *`.
+- D1 binding `DB` apuntando a `prode-tafa`;
+- Cron Trigger `*/10 * * * *`;
 - `FOOTBALL_API_KEY` como Secret.
 
 ## Prueba end-to-end de Fase 1
@@ -79,7 +75,7 @@ Usar una fecha real o de prueba con 12 partidos y verificar, en este orden:
 
 1. Admin puede abrir la fecha y ver los 12 partidos.
 2. Participante puede iniciar sesión.
-3. Cargar resultados normales y comprobar autosave.
+3. Cargar pronósticos normales y comprobar autosave.
 4. En un partido marcado `PENALTIES_ONLY`, cargar marcador de 90 minutos y ganador de la tanda.
 5. Enviar la fecha completa.
 6. Modificar un partido todavía abierto y volver a enviar.
@@ -129,11 +125,10 @@ Una vez que el secreto ya existe en el Worker:
 ```powershell
 git pull
 npm install
-npm run db:migrate:remote
 npm run deploy
 ```
 
-`npm run deploy` ejecuta tests y build antes de publicar. El comando de migración debe ejecutarse antes cuando existan migraciones nuevas.
+`npm run deploy` también ejecuta tests, build y migraciones remotas antes de publicar.
 
 ## Criterio para cerrar Fase 1
 
