@@ -14,6 +14,8 @@ type PredictionRow = {
   home_score_regulation: number | null;
   away_score_regulation: number | null;
   winning_team_provider_id: string | null;
+  qualified_team_provider_id: string | null;
+  went_to_extra_time: number;
   went_to_penalties: number;
   is_void: number;
 };
@@ -25,13 +27,40 @@ function sign(home: number, away: number) {
   return home === away ? 0 : home > away ? 1 : -1;
 }
 
+async function saveScore(
+  env: Env,
+  predictionId: number,
+  resultType: 'FULL' | 'PARTIAL' | 'ERROR' | 'PENALTIES' | 'VOID',
+  basePoints: number,
+  extraPoints: number,
+  provisional: boolean,
+) {
+  await env.DB.prepare(
+    `INSERT INTO prediction_scores
+      (prediction_id, result_type, base_points, extra_points, total_points, is_provisional, calculated_at)
+     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+     ON CONFLICT(prediction_id) DO UPDATE SET
+      result_type=excluded.result_type, base_points=excluded.base_points,
+      extra_points=excluded.extra_points, total_points=excluded.total_points,
+      is_provisional=excluded.is_provisional, calculated_at=datetime('now')`,
+  ).bind(
+    predictionId,
+    resultType,
+    basePoints,
+    extraPoints,
+    basePoints + extraPoints,
+    provisional ? 1 : 0,
+  ).run();
+}
+
 export async function recalculateRoundScores(roundId: number, env: Env) {
   const rows = await env.DB.prepare(
     `SELECT p.id AS prediction_id, p.predicted_home_score, p.predicted_away_score,
             p.predicted_extra_team_provider_id, m.match_type, m.status,
             m.home_score_current, m.away_score_current,
             m.home_score_regulation, m.away_score_regulation,
-            m.winning_team_provider_id, m.went_to_penalties, m.is_void
+            m.winning_team_provider_id, m.qualified_team_provider_id,
+            m.went_to_extra_time, m.went_to_penalties, m.is_void
      FROM predictions p
      JOIN matches m ON m.id = p.match_id
      WHERE m.round_id = ?`,
@@ -40,14 +69,7 @@ export async function recalculateRoundScores(roundId: number, env: Env) {
   let calculated = 0;
   for (const row of rows.results ?? []) {
     if (row.is_void) {
-      await env.DB.prepare(
-        `INSERT INTO prediction_scores
-          (prediction_id, result_type, base_points, extra_points, total_points, is_provisional, calculated_at)
-         VALUES (?, 'VOID', 0, 0, 0, 0, datetime('now'))
-         ON CONFLICT(prediction_id) DO UPDATE SET
-          result_type='VOID', base_points=0, extra_points=0, total_points=0,
-          is_provisional=0, calculated_at=datetime('now')`,
-      ).bind(row.prediction_id).run();
+      await saveScore(env, row.prediction_id, 'VOID', 0, 0, false);
       calculated += 1;
       continue;
     }
@@ -55,6 +77,15 @@ export async function recalculateRoundScores(roundId: number, env: Env) {
     const final = FINAL_STATUSES.has(row.status);
     const live = LIVE_STATUSES.has(row.status);
     if (!final && !live) continue;
+
+    if (row.match_type === 'PENALTIES_ONLY') {
+      if (!final || !row.predicted_extra_team_provider_id) continue;
+      const resolvedWinner = row.qualified_team_provider_id ?? row.winning_team_provider_id;
+      const correct = row.went_to_penalties === 1 && row.predicted_extra_team_provider_id === resolvedWinner;
+      await saveScore(env, row.prediction_id, correct ? 'PENALTIES' : 'ERROR', 0, correct ? 1 : 0, false);
+      calculated += 1;
+      continue;
+    }
 
     const actualHome = row.home_score_regulation ?? row.home_score_current;
     const actualAway = row.away_score_regulation ?? row.away_score_current;
@@ -64,7 +95,7 @@ export async function recalculateRoundScores(roundId: number, env: Env) {
     ) continue;
 
     let basePoints = 0;
-    let resultType: 'FULL' | 'PARTIAL' | 'ERROR' | 'PENALTIES' = 'ERROR';
+    let resultType: 'FULL' | 'PARTIAL' | 'ERROR' = 'ERROR';
 
     if (row.predicted_home_score === actualHome && row.predicted_away_score === actualAway) {
       basePoints = 3;
@@ -75,31 +106,16 @@ export async function recalculateRoundScores(roundId: number, env: Env) {
     }
 
     let extraPoints = 0;
+    const resolvedWinner = row.qualified_team_provider_id ?? row.winning_team_provider_id;
     if (
-      final && row.match_type === 'PENALTIES_ONLY' && row.went_to_penalties === 1 &&
+      final && (row.went_to_extra_time === 1 || row.went_to_penalties === 1) &&
       row.predicted_extra_team_provider_id &&
-      row.predicted_extra_team_provider_id === row.winning_team_provider_id
+      row.predicted_extra_team_provider_id === resolvedWinner
     ) {
       extraPoints = 1;
-      if (basePoints === 0) resultType = 'PENALTIES';
     }
 
-    await env.DB.prepare(
-      `INSERT INTO prediction_scores
-        (prediction_id, result_type, base_points, extra_points, total_points, is_provisional, calculated_at)
-       VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
-       ON CONFLICT(prediction_id) DO UPDATE SET
-        result_type=excluded.result_type, base_points=excluded.base_points,
-        extra_points=excluded.extra_points, total_points=excluded.total_points,
-        is_provisional=excluded.is_provisional, calculated_at=datetime('now')`,
-    ).bind(
-      row.prediction_id,
-      resultType,
-      basePoints,
-      extraPoints,
-      basePoints + extraPoints,
-      final ? 0 : 1,
-    ).run();
+    await saveScore(env, row.prediction_id, resultType, basePoints, extraPoints, !final);
     calculated += 1;
   }
 
