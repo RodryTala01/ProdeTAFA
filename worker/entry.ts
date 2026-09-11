@@ -2,11 +2,15 @@ import baseWorker, { type Env } from './index';
 import { handleLeague } from './league';
 import { handleHistory } from './history';
 
-function jsonError(message: string, status: number) {
-  return new Response(JSON.stringify({ error: message }), {
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
     status,
     headers: { 'content-type': 'application/json; charset=utf-8' },
   });
+}
+
+function jsonError(message: string, status: number) {
+  return json({ error: message }, status);
 }
 
 function mutationAllowed(request: Request) {
@@ -30,6 +34,19 @@ async function syncOpenLeagueParticipants(env: Env) {
   ).run();
 }
 
+async function deepHealth(env: Env) {
+  const required = ['league_seasons', 'league_rounds', 'league_participants'];
+  const result = await env.DB.prepare(
+    `SELECT name FROM sqlite_master
+     WHERE type = 'table'
+       AND name IN ('league_seasons', 'league_rounds', 'league_participants')`,
+  ).all<{ name: string }>();
+  const found = new Set((result.results ?? []).map((row) => row.name));
+  const missing = required.filter((name) => !found.has(name));
+  const ok = missing.length === 0;
+  return json({ ok, app: 'prode-tafa', leagueSchemaReady: ok, missingTables: missing }, ok ? 200 : 503);
+}
+
 export async function protectPublishedRoundMatches(request: Request, env: Env) {
   if (request.method !== 'POST' && request.method !== 'DELETE') return null;
   const pathname = new URL(request.url).pathname;
@@ -47,6 +64,10 @@ export async function protectPublishedRoundMatches(request: Request, env: Env) {
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const pathname = new URL(request.url).pathname;
+
+    if (request.method === 'GET' && pathname === '/api/health/deep') {
+      return deepHealth(env);
+    }
 
     const immutableRoundResponse = await protectPublishedRoundMatches(request, env);
     if (immutableRoundResponse) return immutableRoundResponse;
