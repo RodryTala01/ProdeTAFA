@@ -299,31 +299,21 @@ async function overrideResult(request: Request, env: Env, matchId: number) {
       return error(caught instanceof Error ? caught.message : 'Resultado inválido');
     }
 
-    if (match.match_type === 'PENALTIES_ONLY') {
+    wentToPenalties = Boolean(body.wentToPenalties);
+    if (wentToPenalties) {
       try {
         winningTeamId = validateTeam(body.winningTeamId, match);
       } catch (caught) {
         return error(caught instanceof Error ? caught.message : 'Equipo inválido');
       }
-      wentToPenalties = true;
       status = 'PEN';
     } else {
-      wentToPenalties = Boolean(body.wentToPenalties);
-      if (wentToPenalties) {
-        try {
-          winningTeamId = validateTeam(body.winningTeamId, match);
-        } catch (caught) {
-          return error(caught instanceof Error ? caught.message : 'Equipo inválido');
-        }
-        status = 'PEN';
-      } else {
-        winningTeamId = homeScore === awayScore
-          ? null
-          : homeScore > awayScore
-            ? match.home_team_provider_id
-            : match.away_team_provider_id;
-        status = 'FT';
-      }
+      winningTeamId = homeScore === awayScore
+        ? null
+        : homeScore > awayScore
+          ? match.home_team_provider_id
+          : match.away_team_provider_id;
+      status = 'FT';
     }
   }
 
