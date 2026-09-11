@@ -75,6 +75,12 @@ function formatDate(value: string) {
   }).format(new Date(normalized));
 }
 
+function teamName(match: CorrectionMatch, teamId: string | null) {
+  if (teamId === match.home.id) return match.home.name;
+  if (teamId === match.away.id) return match.away.name;
+  return null;
+}
+
 function ResultEditor({
   match,
   onSaved,
@@ -90,6 +96,7 @@ function ResultEditor({
   const [reason, setReason] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const penaltyOnly = match.matchType === 'PENALTIES_ONLY';
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -98,9 +105,9 @@ function ResultEditor({
       await api(`/api/admin/matches/${match.id}/manual-result`, {
         method: 'PUT',
         body: JSON.stringify({
-          homeScore: homeScore === '' ? null : Number(homeScore),
-          awayScore: awayScore === '' ? null : Number(awayScore),
-          wentToPenalties,
+          homeScore: penaltyOnly || homeScore === '' ? null : Number(homeScore),
+          awayScore: penaltyOnly || awayScore === '' ? null : Number(awayScore),
+          wentToPenalties: penaltyOnly ? true : wentToPenalties,
           winningTeamId: winningTeamId || null,
           isVoid,
           reason,
@@ -126,22 +133,24 @@ function ResultEditor({
 
   return (
     <form className="correction-editor" onSubmit={save}>
-      <div className="correction-score-row">
-        <label><span>{match.home.name}</span><input type="number" min="0" max="99" value={homeScore} disabled={isVoid} onChange={(event) => setHomeScore(event.target.value)} /></label>
-        <strong>-</strong>
-        <label><span>{match.away.name}</span><input type="number" min="0" max="99" value={awayScore} disabled={isVoid} onChange={(event) => setAwayScore(event.target.value)} /></label>
-      </div>
+      {!penaltyOnly && (
+        <div className="correction-score-row">
+          <label><span>{match.home.name}</span><input type="number" min="0" max="99" value={homeScore} disabled={isVoid} onChange={(event) => setHomeScore(event.target.value)} required={!isVoid} /></label>
+          <strong>-</strong>
+          <label><span>{match.away.name}</span><input type="number" min="0" max="99" value={awayScore} disabled={isVoid} onChange={(event) => setAwayScore(event.target.value)} required={!isVoid} /></label>
+        </div>
+      )}
 
       <div className="correction-checks">
         <label><input type="checkbox" checked={isVoid} onChange={(event) => setIsVoid(event.target.checked)} /> Partido anulado / sin puntos</label>
-        {!isVoid && match.matchType === 'PENALTIES_ONLY' && (
+        {!isVoid && !penaltyOnly && (
           <label><input type="checkbox" checked={wentToPenalties} onChange={(event) => setWentToPenalties(event.target.checked)} /> Se definió por penales</label>
         )}
       </div>
 
-      {!isVoid && wentToPenalties && (
+      {!isVoid && (penaltyOnly || wentToPenalties) && (
         <label className="correction-wide-field">
-          <span>Ganador por penales</span>
+          <span>{penaltyOnly ? 'Ganador de la tanda' : 'Ganador por penales'}</span>
           <select value={winningTeamId} onChange={(event) => setWinningTeamId(event.target.value)} required>
             <option value="">Elegir equipo</option>
             <option value={match.home.id ?? ''}>{match.home.name}</option>
@@ -149,6 +158,8 @@ function ResultEditor({
           </select>
         </label>
       )}
+
+      {penaltyOnly && !isVoid && <small className="correction-muted">Este ítem no usa marcador: sólo se corrige quién ganó la tanda.</small>}
 
       <label className="correction-wide-field">
         <span>Motivo de la corrección</span>
@@ -187,6 +198,7 @@ function PredictionEditor({
   const [reason, setReason] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const penaltyOnly = match.matchType === 'PENALTIES_ONLY';
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -195,8 +207,8 @@ function PredictionEditor({
       await api(`/api/admin/rounds/${roundId}/users/${encodeURIComponent(participant.id)}/matches/${match.id}/prediction`, {
         method: 'PUT',
         body: JSON.stringify({
-          homeScore: homeScore === '' ? null : Number(homeScore),
-          awayScore: awayScore === '' ? null : Number(awayScore),
+          homeScore: penaltyOnly || homeScore === '' ? null : Number(homeScore),
+          awayScore: penaltyOnly || awayScore === '' ? null : Number(awayScore),
           extraTeamId: extraTeamId || null,
           reason,
         }),
@@ -209,12 +221,14 @@ function PredictionEditor({
 
   return (
     <form className="correction-editor prediction-override-editor" onSubmit={save}>
-      <div className="correction-score-row">
-        <label><span>{match.home.name}</span><input type="number" min="0" max="99" value={homeScore} onChange={(event) => setHomeScore(event.target.value)} required /></label>
-        <strong>-</strong>
-        <label><span>{match.away.name}</span><input type="number" min="0" max="99" value={awayScore} onChange={(event) => setAwayScore(event.target.value)} required /></label>
-      </div>
-      {match.matchType === 'PENALTIES_ONLY' && (
+      {!penaltyOnly && (
+        <div className="correction-score-row">
+          <label><span>{match.home.name}</span><input type="number" min="0" max="99" value={homeScore} onChange={(event) => setHomeScore(event.target.value)} required /></label>
+          <strong>-</strong>
+          <label><span>{match.away.name}</span><input type="number" min="0" max="99" value={awayScore} onChange={(event) => setAwayScore(event.target.value)} required /></label>
+        </div>
+      )}
+      {penaltyOnly && (
         <label className="correction-wide-field">
           <span>Ganador por penales pronosticado</span>
           <select value={extraTeamId} onChange={(event) => setExtraTeamId(event.target.value)} required>
@@ -224,6 +238,7 @@ function PredictionEditor({
           </select>
         </label>
       )}
+      {penaltyOnly && <small className="correction-muted">En este ítem se corrige únicamente el equipo elegido para ganar la tanda.</small>}
       <label className="correction-wide-field">
         <span>Motivo de la edición excepcional</span>
         <input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Ej: corrección solicitada por el participante" required minLength={3} />
@@ -300,28 +315,31 @@ export default function AdminCorrections({
       <details className="correction-section">
         <summary>Corregir resultados manualmente</summary>
         <div className="correction-list">
-          {data.matches.map((match) => (
-            <div className="correction-match" key={match.id}>
-              <div className="correction-match-summary">
-                <div>
-                  <small>{match.competitionName || 'Competencia'} · {formatDate(match.kickoffAt)}</small>
-                  <strong>{match.home.name} vs {match.away.name}</strong>
-                  <span>
-                    {match.result.isVoid
-                      ? 'Anulado'
-                      : match.result.homeScore !== null && match.result.awayScore !== null
-                        ? `${match.result.homeScore} - ${match.result.awayScore}`
-                        : 'Sin resultado definitivo'}
-                    {match.manualResult ? ' · MANUAL' : ''}
-                  </span>
+          {data.matches.map((match) => {
+            const winner = teamName(match, match.result.winningTeamId);
+            const resultLabel = match.result.isVoid
+              ? 'Anulado'
+              : match.matchType === 'PENALTIES_ONLY'
+                ? winner ? `Ganador tanda: ${winner}` : 'Sin resultado definitivo'
+                : match.result.homeScore !== null && match.result.awayScore !== null
+                  ? `${match.result.homeScore} - ${match.result.awayScore}`
+                  : 'Sin resultado definitivo';
+            return (
+              <div className="correction-match" key={match.id}>
+                <div className="correction-match-summary">
+                  <div>
+                    <small>{match.competitionName || 'Competencia'} · {formatDate(match.kickoffAt)}</small>
+                    <strong>{match.home.name} vs {match.away.name}</strong>
+                    <span>{resultLabel}{match.manualResult ? ' · MANUAL' : ''}</span>
+                  </div>
+                  <button type="button" className="button button--secondary" onClick={() => setResultMatchId(resultMatchId === match.id ? null : match.id)}>
+                    {resultMatchId === match.id ? 'Cerrar' : match.manualResult ? 'Editar corrección' : 'Corregir'}
+                  </button>
                 </div>
-                <button type="button" className="button button--secondary" onClick={() => setResultMatchId(resultMatchId === match.id ? null : match.id)}>
-                  {resultMatchId === match.id ? 'Cerrar' : match.manualResult ? 'Editar corrección' : 'Corregir'}
-                </button>
+                {resultMatchId === match.id && <ResultEditor match={match} onSaved={changed} />}
               </div>
-              {resultMatchId === match.id && <ResultEditor match={match} onSaved={changed} />}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </details>
 
@@ -340,17 +358,19 @@ export default function AdminCorrections({
             <div className="correction-list">
               {participant && data.matches.map((match) => {
                 const prediction = predictions.get(match.id) ?? null;
+                const penaltyPick = prediction ? teamName(match, prediction.extraTeamId) : null;
+                const predictionLabel = !prediction
+                  ? 'Sin pronóstico guardado'
+                  : match.matchType === 'PENALTIES_ONLY'
+                    ? penaltyPick ?? 'Sin ganador elegido'
+                    : `${prediction.homeScore ?? '-'} - ${prediction.awayScore ?? '-'}`;
                 return (
                   <div className="correction-match" key={match.id}>
                     <div className="correction-match-summary">
                       <div>
                         <small>{match.competitionName || 'Competencia'}</small>
                         <strong>{match.home.name} vs {match.away.name}</strong>
-                        <span>
-                          {prediction
-                            ? `${prediction.homeScore ?? '-'} - ${prediction.awayScore ?? '-'}${prediction.adminOverride ? ' · EDITADO POR ADMIN' : ''}`
-                            : 'Sin pronóstico guardado'}
-                        </span>
+                        <span>{predictionLabel}{prediction?.adminOverride ? ' · EDITADO POR ADMIN' : ''}</span>
                       </div>
                       <button type="button" className="button button--secondary" onClick={() => setPredictionMatchId(predictionMatchId === match.id ? null : match.id)}>
                         {predictionMatchId === match.id ? 'Cerrar' : 'Editar'}
