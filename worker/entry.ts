@@ -30,7 +30,7 @@ async function syncOpenLeagueParticipants(env: Env) {
   ).run();
 }
 
-async function protectPublishedRoundMatches(request: Request, env: Env) {
+export async function protectPublishedRoundMatches(request: Request, env: Env) {
   if (request.method !== 'POST' && request.method !== 'DELETE') return null;
   const pathname = new URL(request.url).pathname;
   const match = pathname.match(/^\/api\/admin\/rounds\/(\d+)\/matches(?:\/\d+)?$/);
