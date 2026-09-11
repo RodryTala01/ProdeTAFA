@@ -20,6 +20,7 @@ type LeagueStandingRow = {
   user_id: string;
   full_name: string;
   joined_at: string;
+  eligible_from_slot: number;
   rounds_played: number;
   points: number;
   fulls: number;
@@ -116,6 +117,7 @@ async function buildStandings(env: Env, seasonId: number) {
        lp.user_id,
        u.full_name,
        lp.joined_at,
+       lp.eligible_from_slot,
        COUNT(DISTINCT CASE WHEN rs.id IS NOT NULL THEN lr.round_id END) AS rounds_played,
        COALESCE(SUM(CASE
          WHEN rs.id IS NOT NULL
@@ -148,13 +150,15 @@ async function buildStandings(env: Env, seasonId: number) {
          THEN ps.extra_points ELSE 0 END), 0) AS extras
      FROM league_participants lp
      JOIN users u ON u.id = lp.user_id AND u.role = 'participant'
-     LEFT JOIN league_rounds lr ON lr.season_id = lp.season_id
+     LEFT JOIN league_rounds lr
+       ON lr.season_id = lp.season_id
+      AND lr.slot_number >= lp.eligible_from_slot
      LEFT JOIN round_submissions rs ON rs.round_id = lr.round_id AND rs.user_id = lp.user_id
      LEFT JOIN matches m ON m.round_id = lr.round_id
      LEFT JOIN predictions p ON p.user_id = lp.user_id AND p.match_id = m.id
      LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id
      WHERE lp.season_id = ?
-     GROUP BY lp.user_id, u.full_name, lp.joined_at
+     GROUP BY lp.user_id, u.full_name, lp.joined_at, lp.eligible_from_slot
      ORDER BY points DESC, fulls DESC, partials DESC, errors ASC, extras DESC, u.full_name COLLATE NOCASE`,
   ).bind(seasonId).all<LeagueStandingRow>();
 
@@ -163,6 +167,7 @@ async function buildStandings(env: Env, seasonId: number) {
     userId: row.user_id,
     fullName: row.full_name,
     joinedAt: row.joined_at,
+    eligibleFromSlot: Number(row.eligible_from_slot ?? 1),
     roundsPlayed: Number(row.rounds_played ?? 0),
     points: Number(row.points ?? 0),
     fulls: Number(row.fulls ?? 0),
@@ -203,8 +208,8 @@ async function createSeason(request: Request, env: Env, user: SessionUser) {
   if (!inserted) return error('No se pudo crear la temporada', 500);
 
   await env.DB.prepare(
-    `INSERT OR IGNORE INTO league_participants (season_id, user_id)
-     SELECT ?, id FROM users WHERE role = 'participant' AND is_active = 1`,
+    `INSERT OR IGNORE INTO league_participants (season_id, user_id, eligible_from_slot)
+     SELECT ?, id, 1 FROM users WHERE role = 'participant' AND is_active = 1`,
   ).bind(inserted.id).run();
 
   await env.DB.prepare(
@@ -310,6 +315,12 @@ async function unlinkRound(env: Env, user: SessionUser, seasonId: number, roundI
     `UPDATE league_rounds
      SET slot_number = slot_number - 1
      WHERE season_id = ? AND slot_number > ?`,
+  ).bind(seasonId, target.slot_number).run();
+
+  await env.DB.prepare(
+    `UPDATE league_participants
+     SET eligible_from_slot = eligible_from_slot - 1
+     WHERE season_id = ? AND eligible_from_slot > ?`,
   ).bind(seasonId, target.slot_number).run();
 
   await env.DB.prepare(
