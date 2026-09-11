@@ -24,7 +24,7 @@ async function syncOpenLeagueParticipants(env: Env) {
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const pathname = new URL(request.url).pathname;
     const leagueRoute = pathname === '/api/league' || pathname.startsWith('/api/admin/leagues');
 
@@ -45,7 +45,7 @@ export default {
       if (response) return response;
     }
 
-    return baseWorker.fetch(request, env, ctx);
+    return baseWorker.fetch(request, env);
   },
 
   async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
