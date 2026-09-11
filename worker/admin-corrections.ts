@@ -292,6 +292,13 @@ async function overrideResult(request: Request, env: Env, matchId: number) {
   let status = 'CANC';
 
   if (!isVoid) {
+    try {
+      homeScore = scoreValue(body.homeScore);
+      awayScore = scoreValue(body.awayScore);
+    } catch (caught) {
+      return error(caught instanceof Error ? caught.message : 'Resultado inválido');
+    }
+
     if (match.match_type === 'PENALTIES_ONLY') {
       try {
         winningTeamId = validateTeam(body.winningTeamId, match);
@@ -301,13 +308,6 @@ async function overrideResult(request: Request, env: Env, matchId: number) {
       wentToPenalties = true;
       status = 'PEN';
     } else {
-      try {
-        homeScore = scoreValue(body.homeScore);
-        awayScore = scoreValue(body.awayScore);
-      } catch (caught) {
-        return error(caught instanceof Error ? caught.message : 'Resultado inválido');
-      }
-
       wentToPenalties = Boolean(body.wentToPenalties);
       if (wentToPenalties) {
         try {
@@ -463,14 +463,12 @@ async function overridePrediction(
   } | null;
   if (!body) return error('Datos inválidos');
 
-  let homeScore: number | null = null;
-  let awayScore: number | null = null;
+  let homeScore: number;
+  let awayScore: number;
   let reason: string;
   try {
-    if (match.match_type === 'NORMAL') {
-      homeScore = scoreValue(body.homeScore);
-      awayScore = scoreValue(body.awayScore);
-    }
+    homeScore = scoreValue(body.homeScore);
+    awayScore = scoreValue(body.awayScore);
     reason = reasonValue(body.reason);
   } catch (caught) {
     return error(caught instanceof Error ? caught.message : 'Pronóstico inválido');
@@ -484,7 +482,7 @@ async function overridePrediction(
     extraTeamId = body.extraTeamId;
   }
   if (match.match_type === 'PENALTIES_ONLY' && !extraTeamId) {
-    return error('Indicá qué equipo fue pronosticado como ganador por penales');
+    return error('En este partido también tenés que indicar el ganador por penales');
   }
 
   const existing = await env.DB.prepare(
