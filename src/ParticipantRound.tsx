@@ -48,6 +48,15 @@ type Round = {
   matches: Match[];
 };
 
+type RoundOption = {
+  id: number;
+  name: string;
+  status: 'open' | 'finished';
+  publishedAt: string | null;
+  finishedAt: string | null;
+  matchCount: number;
+};
+
 type Draft = {
   homeScore: string;
   awayScore: string;
@@ -120,6 +129,8 @@ function Team({ name, logoUrl }: { name: string; logoUrl: string | null }) {
 }
 
 export default function ParticipantRound() {
+  const [rounds, setRounds] = useState<RoundOption[]>([]);
+  const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
   const [round, setRound] = useState<Round | null>(null);
   const [drafts, setDrafts] = useState<Record<number, Draft>>({});
   const [saveState, setSaveState] = useState<Record<number, string>>({});
@@ -131,14 +142,16 @@ export default function ParticipantRound() {
   const timers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
   const awayInputs = useRef<Record<number, HTMLInputElement | null>>({});
   const serverOffset = useRef(0);
+  const selectedRoundIdRef = useRef<number | null>(null);
 
-  async function loadRound(initial = false) {
+  async function loadRound(initial = false, roundId = selectedRoundIdRef.current) {
     if (initial) {
       setLoading(true);
       setError('');
     }
     try {
-      const data = await api<{ round: Round | null }>('/api/participant/round');
+      const query = roundId === null ? '' : `?roundId=${roundId}`;
+      const data = await api<{ round: Round | null }>(`/api/participant/round${query}`);
       setRound(data.round);
       if (data.round) {
         serverOffset.current = new Date(data.round.serverNow).getTime() - Date.now();
@@ -164,16 +177,48 @@ export default function ParticipantRound() {
     }
   }
 
+  async function loadRoundList() {
+    const data = await api<{ rounds: RoundOption[] }>('/api/participant/rounds');
+    setRounds(data.rounds);
+    return data.rounds;
+  }
+
   useEffect(() => {
-    void loadRound(true);
+    async function bootstrap() {
+      setLoading(true);
+      setError('');
+      try {
+        const available = await loadRoundList();
+        const initialId = available[0]?.id ?? null;
+        selectedRoundIdRef.current = initialId;
+        setSelectedRoundId(initialId);
+        await loadRound(false, initialId);
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : 'No se pudo cargar la fecha');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    void bootstrap();
     const clock = setInterval(() => setNow(Date.now() + serverOffset.current), 1000);
-    const refresh = setInterval(() => void loadRound(false), 60_000);
+    const refresh = setInterval(() => void loadRound(false, selectedRoundIdRef.current), 60_000);
     return () => {
       clearInterval(clock);
       clearInterval(refresh);
       Object.values(timers.current).forEach(clearTimeout);
     };
   }, []);
+
+  async function chooseRound(roundId: number) {
+    selectedRoundIdRef.current = roundId;
+    setSelectedRoundId(roundId);
+    setDrafts({});
+    setSaveState({});
+    setSuccess('');
+    setError('');
+    await loadRound(true, roundId);
+  }
 
   function locked(match: Match) {
     return round?.status === 'finished' || now >= new Date(match.lockedAt).getTime();
@@ -182,8 +227,8 @@ export default function ParticipantRound() {
   async function saveMatch(match: Match, draft: Draft) {
     setSaveState((current) => ({ ...current, [match.id]: 'Guardando…' }));
     try {
-      const homeScore = draft.homeScore === '' ? null : Number(draft.homeScore);
-      const awayScore = draft.awayScore === '' ? null : Number(draft.awayScore);
+      const homeScore = match.matchType === 'NORMAL' && draft.homeScore !== '' ? Number(draft.homeScore) : null;
+      const awayScore = match.matchType === 'NORMAL' && draft.awayScore !== '' ? Number(draft.awayScore) : null;
       await api<{ ok: true }>(`/api/participant/predictions/${match.id}`, {
         method: 'PUT',
         body: JSON.stringify({
@@ -249,7 +294,7 @@ export default function ParticipantRound() {
   );
 
   if (loading) {
-    return <section className="card participant-empty"><p>Cargando fecha activa…</p></section>;
+    return <section className="card participant-empty"><p>Cargando fecha…</p></section>;
   }
 
   if (error && !round) {
@@ -270,6 +315,26 @@ export default function ParticipantRound() {
 
   return (
     <div className="participant-round">
+      {rounds.length > 1 && (
+        <section className="card round-history-card">
+          <div>
+            <span className="eyebrow">HISTORIAL</span>
+            <strong>Ver otra fecha</strong>
+          </div>
+          <select
+            value={selectedRoundId ?? round.id}
+            onChange={(event) => void chooseRound(Number(event.target.value))}
+            aria-label="Elegir fecha del Prode"
+          >
+            {rounds.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}{item.status === 'open' ? ' · abierta' : ' · finalizada'}
+              </option>
+            ))}
+          </select>
+        </section>
+      )}
+
       <section className="card participant-round-header">
         <div>
           <span className="eyebrow">{isFinished ? 'FECHA FINALIZADA' : 'FECHA ABIERTA'}</span>
@@ -346,11 +411,11 @@ export default function ParticipantRound() {
                 </b>
               </div>
 
-              {scoreInputs}
+              {match.matchType === 'NORMAL' && scoreInputs}
 
               {match.matchType === 'PENALTIES_ONLY' && (
-                <div className="penalty-prediction">
-                  <p><strong>Si se define por penales, ¿quién gana la tanda?</strong></p>
+                <div className="penalty-prediction penalty-prediction--only">
+                  <p><strong>¿Quién gana la tanda de penales?</strong></p>
                   <div className="penalty-options">
                     <button
                       type="button"
@@ -369,22 +434,32 @@ export default function ParticipantRound() {
                       <Team name={match.away.name} logoUrl={match.away.logoUrl} />
                     </button>
                   </div>
-                  <small>El resultado de arriba corresponde a los 90 minutos. La elección de abajo corresponde únicamente a los penales.</small>
+                  <small>En este ítem no se pronostica marcador: acertar el ganador de la tanda vale 1 punto.</small>
                 </div>
               )}
 
-              {(match.result.isVoid || resultHome !== null || resultAway !== null) && (
-                <div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
-                  {match.result.isVoid ? (
-                    <strong>Partido anulado · no suma ni resta puntos</strong>
-                  ) : (
-                    <>
-                      <span>{isFinal ? 'Resultado 90′' : isLive ? 'Resultado actual' : 'Resultado'}</span>
-                      <strong>{resultHome ?? '-'} - {resultAway ?? '-'}</strong>
-                      {isFinal && match.result.wentToPenalties && penaltyWinner && <small>Ganó por penales: {penaltyWinner}</small>}
-                    </>
-                  )}
-                </div>
+              {match.matchType === 'PENALTIES_ONLY' ? (
+                (match.result.isVoid || (isFinal && penaltyWinner)) && (
+                  <div className="match-result">
+                    {match.result.isVoid
+                      ? <strong>Partido anulado · no suma ni resta puntos</strong>
+                      : <><span>Definición</span><strong>Ganó {penaltyWinner}</strong></>}
+                  </div>
+                )
+              ) : (
+                (match.result.isVoid || resultHome !== null || resultAway !== null) && (
+                  <div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
+                    {match.result.isVoid ? (
+                      <strong>Partido anulado · no suma ni resta puntos</strong>
+                    ) : (
+                      <>
+                        <span>{isFinal ? 'Resultado 90′' : isLive ? 'Resultado actual' : 'Resultado'}</span>
+                        <strong>{resultHome ?? '-'} - {resultAway ?? '-'}</strong>
+                        {isFinal && match.result.wentToPenalties && penaltyWinner && <small>Ganó por penales: {penaltyWinner}</small>}
+                      </>
+                    )}
+                  </div>
+                )
               )}
 
               <div className="prediction-footer">
@@ -392,7 +467,7 @@ export default function ParticipantRound() {
                 {match.score && (
                   <div className="score-earned">
                     <strong>{match.score.points} pt{match.score.points === 1 ? '' : 's'} · {scoreLabel(match.score.resultType)}</strong>
-                    {match.score.extraPoints > 0 && <small>+{match.score.extraPoints} por penales</small>}
+                    {match.score.extraPoints > 0 && match.matchType === 'NORMAL' && <small>+{match.score.extraPoints} por definición</small>}
                     {match.score.provisional && <small>provisional</small>}
                   </div>
                 )}
