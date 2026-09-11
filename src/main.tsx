@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import AppV2 from './AppV2';
 import PwaInstallPrompt from './PwaInstallPrompt';
 import './styles.css';
+import './phase2.css';
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
