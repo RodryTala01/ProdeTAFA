@@ -12,66 +12,113 @@ Los partidos cargados como `PENALTIES_ONLY` usan:
 
 No volver a simplificar este tipo a solo ganador de penales.
 
-## Fase 1
+## Estado antes de volver
 
-El desarrollo de Fase 1 está terminado. Queda validación real en producción:
+El desarrollo que puede hacerse sin entorno real quedó cubierto y validado por CI:
 
-1. `git pull`
-2. `npm install`
-3. `npm run test`
-4. `npm run build`
-5. Aplicar migraciones remotas: `npm run db:migrate:remote`
-6. Verificar que se aplique `0002_league_seasons.sql` además de la migración inicial.
-7. Primer deploy con el flujo documentado en `PRODUCTION.md`.
-8. Abrir la URL `workers.dev` y ejecutar el smoke test.
-9. Entrar como admin y participante.
-10. Verificar crear/publicar fecha, autosave, envío y reenvío.
-11. Verificar bloqueo real en kickoff + 1 minuto.
-12. Verificar sincronización de resultados, puntos y cierre de fecha.
-13. Confirmar que el Cron corre en producción.
-14. Revisar consumo real de la cuota gratis de API-Football.
+- scoring y reglas de penales;
+- integridad de fechas publicadas;
+- migraciones D1 locales `0001 + 0002`;
+- tests de esquema de Liga;
+- build TypeScript/Vite;
+- Liga de 5 fechas;
+- altas tardías;
+- tabla sólo con puntos definitivos;
+- PWA base y navegación móvil;
+- smoke test profundo de producción.
 
-## Fase 2 - Liga
+## Primer paso al llegar a la PC
+
+Si `npm run dev` estuviera abierto, frenarlo con `Ctrl + C`.
+
+Después, desde la carpeta `ProdeTAFA`:
+
+```powershell
+git pull
+npm install
+npm run deploy:first
+```
+
+`deploy:first` ya hace automáticamente:
+
+1. tests;
+2. build;
+3. migraciones pendientes sobre D1 remota, incluida `0002_league_seasons.sql`;
+4. deploy a Cloudflare;
+5. carga segura de `FOOTBALL_API_KEY` desde `.dev.vars` para el primer deploy.
+
+No ejecutar migraciones, tests o build por separado salvo que estemos diagnosticando un error.
+
+## Después del deploy
+
+Copiar la URL `workers.dev` que devuelva Wrangler y ejecutar:
+
+```powershell
+$env:BASE_URL="https://prode-tafa.<subdominio>.workers.dev"
+npm run smoke:prod
+```
+
+El smoke test debe validar:
+
+- Worker saludable;
+- esquema de Liga presente en D1 remota;
+- frontend;
+- manifest PWA;
+- iconos 192x192 y 512x512 declarados;
+- service worker `/sw.js`.
+
+## Prueba Fase 1
+
+- Entrar como admin y participante.
+- Crear/publicar o usar una fecha de prueba de 12 partidos.
+- Probar autosave, enviar y reenviar.
+- Probar marcador 90' + ganador de tanda en `PENALTIES_ONLY`.
+- Confirmar bloqueo real en kickoff + 1 minuto.
+- Confirmar que una fecha publicada no permita agregar/quitar partidos.
+- Confirmar resultados, 3/1/0, +1 penales, anulados y ranking.
+- Confirmar cierre de fecha, historial y revelado final.
+- Probar corrección manual y auditoría.
+- Confirmar Cron real y consumo de API-Football.
+
+## Prueba Fase 2 - Liga
 
 Decisiones confirmadas:
 
-- La temporada de Liga se crea primero y después se vinculan las fechas.
-- Son 5 fechas por Liga.
-- Si alguien no juega una fecha, suma 0.
-- Se permiten altas de participantes a mitad de temporada y arrancan desde 0 en lo anterior.
-- La tabla se actualiza cuando termina cada partido, nunca con puntos provisionales.
-- Desempate: puntos, plenos, parciales, menos errores y extras.
-- Admin y participantes ven la Liga.
-- Copas, tabla histórica general, palmarés, perfiles avanzados y estadísticas divertidas quedan para fases posteriores.
-- WhatsApp queda separado por ahora.
+- temporada creada aparte y luego se vinculan fechas;
+- exactamente 5 fechas;
+- no presentado = 0;
+- alta a mitad de Liga permitida con 0 previo;
+- tabla cambia sólo cuando termina cada partido;
+- nunca entran puntos provisionales;
+- desempate: puntos, plenos, parciales, menos errores, extras.
 
-Implementado mientras Rodrigo estaba en el trabajo:
+Prueba:
 
-- Migración `0002_league_seasons.sql`.
-- Temporadas de Liga.
-- Vínculo de hasta 5 fechas en orden.
-- Incorporación automática de participantes activos a Ligas abiertas.
-- Alta tardía de participantes sin puntos retroactivos.
-- Tabla acumulada de Liga sólo con partidos definitivos.
-- Cierre de Liga únicamente con las 5 fechas finalizadas.
-- Navegación Admin: `Fechas | Liga | Participantes`.
-- Navegación Participante: `Pronósticos | Liga | Historial`.
-- Historial de fechas separado.
-- PWA base y aviso de instalación.
+1. Crear `Liga TAFA Prueba`.
+2. Vincular 5 fechas y comprobar orden 1–5.
+3. Confirmar que una fecha no pueda estar en dos Ligas.
+4. Ver tabla inicial con participantes en 0.
+5. Crear/reactivar un participante a mitad y comprobar 0 retroactivo.
+6. Dejar a alguien sin presentar una fecha y comprobar 0.
+7. Finalizar un partido y comprobar que recién entonces cambie la Liga.
+8. Confirmar que un resultado provisional no entre.
+9. Cerrar las cinco fechas.
+10. Finalizar Liga y comprobar que sus fechas ya no puedan cambiarse.
+11. Abrir una Liga finalizada desde el histórico.
 
-## Prueba de Liga al volver
+## PWA / Android
 
-1. Crear una temporada, por ejemplo `Liga TAFA Prueba`.
-2. Vincular 5 fechas.
-3. Confirmar que el orden quede 1 a 5.
-4. Revisar la tabla con todos los participantes activos en 0.
-5. Crear un participante nuevo con la Liga ya empezada y comprobar que se incorpore con 0 previo.
-6. Dejar un participante sin enviar una fecha y comprobar que esa fecha le aporte 0.
-7. Finalizar un partido y comprobar que la tabla cambie sólo después del resultado definitivo.
-8. Confirmar que un partido en vivo/provisional no cambie la tabla de Liga.
-9. Cerrar las 5 fechas.
-10. Finalizar la Liga y comprobar que ya no permita cambiar sus fechas.
+En la URL HTTPS real:
 
-## Al volver
+- abrir desde Chrome en Android;
+- confirmar que aparece la opción/banner de instalación;
+- instalar y verificar modo standalone;
+- probar la barra inferior `Pronósticos | Liga | Historial` y safe areas.
 
-Primero aplicar la migración nueva y hacer el deploy/pruebas de Fase 1. Después probar la Liga con el bloque anterior. Si ambos quedan verdes, Fase 1 queda oficialmente cerrada y Fase 2 queda funcionalmente encaminada.
+El manifest ya declara SVG 192x192 y 512x512. Como mejora de compatibilidad, queda pendiente generar PNG 192x192 y 512x512/maskable si el dispositivo o auditoría los exige. Esto requiere una vía capaz de subir binarios (PC/Codex u otra herramienta), no el conector de texto actual.
+
+## Punto exacto donde retomamos
+
+Si deploy + smoke están verdes, hacemos la prueba real de Fase 1 y Liga. Los problemas que aparezcan ahí se corrigen antes de avanzar a Copas.
+
+No empezar todavía tabla histórica general, palmarés, perfiles avanzados, estadísticas divertidas ni WhatsApp: quedaron deliberadamente para fases posteriores.
