@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
+import AppV2 from './AppV2';
 import PwaInstallPrompt from './PwaInstallPrompt';
 import './styles.css';
 
@@ -14,7 +14,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AppV2 />
     <PwaInstallPrompt />
   </StrictMode>,
 );
