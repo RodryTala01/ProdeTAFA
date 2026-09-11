@@ -1,5 +1,6 @@
 import baseWorker, { type Env } from './index';
 import { handleLeague } from './league';
+import { handleHistory } from './history';
 
 function mutationAllowed(request: Request) {
   if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return true;
@@ -36,6 +37,11 @@ export default {
       }
       await syncOpenLeagueParticipants(env);
       const response = await handleLeague(request, env);
+      if (response) return response;
+    }
+
+    if (pathname === '/api/participant/history') {
+      const response = await handleHistory(request, env);
       if (response) return response;
     }
 
