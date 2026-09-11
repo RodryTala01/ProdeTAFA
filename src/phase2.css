@@ -1,0 +1,48 @@
+.field select,
+.round-create select {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(6, 10, 24, 0.82);
+  color: inherit;
+  border-radius: 12px;
+  padding: 11px 12px;
+  outline: none;
+}
+
+.field select:focus,
+.round-create select:focus {
+  border-color: rgba(96, 165, 250, 0.8);
+}
+
+@media (max-width: 700px) {
+  .dashboard--narrow {
+    padding-bottom: 92px;
+  }
+
+  .dashboard--narrow > .admin-tabs {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    z-index: 40;
+    width: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0;
+    padding: 6px;
+    background: rgba(10, 15, 31, 0.94);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .dashboard--narrow > .admin-tabs .admin-tab {
+    min-width: 0;
+    padding: 11px 6px;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .dashboard--narrow > .admin-tabs .admin-tab--active {
+    background: rgba(59, 130, 246, 0.24);
+  }
+}
