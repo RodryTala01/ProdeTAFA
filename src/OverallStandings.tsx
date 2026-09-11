@@ -13,11 +13,29 @@ type Standing = {
   extras: number;
 };
 
+type RecentRound = {
+  id: number;
+  name: string;
+  finishedAt: string | null;
+  points: number;
+  fulls: number;
+  partials: number;
+  errors: number;
+  extras: number;
+};
+
 type Data = {
   finishedRounds: number;
   currentUserId: string;
   standings: Standing[];
+  recentRounds: RecentRound[];
 };
+
+function formatDate(value: string | null) {
+  if (!value) return '';
+  const normalized = /(Z|[+-]\d{2}:\d{2})$/.test(value) ? value : `${value.replace(' ', 'T')}Z`;
+  return new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(normalized));
+}
 
 export default function OverallStandings() {
   const [data, setData] = useState<Data | null>(null);
@@ -63,6 +81,7 @@ export default function OverallStandings() {
       </div>
 
       <section className="card panel panel--wide">
+        <div className="panel-heading"><div><h2>Clasificacion acumulada</h2><p>Solo cuentan fechas ya cerradas.</p></div></div>
         <div className="user-list">
           {data.standings.map((entry) => (
             <div className="user-row" key={entry.userId}>
@@ -80,6 +99,24 @@ export default function OverallStandings() {
         </div>
         <p>Desempate: puntos, plenos, parciales, menos errores y extras.</p>
       </section>
+
+      {data.recentRounds.length > 0 && (
+        <section className="card panel panel--wide">
+          <div className="panel-heading"><div><h2>Tus ultimas fechas</h2><p>Resumen de rendimiento por fecha cerrada.</p></div></div>
+          <div className="user-list">
+            {data.recentRounds.map((round) => (
+              <div className="user-row" key={round.id}>
+                <div className="avatar">{round.points}</div>
+                <div className="user-data">
+                  <strong>{round.name}</strong>
+                  <span>{formatDate(round.finishedAt)} | {round.fulls} plenos | {round.partials} parciales | {round.errors} errores | {round.extras} extras</span>
+                </div>
+                <span className="user-chip">{round.points} pts</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
