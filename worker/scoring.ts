@@ -127,7 +127,12 @@ export async function recalculateRoundScores(roundId: number, env: Env) {
   let calculated = 0;
   for (const row of rows.results ?? []) {
     const calculation = calculatePredictionScore(row);
-    if (!calculation) continue;
+    if (!calculation) {
+      await env.DB.prepare('DELETE FROM prediction_scores WHERE prediction_id = ?')
+        .bind(row.prediction_id)
+        .run();
+      continue;
+    }
     await saveScore(env, row.prediction_id, calculation);
     calculated += 1;
   }
