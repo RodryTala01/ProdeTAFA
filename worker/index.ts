@@ -3,6 +3,7 @@ import { handlePredictions } from './predictions';
 import { handleResults, syncEligibleRounds } from './results';
 import { handleRanking } from './ranking';
 import { handleAdminCorrections } from './admin-corrections';
+import { handleStandings } from './standings';
 
 export interface Env {
   DB: D1Database;
@@ -40,6 +41,15 @@ function json(data: unknown, init: ResponseInit = {}) {
 
 function error(message: string, status = 400) {
   return json({ error: message }, { status });
+}
+
+function mutationAllowed(request: Request) {
+  if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return true;
+  const url = new URL(request.url);
+  const origin = request.headers.get('origin');
+  if (origin && origin !== url.origin) return false;
+  const fetchSite = request.headers.get('sec-fetch-site');
+  return fetchSite !== 'cross-site';
 }
 
 function publicUser(user: UserRow) {
@@ -396,6 +406,10 @@ export default {
     const { pathname } = url;
 
     try {
+      if (pathname.startsWith('/api/') && !mutationAllowed(request)) {
+        return error('Origen de solicitud no permitido', 403);
+      }
+
       if (request.method === 'GET' && pathname === '/api/health') {
         return json({ ok: true, app: 'prode-tafa', timestamp: new Date().toISOString() });
       }
@@ -440,6 +454,9 @@ export default {
 
       const resultsResponse = await handleResults(request, env);
       if (resultsResponse) return resultsResponse;
+
+      const standingsResponse = await handleStandings(request, env);
+      if (standingsResponse) return standingsResponse;
 
       const rankingResponse = await handleRanking(request, env);
       if (rankingResponse) return rankingResponse;
