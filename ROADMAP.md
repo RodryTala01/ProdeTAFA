@@ -17,6 +17,7 @@
 - [x] Edición hasta kickoff + 1 minuto.
 - [x] Bloqueo real en backend.
 - [x] `PENALTIES_ONLY` sin marcador, sólo ganador de la tanda.
+- [x] Corrección administrativa de `PENALTIES_ONLY` sin marcador.
 - [x] Sincronización automática de resultados por Cron Trigger.
 - [x] Sincronización manual de resultados.
 - [x] Pleno 3 / parcial 1 / error 0.
@@ -33,7 +34,6 @@
 ### Pendiente para declarar Fase 1 cerrada
 
 - [ ] Probar end-to-end con una fecha real o de prueba: crear 12 partidos, publicar, pronosticar desde un participante, enviar, simular cierre y verificar puntaje.
-- [ ] Revisar en runtime la corrección administrativa de un ítem `PENALTIES_ONLY` y simplificar su editor para que tampoco pida marcador.
 - [ ] Definir/implementar el selector extra para partidos eliminatorios normales cuando corresponda pronosticar quién clasifica. El scoring ya acepta el extra; falta una bandera explícita por partido y su UI.
 - [ ] Configurar `FOOTBALL_API_KEY` como secreto del Worker de producción.
 - [ ] Hacer el primer deploy real a `workers.dev` y smoke test con D1 remota.
@@ -41,19 +41,20 @@
 
 ## Fase 2 — Producto usable y móvil
 
-### Ya iniciado
+### Ya implementado/iniciado
 
 - [x] Manifest PWA.
 - [x] Service worker para assets estáticos sin cachear `/api/*`.
 - [x] Metadatos de instalación móvil.
 - [x] Ícono SVG base.
+- [x] Historial de fechas para participantes.
+- [x] Revelar los pronósticos enviados por todos los participantes sólo después de finalizar la fecha.
 
 ### Próximo alcance recomendado
 
 - [ ] Confirmar instalación PWA en Android desde producción.
 - [ ] Agregar íconos PNG 192x192 y 512x512 / maskable si el navegador o Android lo requieren.
-- [ ] Pantalla de historial más completa con resumen por fecha.
-- [ ] Revelar pronósticos de todos los participantes sólo cuando la fecha haya finalizado.
+- [ ] Enriquecer el historial con resumen por fecha.
 - [ ] Mejorar estado en vivo y feedback de actualización.
 - [ ] Pantalla general de posiciones acumuladas entre fechas.
 - [ ] Palmarés e historial del Prode.
