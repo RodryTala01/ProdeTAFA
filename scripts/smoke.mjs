@@ -36,8 +36,12 @@ try {
 
   await check('/manifest.webmanifest', async (response) => {
     const manifest = await response.json();
+    const iconSizes = new Set((manifest?.icons ?? []).map((icon) => icon?.sizes));
     if (!manifest?.name || !manifest?.start_url || manifest?.display !== 'standalone') {
       throw new Error('/manifest.webmanifest: manifest inválido');
+    }
+    if (!iconSizes.has('192x192') || !iconSizes.has('512x512')) {
+      throw new Error('/manifest.webmanifest: faltan iconos instalables 192x192 o 512x512');
     }
   });
 
