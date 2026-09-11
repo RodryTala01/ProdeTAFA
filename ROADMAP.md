@@ -8,33 +8,31 @@
 - [x] Login por teléfono y contraseña.
 - [x] Contraseñas hasheadas y sesiones HttpOnly.
 - [x] Alta, reset de clave, desactivación y reactivación de participantes.
+- [x] El endpoint de reset de participantes no puede modificar cuentas admin.
 - [x] Creación de fechas.
 - [x] Búsqueda semanal/rango de partidos reales con API-Football.
 - [x] Selección de 12 partidos por fecha.
 - [x] Publicación de fecha.
+- [x] Sólo puede existir una fecha publicada/abierta a la vez.
+- [x] Una fecha publicada/finalizada no permite agregar ni quitar partidos, también desde backend.
 - [x] Autosave de pronósticos.
-- [x] Envío explícito de pronóstico.
-- [x] Edición hasta kickoff + 1 minuto.
-- [x] Bloqueo real en backend.
-- [x] Partido marcado `PENALTIES_ONLY`: marcador de 90 minutos + ganador de la tanda.
-- [x] 3/1/0 sobre los 90 minutos + hasta 1 punto extra por acertar penales.
-- [x] Corrección administrativa de marcador + ganador de penales.
-- [x] Sincronización automática de resultados por Cron Trigger.
-- [x] Sincronización manual de resultados.
-- [x] Pleno 3 / parcial 1 / error 0.
+- [x] Envío explícito y reenvío de pronóstico.
+- [x] Edición hasta kickoff + 1 minuto con bloqueo real en backend.
+- [x] Partido marcado `PENALTIES_ONLY`: marcador de 90 minutos + ganador de la tanda pronosticado.
+- [x] 3/1/0 sobre los 90 minutos + hasta 1 punto extra sólo si realmente hubo tanda y se acertó el ganador.
+- [x] Corrección administrativa de resultados; en partidos marcados para penales el admin indica si efectivamente hubo tanda.
+- [x] Volver de una corrección manual a API-Football limpia resultado/puntajes derivados hasta la próxima sincronización oficial.
+- [x] Sincronización automática de resultados por Cron Trigger y sincronización manual.
 - [x] Puntos provisionales en vivo cuando hay datos suficientes.
 - [x] Tratamiento de partidos anulados.
 - [x] Ranking y desempates.
 - [x] Cierre de fecha.
 - [x] Historial de fechas para participantes.
-- [x] Corrección manual de resultados.
-- [x] Edición excepcional de pronósticos por admin.
-- [x] Auditoría de intervenciones.
+- [x] Edición excepcional de pronósticos por admin y auditoría.
 - [x] Revelado de pronósticos enviados después del cierre de la fecha.
-- [x] Una fecha publicada/finalizada no permite agregar ni quitar partidos, también desde backend.
+- [x] Protección de mutaciones API contra requests cross-site.
 - [x] Build automático en GitHub Actions.
-- [x] Tests automáticos de reglas de scoring.
-- [x] Tests de integridad de fechas publicadas.
+- [x] Tests de scoring, seguridad, integridad de fechas y políticas de negocio.
 - [x] Validación automática de migraciones D1 en CI.
 - [x] Smoke test profundo para producción.
 - [x] `FOOTBALL_API_KEY` declarada como secreto obligatorio de Cloudflare.
@@ -67,15 +65,16 @@ Objetivo: dejar lista una Liga de temporada compuesta por 5 fechas del Prode. No
 
 ### Implementado
 
-- [x] Esquema `league_seasons`, `league_rounds` y `league_participants` en migración `0002_league_seasons.sql`.
+- [x] Esquema base en `0002_league_seasons.sql`: `league_seasons`, `league_rounds` y `league_participants`.
+- [x] Migración `0003_league_entry_slot.sql` con `eligible_from_slot` para altas tardías.
 - [x] Restricción DB de slots 1–5, fecha única entre Ligas y participante único por temporada.
-- [x] Tests automáticos de las restricciones del esquema de Liga.
+- [x] Tests automáticos del esquema y del contrato de altas tardías.
 - [x] Crear temporadas.
 - [x] Vincular hasta 5 fechas en orden.
-- [x] Desvincular fechas mientras la Liga siga abierta con confirmación administrativa.
+- [x] Desvincular fechas mientras la Liga siga abierta y reindexar slots/elegibilidad.
 - [x] Incorporación automática de participantes activos a Ligas abiertas.
-- [x] Soporte para altas tardías sin puntos retroactivos.
-- [x] Tabla de Liga calculada sólo con partidos definitivos.
+- [x] Alta/reactivación tardía con elegibilidad desde la primera fecha no finalizada, sin puntos retroactivos.
+- [x] Tabla de Liga calculada sólo con partidos definitivos y con presentación de la fecha.
 - [x] Auto-refresh de tabla de Liga para admin y participantes.
 - [x] Cierre de Liga sólo cuando las 5 fechas están vinculadas y finalizadas.
 - [x] Vista Admin: Fechas | Liga | Participantes.
@@ -84,21 +83,20 @@ Objetivo: dejar lista una Liga de temporada compuesta por 5 fechas del Prode. No
 - [x] Navegación inferior en móvil con soporte de safe areas.
 - [x] PWA base y aviso de instalación cuando el navegador lo permite.
 - [x] Manifest en modo `standalone` con iconos SVG declarados como 192x192 y 512x512.
-- [x] Health check profundo que valida que D1 tenga el esquema de Liga.
-- [x] Smoke test que valida health, esquema de Liga, frontend, manifest y `/sw.js`.
-- [x] Protección adicional contra operaciones API iniciadas desde sitios externos.
+- [x] Health check profundo: esquema de Liga, columna `eligible_from_slot` y máximo una fecha abierta.
+- [x] Smoke test que valida health, consistencia D1, frontend, manifest y `/sw.js`.
 - [x] Reglas completas de Fase 2 documentadas en `AGENTS.md` para Codex.
 
 ### Pendiente de validación real
 
-- [ ] Desplegar y aplicar `0002_league_seasons.sql` a D1 remota mediante `npm run deploy:first`.
+- [ ] Desplegar y aplicar `0002_league_seasons.sql` + `0003_league_entry_slot.sql` a D1 remota mediante `npm run deploy:first`.
 - [ ] Crear una Liga de prueba y vincular 5 fechas.
-- [ ] Verificar alta de participante a mitad de temporada.
+- [ ] Verificar alta/reactivación de participante a mitad de temporada y `0` retroactivo.
 - [ ] Confirmar que un no-presentado suma 0.
 - [ ] Confirmar que la tabla se mueve al finalizar cada partido, no antes.
 - [ ] Confirmar cierre de Liga tras la quinta fecha.
 - [ ] Confirmar instalación PWA en Android desde producción HTTPS.
-- [ ] Generar/agregar PNG 192x192 y 512x512 como fallback de iconos para máxima compatibilidad si el dispositivo lo requiere.
+- [ ] Generar/agregar PNG 192x192 y 512x512 como fallback de iconos si el dispositivo o auditoría los requiere.
 
 ## Fases posteriores
 
@@ -111,4 +109,4 @@ Objetivo: dejar lista una Liga de temporada compuesta por 5 fechas del Prode. No
 
 ## Regla de avance
 
-Primero garantizar que el ciclo completo de Liga `crear temporada → vincular 5 fechas → pronosticar → puntuar partidos definitivos → acumular tabla → cerrar Liga` funcione correctamente en producción.
+Primero garantizar en producción el ciclo completo `crear temporada → vincular 5 fechas → pronosticar → puntuar sólo partidos definitivos → acumular Liga → cerrar temporada`. Recién después definir Copas.
