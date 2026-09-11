@@ -228,8 +228,8 @@ export default function ParticipantRound() {
   async function saveMatch(match: Match, draft: Draft) {
     setSaveState((current) => ({ ...current, [match.id]: 'Guardando…' }));
     try {
-      const homeScore = match.matchType === 'NORMAL' && draft.homeScore !== '' ? Number(draft.homeScore) : null;
-      const awayScore = match.matchType === 'NORMAL' && draft.awayScore !== '' ? Number(draft.awayScore) : null;
+      const homeScore = draft.homeScore === '' ? null : Number(draft.homeScore);
+      const awayScore = draft.awayScore === '' ? null : Number(draft.awayScore);
       await api<{ ok: true }>(`/api/participant/predictions/${match.id}`, {
         method: 'PUT',
         body: JSON.stringify({
@@ -413,11 +413,11 @@ export default function ParticipantRound() {
                 </b>
               </div>
 
-              {match.matchType === 'NORMAL' && scoreInputs}
+              {scoreInputs}
 
               {match.matchType === 'PENALTIES_ONLY' && (
-                <div className="penalty-prediction penalty-prediction--only">
-                  <p><strong>¿Quién gana la tanda de penales?</strong></p>
+                <div className="penalty-prediction">
+                  <p><strong>Si se define por penales, ¿quién gana la tanda?</strong></p>
                   <div className="penalty-options">
                     <button
                       type="button"
@@ -436,32 +436,22 @@ export default function ParticipantRound() {
                       <Team name={match.away.name} logoUrl={match.away.logoUrl} />
                     </button>
                   </div>
-                  <small>En este ítem no se pronostica marcador: acertar el ganador de la tanda vale 1 punto.</small>
+                  <small>El marcador corresponde a los 90 minutos. Si el partido llega a penales, acertar el ganador de la tanda suma 1 punto extra.</small>
                 </div>
               )}
 
-              {match.matchType === 'PENALTIES_ONLY' ? (
-                (match.result.isVoid || (isFinal && penaltyWinner)) && (
-                  <div className="match-result">
-                    {match.result.isVoid
-                      ? <strong>Partido anulado · no suma ni resta puntos</strong>
-                      : <><span>Definición</span><strong>Ganó {penaltyWinner}</strong></>}
-                  </div>
-                )
-              ) : (
-                (match.result.isVoid || resultHome !== null || resultAway !== null) && (
-                  <div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
-                    {match.result.isVoid ? (
-                      <strong>Partido anulado · no suma ni resta puntos</strong>
-                    ) : (
-                      <>
-                        <span>{isFinal ? 'Resultado 90′' : isLive ? 'Resultado actual' : 'Resultado'}</span>
-                        <strong>{resultHome ?? '-'} - {resultAway ?? '-'}</strong>
-                        {isFinal && match.result.wentToPenalties && penaltyWinner && <small>Ganó por penales: {penaltyWinner}</small>}
-                      </>
-                    )}
-                  </div>
-                )
+              {(match.result.isVoid || resultHome !== null || resultAway !== null) && (
+                <div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
+                  {match.result.isVoid ? (
+                    <strong>Partido anulado · no suma ni resta puntos</strong>
+                  ) : (
+                    <>
+                      <span>{isFinal ? 'Resultado 90′' : isLive ? 'Resultado actual' : 'Resultado'}</span>
+                      <strong>{resultHome ?? '-'} - {resultAway ?? '-'}</strong>
+                      {isFinal && match.result.wentToPenalties && penaltyWinner && <small>Ganó por penales: {penaltyWinner}</small>}
+                    </>
+                  )}
+                </div>
               )}
 
               <div className="prediction-footer">
@@ -469,7 +459,7 @@ export default function ParticipantRound() {
                 {match.score && (
                   <div className="score-earned">
                     <strong>{match.score.points} pt{match.score.points === 1 ? '' : 's'} · {scoreLabel(match.score.resultType)}</strong>
-                    {match.score.extraPoints > 0 && match.matchType === 'NORMAL' && <small>+{match.score.extraPoints} por definición</small>}
+                    {match.score.extraPoints > 0 && <small>+{match.score.extraPoints} por penales</small>}
                     {match.score.provisional && <small>provisional</small>}
                   </div>
                 )}
