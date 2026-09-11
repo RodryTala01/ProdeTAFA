@@ -10,6 +10,9 @@
   "triggers": {
     "crons": ["*/10 * * * *"]
   },
+  "secrets": {
+    "required": ["FOOTBALL_API_KEY"]
+  },
   "d1_databases": [
     {
       "binding": "DB",
