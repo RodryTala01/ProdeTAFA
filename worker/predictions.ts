@@ -1,3 +1,6 @@
+import { recalculateRoundScores } from './scoring';
+import { predictionHistory } from './prediction-history';
+
 type Env = {
   DB: D1Database;
 };
@@ -32,6 +35,9 @@ type MatchRow = {
   predicted_home_score: number | null;
   predicted_away_score: number | null;
   predicted_extra_team_provider_id: string | null;
+  official_home_score: number | null;
+  official_away_score: number | null;
+  official_extra_team: string | null;
   score_base_points: number | null;
   score_extra_points: number | null;
   score_total_points: number | null;
@@ -203,6 +209,9 @@ async function getParticipantRound(request: Request, env: Env) {
             m.winning_team_provider_id, m.went_to_penalties, m.is_void,
             p.predicted_home_score, p.predicted_away_score,
             p.predicted_extra_team_provider_id,
+            o.predicted_home_score AS official_home_score,
+            o.predicted_away_score AS official_away_score,
+            o.predicted_extra_team_provider_id AS official_extra_team,
             ps.base_points AS score_base_points,
             ps.extra_points AS score_extra_points,
             ps.total_points AS score_total_points,
@@ -210,7 +219,8 @@ async function getParticipantRound(request: Request, env: Env) {
             ps.is_provisional AS score_is_provisional
      FROM matches m
      LEFT JOIN predictions p ON p.match_id = m.id AND p.user_id = ?
-     LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id
+     LEFT JOIN official_predictions o ON o.match_id = m.id AND o.user_id = p.user_id
+     LEFT JOIN prediction_scores ps ON ps.prediction_id = o.id
      WHERE m.round_id = ?
      ORDER BY m.kickoff_at, m.id`,
   ).bind(user.id, round.id).all<MatchRow>();
@@ -261,9 +271,14 @@ async function getParticipantRound(request: Request, env: Env) {
           logoUrl: match.away_team_logo_url,
         },
         prediction: {
-          homeScore: match.predicted_home_score,
-          awayScore: match.predicted_away_score,
-          extraTeamId: match.predicted_extra_team_provider_id,
+          homeScore: round.status === 'finished' || now >= new Date(match.kickoff_at).getTime() + 60_000 ? match.official_home_score : match.predicted_home_score,
+          awayScore: round.status === 'finished' || now >= new Date(match.kickoff_at).getTime() + 60_000 ? match.official_away_score : match.predicted_away_score,
+          extraTeamId: round.status === 'finished' || now >= new Date(match.kickoff_at).getTime() + 60_000 ? match.official_extra_team : match.predicted_extra_team_provider_id,
+        },
+        officialPrediction: {
+          homeScore: match.official_home_score,
+          awayScore: match.official_away_score,
+          extraTeamId: match.official_extra_team,
         },
         result: {
           homeCurrent: match.home_score_current,
@@ -335,17 +350,21 @@ async function savePrediction(request: Request, env: Env, matchId: number) {
     return error(caught instanceof Error ? caught.message : 'Pronóstico inválido');
   }
 
-  await env.DB.prepare(
+  const saved = await env.DB.prepare(
     `INSERT INTO predictions (
        user_id, match_id, predicted_home_score, predicted_away_score,
        predicted_extra_team_provider_id, updated_at
-     ) VALUES (?, ?, ?, ?, ?, datetime('now'))
+     ) SELECT ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now')
+       WHERE EXISTS (SELECT 1 FROM matches m JOIN rounds r ON r.id=m.round_id
+         WHERE m.id=? AND r.status='open' AND julianday(m.kickoff_at)+1.0/1440 > julianday('now'))
      ON CONFLICT(user_id, match_id) DO UPDATE SET
        predicted_home_score = excluded.predicted_home_score,
        predicted_away_score = excluded.predicted_away_score,
        predicted_extra_team_provider_id = excluded.predicted_extra_team_provider_id,
+       is_admin_override = 0,
        updated_at = datetime('now')`,
-  ).bind(user.id, matchId, homeScore, awayScore, extraTeamId).run();
+  ).bind(user.id, matchId, homeScore, awayScore, match.match_type === 'PENALTIES_ONLY' ? extraTeamId : null, matchId).run();
+  if (Number(saved.meta.changes) !== 1) return error('Este partido ya cerró', 409);
 
   return json({ ok: true, savedAt: new Date().toISOString() });
 }
@@ -395,14 +414,23 @@ async function submitRound(request: Request, env: Env, roundId: number) {
   }
   if (openCount === 0) return error('No quedan partidos abiertos para enviar', 409);
 
-  await env.DB.prepare(
+  try {
+    await env.DB.prepare(
     `INSERT INTO round_submissions (
        round_id, user_id, first_submitted_at, last_submitted_at, submission_count
-     ) VALUES (?, ?, datetime('now'), datetime('now'), 1)
+     ) VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'), 1)
      ON CONFLICT(round_id, user_id) DO UPDATE SET
-       last_submitted_at = datetime('now'),
+       last_submitted_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'),
        submission_count = submission_count + 1`,
   ).bind(roundId, user.id).run();
+  } catch (caught) {
+    const message = caught instanceof Error ? caught.message : '';
+    if (['La fecha no está abierta', 'No quedan partidos abiertos', 'Faltan completar'].some((text) => message.includes(text))) {
+      return error('La fecha cambió o faltan partidos por completar. Actualizá y revisá el pronóstico.', 409);
+    }
+    throw caught;
+  }
+  await recalculateRoundScores(roundId, env);
 
   const submission = await env.DB.prepare(
     `SELECT last_submitted_at, submission_count
@@ -427,6 +455,14 @@ export async function handlePredictions(request: Request, env: Env): Promise<Res
   }
 
   if (!pathname.startsWith('/api/participant/')) return null;
+
+  const historyMatch = pathname.match(/^\/api\/participant\/rounds\/(\d+)\/prediction-history$/);
+  if (historyMatch) {
+    const user = await sessionUser(request, env);
+    if (!user || user.role !== 'participant') return error('Acceso de participante requerido', 403);
+    if (request.method !== 'GET') return error('Método no permitido', 405);
+    return predictionHistory(request, env.DB, Number(historyMatch[1]), user.id);
+  }
 
   if (pathname === '/api/participant/rounds' && request.method === 'GET') {
     return listParticipantRounds(request, env);

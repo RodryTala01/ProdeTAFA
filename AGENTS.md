@@ -69,7 +69,7 @@ Aplicación permanente de Prode para aproximadamente 40 participantes. Priorizar
 
 - No auditar cada tecla/cambio de borrador antes del primer envío; el autosave no debe generar ruido histórico.
 - Al primer envío, registrar fecha/hora y el estado presentado.
-- Desde el primer envío en adelante, registrar cambios efectivos con valor anterior y nuevo.
+- Registrar cambios oficiales únicamente al Reenviar, comparando la versión oficial anterior con la nueva; nunca auditar autosaves como modificaciones oficiales.
 - Registrar por separado cada `Reenviar`.
 - No crear evento si el valor guardado es idéntico al anterior.
 - Incluir cambios de marcador y de selección de `Penales`.
@@ -243,6 +243,8 @@ Patrón conceptual indicado por el usuario:
 - `0001_initial.sql`: núcleo del Prode.
 - `0002_league_seasons.sql`: temporadas, fechas de Liga y participantes.
 - `0003_league_entry_slot.sql`: `league_participants.eligible_from_slot` para altas tardías sin retroactividad.
+- `0004_prediction_history.sql`: auditoría anterior, conservada como legado sin convertir sus cambios de borrador en eventos oficiales.
+- `0005_official_predictions.sql`: separación de borradores y oficiales; publicación y auditoría oficial atómicas. Scoring y revelado consumen sólo official_predictions. Los partidos bloqueados conservan su versión oficial previa. Las correcciones Admin son explícitas, con motivo y auditoría.
 
 ## Regla de avance
 

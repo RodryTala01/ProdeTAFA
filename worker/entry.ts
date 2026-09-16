@@ -91,11 +91,11 @@ export async function syncOpenLeagueParticipants(env: Env) {
 }
 
 async function deepHealth(env: Env) {
-  const required = ['league_seasons', 'league_rounds', 'league_participants'];
+  const required = ['league_seasons', 'league_rounds', 'league_participants', 'official_predictions', 'prediction_submission_events'];
   const result = await env.DB.prepare(
     `SELECT name FROM sqlite_master
      WHERE type = 'table'
-       AND name IN ('league_seasons', 'league_rounds', 'league_participants')`,
+       AND name IN ('league_seasons', 'league_rounds', 'league_participants', 'official_predictions', 'prediction_submission_events')`,
   ).all<{ name: string }>();
   const found = new Set((result.results ?? []).map((row) => row.name));
   const missingTables = required.filter((name) => !found.has(name));
@@ -117,6 +117,7 @@ async function deepHealth(env: Env) {
     ok,
     app: 'prode-tafa',
     leagueSchemaReady: missingTables.length === 0 && eligibilityColumnReady,
+    officialPredictionsReady: found.has('official_predictions') && found.has('prediction_submission_events'),
     singleOpenRoundReady,
     openRoundCount,
     missingTables,

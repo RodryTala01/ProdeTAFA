@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { nextPredictionField, type PredictionField } from './prediction-focus';
+import PredictionHistory from './PredictionHistory';
 import FinishedPredictions from './FinishedPredictions';
 import RoundRanking from './RoundRanking';
 import './participant-round.css';
@@ -19,6 +21,7 @@ type Match = {
     awayScore: number | null;
     extraTeamId: string | null;
   };
+  officialPrediction: { homeScore: number | null; awayScore: number | null; extraTeamId: string | null };
   result: {
     homeCurrent: number | null;
     awayCurrent: number | null;
@@ -84,11 +87,13 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
 
 function formatKickoff(value: string) {
   return new Intl.DateTimeFormat('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
   }).format(new Date(value));
 }
 
@@ -105,11 +110,14 @@ function formatDuration(milliseconds: number) {
 }
 
 function countdownLabel(match: Match, now: number) {
-  const kickoff = new Date(match.kickoffAt).getTime();
   const lock = new Date(match.lockedAt).getTime();
   if (now >= lock) return 'Cerrado';
-  if (now >= kickoff) return `Cierra en ${formatDuration(lock - now)}`;
-  return `Empieza en ${formatDuration(kickoff - now)}`;
+  return `Cierra en ${formatDuration(lock - now)}`;
+}
+
+function submissionTime(value: string) {
+  const utc = /(Z|[+-]\d{2}:\d{2})$/.test(value) ? value : `${value.replace(' ', 'T')}Z`;
+  return new Intl.DateTimeFormat('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(utc));
 }
 
 function scoreLabel(resultType: string | null) {
@@ -141,7 +149,10 @@ export default function ParticipantRound() {
   const [success, setSuccess] = useState('');
   const [now, setNow] = useState(Date.now());
   const timers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  const pendingSaves = useRef<Record<number, Promise<void>>>({});
   const awayInputs = useRef<Record<number, HTMLInputElement | null>>({});
+  const homeInputs = useRef<Record<number, HTMLInputElement | null>>({});
+  const penaltyInputs = useRef<Record<number, HTMLButtonElement | null>>({});
   const serverOffset = useRef(0);
   const selectedRoundIdRef = useRef<number | null>(null);
 
@@ -212,6 +223,7 @@ export default function ParticipantRound() {
   }, []);
 
   async function chooseRound(roundId: number) {
+    Object.values(timers.current).forEach(clearTimeout);
     selectedRoundIdRef.current = roundId;
     setSelectedRoundId(roundId);
     setDrafts({});
@@ -222,10 +234,19 @@ export default function ParticipantRound() {
   }
 
   function locked(match: Match) {
-    return round?.status === 'finished' || now >= new Date(match.lockedAt).getTime();
+    return round?.status !== 'open' || Date.now() + serverOffset.current >= new Date(match.lockedAt).getTime();
   }
 
-  async function saveMatch(match: Match, draft: Draft) {
+  function saveMatch(match: Match, draft: Draft): Promise<void> {
+    // Serialize each match so an older autosave cannot overwrite a newer edit
+    // or arrive after the explicit submission snapshot.
+    const previous = pendingSaves.current[match.id] ?? Promise.resolve();
+    const next = previous.catch(() => {}).then(() => persistMatch(match, draft));
+    pendingSaves.current[match.id] = next;
+    return next;
+  }
+
+  async function persistMatch(match: Match, draft: Draft) {
     setSaveState((current) => ({ ...current, [match.id]: 'Guardando…' }));
     try {
       const homeScore = draft.homeScore === '' ? null : Number(draft.homeScore);
@@ -242,6 +263,7 @@ export default function ParticipantRound() {
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'Error al guardar';
       setSaveState((current) => ({ ...current, [match.id]: message }));
+      throw caught;
     }
   }
 
@@ -249,14 +271,38 @@ export default function ParticipantRound() {
     const next = { ...drafts[match.id], ...patch };
     setDrafts((current) => ({ ...current, [match.id]: next }));
     if (timers.current[match.id]) clearTimeout(timers.current[match.id]);
-    timers.current[match.id] = setTimeout(() => void saveMatch(match, next), 500);
+    timers.current[match.id] = setTimeout(() => void saveMatch(match, next).catch(() => {}), 500);
   }
 
   function updateHomeScore(match: Match, value: string) {
     updateDraft(match, { homeScore: value });
-    if (value !== '') {
-      requestAnimationFrame(() => awayInputs.current[match.id]?.focus());
+    if (/^\d{1,2}$/.test(value)) advanceFocus(match, 'home');
+  }
+
+  function focusEditable(input: HTMLInputElement | HTMLButtonElement | null | undefined) {
+    if (input && !input.disabled) {
+      input.focus();
+      if (input instanceof HTMLInputElement) input.select();
     }
+  }
+
+  function advanceFocus(match: Match, completed: PredictionField) {
+    if (!round) return;
+    const inputs = { home: homeInputs.current, away: awayInputs.current, penalty: penaltyInputs.current };
+    const target = nextPredictionField(round.matches, match.id, completed, Date.now() + serverOffset.current,
+      round.status === 'open' && !submitting, (id, field) => Boolean(inputs[field][id] && !inputs[field][id]?.disabled));
+    if (target) focusEditable(inputs[target.field][target.id]);
+  }
+
+  function updateAwayScore(match: Match, value: string) {
+    updateDraft(match, { awayScore: value });
+    if (!/^\d{1,2}$/.test(value) || locked(match)) return;
+    advanceFocus(match, 'away');
+  }
+
+  function updatePenalty(match: Match, teamId: string | null) {
+    updateDraft(match, { extraTeamId: teamId });
+    if (teamId) advanceFocus(match, 'penalty');
   }
 
   async function submitRound() {
@@ -266,6 +312,7 @@ export default function ParticipantRound() {
     setSuccess('');
     try {
       for (const timer of Object.values(timers.current)) clearTimeout(timer);
+      await Promise.all(Object.values(pendingSaves.current).map((save) => save.catch(() => {})));
       for (const match of round.matches) {
         if (!locked(match)) await saveMatch(match, drafts[match.id]);
       }
@@ -279,7 +326,8 @@ export default function ParticipantRound() {
         lastSubmittedAt: data.lastSubmittedAt,
         submissionCount: data.submissionCount,
       } : current);
-      setSuccess('Pronóstico enviado correctamente. Podés seguir editando los partidos que continúen abiertos.');
+      await loadRound(false, round.id);
+      setSuccess('Pronóstico enviado correctamente. Los próximos cambios serán borradores hasta Reenviar.');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo enviar el pronóstico');
     } finally {
@@ -347,7 +395,7 @@ export default function ParticipantRound() {
         <div className="participant-summary">
           <div className="points-total"><span>{isFinished ? 'Puntos finales' : 'Puntos actuales'}</span><strong>{round.pointsTotal}</strong></div>
           <div className={`submission-state ${round.submitted ? 'submission-state--ok' : ''}`}>
-            <strong>{isFinished ? 'Finalizado' : round.submitted ? 'Enviado' : 'Borrador'}</strong>
+            <strong>{isFinished ? 'Finalizado' : round.submitted ? `Pronóstico enviado · ${round.lastSubmittedAt ? submissionTime(round.lastSubmittedAt) : ''}` : 'Borrador'}</strong>
             <span>{round.submitted ? `Envíos: ${round.submissionCount}` : 'Sin envío registrado'}</span>
           </div>
         </div>
@@ -358,8 +406,12 @@ export default function ParticipantRound() {
 
       <div className="prediction-list">
         {round.matches.map((match) => {
-          const draft = drafts[match.id] ?? { homeScore: '', awayScore: '', extraTeamId: null };
           const isLocked = locked(match);
+          const draft = isLocked ? {
+            homeScore: match.officialPrediction.homeScore === null ? '' : String(match.officialPrediction.homeScore),
+            awayScore: match.officialPrediction.awayScore === null ? '' : String(match.officialPrediction.awayScore),
+            extraTeamId: match.officialPrediction.extraTeamId,
+          } : drafts[match.id] ?? { homeScore: '', awayScore: '', extraTeamId: null };
           const isFinal = FINAL_STATUSES.has(match.status);
           const isLive = LIVE_STATUSES.has(match.status);
           const resultHome = isFinal ? (match.result.homeRegulation ?? match.result.homeCurrent) : match.result.homeCurrent;
@@ -375,12 +427,13 @@ export default function ParticipantRound() {
               <div className="score-side">
                 <Team name={match.home.name} logoUrl={match.home.logoUrl} />
                 <input
+                  ref={(element) => { homeInputs.current[match.id] = element; }}
                   type="number"
                   min="0"
                   max="99"
                   inputMode="numeric"
                   value={draft.homeScore}
-                  disabled={isLocked}
+                  disabled={isLocked || submitting}
                   onChange={(event) => updateHomeScore(match, event.target.value)}
                   aria-label={`Goles ${match.home.name}`}
                 />
@@ -394,8 +447,8 @@ export default function ParticipantRound() {
                   max="99"
                   inputMode="numeric"
                   value={draft.awayScore}
-                  disabled={isLocked}
-                  onChange={(event) => updateDraft(match, { awayScore: event.target.value })}
+                  disabled={isLocked || submitting}
+                  onChange={(event) => updateAwayScore(match, event.target.value)}
                   aria-label={`Goles ${match.away.name}`}
                 />
                 <Team name={match.away.name} logoUrl={match.away.logoUrl} />
@@ -408,6 +461,7 @@ export default function ParticipantRound() {
               <div className="prediction-meta">
                 <span>{match.competitionName || 'Competencia'}</span>
                 <time>{formatKickoff(match.kickoffAt)}</time>
+                <time dateTime={match.lockedAt}>Cierre: {formatKickoff(match.lockedAt)} (Argentina)</time>
                 <b className={isLocked ? 'match-countdown match-countdown--closed' : 'match-countdown'}>
                   {isFinished ? 'Finalizado' : countdownLabel(match, now)}
                 </b>
@@ -417,21 +471,24 @@ export default function ParticipantRound() {
 
               {match.matchType === 'PENALTIES_ONLY' && (
                 <div className="penalty-prediction">
-                  <p><strong>Si se define por penales, ¿quién gana la tanda?</strong></p>
+                  <p><strong>Penales</strong></p>
                   <div className="penalty-options">
                     <button
+                      ref={(element) => { penaltyInputs.current[match.id] = element; }}
                       type="button"
-                      disabled={isLocked}
+                      disabled={isLocked || submitting}
+                      aria-pressed={draft.extraTeamId === match.home.id}
                       className={`penalty-option ${draft.extraTeamId === match.home.id ? 'penalty-option--selected' : ''}`}
-                      onClick={() => updateDraft(match, { extraTeamId: match.home.id })}
+                      onClick={() => updatePenalty(match, match.home.id)}
                     >
                       <Team name={match.home.name} logoUrl={match.home.logoUrl} />
                     </button>
                     <button
                       type="button"
-                      disabled={isLocked}
+                      disabled={isLocked || submitting}
+                      aria-pressed={draft.extraTeamId === match.away.id}
                       className={`penalty-option ${draft.extraTeamId === match.away.id ? 'penalty-option--selected' : ''}`}
-                      onClick={() => updateDraft(match, { extraTeamId: match.away.id })}
+                      onClick={() => updatePenalty(match, match.away.id)}
                     >
                       <Team name={match.away.name} logoUrl={match.away.logoUrl} />
                     </button>
@@ -472,16 +529,17 @@ export default function ParticipantRound() {
       {!isFinished && (
         <section className="card submit-card">
           <div className="submit-copy">
-            <strong>{round.submitted ? 'Actualizar envío' : 'Enviar pronóstico'}</strong>
+            <strong>{round.submitted ? 'Reenviar' : 'Enviar pronóstico'}</strong>
             <p>Todos los partidos que todavía estén abiertos deben estar completos.</p>
             {error && <div className="alert alert--error submit-alert">{error}</div>}
             {success && <div className="alert alert--success submit-alert">{success}</div>}
           </div>
           <button className="button button--primary" disabled={submitting || openMatches.length === 0} onClick={() => void submitRound()}>
-            {submitting ? 'Enviando…' : round.submitted ? 'Volver a enviar' : 'Enviar pronóstico'}
+            {submitting ? 'Enviando…' : round.submitted ? 'Reenviar' : 'Enviar pronóstico'}
           </button>
         </section>
       )}
+      <PredictionHistory key={round.id} roundId={round.id} own />
     </div>
   );
 }

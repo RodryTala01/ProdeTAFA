@@ -50,28 +50,29 @@ El núcleo del Prode y la Liga ya funciona en entorno local y fue probado por el
 
 Prioridad inmediata.
 
-- [ ] Crear historial/auditoría detallada de pronósticos.
-- [ ] Registrar primer envío con fecha/hora.
-- [ ] No auditar borradores previos al primer envío.
-- [ ] Desde el primer envío, registrar cada cambio efectivo con valor anterior/nuevo.
-- [ ] Registrar cambios de marcador y de selección `Penales`.
-- [ ] Registrar cada reenvío.
-- [ ] Después del primer envío, los cambios quedan pendientes hasta tocar `Reenviar`.
-- [ ] Historial consultable por Admin desde Fecha y desde Participante.
-- [ ] Participante puede ver su propio historial.
-- [ ] Filtros Admin: fecha, participante y tipo de evento.
-- [ ] Mostrar `Enviado HH:MM` / última hora de presentación.
-- [ ] Permitir identificar fácilmente quién todavía no presentó, sin construir todavía un dashboard estadístico avanzado.
+- [x] Crear historial/auditoría detallada de pronósticos.
+- [x] Registrar primer envío con fecha/hora.
+- [x] No auditar borradores previos al primer envío.
+- [x] Al Reenviar, registrar cada cambio oficial efectivo con valor anterior/nuevo.
+- [x] Registrar cambios de marcador y de selección `Penales`.
+- [x] Registrar cada reenvío.
+- [x] Después del primer envío, los cambios quedan pendientes hasta tocar `Reenviar`.
+- [x] Historial consultable por Admin desde Fecha y desde Participante.
+- [x] Participante puede ver su propio historial.
+- [x] Filtros Admin: fecha, participante y tipo de evento.
+- [x] Mostrar `Enviado HH:MM` / última hora de presentación.
+- [x] Permitir identificar fácilmente quién todavía no presentó, sin construir todavía un dashboard estadístico avanzado.
 
 ### Entrada rápida de marcadores
 
-- [ ] NORMAL: `Local → Visitante → Local del siguiente partido`.
-- [ ] PENALTIES_ONLY: `Local → Visitante → Penales → siguiente partido`.
-- [ ] Avance automático con un dígito válido.
-- [ ] Saltar controles bloqueados/disabled.
-- [ ] Optimizar para teclado numérico móvil.
-- [ ] Mostrar hora exacta de cierre + cuenta regresiva por partido.
-- [ ] Texto visible para elección extra: `Penales`.
+- [x] NORMAL: `Local → Visitante → Local del siguiente partido`.
+- [x] PENALTIES_ONLY: `Local → Visitante → Penales → siguiente partido`.
+- [x] Avance automático con un dígito válido.
+- [x] Saltar controles bloqueados/disabled.
+- [x] Usar teclado numérico móvil y navegación de foco.
+- [ ] Validar interacción en teléfono físico.
+- [x] Mostrar hora exacta de cierre + cuenta regresiva por partido.
+- [x] Texto visible para elección extra: `Penales`.
 
 ## Pulido de Liga
 

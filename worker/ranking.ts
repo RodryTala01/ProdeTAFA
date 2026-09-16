@@ -111,7 +111,7 @@ async function buildRanking(roundId: number, env: Env) {
        COALESCE(SUM(CASE WHEN ps.is_provisional = 1 THEN 1 ELSE 0 END), 0) AS provisional_count
      FROM round_submissions rs
      JOIN users u ON u.id = rs.user_id
-     LEFT JOIN predictions p ON p.user_id = u.id
+     LEFT JOIN official_predictions p ON p.user_id = u.id
        AND p.match_id IN (SELECT id FROM matches WHERE round_id = ?)
      LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id
      WHERE rs.round_id = ?
@@ -201,7 +201,7 @@ async function participantReveal(request: Request, env: Env, roundId: number) {
             p.predicted_home_score, p.predicted_away_score,
             p.predicted_extra_team_provider_id,
             ps.total_points
-     FROM predictions p
+     FROM official_predictions p
      JOIN matches m ON m.id = p.match_id
      JOIN round_submissions rs ON rs.round_id = m.round_id AND rs.user_id = p.user_id
      LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id

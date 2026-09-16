@@ -4,6 +4,7 @@ type Env = {
 
 export type PredictionScoringInput = {
   prediction_id: number;
+  scoring_revision?: string;
   predicted_home_score: number | null;
   predicted_away_score: number | null;
   predicted_extra_team_provider_id: string | null;
@@ -30,6 +31,11 @@ export type ScoreCalculation = {
 
 const FINAL_STATUSES = new Set(['FT', 'AET', 'PEN']);
 const LIVE_STATUSES = new Set(['1H', 'HT', '2H', 'ET', 'BT', 'P', 'LIVE']);
+// Compare inputs again when persisting: concurrent result sync or resubmission
+// cannot write a calculation belonging to an older official version.
+const REVISION = `json_array(p.version,m.match_type,m.status,m.home_score_current,m.away_score_current,
+  m.home_score_regulation,m.away_score_regulation,m.winning_team_provider_id,
+  m.qualified_team_provider_id,m.went_to_extra_time,m.went_to_penalties,m.is_void)`;
 
 function sign(home: number, away: number) {
   return home === away ? 0 : home > away ? 1 : -1;
@@ -92,11 +98,14 @@ async function saveScore(
   env: Env,
   predictionId: number,
   calculation: ScoreCalculation,
+  revision: string,
 ) {
   await env.DB.prepare(
     `INSERT INTO prediction_scores
       (prediction_id, result_type, base_points, extra_points, total_points, is_provisional, calculated_at)
-     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+     SELECT ?, ?, ?, ?, ?, ?, datetime('now')
+     WHERE EXISTS (SELECT 1 FROM official_predictions p JOIN matches m ON m.id=p.match_id
+       WHERE p.id=? AND ${REVISION}=?)
      ON CONFLICT(prediction_id) DO UPDATE SET
       result_type=excluded.result_type, base_points=excluded.base_points,
       extra_points=excluded.extra_points, total_points=excluded.total_points,
@@ -108,18 +117,19 @@ async function saveScore(
     calculation.extraPoints,
     calculation.totalPoints,
     calculation.provisional ? 1 : 0,
+    predictionId, revision,
   ).run();
 }
 
 export async function recalculateRoundScores(roundId: number, env: Env) {
   const rows = await env.DB.prepare(
-    `SELECT p.id AS prediction_id, p.predicted_home_score, p.predicted_away_score,
+    `SELECT p.id AS prediction_id, ${REVISION} AS scoring_revision, p.predicted_home_score, p.predicted_away_score,
             p.predicted_extra_team_provider_id, m.match_type, m.status,
             m.home_score_current, m.away_score_current,
             m.home_score_regulation, m.away_score_regulation,
             m.winning_team_provider_id, m.qualified_team_provider_id,
             m.went_to_extra_time, m.went_to_penalties, m.is_void
-     FROM predictions p
+     FROM official_predictions p
      JOIN matches m ON m.id = p.match_id
      WHERE m.round_id = ?`,
   ).bind(roundId).all<PredictionScoringInput>();
@@ -128,12 +138,14 @@ export async function recalculateRoundScores(roundId: number, env: Env) {
   for (const row of rows.results ?? []) {
     const calculation = calculatePredictionScore(row);
     if (!calculation) {
-      await env.DB.prepare('DELETE FROM prediction_scores WHERE prediction_id = ?')
-        .bind(row.prediction_id)
+      await env.DB.prepare(`DELETE FROM prediction_scores WHERE prediction_id = ?
+        AND EXISTS (SELECT 1 FROM official_predictions p JOIN matches m ON m.id=p.match_id
+          WHERE p.id=? AND ${REVISION}=?)`)
+        .bind(row.prediction_id, row.prediction_id, row.scoring_revision ?? '')
         .run();
       continue;
     }
-    await saveScore(env, row.prediction_id, calculation);
+    await saveScore(env, row.prediction_id, calculation, row.scoring_revision!);
     calculated += 1;
   }
 

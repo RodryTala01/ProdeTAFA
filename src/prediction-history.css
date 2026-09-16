@@ -1,0 +1,8 @@
+.prediction-history { padding: 1.25rem; overflow-wrap: anywhere; }
+.prediction-history label { display: grid; gap: .5rem; margin: 1rem 0; }
+.prediction-history select { width: 100%; min-height: 44px; }
+.prediction-timeline { list-style: none; padding: 0; }
+.prediction-timeline > li { border-left: 3px solid var(--accent, #64748b); padding: .75rem 1rem; margin: 1rem 0; }
+.prediction-timeline time, .prediction-timeline small { display: block; margin: .35rem 0; }
+.prediction-timeline summary { cursor: pointer; padding: .5rem 0; }
+.penalty-option:focus-visible { outline: 3px solid #38bdf8; outline-offset: 3px; }

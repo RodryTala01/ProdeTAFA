@@ -100,7 +100,7 @@ async function overallStandings(request: Request, env: Env) {
      JOIN rounds r ON r.id = rs.round_id AND r.status = 'finished'
      JOIN users u ON u.id = rs.user_id AND u.role = 'participant'
      LEFT JOIN matches m ON m.round_id = r.id
-     LEFT JOIN predictions p ON p.user_id = u.id AND p.match_id = m.id
+     LEFT JOIN official_predictions p ON p.user_id = u.id AND p.match_id = m.id
      LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id
      GROUP BY u.id, u.full_name
      ORDER BY points DESC, fulls DESC, partials DESC, errors ASC, extras DESC, u.full_name COLLATE NOCASE`,
@@ -117,7 +117,7 @@ async function overallStandings(request: Request, env: Env) {
        FROM round_submissions rs
        JOIN rounds r ON r.id = rs.round_id AND r.status = 'finished'
        LEFT JOIN matches m ON m.round_id = r.id
-       LEFT JOIN predictions p ON p.user_id = rs.user_id AND p.match_id = m.id
+       LEFT JOIN official_predictions p ON p.user_id = rs.user_id AND p.match_id = m.id
        LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id
        WHERE rs.user_id = ?
        GROUP BY r.id, r.name, r.finished_at

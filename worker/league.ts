@@ -155,7 +155,7 @@ async function buildStandings(env: Env, seasonId: number) {
       AND lr.slot_number >= lp.eligible_from_slot
      LEFT JOIN round_submissions rs ON rs.round_id = lr.round_id AND rs.user_id = lp.user_id
      LEFT JOIN matches m ON m.round_id = lr.round_id
-     LEFT JOIN predictions p ON p.user_id = lp.user_id AND p.match_id = m.id
+     LEFT JOIN official_predictions p ON p.user_id = lp.user_id AND p.match_id = m.id
      LEFT JOIN prediction_scores ps ON ps.prediction_id = p.id
      WHERE lp.season_id = ?
      GROUP BY lp.user_id, u.full_name, lp.joined_at, lp.eligible_from_slot

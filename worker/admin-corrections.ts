@@ -1,4 +1,5 @@
 import { recalculateRoundScores } from './scoring';
+import { predictionHistory } from './prediction-history';
 
 type Env = {
   DB: D1Database;
@@ -151,7 +152,7 @@ async function getCorrectionsData(request: Request, env: Env, roundId: number) {
     `SELECT p.id, p.user_id, p.match_id,
             p.predicted_home_score, p.predicted_away_score,
             p.predicted_extra_team_provider_id, p.is_admin_override
-     FROM predictions p
+     FROM official_predictions p
      JOIN matches m ON m.id = p.match_id
      WHERE m.round_id = ?`,
   ).bind(roundId).all<PredictionRow>();
@@ -478,7 +479,7 @@ async function overridePrediction(
   const existing = await env.DB.prepare(
     `SELECT id, predicted_home_score, predicted_away_score,
             predicted_extra_team_provider_id, is_admin_override
-     FROM predictions
+     FROM official_predictions
      WHERE user_id = ? AND match_id = ? LIMIT 1`,
   ).bind(userId, matchId).first<PredictionRow>();
 
@@ -489,7 +490,7 @@ async function overridePrediction(
     adminOverride: Boolean(existing.is_admin_override),
   } : null;
 
-  await env.DB.prepare(
+  const draftStatement = env.DB.prepare(
     `INSERT INTO predictions
       (user_id, match_id, predicted_home_score, predicted_away_score,
        predicted_extra_team_provider_id, is_admin_override, updated_at)
@@ -500,14 +501,7 @@ async function overridePrediction(
        predicted_extra_team_provider_id = excluded.predicted_extra_team_provider_id,
        is_admin_override = 1,
        updated_at = datetime('now')`,
-  ).bind(userId, matchId, homeScore, awayScore, extraTeamId).run();
-
-  const saved = await env.DB.prepare(
-    `SELECT id FROM predictions WHERE user_id = ? AND match_id = ? LIMIT 1`,
-  ).bind(userId, matchId).first<{ id: number }>();
-  if (!saved) return error('No se pudo guardar la corrección', 500);
-
-  const calculated = await recalculateRoundScores(roundId, env);
+  ).bind(userId, matchId, homeScore, awayScore, extraTeamId);
   const after = {
     roundId,
     participantId: userId,
@@ -518,25 +512,50 @@ async function overridePrediction(
     extraTeamId,
     adminOverride: true,
     reason,
-    calculated,
   };
 
-  await env.DB.prepare(
+  const auditStatement = env.DB.prepare(
     `INSERT INTO audit_log
       (actor_user_id, action, entity_type, entity_id, before_json, after_json)
-     VALUES (?, 'prediction.admin_override', 'prediction', ?, ?, ?)`,
+     SELECT ?, 'prediction.admin_override', 'prediction', CAST(id AS TEXT), ?, ?
+     FROM predictions WHERE user_id=? AND match_id=?`,
   ).bind(
     auth.user!.id,
-    String(saved.id),
     before ? JSON.stringify(before) : null,
     JSON.stringify(after),
-  ).run();
+    userId, matchId,
+  );
+  const officialStatement = env.DB.prepare(
+    `INSERT INTO official_predictions
+      (id,user_id,match_id,predicted_home_score,predicted_away_score,predicted_extra_team_provider_id,is_admin_override,updated_at,source)
+     SELECT p.id,p.user_id,p.match_id,p.predicted_home_score,p.predicted_away_score,
+       p.predicted_extra_team_provider_id,1,strftime('%Y-%m-%dT%H:%M:%fZ','now'),'admin'
+     FROM predictions p WHERE p.user_id=? AND p.match_id=?
+       AND EXISTS (SELECT 1 FROM round_submissions WHERE user_id=? AND round_id=?)
+     ON CONFLICT(id) DO UPDATE SET
+       predicted_home_score=excluded.predicted_home_score,predicted_away_score=excluded.predicted_away_score,
+       predicted_extra_team_provider_id=excluded.predicted_extra_team_provider_id,
+       is_admin_override=1,updated_at=excluded.updated_at,source='admin',version=official_predictions.version+1`,
+  ).bind(userId, matchId, userId, roundId);
+  await env.DB.batch([draftStatement, officialStatement, auditStatement]);
+  const saved = await env.DB.prepare('SELECT id FROM predictions WHERE user_id=? AND match_id=?')
+    .bind(userId, matchId).first<{ id: number }>();
+  if (!saved) return error('No se pudo guardar la corrección', 500);
+  const calculated = await recalculateRoundScores(roundId, env);
 
   return json({ ok: true, predictionId: saved.id, calculated });
 }
 
 export async function handleAdminCorrections(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
+
+  const historyMatch = pathname.match(/^\/api\/admin\/rounds\/(\d+)\/prediction-history$/);
+  if (historyMatch) {
+    const auth = await requireAdmin(request, env);
+    if (auth.response) return auth.response;
+    if (request.method !== 'GET') return error('Método no permitido', 405);
+    return predictionHistory(request, env.DB, Number(historyMatch[1]));
+  }
 
   const dataMatch = pathname.match(/^\/api\/admin\/rounds\/(\d+)\/corrections$/);
   if (dataMatch && request.method === 'GET') {

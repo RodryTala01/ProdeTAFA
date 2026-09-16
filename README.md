@@ -64,10 +64,11 @@ La aplicación se despliega como una única unidad en Cloudflare Workers: fronte
 
 ```bash
 npm install
+npm run db:migrate:local
 npm run dev
 ```
 
-La configuración actual conecta D1 localmente contra la base remota del proyecto.
+El desarrollo usa una D1 local separada, persistida en `.wrangler/state`. El binding `DB` tiene `remote: false`; `npm run dev` no usa la D1 de producción. Las migraciones locales se aplican con `--local`. La base local conserva sus datos entre reinicios y requiere crear su propio administrador desde la web.
 
 ## Tests y build
 

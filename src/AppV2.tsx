@@ -1,3 +1,4 @@
+import PredictionHistoryBrowser from './PredictionHistoryBrowser';
 import { FormEvent, useEffect, useState } from 'react';
 import AdminRounds from './AdminRounds';
 import AdminLeague from './AdminLeague';
@@ -115,6 +116,7 @@ function Header({ user, subtitle, onLogout }: { user: User; subtitle: string; on
 }
 
 function ParticipantsAdmin() {
+  const [historyUser, setHistoryUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -180,10 +182,11 @@ function ParticipantsAdmin() {
         {error && <div className="alert alert--error">{error}</div>}{success && <div className="alert alert--success">{success}</div>}
         <div className="user-list">{users.map((entry) => <div className="user-row" key={entry.id}>
           <div className="avatar">{entry.fullName.slice(0, 1).toUpperCase()}</div><div className="user-data"><strong>{entry.fullName}</strong><span>{entry.phone} · {entry.role === 'admin' ? 'Administrador' : `Participante · ${entry.isActive ? 'Activo' : 'Inactivo'}`}</span></div>
-          {entry.role === 'participant' && <div className="topbar-actions"><button className="button button--secondary" onClick={() => { setResetUser(entry); setNewPassword(''); }}>Cambiar clave</button><button className="button button--ghost" disabled={loading} onClick={() => void toggleParticipant(entry)}>{entry.isActive ? 'Desactivar' : 'Reactivar'}</button></div>}
+          {entry.role === 'participant' && <div className="topbar-actions"><button className="button button--secondary" onClick={() => setHistoryUser(entry)}>Historial</button><button className="button button--secondary" onClick={() => { setResetUser(entry); setNewPassword(''); }}>Cambiar clave</button><button className="button button--ghost" disabled={loading} onClick={() => void toggleParticipant(entry)}>{entry.isActive ? 'Desactivar' : 'Reactivar'}</button></div>}
         </div>)}</div>
       </section>
     </div>
+    {historyUser && <section><h2>{historyUser.fullName}</h2><button className="button button--ghost" onClick={() => setHistoryUser(null)}>Cerrar historial</button><PredictionHistoryBrowser key={historyUser.id} participantId={historyUser.id} /></section>}
     {resetUser && <div className="modal-backdrop" onMouseDown={() => setResetUser(null)}><section className="modal card" onMouseDown={(event) => event.stopPropagation()}><span className="eyebrow">RESTABLECER CONTRASEÑA</span><h2>{resetUser.fullName}</h2><form className="form-stack" onSubmit={resetPassword}><Field label="Nueva contraseña" value={newPassword} onChange={setNewPassword} type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" /><div className="modal-actions"><button type="button" className="button button--ghost" onClick={() => setResetUser(null)}>Cancelar</button><button className="button button--primary" disabled={loading}>Guardar contraseña</button></div></form></section></div>}
   </>;
 }
@@ -216,7 +219,7 @@ function ParticipantDashboard({ user, onLogout }: { user: User; onLogout: () => 
           <button className={`admin-tab ${section === 'league' ? 'admin-tab--active' : ''}`} onClick={() => setSection('league')}>Liga</button>
           <button className={`admin-tab ${section === 'history' ? 'admin-tab--active' : ''}`} onClick={() => setSection('history')}>Historial</button>
         </nav>
-        {section === 'round' ? <ParticipantRound /> : section === 'league' ? <LeagueView /> : <ParticipantHistory />}
+        {section === 'round' ? <ParticipantRound /> : section === 'league' ? <LeagueView /> : <><PredictionHistoryBrowser own /><ParticipantHistory /></>}
       </section>
     </main>
   );

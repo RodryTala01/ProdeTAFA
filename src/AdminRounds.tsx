@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import RoundRanking from './RoundRanking';
 import AdminCorrections from './AdminCorrections';
+import PredictionHistory from './PredictionHistory';
 import './admin-rounds.css';
 
 type RoundSummary = { id: number; name: string; status: string; matchCount: number };
@@ -294,6 +295,7 @@ export default function AdminRounds() {
             )}
 
             {!isDraft && <RoundRanking roundId={selected.id} mode="admin" refreshToken={rankingRefresh} />}
+            <PredictionHistory key={selected.id} roundId={selected.id} />
 
             {!isDraft && (
               <AdminCorrections
