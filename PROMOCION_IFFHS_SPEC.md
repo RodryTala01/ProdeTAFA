@@ -1,6 +1,6 @@
 # ProdeTAFA — Promoción, zonas de Liga e IFFHS
 
-Estado: Promoción y zonas de tabla confirmadas en su estructura base. Los criterios IFFHS fueron corregidos tomando como fuente directa `TABLA IFFHS.xlsx`. Quedan por confirmar únicamente reglas que el archivo no explicita (por ejemplo desempate exacto del ranking IFFHS y si Liga/Copa C siguen vigentes o son históricas).
+Estado: Promoción, zonas de tabla e IFFHS confirmadas en su estructura y criterios actuales. Los criterios IFFHS toman como fuente directa `TABLA IFFHS.xlsx`. Liga C/Copa C quedan únicamente como formato histórico/futuro potencial y no deben activarse ni implementarse ahora salvo nueva definición del usuario.
 
 ## Promoción A/B
 
@@ -101,6 +101,15 @@ La lógica inferior debe calcularse desde el final de la tabla si cambia el núm
 - Se usa para formar bombos de Copa A, Copa B y Copa Total.
 - Los bombos se arman entre los participantes elegibles para esa competición, no tomando mecánicamente los primeros N de la tabla global.
 - El campeón vigente de la competición mantiene su privilegio/cabeza de serie cuando la regla de esa Copa así lo dispone.
+- Si dos o más participantes terminan con exactamente el mismo total IFFHS, **comparten el mismo puesto**. No se aplica ningún criterio adicional de desempate.
+
+## Liga C / Copa C
+
+- Liga C y Copa C existieron como formato histórico y sus criterios IFFHS se conservan para poder interpretar temporadas antiguas.
+- No están activas en la estructura actual.
+- No deben implementarse ahora como una tercera división operativa.
+- Si la cantidad de participantes crece y vuelve a ser necesaria una Liga C, el usuario definirá junto con el sistema sus reglas actuales, ascensos/descensos, clasificación a copas y relación con Liga A/B antes de activarla.
+- Los coeficientes IFFHS históricos de Liga C/Copa C quedan disponibles como referencia, pero no deben forzar automáticamente el formato futuro si este cambia.
 
 ## Criterios de puntuación — Ligas
 
@@ -125,6 +134,8 @@ Criterios exactos del archivo `TABLA IFFHS.xlsx`:
 - Posición en ranking de errores Liga B: **1 pt por posición de abajo hacia arriba**.
 
 ### Liga C
+
+Histórico/futuro potencial, no activo actualmente:
 
 - Campeón Liga C: **25 pts**.
 - Posición en Liga C: **1 punto por posición de abajo hacia arriba**. El campeón no suma este componente de posición.
@@ -155,6 +166,8 @@ Criterios exactos del archivo `TABLA IFFHS.xlsx`:
 - Puntos conseguidos en fase de grupos de Copa B: **× 0,75**.
 
 ### Copa C
+
+Histórica/futura potencial, no activa actualmente:
 
 - Campeón: **30 pts**.
 - Posición alcanzada:
@@ -217,12 +230,11 @@ Al finalizar una temporada nueva:
 2. agregarla al historial;
 3. eliminar del cómputo la temporada que pasa a quedar fuera de las últimas cinco;
 4. recalcular el ranking global;
-5. usar la tabla resultante para los próximos sorteos/bombos que correspondan.
+5. asignar el mismo puesto a totales idénticos;
+6. usar la tabla resultante para los próximos sorteos/bombos que correspondan.
 
-## Pendientes reales
+## Pendientes
 
-El archivo nuevo ya resuelve los coeficientes y escalas de puntos. Sólo quedan por confirmar antes de automatizar completamente:
+Los criterios deportivos e IFFHS actuales ya están suficientemente definidos para diseñar el modelo de datos.
 
-- si Liga C y Copa C siguen siendo competiciones posibles en la app o son únicamente históricas;
-- criterio de desempate cuando dos participantes terminan con exactamente el mismo total IFFHS;
-- cómo tratar temporadas antiguas incompletas o participantes sin datos suficientes, si hiciera falta importarlas.
+Antes de automatizar el cierre completo de temporada todavía conviene cerrar por separado las reglas generales de corrimiento de cupos cuando Copa A/Copa B alteran permanencias/ascensos en casos extremos. La importación de temporadas antiguas incompletas también puede resolverse más adelante si finalmente se desea cargar historia previa en la app.
