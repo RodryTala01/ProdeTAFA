@@ -21,7 +21,8 @@ describe('T32 competition engine contracts', () => {
   });
 
   it('lets the same real round be linked through the generic many-to-many route', () => {
-    expect(worker).toContain('/api/admin/competition-engine/competitions');
+    expect(worker).toContain('const linkMatch = pathname.match(');
+    expect(worker).toContain('competition-engine\\/competitions\\/(\\d+)\\/rounds');
     expect(worker).toContain('INSERT INTO competition_round_links');
     expect(adminUi).toContain('La misma Fecha puede usarse en otra competición');
   });
