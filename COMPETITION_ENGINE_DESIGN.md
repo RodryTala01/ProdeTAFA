@@ -20,7 +20,9 @@ El motor de competiciones se construye por encima de la capa actual.
 
 ## 1. Temporada TAFA
 
-Crear un concepto superior de temporada real, por ejemplo `T31`.
+La próxima temporada real a crear en la app es **T32**.
+
+Crear un concepto superior de temporada real, por ejemplo `T32`.
 
 Una temporada contiene:
 
@@ -456,5 +458,5 @@ El usuario completa **un solo pronóstico**.
 ## Decisiones que todavía deben validarse antes de implementar
 
 - Confirmar si Liga A y Liga B usan siempre la misma Fecha de 12 partidos en cada jornada.
-- Confirmar si una temporada TAFA tiene una única numeración global (`T31`) compartida por todas las competiciones.
-- Definir si el Admin crea todas las competiciones de una temporada manualmente o si al crear `T31` la app ofrece una plantilla que crea automáticamente Liga A/B + Copas habituales.
+- La próxima temporada real a crear es **T32** y la numeración de temporada es global para todas las competiciones de esa edición.
+- Definir si el Admin crea todas las competiciones de una temporada manualmente o si al crear `T32` la app ofrece una plantilla que crea automáticamente Liga A/B + Copas habituales.
