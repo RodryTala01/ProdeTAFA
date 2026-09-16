@@ -20,9 +20,13 @@ Aplicación permanente de Prode para aproximadamente 40 participantes. Priorizar
 - El admin crea participantes; no hay autorregistro.
 - Login con teléfono normalizado + contraseña.
 - Contraseñas nunca en texto plano.
-- El admin puede resetear la contraseña de un participante, pero el endpoint de participantes jamás debe modificar una cuenta admin.
+- El participante podrá cambiar su propia contraseña.
+- El admin puede resetear/asignar una nueva contraseña a un participante, pero nunca leer la contraseña actual ni modificar una cuenta admin desde el endpoint de participantes.
+- Nombre y teléfono los administra exclusivamente el admin; el participante no los edita.
 - Desactivar un participante bloquea acceso y elimina sesiones, pero conserva pronósticos, puntajes, rankings y temporadas históricas.
 - Reactivar vuelve a habilitar login sin reescribir historia.
+- Perfil individual avanzado queda para una fase posterior.
+- Se desea agregar escudo/avatar de participante en una fase de pulido; el recurso será cargado más adelante por el admin.
 
 ## Fechas del Prode
 
@@ -31,6 +35,10 @@ Aplicación permanente de Prode para aproximadamente 40 participantes. Priorizar
 - Sólo puede existir **una fecha `open` a la vez**. Para publicar otra, primero cerrar la actual.
 - La lista de partidos sólo puede cambiar mientras la fecha esté `draft`.
 - Una fecha `open` o `finished` es inmutable respecto de alta/baja de partidos, también en backend.
+- El cierre de una fecha sigue siendo manual por parte del admin, aunque los 12 partidos estén definitivos.
+- No eliminar fechas desde la aplicación normal; para fechas que no deban usarse, preferir estado archivado/cancelado preservando trazabilidad.
+- Se desea clasificar fechas por contexto, al menos `Liga`, `Copa` y `Desempate`; la semántica exacta de Copa/Desempate debe definirse antes de implementar esas competiciones.
+- El orden visible de partidos para participantes sigue siendo por hora de comienzo.
 
 ## Pronósticos
 
@@ -38,10 +46,40 @@ Aplicación permanente de Prode para aproximadamente 40 participantes. Priorizar
 - Autosave como borrador + botón explícito `Enviar pronóstico`.
 - Todos los partidos todavía abiertos deben estar completos para enviar.
 - Partidos ya cerrados no bloquean el envío del resto y quedan sin participación/puntos si no se pronosticaron.
-- Tras enviar se puede seguir editando cualquier partido todavía abierto.
+- Después del primer envío, editar un pronóstico NO lo convierte automáticamente en una nueva presentación oficial: los cambios quedan pendientes hasta tocar `Reenviar`.
 - Cierre individual: kickoff oficial + 1 minuto.
 - Si el proveedor modifica kickoff antes del cierre, adaptar el cierre.
 - Backend, no sólo UI, debe rechazar escrituras tardías.
+- Mostrar hora exacta de cierre y cuenta regresiva por partido.
+- No hace falta barra global `x/12` por ahora.
+- No pedir confirmación previa al envío ni advertencias por marcadores altos por ahora.
+- Después de enviar, mostrar una confirmación visible con la hora del último envío.
+- El texto visible para la selección extra será simplemente `Penales`.
+
+### Navegación rápida de inputs
+
+- En partido `NORMAL`: `Local → Visitante → Local del siguiente partido editable`.
+- En `PENALTIES_ONLY`: `Local → Visitante → Penales → Local del siguiente partido editable`.
+- Con un dígito válido, avanzar automáticamente al siguiente control.
+- Saltar partidos/controles bloqueados o deshabilitados.
+- En el último control no producir errores si no existe siguiente foco.
+- Priorizar buen funcionamiento con teclado numérico móvil.
+
+### Historial y trazabilidad de pronósticos
+
+- No auditar cada tecla/cambio de borrador antes del primer envío; el autosave no debe generar ruido histórico.
+- Al primer envío, registrar fecha/hora y el estado presentado.
+- Desde el primer envío en adelante, registrar cambios efectivos con valor anterior y nuevo.
+- Registrar por separado cada `Reenviar`.
+- No crear evento si el valor guardado es idéntico al anterior.
+- Incluir cambios de marcador y de selección de `Penales`.
+- El historial debe ser append-only desde el flujo normal.
+- El admin puede consultar historial por fecha y participante, y también desde el participante.
+- Cada participante puede consultar su propio historial, pero no el de otros mientras la fecha está abierta.
+- Filtros deseados para admin: fecha, participante y tipo de evento.
+- No se requiere por ahora snapshot completo/versionado de los 12 partidos por cada reenvío si el historial de cambios permite reconstruir qué ocurrió.
+- Mostrar timestamps en `America/Argentina/Buenos_Aires` aunque se persistan en UTC.
+- En Admin debe ser fácil identificar quién todavía no presentó una fecha, aunque el dashboard estadístico avanzado quede para después.
 
 ## Partido marcado para penales (`PENALTIES_ONLY`)
 
@@ -87,13 +125,12 @@ Orden:
 6. orden alfabético determinístico.
 
 - Admin puede ver ranking en vivo.
+- En Admin, diferenciar visualmente puntos provisionales de puntos definitivos.
 - Participante sólo ve ranking final cuando la fecha está `finished`.
 - Después de finalizar, revelar los pronósticos enviados de todos los participantes.
 - Participantes inactivos no desaparecen de rankings históricos.
 
 ## Fase 2 — Liga
-
-Esta fase es exclusivamente Liga. No implementar todavía Copas, tabla histórica general, palmarés, perfiles avanzados, estadísticas divertidas, WhatsApp o push.
 
 ### Temporada
 
@@ -127,6 +164,11 @@ Acumular sólo cuando:
 
 Usar los mismos desempates que el ranking de fecha. La tabla se refresca periódicamente desde D1 y puede cambiar al finalizar cada partido; nunca usar puntos provisionales.
 
+Mejoras deseadas:
+
+- Al tocar un participante, mostrar desglose de puntos por Fecha 1–5.
+- Mostrar movimiento de posición (`↑N`, `↓N`) cuando la posición cambie; definir técnicamente el punto de comparación antes de implementar para que sea determinístico.
+
 ### Navegación
 
 Participante: `Pronósticos | Liga | Historial`.
@@ -135,6 +177,56 @@ Administrador: `Fechas | Liga | Participantes`.
 
 En móvil, navegación inferior fija y respeto de safe areas. La PWA debe sentirse como app instalada (`standalone`).
 
+## Historial del participante
+
+La vista histórica debe ser lo más completa posible. Al abrir una fecha finalizada, mostrar como mínimo:
+
+- posición conseguida;
+- puntos;
+- plenos;
+- parciales;
+- errores;
+- extras;
+- sus 12 pronósticos;
+- resultado real de cada partido;
+- puntos obtenidos por partido.
+
+El perfil estadístico transversal del participante queda para una fase posterior.
+
+## Avisos internos
+
+Antes de integrar WhatsApp o push, se permiten avisos internos útiles dentro de la app, por ejemplo indicar que todavía quedan partidos sin completar o que una acción requiere atención.
+
+No convertir todavía esto en un sistema complejo de notificaciones externas.
+
+## Dashboard Admin
+
+Se desea una pantalla inicial de Admin simple y operativa con información útil de la fecha activa, Liga actual y estado general. Las estadísticas avanzadas y métricas agregadas quedan para una fase posterior.
+
+No implementar por ahora duplicación de fechas.
+
+## Copas — siguiente gran fase funcional
+
+Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
+
+Patrón conceptual indicado por el usuario:
+
+`Fecha 32avos Copas → Fecha 1 Liga → Fecha Copas → Fecha 2 Liga → Fecha Copas → Fecha 3 Liga → ...`
+
+- Hay múltiples Copas.
+- Debe existir categoría/identidad de fecha de Copa.
+- También existe el concepto de `Desempate`, cuya regla exacta debe definirse.
+- No implementar todavía estructura de Copas hasta confirmar formato, clasificación, cruces, cantidad de copas, avance y desempates.
+- La Liga ya implementada debe seguir funcionando aunque haya fechas de Copa intercaladas en el calendario general.
+
+## Diseño, PWA y Android
+
+- Primero garantizar funcionamiento y reglas.
+- Después realizar pulido/rediseño visual antes de empaquetar Android.
+- Identidad visual definitiva (colores/branding TAFA) se definirá más adelante.
+- No implementar modo oscuro por ahora; puede evaluarse después.
+- La APK/AAB queda hacia el final, una vez cerradas funcionalidad y diseño.
+
 ## Seguridad y consistencia
 
 - Toda autorización sensible en backend.
@@ -142,6 +234,7 @@ En móvil, navegación inferior fija y respeto de safe areas. La PWA debe sentir
 - Mutaciones `/api/*` deben rechazar requests cross-site sin romper requests legítimos sin `Origin` (CLI/Codex).
 - SQL parametrizado.
 - Nunca almacenar secretos reales en Git.
+- Nunca almacenar contraseñas recuperables o visibles para el admin; usar hash y reset seguro.
 - Health profundo debe detectar esquema de Liga incompleto y más de una fecha abierta.
 - CI debe aplicar todas las migraciones D1 locales antes de tests/build.
 
@@ -153,8 +246,14 @@ En móvil, navegación inferior fija y respeto de safe areas. La PWA debe sentir
 
 ## Regla de avance
 
-Antes de empezar Copas, validar en producción el ciclo completo:
+Orden funcional acordado a partir de septiembre de 2026:
 
-`crear Liga → vincular 5 fechas → pronosticar → sincronizar resultados → sumar sólo definitivos → alta tardía sin retroactividad → cerrar fechas → cerrar Liga`.
+1. cerrar mejoras de pronósticos, historial y trazabilidad;
+2. validar y pulir Liga;
+3. definir e implementar Copas y Desempates, respetando que se intercalan con fechas de Liga;
+4. completar historial/estadísticas avanzadas y perfiles;
+5. pulir/rediseñar UI;
+6. cerrar PWA;
+7. generar APK/AAB al final.
 
 Si una regla futura es ambigua, no inventar una extensión grande: mantener el comportamiento más conservador, documentarlo y preservar compatibilidad con estas reglas.
