@@ -1,6 +1,6 @@
 # ProdeTAFA — Promoción, zonas de Liga e IFFHS
 
-Estado: Promoción y zonas de tabla casi confirmadas. IFFHS parcialmente reconstruida a partir del archivo histórico `ayuda para iffhs.xlsx`; faltan confirmar las fórmulas exactas de tres bloques variables y las reglas generales de corrimiento cuando Copa A/Copa B alteran ascensos/permanencias.
+Estado: Promoción y zonas de tabla confirmadas en su estructura base. Los criterios IFFHS fueron corregidos tomando como fuente directa `TABLA IFFHS.xlsx`. Quedan por confirmar únicamente reglas que el archivo no explicita (por ejemplo desempate exacto del ranking IFFHS y si Liga/Copa C siguen vigentes o son históricas).
 
 ## Promoción A/B
 
@@ -36,7 +36,7 @@ Los dos cruces se disputan simultáneamente usando una única Fecha de 12 partid
 - Ganador del cruce: jugará Liga A la temporada siguiente.
 - Perdedor del cruce: jugará Liga B la temporada siguiente.
 - Los puntos del enfrentamiento se calculan automáticamente con el Prode de esa fecha.
-- Si hay empate se usa la regla general de desempate de cruces. Como Promoción suele ser la última fecha deportiva de la temporada, es probable que se cree una Fecha Desempate específica.
+- Si hay empate se usa la regla general de desempate de cruces. Como Promoción suele ser la última fecha deportiva de la temporada, puede crearse una Fecha Desempate específica.
 - El clasificado/ganador definitivo conserva confirmación administrativa y trazabilidad.
 
 ## Efectos de Copa A y Copa B sobre la movilidad
@@ -45,49 +45,39 @@ Los dos cruces se disputan simultáneamente usando una única Fecha de 12 partid
 
 - El campeón de Copa B asciende a Liga A.
 - Si el campeón de Copa B ya ocupa un lugar que normalmente daría ascenso/promoción, se libera un cupo y las posiciones siguientes se corren.
-- Ejemplo confirmado: si el 2.º de Liga B gana Copa B, su ascenso queda asegurado por la Copa; entonces el 3.º pasa a ocupar funcionalmente el lugar de 2.º para Promoción y el 4.º entra como el siguiente cupo de Promoción.
-
-La regla general exacta de corrimiento para cualquier posición del campeón de Copa B debe quedar explícita antes de automatizar la composición final de divisiones.
+- Ejemplo confirmado: si el 2.º de Liga B gana Copa B, su ascenso queda asegurado por la Copa; entonces el 3.º pasa a ocupar funcionalmente el lugar de 2.º para Promoción y el 4.º entra como siguiente cupo de Promoción.
 
 ### Copa A
 
 - El campeón de Copa A tiene permanencia asegurada en Liga A.
 - Si termina en una posición de Promoción o descenso, su permanencia altera/corre los cupos de descenso/promoción.
-- La regla general exacta de corrimiento debe confirmarse antes de automatizar el cierre de temporada.
 
 ## Colores y zonas visuales en tablas de Liga
 
-La tabla debe diferenciar visualmente las zonas deportivas.
-
 ### Liga A
 
-- 1.º: verde fuerte para campeón.
-- 2.º a 7.º: color de clasificación a Copa Campeones.
-- Dos posiciones de Promoción: color propio.
-- Dos posiciones de descenso directo: color propio más fuerte/alerta.
+Para 16 participantes:
 
-Para 16 participantes, las zonas base son:
+- 1.º: verde fuerte, campeón.
+- 2.º–7.º: zona de clasificación por Liga a Copa Campeones.
+- 13.º–14.º: zona de Promoción.
+- 15.º–16.º: descenso directo.
 
-- 1.º campeón.
-- 2.º–7.º Copa Campeones.
-- 13.º–14.º Promoción.
-- 15.º–16.º descenso directo.
+La UI debe diferenciar claramente estas zonas.
 
 ### Liga B
 
-- 1.º: color de ascenso directo.
-- 2.º–3.º: color de Promoción.
-- Cuando Copa B modifica los cupos efectivos, la UI debe poder reflejar el corrimiento real y/o señalar el ascenso asegurado del campeón de Copa B.
+- 1.º: ascenso directo.
+- 2.º–3.º: Promoción.
+- Si Copa B libera/corre cupos, la interfaz debe mostrar los cupos efectivos resultantes.
 
-La lógica de colores no debe quedar hardcodeada únicamente para 16 si la cantidad de participantes puede variar; las zonas inferiores se calculan desde el final de la tabla.
+La lógica inferior debe calcularse desde el final de la tabla si cambia el número de participantes.
 
 ## Copa Total — tabla de grupos
 
-Confirmación adicional:
-
-- Los “goles” de la tabla de Copa Total son los puntos de Prode obtenidos en cada enfrentamiento de mini-fecha.
-- Ejemplo: un enfrentamiento `7-4` aporta al ganador +3 puntos de tabla, +7 GF, +4 GC y +3 DG.
-- La tabla de grupo debe mostrar como mínimo:
+- Los “goles” son los puntos de Prode conseguidos en cada enfrentamiento de mini-fecha.
+- Ejemplo: `7-4` aporta al ganador +3 puntos de tabla, +7 GF, +4 GC y +3 DG.
+- La tabla debe mostrar:
   - PJ;
   - PG;
   - PE;
@@ -98,75 +88,141 @@ Confirmación adicional:
   - PTS.
 - Orden: PTS → DG → GF → victorias.
 
-## IFFHS — concepto general
+# IFFHS
 
-- Es un ranking histórico/mundial de participantes.
+## Concepto general
+
+- Ranking histórico/mundial de participantes.
 - Considera las **últimas 5 temporadas**.
-- Cada temporada genera una contribución de puntos según Liga y Copas.
-- Al cerrar una nueva temporada se recalcula la tabla: entra la temporada nueva y sale completamente la que queda a 6 temporadas de distancia.
-- No hay depreciación porcentual intermedia: cada una de las cinco temporadas vigentes conserva sus puntos completos mientras esté dentro de la ventana.
-- La tabla IFFHS se vuelve a armar al finalizar cada temporada.
-- Se utiliza para formar bombos de Copa A, Copa B y Copa Total.
-- La pertenencia a un bombo se calcula **sólo entre los participantes habilitados para esa competición**. Por ejemplo, en Copa A no se toman simplemente los puestos 1–16 de la IFFHS global si alguno pertenece a Liga B.
-- El campeón vigente de la competición correspondiente ocupa el lugar privilegiado/cabeza de serie definido por la Copa, y el resto se distribuye respetando la IFFHS entre los participantes elegibles.
+- Cada temporada aporta un total calculado con resultados de Liga y Copas.
+- Al cerrar una nueva temporada entra esa temporada y sale por completo la que pasa a ser la sexta más antigua.
+- No hay depreciación progresiva: las cinco temporadas vigentes valen completas.
+- La tabla se recalcula al finalizar cada temporada.
+- Se usa para formar bombos de Copa A, Copa B y Copa Total.
+- Los bombos se arman entre los participantes elegibles para esa competición, no tomando mecánicamente los primeros N de la tabla global.
+- El campeón vigente de la competición mantiene su privilegio/cabeza de serie cuando la regla de esa Copa así lo dispone.
 
-## Reconstrucción del archivo `ayuda para iffhs.xlsx`
+## Criterios de puntuación — Ligas
 
-El archivo histórico contiene en `Hoja1` seis bloques de aportes individuales que luego se suman en una tabla dinámica/resumen. La comparación con los resultados T29 del Excel principal permite identificar con alta confianza:
+Criterios exactos del archivo `TABLA IFFHS.xlsx`:
 
-1. **Liga T29** — 33 participantes, puntos variables.
-2. **Copa A + Copa B T29** — 33 participantes, puntos variables y distinto peso según competición/división.
-3. **Copa Total T29** — 33 participantes, puntos variables; es la Copa de mayor peso.
-4. **Copa Papa T29** — 16 participantes puntuados desde los últimos 16 en adelante.
-5. **Copa Dúos T29** — 26 participantes (13 dúos) con puntos iguales para los dos integrantes según la instancia/posición del dúo.
-6. **Copa Campeones T29** — 14 participantes, con escalones de puntos según la instancia alcanzada en la llave escalonada.
+### Liga A
 
-El resumen de `Hoja1` suma todos esos aportes por participante para obtener la contribución/ranking de esa temporada de referencia.
+- Campeón Liga A: **100 pts**.
+- Subcampeón Liga A: **75 pts**.
+- Posición en Liga A: **1 punto por posición de abajo hacia arriba + cantidad de participantes de Liga B y Liga C**. El campeón no suma este componente de posición.
+- Puntos deportivos conseguidos en Liga A: **× 1,3**.
+- Plenos conseguidos en Liga A: **× 2,25**.
+- Posición en ranking de errores Liga A: **2 pts por posición de abajo hacia arriba**.
 
-### Copa Papa — escala visible en el archivo
+### Liga B
 
-La escala T29 se reconstruye de forma directa:
+- Campeón Liga B: **30 pts**.
+- Subcampeón Liga B: **20 pts**.
+- Posición en Liga B: **1 punto por posición de abajo hacia arriba + cantidad de participantes de Liga C**. El campeón no suma este componente de posición.
+- Puntos deportivos conseguidos en Liga B: **× 0,75**.
+- Plenos conseguidos en Liga B: **× 1,5**.
+- Posición en ranking de errores Liga B: **1 pt por posición de abajo hacia arriba**.
 
-- campeón: 100;
-- subcampeón: 75;
-- eliminado en semifinal: 45;
-- eliminado en cuartos: 30;
-- eliminado en octavos / últimos 16: 22;
-- eliminados antes de esa instancia: no aparecen en ese bloque y, por lo tanto, no reciben puntos de ese tramo.
+### Liga C
 
-### Copa Dúos — escala visible
+- Campeón Liga C: **25 pts**.
+- Posición en Liga C: **1 punto por posición de abajo hacia arriba**. El campeón no suma este componente de posición.
+- Puntos deportivos conseguidos en Liga C: **× 0,5**.
+- Plenos conseguidos en Liga C: **× 0,75**.
+- Posición en ranking de errores Liga C: **0,5 pts por posición de abajo hacia arriba**.
 
-El archivo muestra escalones individuales de:
+## Criterios de puntuación — Copas
 
-- 5;
-- 10;
-- 15;
-- 20;
-- 30;
-- 50.
+### Copa A
 
-Los dos integrantes de un dúo deben recibir el mismo aporte IFFHS correspondiente al resultado de la pareja. Falta confirmar la asociación exacta de cada escalón con cada ronda/corte de eliminación de la edición.
+- Campeón: **75 pts**.
+- Posición alcanzada:
+  - Octavos: **10 pts**.
+  - Cuartos: **15 pts**.
+  - Semifinales: **25 pts**.
+  - Subcampeón: **40 pts**.
+- Puntos conseguidos en fase de grupos de Copa A: **× 1,3**.
 
-### Copa Campeones — escala visible
+### Copa B
 
-El archivo T29 muestra escalones:
+- Campeón: **25 pts**.
+- Posición alcanzada:
+  - Octavos: **4 pts**.
+  - Cuartos: **8 pts**.
+  - Semifinales: **12 pts**.
+  - Subcampeón: **18 pts**.
+- Puntos conseguidos en fase de grupos de Copa B: **× 0,75**.
 
-- 10;
-- 15;
-- 25;
-- 40;
-- 50;
-- 75;
-- 100.
+### Copa C
 
-Son coherentes con la llave escalonada donde distintos clasificados ingresan en etapas diferentes. El campeón recibe 100 y el subcampeón 75; los demás escalones corresponden a la etapa en la que quedan eliminados.
+- Campeón: **30 pts**.
+- Posición alcanzada:
+  - Octavos: **2 pts**.
+  - Cuartos: **5 pts**.
+  - Semifinales: **8 pts**.
+  - Subcampeón: **15 pts**.
+- Puntos conseguidos en fase de grupos de Copa C: **× 0,5**.
 
-## Pendiente de confirmar para automatizar IFFHS
+### Copa Campeones
 
-El archivo histórico conserva los **resultados finales de puntos**, pero no las fórmulas que los originaron para los tres bloques variables:
+- Campeón: **100 pts**.
+- Posición alcanzada:
+  - 32avos: **10 pts**.
+  - 16avos: **15 pts**.
+  - Octavos: **25 pts**.
+  - Cuartos: **40 pts**.
+  - Semifinales: **50 pts**.
+  - Subcampeón: **75 pts**.
 
-- Liga;
-- Copa A/B;
-- Copa Total.
+### Copa Total
 
-Antes de programar el cálculo automático hay que confirmar qué variables producen esos valores (puntos de Prode, posición, coeficiente de división/competición, bonus por ronda, etc.) y la escala exacta de Copa Dúos.
+- Campeón: **100 pts**.
+- Posición alcanzada:
+  - Octavos: **30 pts**.
+  - Cuartos: **45 pts**.
+  - Semifinales: **60 pts**.
+  - Subcampeón: **75 pts**.
+- Puntos conseguidos en fase de grupos de Copa Total: **× 3,5**.
+
+### Copa Dúos
+
+- Campeón: **50 pts** para cada integrante del dúo campeón.
+- Posición/fase alcanzada:
+  - Fase 2: **5 pts**.
+  - Fase 3: **10 pts**.
+  - Fase 4: **15 pts**.
+  - Fase 5: **20 pts**.
+  - Subcampeón: **30 pts**.
+- Los dos integrantes del dúo reciben el mismo aporte correspondiente a la fase alcanzada por la pareja.
+
+### Copa Papa
+
+- Campeón: **100 pts**.
+- Posición alcanzada:
+  - Octavos: **22 pts**.
+  - Cuartos: **30 pts**.
+  - Semifinales: **45 pts**.
+  - Subcampeón: **75 pts**.
+
+## Cálculo por temporada y ventana histórica
+
+La contribución IFFHS de una temporada es la suma de todos los componentes aplicables de Liga y Copas para cada participante.
+
+El ranking histórico IFFHS es la suma de las contribuciones de las últimas cinco temporadas completas.
+
+Al finalizar una temporada nueva:
+
+1. calcular la contribución IFFHS individual de esa temporada;
+2. agregarla al historial;
+3. eliminar del cómputo la temporada que pasa a quedar fuera de las últimas cinco;
+4. recalcular el ranking global;
+5. usar la tabla resultante para los próximos sorteos/bombos que correspondan.
+
+## Pendientes reales
+
+El archivo nuevo ya resuelve los coeficientes y escalas de puntos. Sólo quedan por confirmar antes de automatizar completamente:
+
+- si Liga C y Copa C siguen siendo competiciones posibles en la app o son únicamente históricas;
+- criterio de desempate cuando dos participantes terminan con exactamente el mismo total IFFHS;
+- cómo tratar temporadas antiguas incompletas o participantes sin datos suficientes, si hiciera falta importarlas.
