@@ -227,6 +227,7 @@ export default function AdminCompetitions() {
 
   const hasT32 = data?.seasons.some((season) => season.seasonNumber === 32) ?? false;
   const activeParticipants = data?.participants.filter((participant) => participant.isActive) ?? [];
+  const availableRounds = data?.rounds ?? [];
 
   return (
     <div className="form-stack">
@@ -325,7 +326,7 @@ export default function AdminCompetitions() {
                         onChange={(event) => setRoundByCompetition((current) => ({ ...current, [competition.id]: event.target.value ? Number(event.target.value) : '' }))}
                       >
                         <option value="">Elegir Fecha...</option>
-                        {data.rounds.map((round) => <option key={round.id} value={round.id}>{round.name} · {statusLabel(round.status)} · {round.category}</option>)}
+                        {availableRounds.map((round) => <option key={round.id} value={round.id}>{round.name} · {statusLabel(round.status)} · {round.category}</option>)}
                       </select>
                       <button className="button button--secondary" disabled={loading || !roundByCompetition[competition.id]} onClick={() => void linkRound(competition)}>Vincular Fecha</button>
                     </div>
