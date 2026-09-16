@@ -1,112 +1,213 @@
 # ProdeTAFA — Roadmap
 
-## Fase 1 — MVP
+## Estado actual
 
-### Implementado
+El núcleo del Prode y la Liga ya funciona en entorno local y fue probado por el usuario con flujo Admin + Participante.
+
+### Núcleo implementado
 
 - [x] Cuenta inicial de administrador.
 - [x] Login por teléfono y contraseña.
 - [x] Contraseñas hasheadas y sesiones HttpOnly.
 - [x] Alta, reset de clave, desactivación y reactivación de participantes.
-- [x] El endpoint de reset de participantes no puede modificar cuentas admin.
 - [x] Creación de fechas.
 - [x] Búsqueda semanal/rango de partidos reales con API-Football.
 - [x] Selección de 12 partidos por fecha.
-- [x] Publicación de fecha.
-- [x] Sólo puede existir una fecha publicada/abierta a la vez.
-- [x] Una fecha publicada/finalizada no permite agregar ni quitar partidos, también desde backend.
+- [x] Sólo una fecha publicada/abierta a la vez.
+- [x] Inmutabilidad de partidos después de publicar.
 - [x] Autosave de pronósticos.
-- [x] Envío explícito y reenvío de pronóstico.
-- [x] Edición hasta kickoff + 1 minuto con bloqueo real en backend.
-- [x] Partido marcado `PENALTIES_ONLY`: marcador de 90 minutos + ganador de la tanda pronosticado.
-- [x] 3/1/0 sobre los 90 minutos + hasta 1 punto extra sólo si realmente hubo tanda y se acertó el ganador.
-- [x] Corrección administrativa de resultados; en partidos marcados para penales el admin indica si efectivamente hubo tanda.
-- [x] Volver de una corrección manual a API-Football limpia resultado/puntajes derivados hasta la próxima sincronización oficial.
-- [x] Sincronización automática de resultados por Cron Trigger y sincronización manual.
-- [x] Puntos provisionales en vivo cuando hay datos suficientes.
-- [x] Tratamiento de partidos anulados.
+- [x] Envío y reenvío.
+- [x] Bloqueo kickoff + 1 minuto.
+- [x] PENALTIES_ONLY: marcador de 90 minutos + elección de ganador de tanda.
+- [x] Scoring 3/1/0 + posible extra de penales.
+- [x] Correcciones administrativas y auditoría.
+- [x] Sincronización API-Football manual y por Cron.
+- [x] Puntaje provisional en vivo para ranking Admin.
+- [x] Void/anulados.
 - [x] Ranking y desempates.
-- [x] Cierre de fecha.
-- [x] Historial de fechas para participantes.
-- [x] Edición excepcional de pronósticos por admin y auditoría.
-- [x] Revelado de pronósticos enviados después del cierre de la fecha.
-- [x] Protección de mutaciones API contra requests cross-site.
-- [x] Build automático en GitHub Actions.
-- [x] Tests de scoring, seguridad, integridad de fechas y políticas de negocio.
-- [x] Validación automática de migraciones D1 en CI.
-- [x] Smoke test profundo para producción.
-- [x] `FOOTBALL_API_KEY` declarada como secreto obligatorio de Cloudflare.
-- [x] Deploy preparado para ejecutar tests + build + migraciones remotas + publicación en una sola orden.
-- [x] Checklist de puesta en producción documentado en `PRODUCTION.md`.
+- [x] Cierre manual de fecha.
+- [x] Historial básico de fechas.
+- [x] Revelado de pronósticos al finalizar.
+- [x] Seguridad cross-site en mutaciones.
+- [x] Tests, build, CI y health checks.
+- [x] D1 remota con migraciones `0001`, `0002` y `0003` aplicadas.
+- [x] `FOOTBALL_API_KEY` configurada como secreto de Cloudflare.
+- [x] Entorno local levantado y operado mediante Codex sin necesidad de PowerShell manual.
 
-### Pendiente para declarar Fase 1 cerrada
+### Liga implementada
 
-- [ ] Hacer el primer deploy real a `workers.dev` desde una sesión autenticada de Cloudflare.
-- [ ] Ejecutar el smoke test contra la URL real.
-- [ ] Probar end-to-end Admin + Participante con una fecha real o de prueba.
-- [ ] Verificar en producción el bloqueo efectivo en kickoff + 1 minuto.
-- [ ] Verificar sincronización automática del Cron Trigger desplegado.
-- [ ] Medir el consumo real de cuota de API-Football y ajustar la frecuencia si fuera necesario.
-
-## Fase 2 — Liga
-
-Objetivo: dejar lista una Liga de temporada compuesta por 5 fechas del Prode. No incluir todavía copas, tabla histórica general, palmarés ni perfiles avanzados.
-
-### Reglas confirmadas
-
-- [x] El admin crea una temporada de Liga y luego vincula sus fechas.
-- [x] Cada Liga tiene exactamente 5 fechas.
-- [x] Un participante que no juega una fecha suma 0.
-- [x] Se puede incorporar un participante a mitad de temporada; arranca con 0 en las fechas anteriores.
-- [x] La tabla se actualiza partido por partido, pero sólo cuando cada resultado queda definitivo.
-- [x] No sumar puntos provisionales a la tabla de Liga.
+- [x] Temporada de exactamente 5 fechas.
+- [x] Vincular/desvincular fechas mientras la Liga está abierta.
+- [x] Alta tardía con `eligible_from_slot` sin retroactividad.
+- [x] No-presentado = 0.
+- [x] Tabla sólo con resultados definitivos/no provisionales.
 - [x] Desempate: puntos → plenos → parciales → menos errores → extras.
-- [x] La Liga está disponible tanto para admin como para participantes.
+- [x] Tabla para Admin y Participante.
+- [x] Historial y navegación móvil.
+- [x] PWA base en modo standalone.
 
-### Implementado
+## Próxima tanda — Pronósticos y trazabilidad
 
-- [x] Esquema base en `0002_league_seasons.sql`: `league_seasons`, `league_rounds` y `league_participants`.
-- [x] Migración `0003_league_entry_slot.sql` con `eligible_from_slot` para altas tardías.
-- [x] Restricción DB de slots 1–5, fecha única entre Ligas y participante único por temporada.
-- [x] Tests automáticos del esquema y del contrato de altas tardías.
-- [x] Crear temporadas.
-- [x] Vincular hasta 5 fechas en orden.
-- [x] Desvincular fechas mientras la Liga siga abierta y reindexar slots/elegibilidad.
-- [x] Incorporación automática de participantes activos a Ligas abiertas.
-- [x] Alta/reactivación tardía con elegibilidad desde la primera fecha no finalizada, sin puntos retroactivos.
-- [x] Tabla de Liga calculada sólo con partidos definitivos y con presentación de la fecha.
-- [x] Auto-refresh de tabla de Liga para admin y participantes.
-- [x] Cierre de Liga sólo cuando las 5 fechas están vinculadas y finalizadas.
-- [x] Vista Admin: Fechas | Liga | Participantes.
-- [x] Vista Participante: Pronósticos | Liga | Historial.
-- [x] Historial de fechas separado de la pantalla de pronósticos.
-- [x] Navegación inferior en móvil con soporte de safe areas.
-- [x] PWA base y aviso de instalación cuando el navegador lo permite.
-- [x] Manifest en modo `standalone` con iconos SVG declarados como 192x192 y 512x512.
-- [x] Health check profundo: esquema de Liga, columna `eligible_from_slot` y máximo una fecha abierta.
-- [x] Smoke test que valida health, consistencia D1, frontend, manifest y `/sw.js`.
-- [x] Reglas completas de Fase 2 documentadas en `AGENTS.md` para Codex.
+Prioridad inmediata.
 
-### Pendiente de validación real
+- [ ] Crear historial/auditoría detallada de pronósticos.
+- [ ] Registrar primer envío con fecha/hora.
+- [ ] No auditar borradores previos al primer envío.
+- [ ] Desde el primer envío, registrar cada cambio efectivo con valor anterior/nuevo.
+- [ ] Registrar cambios de marcador y de selección `Penales`.
+- [ ] Registrar cada reenvío.
+- [ ] Después del primer envío, los cambios quedan pendientes hasta tocar `Reenviar`.
+- [ ] Historial consultable por Admin desde Fecha y desde Participante.
+- [ ] Participante puede ver su propio historial.
+- [ ] Filtros Admin: fecha, participante y tipo de evento.
+- [ ] Mostrar `Enviado HH:MM` / última hora de presentación.
+- [ ] Permitir identificar fácilmente quién todavía no presentó, sin construir todavía un dashboard estadístico avanzado.
 
-- [ ] Desplegar y aplicar `0002_league_seasons.sql` + `0003_league_entry_slot.sql` a D1 remota mediante `npm run deploy:first`.
-- [ ] Crear una Liga de prueba y vincular 5 fechas.
-- [ ] Verificar alta/reactivación de participante a mitad de temporada y `0` retroactivo.
-- [ ] Confirmar que un no-presentado suma 0.
-- [ ] Confirmar que la tabla se mueve al finalizar cada partido, no antes.
-- [ ] Confirmar cierre de Liga tras la quinta fecha.
-- [ ] Confirmar instalación PWA en Android desde producción HTTPS.
-- [ ] Generar/agregar PNG 192x192 y 512x512 como fallback de iconos si el dispositivo o auditoría los requiere.
+### Entrada rápida de marcadores
 
-## Fases posteriores
+- [ ] NORMAL: `Local → Visitante → Local del siguiente partido`.
+- [ ] PENALTIES_ONLY: `Local → Visitante → Penales → siguiente partido`.
+- [ ] Avance automático con un dígito válido.
+- [ ] Saltar controles bloqueados/disabled.
+- [ ] Optimizar para teclado numérico móvil.
+- [ ] Mostrar hora exacta de cierre + cuenta regresiva por partido.
+- [ ] Texto visible para elección extra: `Penales`.
 
-- Copas: formato y reglas a definir después de cerrar la Liga.
-- Tabla general histórica: postergar hasta después de Copas.
-- Palmarés: postergar.
-- Perfil individual y estadísticas avanzadas: postergar.
-- Estadísticas divertidas/rachas: postergar.
-- WhatsApp y automatizaciones: mantener separado por ahora.
+## Pulido de Liga
 
-## Regla de avance
+- [ ] Al tocar participante, mostrar desglose de puntos por Fecha 1–5.
+- [ ] Mostrar movimiento de posición `↑N / ↓N`.
+- [ ] Antes de implementar movimiento, definir punto de comparación determinístico.
+- [ ] Diferenciar claramente puntos provisionales vs definitivos en ranking Admin.
+- [ ] Validar una Liga completa real con 5 fechas.
 
-Primero garantizar en producción el ciclo completo `crear temporada → vincular 5 fechas → pronosticar → puntuar sólo partidos definitivos → acumular Liga → cerrar temporada`. Recién después definir Copas.
+## Historial completo del participante
+
+- [ ] Fecha + posición + puntos.
+- [ ] Plenos, parciales, errores y extras.
+- [ ] Abrir fecha y ver los 12 pronósticos.
+- [ ] Comparar contra resultados reales.
+- [ ] Ver puntos obtenidos partido por partido.
+- [ ] Perfil estadístico transversal queda para después.
+
+## Participantes y acceso — mejoras
+
+- [ ] Permitir al participante cambiar su propia contraseña.
+- [ ] El admin mantiene capacidad de resetear/asignar nueva contraseña.
+- [ ] Nunca mostrar ni almacenar contraseña actual en texto plano.
+- [ ] Nombre y teléfono siguen siendo administrados exclusivamente por Admin.
+- [ ] Agregar escudo/avatar cuando el recurso visual esté disponible.
+
+## Dashboard Admin
+
+- [ ] Crear inicio Admin simple con información operativa.
+- [ ] Mostrar fecha activa, contexto de Liga/Copa y acciones importantes.
+- [ ] Mantener estadísticas avanzadas para una fase posterior.
+- [ ] No agregar duplicación de fechas.
+- [ ] No borrar fechas: implementar archivar/cancelar preservando historial.
+
+## Clasificación de fechas
+
+Se desea identificar el contexto de cada fecha.
+
+- [ ] Liga.
+- [ ] Copa.
+- [ ] Desempate.
+- [ ] Definir si hace falta tipo Test/Amistoso para entorno operativo.
+
+La semántica de Copa y Desempate se define antes de crear migraciones definitivas para esos formatos.
+
+# Siguiente gran fase — Copas
+
+Las Copas se juegan intercaladas con la Liga; no son una temporada independiente que ocurre después.
+
+Patrón conceptual:
+
+`32avos Copas → Fecha 1 Liga → Fecha Copas → Fecha 2 Liga → Fecha Copas → Fecha 3 Liga → ...`
+
+Hay varias Copas en simultáneo o dentro del mismo calendario general.
+
+### Antes de programar Copas hay que definir
+
+- [ ] Cuántas Copas pueden existir en una temporada.
+- [ ] Cómo se asignan participantes a cada Copa.
+- [ ] Si todos juegan todas las Copas o existen clasificaciones distintas.
+- [ ] Formato: eliminación directa, grupos u otro.
+- [ ] Cantidad de participantes y manejo de byes.
+- [ ] Qué significa exactamente `32avos Copas` cuando existen varias Copas.
+- [ ] Cómo se determina un ganador de cruce usando los 12 partidos del Prode.
+- [ ] Desempates de cruces.
+- [ ] Qué es una `Fecha Desempate` y cuándo se usa.
+- [ ] Qué ocurre si un participante no presenta.
+- [ ] Cómo avanzan los cruces.
+- [ ] Qué ve el participante y qué administra el Admin.
+- [ ] Cómo se muestran varias Copas sin recargar la navegación.
+
+La Liga de 5 fechas debe seguir funcionando aunque las fechas de Copa estén intercaladas cronológicamente.
+
+## Después de Copas
+
+### Tabla general histórica
+
+- [ ] Acumulado histórico.
+- [ ] Ligas/Copas disputadas.
+- [ ] Resultados por temporada.
+
+### Palmarés
+
+- [ ] Campeonatos de Liga.
+- [ ] Copas.
+- [ ] Subcampeonatos y otros reconocimientos a definir.
+
+### Perfil y estadísticas avanzadas
+
+- [ ] Estadísticas por participante.
+- [ ] Rachas.
+- [ ] Mejores/peores fechas.
+- [ ] Plenos históricos.
+- [ ] Estadísticas divertidas.
+
+## Avisos internos
+
+- [ ] Avisos dentro de la app antes de integrar servicios externos.
+- [ ] Ejemplo: partidos sin completar, acción pendiente, nueva fecha disponible.
+- [ ] WhatsApp/push quedan para después.
+
+## Diseño
+
+Se hace después de cerrar la lógica funcional principal, especialmente Copas.
+
+- [ ] Pulido visual general.
+- [ ] Mejor experiencia móvil.
+- [ ] Definir identidad/colores TAFA.
+- [ ] Escudos/avatares.
+- [ ] Mantener modo claro por ahora; modo oscuro queda para después.
+
+## PWA y Android — etapa final
+
+- [ ] Finalizar iconos PWA PNG 192/512/maskable.
+- [ ] Validar instalación real en Android.
+- [ ] Validar actualización de versión instalada.
+- [ ] Después del diseño final, empaquetar como APK/AAB sin duplicar la lógica de negocio.
+- [ ] Evaluar TWA primero; Capacitor sólo si hacen falta funciones nativas más profundas.
+
+## Producción pendiente de validación completa
+
+- [ ] Confirmar URL pública definitiva `workers.dev`/dominio.
+- [ ] Ejecutar smoke test completo contra producción.
+- [ ] Probar Admin + Participante en producción.
+- [ ] Verificar bloqueo real kickoff + 1 minuto.
+- [ ] Verificar Cron desplegado.
+- [ ] Medir consumo real de API-Football.
+- [ ] Confirmar instalación PWA desde HTTPS.
+
+## Orden de avance acordado
+
+1. Historial/auditoría + mejoras de carga de pronósticos.
+2. Pulido/validación de Liga.
+3. Definir e implementar Copas + Desempates intercalados con Liga.
+4. Historial completo, perfiles y estadísticas.
+5. Dashboard y pulido final de Admin/Participante.
+6. Diseño visual definitivo.
+7. PWA final.
+8. APK/AAB como último gran paso.
