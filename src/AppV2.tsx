@@ -2,6 +2,7 @@ import PredictionHistoryBrowser from './PredictionHistoryBrowser';
 import { FormEvent, useEffect, useState } from 'react';
 import AdminRounds from './AdminRounds';
 import AdminLeague from './AdminLeague';
+import AdminCompetitions from './AdminCompetitions';
 import ParticipantRound from './ParticipantRound';
 import LeagueView from './LeagueView';
 import ParticipantHistory from './ParticipantHistory';
@@ -192,17 +193,24 @@ function ParticipantsAdmin() {
 }
 
 function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
-  const [section, setSection] = useState<'rounds' | 'league' | 'participants'>('rounds');
+  const [section, setSection] = useState<'rounds' | 'competitions' | 'league' | 'participants'>('rounds');
   return (
     <main className="app-shell">
       <Header user={user} subtitle="Administración" onLogout={onLogout} />
       <section className="dashboard">
         <nav className="admin-tabs" aria-label="Administración">
           <button className={`admin-tab ${section === 'rounds' ? 'admin-tab--active' : ''}`} onClick={() => setSection('rounds')}>Fechas</button>
-          <button className={`admin-tab ${section === 'league' ? 'admin-tab--active' : ''}`} onClick={() => setSection('league')}>Liga</button>
+          <button className={`admin-tab ${section === 'competitions' ? 'admin-tab--active' : ''}`} onClick={() => setSection('competitions')}>Competiciones</button>
+          <button className={`admin-tab ${section === 'league' ? 'admin-tab--active' : ''}`} onClick={() => setSection('league')}>Liga actual</button>
           <button className={`admin-tab ${section === 'participants' ? 'admin-tab--active' : ''}`} onClick={() => setSection('participants')}>Participantes</button>
         </nav>
-        {section === 'rounds' ? <AdminRounds /> : section === 'league' ? <AdminLeague /> : <ParticipantsAdmin />}
+        {section === 'rounds'
+          ? <AdminRounds />
+          : section === 'competitions'
+            ? <AdminCompetitions />
+            : section === 'league'
+              ? <AdminLeague />
+              : <ParticipantsAdmin />}
       </section>
     </main>
   );
