@@ -1,6 +1,6 @@
 # ProdeTAFA — Especificación de Copas y Desempates
 
-Estado: reglas funcionales parcialmente confirmadas. **No implementar estructura definitiva de Copas hasta revisar el Excel histórico del usuario**, porque allí se definen las competiciones reales, formatos, divisiones y participantes aproximados.
+Estado: reglas funcionales parcialmente confirmadas. **No implementar estructura definitiva de Copas hasta terminar de relevar el Excel histórico del usuario**, porque allí se definen las competiciones reales, formatos, divisiones y participantes aproximados.
 
 ## Relación con la Liga
 
@@ -75,6 +75,80 @@ Consecuencias de implementación futuras:
 - No debe alterar los puntos de Liga: la Fecha Liga sigue puntuando normalmente para Liga y, en paralelo, puede resolver un desempate de Copa.
 - Un mismo pronóstico puede servir simultáneamente para Liga y para desempatar uno o varios cruces pendientes.
 
+## Copa A
+
+Formato confirmado tomando como referencia una edición con 16 participantes.
+
+### Participación
+
+- Participan todos los integrantes vigentes de **Primera División**.
+- La composición se determina por la división vigente de esa temporada/edición.
+- El campeón de Copa A obtiene como premio deportivo **asegurar la permanencia en Liga A/Primera División**.
+
+### Sorteo y bombos
+
+- La fase inicial se divide en **4 grupos**.
+- Los grupos se forman por sorteo.
+- El **último campeón de Copa A es cabeza de serie del Grupo A**.
+- Los bombos se determinan mediante la **tabla IFFHS**, cuya lógica se documentará por separado al final del relevamiento de copas.
+- El admin controla el armado/sorteo; el sistema no debe imponer automáticamente cruces definitivos sin confirmación administrativa.
+
+### Fase de grupos
+
+- La fase de grupos dura **2 Fechas Copa completas de 12 partidos cada una**.
+- En el calendario histórico esas dos jornadas corresponden conceptualmente a `32avos` y `16avos`, aunque funcionen como acumulación de fase de grupos.
+- Los puntos obtenidos en ambas Fechas Copa se acumulan para definir la posición dentro del grupo.
+- Al terminar la fase:
+  - **1.º de cada grupo → clasifica directamente a Cuartos de Final**.
+  - **2.º y 3.º de cada grupo → clasifican a Octavos de Final**.
+  - **4.º de cada grupo → eliminado**.
+
+### Octavos
+
+- Participan los segundos y terceros de los cuatro grupos: 8 jugadores.
+- Los cruces se designan **por sorteo**.
+- Restricción del sorteo: cada cruce debe ser siempre **un 2.º vs un 3.º**.
+- Cada llave se define usando una única Fecha Copa de 12 partidos.
+- Si queda igualdad de puntos, se aplica la regla general de desempate de Copa; no se usan plenos/parciales como desempate del cruce.
+
+### Cuartos y Semifinales
+
+- A los 4 ganadores de Octavos se suman los 4 primeros de grupo que ya estaban clasificados.
+- Los cruces de Cuartos se designan **por sorteo**.
+- Cada Cuarto se juega sobre una única Fecha Copa.
+- Los cruces de Semifinal también se designan **por sorteo** entre los clasificados.
+- Cada Semifinal se juega sobre una única Fecha Copa.
+
+### Final
+
+- Se disputa sobre una Fecha Copa.
+- La lógica específica de tercer puesto/final se terminará de confirmar en el relevamiento, pero el campeón es quien obtiene el beneficio de permanencia indicado arriba.
+
+## Copa B
+
+La Copa B usa el **mismo método estructural que Copa A** como formato base.
+
+### Participación
+
+- Participan los integrantes vigentes de **Segunda División/Liga B**.
+- Para diseño inicial, asumir **16 participantes**, aunque el formato puede adaptarse si una edición tiene menos jugadores.
+- El campeón de Copa B obtiene como premio deportivo **ascenso a Liga A/Primera División**.
+- Como consecuencia, en la siguiente edición de Copa B ese campeón ya no participa si para entonces integra Primera División.
+
+### Formato base
+
+- 4 grupos por sorteo.
+- Bombos determinados por tabla IFFHS.
+- Fase de grupos durante 2 Fechas Copa.
+- 1.º de cada grupo a Cuartos.
+- 2.º y 3.º a Octavos.
+- Octavos sorteados con restricción `2.º vs 3.º`.
+- Cuartos por sorteo.
+- Semifinales por sorteo.
+- Una Fecha Copa por cada ronda de eliminación directa.
+- Empates de cruces siguen la regla general de desempate de Copa.
+- El formato exacto puede comprimirse/adaptarse manualmente por Admin si la cantidad real de participantes es menor a 16.
+
 ## Vista participante
 
 En una Fecha Copa, mostrar de forma clara qué está disputando el participante.
@@ -109,17 +183,26 @@ Para `↑N / ↓N` en la tabla de Liga, comparar contra la **posición al finali
 
 ## Pendiente antes de diseñar base de datos/migraciones
 
-Revisar el Excel histórico que enviará el usuario y relevar por hoja/competición:
+Continuar relevando el Excel histórico competición por competición:
 
-- nombre de cada Copa;
-- divisiones o condiciones de acceso;
-- participantes aproximados;
+- Copa Total;
+- Copa Dúos;
+- Copa Campeones;
+- Copa Papa / Copa Miguel Ángel Russo;
+- Promoción;
+- tabla IFFHS y su incidencia en sorteos;
+- cualquier otra competición/variante detectada.
+
+Para cada una relevar:
+
+- participantes/condiciones de acceso;
 - formato (grupos, eliminación, mixto, etc.);
 - cantidad y nombres de fases;
+- sorteos/cruces;
 - si hay ida/vuelta;
 - tercer puesto;
 - final;
-- criterios particulares;
-- cómo se representaban cruces y desempates anteriormente.
+- premios deportivos/ascensos/permanencias;
+- criterios particulares.
 
 Después de ese relevamiento se definirá un modelo suficientemente flexible para soportar varias Copas sin hardcodear una tabla distinta por competición.
