@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import CompetitionConfigPanel from './CompetitionConfigPanel';
 
 type Division = {
   id: number;
@@ -136,18 +137,20 @@ export default function AdminCompetitions() {
   useEffect(() => {
     if (!selected) {
       setAssignments({});
+      setStageByCompetition({});
       return;
     }
-    const next: Record<string, string> = {};
-    for (const member of selected.members) next[member.userId] = member.divisionCode;
-    setAssignments(next);
+
+    const nextAssignments: Record<string, string> = {};
+    for (const member of selected.members) nextAssignments[member.userId] = member.divisionCode;
+    setAssignments(nextAssignments);
 
     const initialStages: Record<number, number | ''> = {};
     for (const competition of selected.competitions) {
       initialStages[competition.id] = competition.stages[0]?.id ?? '';
     }
     setStageByCompetition(initialStages);
-  }, [selectedSeasonId, data]);
+  }, [selected]);
 
   async function createT32() {
     setLoading(true); setError(''); setSuccess('');
@@ -174,7 +177,7 @@ export default function AdminCompetitions() {
         method: 'PUT',
         body: JSON.stringify({ assignments: payload }),
       });
-      setSuccess('Divisiones guardadas. Cada participante quedó asignado una sola vez en T32.');
+      setSuccess('Divisiones guardadas.');
       await load(selected.id);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudieron guardar las divisiones');
@@ -210,7 +213,7 @@ export default function AdminCompetitions() {
       setSuccess(`Fecha vinculada a ${competition.displayName}. La misma Fecha puede usarse en otra competición.`);
       await load(selected?.id ?? null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo vincular la fecha');
+      setError(caught instanceof Error ? caught.message : 'No se pudo vincular la Fecha');
     } finally { setLoading(false); }
   }
 
@@ -221,7 +224,7 @@ export default function AdminCompetitions() {
       setSuccess(`${link.roundName} fue desvinculada de ${competition.displayName}.`);
       await load(selected?.id ?? null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo desvincular la fecha');
+      setError(caught instanceof Error ? caught.message : 'No se pudo desvincular la Fecha');
     } finally { setLoading(false); }
   }
 
@@ -274,7 +277,10 @@ export default function AdminCompetitions() {
 
           <section className="card panel panel--wide">
             <div className="panel-heading">
-              <div><h2>Divisiones de {selected.name}</h2><p>La pertenencia a Liga A/B se guarda por temporada y no depende de la tabla vieja.</p></div>
+              <div>
+                <h2>Divisiones de {selected.name}</h2>
+                <p>La pertenencia a Liga A/B se guarda por temporada y no depende de la tabla vieja.</p>
+              </div>
               <div className="topbar-actions">
                 {selected.status === 'draft' && <button className="button button--secondary" disabled={loading} onClick={() => void changeSeasonStatus('active')}>Activar T{selected.seasonNumber}</button>}
                 {selected.status === 'active' && <button className="button button--ghost" disabled={loading} onClick={() => void changeSeasonStatus('draft')}>Volver a borrador</button>}
@@ -300,7 +306,13 @@ export default function AdminCompetitions() {
           </section>
 
           <section className="card panel panel--wide">
-            <div className="panel-heading"><div><h2>Competiciones</h2><p>La plantilla de T32 deja creadas las competiciones; se configuran por etapas sin duplicar pronósticos.</p></div></div>
+            <div className="panel-heading">
+              <div>
+                <h2>Competiciones</h2>
+                <p>Configurá el nombre de cada edición, sus etapas y qué Fechas del Prode alimentan cada fase.</p>
+              </div>
+            </div>
+
             <div className="user-list">
               {selected.competitions.map((competition) => (
                 <div className="card panel" key={competition.id}>
@@ -308,10 +320,16 @@ export default function AdminCompetitions() {
                     <div>
                       <span className="eyebrow">{familyLabel(competition.family)}{competition.divisionCode ? ` · DIVISIÓN ${competition.divisionCode}` : ''}</span>
                       <h2>{competition.displayName}</h2>
-                      <p>{competition.stages.length} etapa(s) configurada(s) · {competition.roundLinks.length} Fecha(s) vinculada(s).</p>
+                      <p>{competition.stages.length} etapa(s) · {competition.roundLinks.length} Fecha(s) vinculada(s).</p>
                     </div>
                     <span className="user-chip">{statusLabel(competition.status)}</span>
                   </div>
+
+                  <CompetitionConfigPanel
+                    competition={competition}
+                    disabled={loading}
+                    onChanged={() => load(selected.id)}
+                  />
 
                   {competition.stages.length > 0 && (
                     <div className="round-create">
@@ -337,7 +355,10 @@ export default function AdminCompetitions() {
                       {competition.roundLinks.map((link) => (
                         <div className="user-row" key={link.id}>
                           <div className="avatar">{link.sequence}</div>
-                          <div className="user-data"><strong>{link.roundName}</strong><span>{link.purpose} · {link.category} · {statusLabel(link.roundStatus)}</span></div>
+                          <div className="user-data">
+                            <strong>{link.roundName}</strong>
+                            <span>{link.purpose} · {link.category} · {statusLabel(link.roundStatus)}</span>
+                          </div>
                           <button className="button button--ghost" disabled={loading} onClick={() => void unlinkRound(competition, link)}>Desvincular</button>
                         </div>
                       ))}
