@@ -10,6 +10,7 @@ import { handleCompetitionKnockout } from './competition-knockout';
 import { handleCompetitionTiebreak } from './competition-tiebreak';
 import { handleCompetitionCupAbProgression } from './competition-cup-ab-progression';
 import { handleCompetitionTotalSegments } from './competition-total-segments';
+import { handleCompetitionTotalGroups } from './competition-total-groups';
 import { handleIffhs } from './iffhs';
 
 function jsonError(message: string, status: number) {
@@ -27,6 +28,9 @@ export default {
 
     if (competitionRoute) {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido', 403);
+
+      const totalGroupsResponse = await handleCompetitionTotalGroups(request, env);
+      if (totalGroupsResponse) return totalGroupsResponse;
 
       const totalSegmentsResponse = await handleCompetitionTotalSegments(request, env);
       if (totalSegmentsResponse) return totalSegmentsResponse;
