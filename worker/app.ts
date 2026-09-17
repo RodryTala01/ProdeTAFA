@@ -12,6 +12,7 @@ import { handleCompetitionCupAbProgression } from './competition-cup-ab-progress
 import { handleCompetitionTotalSegments } from './competition-total-segments';
 import { handleCompetitionTotalGroups } from './competition-total-groups';
 import { handleCompetitionTotalProgression } from './competition-total-progression';
+import { handleCompetitionDuos } from './competition-duos';
 import { handleIffhs } from './iffhs';
 
 function jsonError(message: string, status: number) {
@@ -29,6 +30,9 @@ export default {
 
     if (competitionRoute) {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido', 403);
+
+      const duosResponse = await handleCompetitionDuos(request, env);
+      if (duosResponse) return duosResponse;
 
       const totalProgressionResponse = await handleCompetitionTotalProgression(request, env);
       if (totalProgressionResponse) return totalProgressionResponse;
