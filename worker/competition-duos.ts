@@ -485,7 +485,7 @@ export async function handleCompetitionDuos(request: Request, env: Env): Promise
     if (!user) return error('No autorizado', 401);
     if (request.method !== 'GET') return error('Método no permitido', 405);
     const payload = await tablePayload(env, Number(tableMatch[1]));
-    if ('error' in payload) return error(payload.error, payload.status);
+    if ('error' in payload) return error(String(payload.error ?? 'No se pudo cargar la tabla de Dúos'), Number(payload.status ?? 500));
     return json(payload);
   }
 
