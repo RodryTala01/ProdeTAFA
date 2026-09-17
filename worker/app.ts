@@ -1,6 +1,7 @@
 import entryWorker, { mutationAllowed } from './entry';
 import type { Env } from './index';
 import { handleCompetitionEngine } from './competitions';
+import { handleCompetitionConfig } from './competition-config';
 
 function jsonError(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
@@ -17,6 +18,8 @@ export default {
 
     if (competitionRoute) {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido', 403);
+      const configResponse = await handleCompetitionConfig(request, env);
+      if (configResponse) return configResponse;
       const response = await handleCompetitionEngine(request, env);
       if (response) return response;
     }
