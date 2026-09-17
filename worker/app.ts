@@ -5,6 +5,7 @@ import { handleCompetitionConfig } from './competition-config';
 import { handleCompetitionLeagues } from './competition-leagues';
 import { handleCompetitionGroups } from './competition-groups';
 import { handleCompetitionDraw } from './competition-draw';
+import { handleCompetitionResults } from './competition-results';
 import { handleIffhs } from './iffhs';
 
 function jsonError(message: string, status: number) {
@@ -22,6 +23,9 @@ export default {
 
     if (competitionRoute) {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido', 403);
+
+      const resultsResponse = await handleCompetitionResults(request, env);
+      if (resultsResponse) return resultsResponse;
 
       const iffhsResponse = await handleIffhs(request, env);
       if (iffhsResponse) return iffhsResponse;
