@@ -8,6 +8,7 @@ import { handleCompetitionDraw } from './competition-draw';
 import { handleCompetitionResults } from './competition-results';
 import { handleCompetitionKnockout } from './competition-knockout';
 import { handleCompetitionTiebreak } from './competition-tiebreak';
+import { handleCompetitionCupAbProgression } from './competition-cup-ab-progression';
 import { handleIffhs } from './iffhs';
 
 function jsonError(message: string, status: number) {
@@ -25,6 +26,9 @@ export default {
 
     if (competitionRoute) {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido', 403);
+
+      const progressionResponse = await handleCompetitionCupAbProgression(request, env);
+      if (progressionResponse) return progressionResponse;
 
       const tiebreakResponse = await handleCompetitionTiebreak(request, env);
       if (tiebreakResponse) return tiebreakResponse;
