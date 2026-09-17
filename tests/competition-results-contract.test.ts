@@ -24,8 +24,8 @@ describe('competition results contract', () => {
   });
 
   it('validates entries and stages against the selected competition', () => {
-    expect(worker).toContain('entry_id = ? AND competition_id = ?');
-    expect(worker).toContain('id = ? AND competition_id = ?');
+    expect(worker).toContain('SELECT id FROM competition_entries WHERE id = ? AND competition_id = ? LIMIT 1');
+    expect(worker).toContain('SELECT id FROM competition_stages WHERE id = ? AND competition_id = ? LIMIT 1');
   });
 
   it('audits replacements instead of silently overwriting sporting history', () => {
