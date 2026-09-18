@@ -116,7 +116,7 @@ async function entryScoreForMatch(env: Env, entryId: number, matchId: number, ro
      LEFT JOIN prediction_scores ps ON ps.prediction_id = op.id
      WHERE cem.entry_id = ?
        AND (cem.valid_from_round_id IS NULL OR cem.valid_from_round_id <= ?)
-       AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id >= ?)`,
+       AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id > ?)`,
   ).bind(matchId, entryId, roundId, roundId).first<{ points: number }>();
   return Number(row?.points ?? 0);
 }
