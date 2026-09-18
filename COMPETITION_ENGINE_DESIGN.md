@@ -83,6 +83,37 @@ Ejemplo Copa Papa:
 - nombre canónico: `Copa Papa`;
 - nombre visible T30: `Copa Miguel Ángel Russo`.
 
+## 3A. Configuración manual como regla transversal
+
+El motor debe tratar el armado manual por Admin como una capacidad de primera clase.
+
+Los criterios de cada competición pueden determinar:
+
+- participantes elegibles;
+- bombos;
+- cabezas de serie;
+- restricciones de cruce;
+- posiciones clasificatorias;
+- formato de grupos o llaves.
+
+Pero esos criterios **no obligan a ejecutar un sorteo automático dentro de la app**.
+
+El sistema debe permitir dos flujos:
+
+1. **Asistido**: calcular una propuesta o ejecutar un sorteo automático reproducible/auditable.
+2. **Manual**: el Admin realiza el sorteo o designación por su cuenta y carga el resultado final en grupos, parejas o cruces.
+
+La modalidad manual debe existir para:
+
+- Copa A/B: grupos y cruces de eliminación;
+- Copa Total: grupos y cruces;
+- Copa Dúos: composición de parejas, además del sorteo aleatorio opcional;
+- Copa Campeones: reemplazos/correcciones y armado de posiciones cuando corresponda;
+- Copa Papa: ubicación manual si el Admin necesita corregir el armado derivado del ranking;
+- Promoción: corrección administrativa excepcional de participantes.
+
+Toda acción manual debe preservar las validaciones de elegibilidad y quedar auditada. El randomizador interno nunca debe ser la única vía posible.
+
 ## 4. Etapas
 
 Una competición se compone de `competition_stages`.
