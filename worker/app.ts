@@ -17,6 +17,7 @@ import { handleCompetitionChampions } from './competition-champions';
 import { handleCompetitionPapa } from './competition-papa';
 import { handleCompetitionPromotion } from './competition-promotion';
 import { handleIffhs } from './iffhs';
+import { handleSeasonTransition } from './season-transition';
 
 function jsonError(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
@@ -54,6 +55,9 @@ export default {
 
       const totalSegmentsResponse = await handleCompetitionTotalSegments(request, env);
       if (totalSegmentsResponse) return totalSegmentsResponse;
+
+      const transitionResponse = await handleSeasonTransition(request, env);
+      if (transitionResponse) return transitionResponse;
 
       const progressionResponse = await handleCompetitionCupAbProgression(request, env);
       if (progressionResponse) return progressionResponse;
