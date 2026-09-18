@@ -72,32 +72,6 @@ function readCookie(request: Request, name: string) {
     const [rawName, ...rawValue] = part.trim().split('=');
     if (rawName === name) return decodeURIComponent(rawValue.join('='));
   }
-  const bracketGetMatch = pathname.match(/^\/api\/competition-engine\/competitions\/(\d+)\/champions\/bracket$/);
-  if (bracketGetMatch) {
-    const user = await sessionUser(request, env);
-    if (!user) return error('No autorizado', 401);
-    if (request.method !== 'GET') return error('Método no permitido', 405);
-    return json({ competitionId: Number(bracketGetMatch[1]), bracket: await readBracket(env, Number(bracketGetMatch[1])) });
-  }
-
-  const bracketInitMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/champions\/bracket$/);
-  if (bracketInitMatch) {
-    const user = await sessionUser(request, env);
-    if (!user) return error('No autorizado', 401);
-    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
-    if (request.method !== 'POST') return error('Método no permitido', 405);
-    return initBracket(env, user, Number(bracketInitMatch[1]));
-  }
-
-  const activateMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/champions\/nodes\/([A-Z0-9_-]+)\/activate$/);
-  if (activateMatch) {
-    const user = await sessionUser(request, env);
-    if (!user) return error('No autorizado', 401);
-    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
-    if (request.method !== 'POST') return error('Método no permitido', 405);
-    return activateNode(request, env, user, Number(activateMatch[1]), activateMatch[2]);
-  }
-
   return null;
 }
 function bytesToHex(bytes: Uint8Array) {
@@ -637,6 +611,32 @@ export async function handleCompetitionChampions(request: Request, env: Env): Pr
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
     if (request.method !== 'PUT') return error('Método no permitido', 405);
     return confirmSlots(request, env, user, Number(confirmMatch[1]));
+  }
+
+  const bracketGetMatch = pathname.match(/^\/api\/competition-engine\/competitions\/(\d+)\/champions\/bracket$/);
+  if (bracketGetMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (request.method !== 'GET') return error('Método no permitido', 405);
+    return json({ competitionId: Number(bracketGetMatch[1]), bracket: await readBracket(env, Number(bracketGetMatch[1])) });
+  }
+
+  const bracketInitMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/champions\/bracket$/);
+  if (bracketInitMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method !== 'POST') return error('Método no permitido', 405);
+    return initBracket(env, user, Number(bracketInitMatch[1]));
+  }
+
+  const activateMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/champions\/nodes\/([A-Z0-9_-]+)\/activate$/);
+  if (activateMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method !== 'POST') return error('Método no permitido', 405);
+    return activateNode(request, env, user, Number(activateMatch[1]), activateMatch[2]);
   }
 
   return null;
