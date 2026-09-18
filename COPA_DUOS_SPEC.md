@@ -6,6 +6,7 @@ Estado: formato funcional confirmado a nivel de reglas generales. Los valores co
 
 - La Copa Dúos se disputa en parejas de 2 participantes.
 - Las parejas se forman de manera totalmente aleatoria.
+- El sorteo puede realizarse dentro o fuera de la app. Admin debe poder cargar manualmente las parejas resultantes, con validación de elegibilidad, sin integrantes duplicados y con auditoría. El sorteo automático es una opción asistida, nunca la única vía.
 - La pareja se considera estable durante la competencia, salvo cambio excepcional administrado manualmente.
 - El sistema debe permitir que, en una edición futura o ante una situación excepcional, el admin cambie un integrante del dúo sin perder la historia previa.
 - Un cambio de integrante debe tener vigencia desde una fecha/fase concreta hacia adelante; los resultados anteriores siguen asociados a la composición que realmente disputó esas jornadas.

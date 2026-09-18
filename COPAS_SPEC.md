@@ -31,6 +31,18 @@ No usar `Test` como categoría de producción.
 - Algunas Copas son de eliminación directa y otras tienen fase de grupos. Los formatos exactos se definirán después de revisar el Excel.
 - Nombres de fases como `32avos` pueden mantenerse aunque haya menos cruces reales; no es necesario completar una llave teórica de 64 participantes.
 
+## Regla general de armado manual por Admin
+
+Los criterios deportivos de cada Copa definen **elegibilidad, cabezas de serie, bombos, restricciones y formato**, pero no obligan a que el sistema ejecute el sorteo o la designación final.
+
+- El sistema puede calcular y mostrar una propuesta de bombos, grupos, parejas, cruces o clasificados.
+- El Admin puede realizar el sorteo fuera de la app y **cargar manualmente el resultado**.
+- El Admin puede asignar manualmente participantes a grupos, llaves, parejas o cruces, respetando las restricciones deportivas que correspondan.
+- Ninguna Copa debe depender de un randomizador interno como única vía de configuración.
+- Los sorteos automáticos deben ser opcionales y funcionar como asistencia.
+- Toda asignación o corrección manual debe quedar auditada.
+- Esto también aplica a Copa Dúos: aunque la regla deportiva indique parejas aleatorias, el Admin puede hacer el sorteo por su cuenta y luego cargar manualmente la composición resultante.
+
 ## Pronóstico compartido
 
 - El participante completa **un solo pronóstico de 12 partidos por fecha**.

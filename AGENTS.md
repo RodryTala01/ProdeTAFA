@@ -173,7 +173,7 @@ Mejoras deseadas:
 
 Participante: `Pronósticos | Liga | Historial`.
 
-Administrador: `Fechas | Liga | Participantes`.
+Administrador: `Fechas | Competiciones | Liga actual | Participantes`.
 
 En móvil, navegación inferior fija y respeto de safe areas. La PWA debe sentirse como app instalada (`standalone`).
 
@@ -206,6 +206,17 @@ Se desea una pantalla inicial de Admin simple y operativa con información útil
 No implementar por ahora duplicación de fechas.
 
 ## Copas — siguiente gran fase funcional
+
+La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. El bloque actual completa únicamente la pantalla central Admin de Competiciones, detalle y edición general de competiciones/etapas, reutilizando ese backend y preservando Liga legacy.
+
+### Armado manual y asistido
+
+- Toda pantalla futura de configuración debe ofrecer modalidad asistida/automática y modalidad manual.
+- Elegibilidad, bombos, cabezas de serie y restricciones sirven para validar y sugerir; no obligan a sortear dentro de la app.
+- Admin puede cargar grupos, parejas, cruces y posiciones en llave resultantes de un sorteo externo.
+- Toda asignación manual debe validar elegibilidad y restricciones obligatorias y quedar auditada.
+- Copa Dúos también debe permitir cargar parejas sorteadas fuera de la app; el sorteo interno es opcional.
+- Las pantallas deportivas específicas quedan para bloques posteriores; no duplicar la lógica del motor existente.
 
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 
