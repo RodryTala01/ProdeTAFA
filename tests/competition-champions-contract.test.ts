@@ -49,4 +49,44 @@ describe('Copa Campeones qualification slots contract', () => {
     expect(worker).toContain("entry_type='INDIVIDUAL'");
     expect(worker).toContain('competition.champions_slots_confirmed');
   });
+
+  it('models the fixed staggered bracket instead of a generic 16-player bracket', () => {
+    for (const code of ['U1','U2','U3','U4','U5','L1','L2','L3','L4','L5','L6','L7','F1']) {
+      expect(worker).toContain(`code: '${code}'`);
+    }
+    expect(worker).toContain("sourceARef: 'LIGA_A_7'");
+    expect(worker).toContain("sourceBRef: 'LIGA_A_3'");
+    expect(worker).toContain("sourceBRef: 'LIGA_B_CHAMPION'");
+    expect(worker).toContain("sourceBRef: 'COPA_A_CHAMPION'");
+    expect(worker).toContain("sourceBRef: 'COPA_PAPA_CHAMPION'");
+    expect(worker).toContain("sourceBRef: 'COPA_TOTAL_CHAMPION'");
+  });
+
+  it('models the lower branch exactly as confirmed', () => {
+    expect(worker).toContain("sourceARef: 'LIGA_A_5', sourceBType: 'SLOT', sourceBRef: 'COPA_B_CHAMPION'");
+    expect(worker).toContain("sourceARef: 'LIGA_A_4', sourceBType: 'SLOT', sourceBRef: 'LIGA_A_6'");
+    expect(worker).toContain("sourceARef: 'L1', sourceBType: 'WINNER', sourceBRef: 'L2'");
+    expect(worker).toContain("sourceARef: 'L3', sourceBType: 'SLOT', sourceBRef: 'DUO_2'");
+    expect(worker).toContain("sourceARef: 'LIGA_A_2', sourceBType: 'SLOT', sourceBRef: 'DUO_1'");
+    expect(worker).toContain("sourceARef: 'L4', sourceBType: 'WINNER', sourceBRef: 'L5'");
+    expect(worker).toContain("sourceARef: 'L6', sourceBType: 'SLOT', sourceBRef: 'LIGA_A_1'");
+  });
+
+  it('builds the final from the winners of the two fixed branches and has no third place', () => {
+    expect(worker).toContain("sourceARef: 'U5', sourceBType: 'WINNER', sourceBRef: 'L7'");
+    expect(worker).not.toContain('THIRD');
+    expect(worker).not.toContain('third-place');
+  });
+
+  it('only unlocks winner-fed nodes after the source encounter is admin confirmed', () => {
+    expect(worker).toContain("row.status !== 'finished'");
+    expect(worker).toContain('row.admin_confirmed_at == null');
+    expect(worker).toContain('readyToActivate');
+  });
+
+  it('activates each fixed node using the shared knockout encounter engine', () => {
+    expect(worker).toContain('competition_encounters');
+    expect(worker).toContain("stage.stage_type !== 'KNOCKOUT'");
+    expect(worker).toContain('competition.champions_node_activated');
+  });
 });
