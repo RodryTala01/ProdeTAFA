@@ -1,4 +1,5 @@
 import type { Env } from './index';
+import { calculateIffhsSeason } from './iffhs-calculator';
 
 type SessionUser = {
   id: string;
@@ -237,12 +238,139 @@ async function importSeasonTotals(request: Request, env: Env, user: SessionUser,
   });
 }
 
+async function seasonComponents(request: Request, env: Env, seasonNumber: number) {
+  const user = await sessionUser(request, env);
+  if (!user) return error('No autorizado', 401);
+  if (!Number.isInteger(seasonNumber) || seasonNumber <= 0) return error('Temporada IFFHS inválida');
+
+  const url = new URL(request.url);
+  const requestedUserId = url.searchParams.get('userId')?.trim() || null;
+  if (requestedUserId && user.role !== 'admin' && requestedUserId !== user.id) {
+    return error('No podés consultar el detalle IFFHS de otro participante', 403);
+  }
+  const effectiveUserId = requestedUserId ?? (user.role === 'participant' ? user.id : null);
+
+  const params: unknown[] = [seasonNumber];
+  let where = 'isc.season_number = ?';
+  if (effectiveUserId) {
+    where += ' AND isc.user_id = ?';
+    params.push(effectiveUserId);
+  }
+
+  const rows = await env.DB.prepare(
+    `SELECT isc.user_id,u.full_name,isc.competition_code,isc.component_code,
+            isc.base_value_scaled,isc.multiplier_scaled,isc.points_scaled,
+            isc.detail_json,isc.source,isc.calculated_at
+     FROM iffhs_season_components isc
+     JOIN users u ON u.id=isc.user_id
+     WHERE ${where}
+     ORDER BY u.full_name COLLATE NOCASE,isc.competition_code,isc.component_code`,
+  ).bind(...params).all<{
+    user_id: string; full_name: string; competition_code: string; component_code: string;
+    base_value_scaled: number; multiplier_scaled: number; points_scaled: number;
+    detail_json: string | null; source: string; calculated_at: string;
+  }>();
+
+  const totalRows = await env.DB.prepare(
+    effectiveUserId
+      ? `SELECT user_id,total_points_scaled,source,calculated_at
+         FROM iffhs_season_totals WHERE season_number=? AND user_id=?`
+      : `SELECT user_id,total_points_scaled,source,calculated_at
+         FROM iffhs_season_totals WHERE season_number=?`,
+  ).bind(...(effectiveUserId ? [seasonNumber, effectiveUserId] : [seasonNumber])).all<{
+    user_id: string; total_points_scaled: number; source: string; calculated_at: string;
+  }>();
+  const totals = new Map((totalRows.results ?? []).map((row) => [row.user_id, {
+    points: fromScaled(Number(row.total_points_scaled ?? 0)),
+    source: row.source,
+    calculatedAt: row.calculated_at,
+  }]));
+
+  const byUser = new Map<string, {
+    userId: string; fullName: string; totalPoints: number; totalSource: string | null;
+    calculatedAt: string | null;
+    components: Array<{
+      competitionCode: string; componentCode: string; baseValue: number; multiplier: number;
+      points: number; detail: unknown; source: string; calculatedAt: string;
+    }>;
+  }>();
+
+  for (const row of rows.results ?? []) {
+    const total = totals.get(row.user_id);
+    const item = byUser.get(row.user_id) ?? {
+      userId: row.user_id,
+      fullName: row.full_name,
+      totalPoints: total?.points ?? 0,
+      totalSource: total?.source ?? null,
+      calculatedAt: total?.calculatedAt ?? null,
+      components: [],
+    };
+    item.components.push({
+      competitionCode: row.competition_code,
+      componentCode: row.component_code,
+      baseValue: fromScaled(Number(row.base_value_scaled ?? 0)),
+      multiplier: Number(row.multiplier_scaled ?? 0) / 100,
+      points: fromScaled(Number(row.points_scaled ?? 0)),
+      detail: row.detail_json ? JSON.parse(row.detail_json) : null,
+      source: row.source,
+      calculatedAt: row.calculated_at,
+    });
+    byUser.set(row.user_id, item);
+  }
+
+  if (effectiveUserId && !byUser.has(effectiveUserId)) {
+    const participant = await env.DB.prepare(
+      `SELECT id,full_name FROM users WHERE id=? AND role='participant' LIMIT 1`,
+    ).bind(effectiveUserId).first<{ id: string; full_name: string }>();
+    if (participant) {
+      const total = totals.get(effectiveUserId);
+      byUser.set(effectiveUserId, {
+        userId: participant.id,
+        fullName: participant.full_name,
+        totalPoints: total?.points ?? 0,
+        totalSource: total?.source ?? null,
+        calculatedAt: total?.calculatedAt ?? null,
+        components: [],
+      });
+    }
+  }
+
+  return json({ seasonNumber, rows: [...byUser.values()] });
+}
+
+async function calculateSeason(env: Env, user: SessionUser, seasonNumber: number) {
+  if (!Number.isInteger(seasonNumber) || seasonNumber <= 0) return error('Temporada IFFHS inválida');
+  const result = await calculateIffhsSeason(env, user.id, seasonNumber);
+  if (!result.ok) return error(result.error, 409);
+  return json({
+    ok: true,
+    seasonNumber,
+    componentCount: result.components.length,
+    totals: result.totals,
+  });
+}
+
 export async function handleIffhs(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
 
   if (pathname === '/api/competition-engine/iffhs/ranking') {
     if (request.method !== 'GET') return error('Método no permitido', 405);
     return ranking(request, env);
+  }
+
+  const componentsMatch = pathname.match(/^\/api\/competition-engine\/iffhs\/seasons\/(\d+)\/components$/);
+  if (componentsMatch) {
+    if (request.method !== 'GET') return error('Método no permitido', 405);
+    return seasonComponents(request, env, Number(componentsMatch[1]));
+  }
+
+  const calculateMatch = pathname.match(/^\/api\/admin\/competition-engine\/iffhs\/seasons\/(\d+)\/calculate$/);
+  if (calculateMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method !== 'POST') return error('Método no permitido', 405);
+    return calculateSeason(env, user, Number(calculateMatch[1]));
   }
 
   const importMatch = pathname.match(/^\/api\/admin\/competition-engine\/iffhs\/seasons\/(\d+)\/totals$/);
