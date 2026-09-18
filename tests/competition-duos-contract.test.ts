@@ -60,7 +60,7 @@ describe('Copa Duos progression contract', () => {
   it('keeps historical membership periods queryable', () => {
     expect(worker).toContain('duoMemberHistory');
     expect(worker).toContain('validUntilBeforeRoundId');
-    expect(worker).toContain('/duos/members');
+    expect(worker).toContain('memberHistoryMatch');
   });
 
   it('uses exclusive membership end bounds so the incoming member owns the effective round', () => {
