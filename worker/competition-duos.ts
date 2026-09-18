@@ -456,10 +456,10 @@ async function ensureDuoKnockoutTarget(
   roundLinkId: number,
 ) {
   const stage = await env.DB.prepare(
-    \`SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code
+    `SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code
      FROM competition_stages cs
      JOIN competitions c ON c.id=cs.competition_id
-     WHERE cs.id=? LIMIT 1\`,
+     WHERE cs.id=? LIMIT 1`,
   ).bind(stageId).first<{
     id: number; competition_id: number; stage_type: string; status: string; competition_code: string;
   }>();
@@ -471,14 +471,14 @@ async function ensureDuoKnockoutTarget(
   if (stage.status === 'finished' || stage.status === 'archived') return { ok: false as const, error: 'La etapa destino ya está cerrada' };
 
   const link = await env.DB.prepare(
-    \`SELECT id,round_id FROM competition_round_links
+    `SELECT id,round_id FROM competition_round_links
      WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL'
-     LIMIT 1\`,
+     LIMIT 1`,
   ).bind(roundLinkId, competitionId, stageId).first<{ id: number; round_id: number }>();
   if (!link) return { ok: false as const, error: 'La Fecha indicada no pertenece a la etapa destino' };
 
   const existing = await env.DB.prepare(
-    \`SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?\`,
+    `SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?`,
   ).bind(stageId).first<{ total: number }>();
   if (Number(existing?.total ?? 0) > 0) return { ok: false as const, error: 'La etapa destino ya tiene cruces configurados' };
 
@@ -518,21 +518,21 @@ async function buildSemifinals(request: Request, env: Env, user: SessionUser, so
 
   await env.DB.batch([
     env.DB.prepare(
-      \`INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
-       VALUES (?,?, 'SF-1', ?, ?, 'pending')\`,
+      `INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
+       VALUES (?,?, 'SF-1', ?, ?, 'pending')`,
     ).bind(targetStageId, roundLinkId, first, fourth),
     env.DB.prepare(
-      \`INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
-       VALUES (?,?, 'SF-2', ?, ?, 'pending')\`,
+      `INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
+       VALUES (?,?, 'SF-2', ?, ?, 'pending')`,
     ).bind(targetStageId, roundLinkId, second, third),
     env.DB.prepare(
-      \`INSERT INTO competition_entry_bonuses(competition_id,stage_id,round_link_id,entry_id,points,reason)
-       VALUES (?,?,?,?,2,?)\`,
-    ).bind(source.context.competition_id, targetStageId, roundLinkId, first, \`COPA_DUOS:\${sourceRoundLinkId}:SEMIFINAL_SEED:1\`),
+      `INSERT INTO competition_entry_bonuses(competition_id,stage_id,round_link_id,entry_id,points,reason)
+       VALUES (?,?,?,?,2,?)`,
+    ).bind(source.context.competition_id, targetStageId, roundLinkId, first, `COPA_DUOS:${sourceRoundLinkId}:SEMIFINAL_SEED:1`),
     env.DB.prepare(
-      \`INSERT INTO competition_entry_bonuses(competition_id,stage_id,round_link_id,entry_id,points,reason)
-       VALUES (?,?,?,?,2,?)\`,
-    ).bind(source.context.competition_id, targetStageId, roundLinkId, second, \`COPA_DUOS:\${sourceRoundLinkId}:SEMIFINAL_SEED:2\`),
+      `INSERT INTO competition_entry_bonuses(competition_id,stage_id,round_link_id,entry_id,points,reason)
+       VALUES (?,?,?,?,2,?)`,
+    ).bind(source.context.competition_id, targetStageId, roundLinkId, second, `COPA_DUOS:${sourceRoundLinkId}:SEMIFINAL_SEED:2`),
   ]);
 
   const pairs = [
@@ -547,10 +547,10 @@ async function buildSemifinals(request: Request, env: Env, user: SessionUser, so
 
 async function buildFinal(request: Request, env: Env, user: SessionUser, semifinalStageId: number) {
   const semifinalStage = await env.DB.prepare(
-    \`SELECT cs.id,cs.competition_id,cs.stage_type,c.code AS competition_code
+    `SELECT cs.id,cs.competition_id,cs.stage_type,c.code AS competition_code
      FROM competition_stages cs
      JOIN competitions c ON c.id=cs.competition_id
-     WHERE cs.id=? LIMIT 1\`,
+     WHERE cs.id=? LIMIT 1`,
   ).bind(semifinalStageId).first<{
     id: number; competition_id: number; stage_type: string; competition_code: string;
   }>();
@@ -559,8 +559,8 @@ async function buildFinal(request: Request, env: Env, user: SessionUser, semifin
   }
 
   const semis = await env.DB.prepare(
-    \`SELECT id,entry_a_id,entry_b_id,winner_entry_id,status,admin_confirmed_at
-     FROM competition_encounters WHERE stage_id=? ORDER BY id\`,
+    `SELECT id,entry_a_id,entry_b_id,winner_entry_id,status,admin_confirmed_at
+     FROM competition_encounters WHERE stage_id=? ORDER BY id`,
   ).bind(semifinalStageId).all<{
     id: number; entry_a_id: number | null; entry_b_id: number | null; winner_entry_id: number | null;
     status: string; admin_confirmed_at: string | null;
@@ -587,20 +587,20 @@ async function buildFinal(request: Request, env: Env, user: SessionUser, semifin
   });
 
   await env.DB.prepare(
-    \`INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
-     VALUES (?,?, 'FINAL', ?, ?, 'pending')\`,
+    `INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
+     VALUES (?,?, 'FINAL', ?, ?, 'pending')`,
   ).bind(targetStageId, roundLinkId, winners[0], winners[1]).run();
 
   for (const loser of losers) {
     if (Number.isInteger(loser) && loser > 0) {
       await env.DB.prepare(
-        \`UPDATE competition_entries SET status='eliminated',updated_at=datetime('now') WHERE id=?\`,
+        `UPDATE competition_entries SET status='eliminated',updated_at=datetime('now') WHERE id=?`,
       ).bind(loser).run();
     }
   }
   for (const winner of winners) {
     await env.DB.prepare(
-      \`UPDATE competition_entries SET status='qualified',updated_at=datetime('now') WHERE id=?\`,
+      `UPDATE competition_entries SET status='qualified',updated_at=datetime('now') WHERE id=?`,
     ).bind(winner).run();
   }
 
