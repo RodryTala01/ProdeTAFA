@@ -449,6 +449,167 @@ async function confirmRound(env: Env, user: SessionUser, roundLinkId: number) {
   return json({ ok: true, roundLinkId, reachesSemifinals, eliminatedEntryIds: [...eliminated], rows: snapshot });
 }
 
+async function ensureDuoKnockoutTarget(
+  env: Env,
+  competitionId: number,
+  stageId: number,
+  roundLinkId: number,
+) {
+  const stage = await env.DB.prepare(
+    \`SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code
+     FROM competition_stages cs
+     JOIN competitions c ON c.id=cs.competition_id
+     WHERE cs.id=? LIMIT 1\`,
+  ).bind(stageId).first<{
+    id: number; competition_id: number; stage_type: string; status: string; competition_code: string;
+  }>();
+  if (!stage) return { ok: false as const, error: 'Etapa eliminatoria no encontrada' };
+  if (stage.competition_id !== competitionId || stage.competition_code !== 'COPA_DUOS') {
+    return { ok: false as const, error: 'La etapa no pertenece a esta Copa Dúos' };
+  }
+  if (stage.stage_type !== 'KNOCKOUT') return { ok: false as const, error: 'La etapa destino debe ser eliminatoria' };
+  if (stage.status === 'finished' || stage.status === 'archived') return { ok: false as const, error: 'La etapa destino ya está cerrada' };
+
+  const link = await env.DB.prepare(
+    \`SELECT id,round_id FROM competition_round_links
+     WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL'
+     LIMIT 1\`,
+  ).bind(roundLinkId, competitionId, stageId).first<{ id: number; round_id: number }>();
+  if (!link) return { ok: false as const, error: 'La Fecha indicada no pertenece a la etapa destino' };
+
+  const existing = await env.DB.prepare(
+    \`SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?\`,
+  ).bind(stageId).first<{ total: number }>();
+  if (Number(existing?.total ?? 0) > 0) return { ok: false as const, error: 'La etapa destino ya tiene cruces configurados' };
+
+  return { ok: true as const, stage, link };
+}
+
+async function buildSemifinals(request: Request, env: Env, user: SessionUser, sourceRoundLinkId: number) {
+  const source = await ensureDuoRound(env, sourceRoundLinkId);
+  if (!source.ok) return error(source.error, source.status);
+
+  const body = await request.json().catch(() => null) as { targetStageId?: number; roundLinkId?: number } | null;
+  const targetStageId = Number(body?.targetStageId);
+  const roundLinkId = Number(body?.roundLinkId);
+  if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa de semifinal inválida');
+  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha de semifinal inválida');
+
+  const snapshot = await snapshotPayload(env, sourceRoundLinkId);
+  const qualified = snapshot
+    .filter((row) => row.decision === 'QUALIFIED')
+    .sort((a, b) => a.position - b.position);
+  if (qualified.length !== 4) {
+    return error('La última tabla confirmada debe dejar exactamente 4 dúos clasificados a semifinales', 409);
+  }
+  const positions = qualified.map((row) => row.position);
+  if (new Set(positions).size !== 4 || ![1, 2, 3, 4].every((position) => positions.includes(position))) {
+    return error('Para armar semifinales deben estar definidos los puestos 1.º, 2.º, 3.º y 4.º', 409);
+  }
+
+  const target = await ensureDuoKnockoutTarget(env, source.context.competition_id, targetStageId, roundLinkId);
+  if (!target.ok) return error(target.error, 409);
+
+  const byPosition = new Map(qualified.map((row) => [row.position, row.entryId]));
+  const first = byPosition.get(1)!;
+  const second = byPosition.get(2)!;
+  const third = byPosition.get(3)!;
+  const fourth = byPosition.get(4)!;
+
+  await env.DB.batch([
+    env.DB.prepare(
+      \`INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
+       VALUES (?,?, 'SF-1', ?, ?, 'pending')\`,
+    ).bind(targetStageId, roundLinkId, first, fourth),
+    env.DB.prepare(
+      \`INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
+       VALUES (?,?, 'SF-2', ?, ?, 'pending')\`,
+    ).bind(targetStageId, roundLinkId, second, third),
+    env.DB.prepare(
+      \`INSERT INTO competition_entry_bonuses(competition_id,stage_id,round_link_id,entry_id,points,reason)
+       VALUES (?,?,?,?,2,?)\`,
+    ).bind(source.context.competition_id, targetStageId, roundLinkId, first, \`COPA_DUOS:\${sourceRoundLinkId}:SEMIFINAL_SEED:1\`),
+    env.DB.prepare(
+      \`INSERT INTO competition_entry_bonuses(competition_id,stage_id,round_link_id,entry_id,points,reason)
+       VALUES (?,?,?,?,2,?)\`,
+    ).bind(source.context.competition_id, targetStageId, roundLinkId, second, \`COPA_DUOS:\${sourceRoundLinkId}:SEMIFINAL_SEED:2\`),
+  ]);
+
+  const pairs = [
+    { slot: 'SF-1', entryAId: first, entryBId: fourth, bonusA: 2, bonusB: 0 },
+    { slot: 'SF-2', entryAId: second, entryBId: third, bonusA: 2, bonusB: 0 },
+  ];
+  await audit(env, user.id, 'competition.duos_semifinals_built', 'competition_stage', String(targetStageId), {
+    sourceRoundLinkId, roundLinkId, pairs,
+  });
+  return json({ ok: true, sourceRoundLinkId, targetStageId, roundLinkId, pairs });
+}
+
+async function buildFinal(request: Request, env: Env, user: SessionUser, semifinalStageId: number) {
+  const semifinalStage = await env.DB.prepare(
+    \`SELECT cs.id,cs.competition_id,cs.stage_type,c.code AS competition_code
+     FROM competition_stages cs
+     JOIN competitions c ON c.id=cs.competition_id
+     WHERE cs.id=? LIMIT 1\`,
+  ).bind(semifinalStageId).first<{
+    id: number; competition_id: number; stage_type: string; competition_code: string;
+  }>();
+  if (!semifinalStage || semifinalStage.competition_code !== 'COPA_DUOS' || semifinalStage.stage_type !== 'KNOCKOUT') {
+    return error('La etapa origen no es una semifinal de Copa Dúos válida', 409);
+  }
+
+  const semis = await env.DB.prepare(
+    \`SELECT id,entry_a_id,entry_b_id,winner_entry_id,status,admin_confirmed_at
+     FROM competition_encounters WHERE stage_id=? ORDER BY id\`,
+  ).bind(semifinalStageId).all<{
+    id: number; entry_a_id: number | null; entry_b_id: number | null; winner_entry_id: number | null;
+    status: string; admin_confirmed_at: string | null;
+  }>();
+  const encounters = semis.results ?? [];
+  if (encounters.length !== 2) return error('La semifinal debe tener exactamente dos cruces', 409);
+  if (encounters.some((row) => row.status !== 'finished' || row.winner_entry_id == null || row.admin_confirmed_at == null)) {
+    return error('Las dos semifinales deben estar resueltas y confirmadas por Admin', 409);
+  }
+
+  const body = await request.json().catch(() => null) as { targetStageId?: number; roundLinkId?: number } | null;
+  const targetStageId = Number(body?.targetStageId);
+  const roundLinkId = Number(body?.roundLinkId);
+  if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa final inválida');
+  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha final inválida');
+
+  const target = await ensureDuoKnockoutTarget(env, semifinalStage.competition_id, targetStageId, roundLinkId);
+  if (!target.ok) return error(target.error, 409);
+
+  const winners = encounters.map((row) => Number(row.winner_entry_id));
+  const losers = encounters.map((row) => {
+    const winner = Number(row.winner_entry_id);
+    return Number(row.entry_a_id) === winner ? Number(row.entry_b_id) : Number(row.entry_a_id);
+  });
+
+  await env.DB.prepare(
+    \`INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
+     VALUES (?,?, 'FINAL', ?, ?, 'pending')\`,
+  ).bind(targetStageId, roundLinkId, winners[0], winners[1]).run();
+
+  for (const loser of losers) {
+    if (Number.isInteger(loser) && loser > 0) {
+      await env.DB.prepare(
+        \`UPDATE competition_entries SET status='eliminated',updated_at=datetime('now') WHERE id=?\`,
+      ).bind(loser).run();
+    }
+  }
+  for (const winner of winners) {
+    await env.DB.prepare(
+      \`UPDATE competition_entries SET status='qualified',updated_at=datetime('now') WHERE id=?\`,
+    ).bind(winner).run();
+  }
+
+  await audit(env, user.id, 'competition.duos_final_built', 'competition_stage', String(targetStageId), {
+    semifinalStageId, roundLinkId, finalistEntryIds: winners, eliminatedEntryIds: losers,
+  });
+  return json({ ok: true, semifinalStageId, targetStageId, roundLinkId, finalistEntryIds: winners });
+}
+
 export async function handleCompetitionDuos(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
 
@@ -477,6 +638,24 @@ export async function handleCompetitionDuos(request: Request, env: Env): Promise
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
     if (request.method !== 'POST') return error('Método no permitido', 405);
     return confirmRound(env, user, Number(confirmMatch[1]));
+  }
+
+  const semifinalMatch = pathname.match(/^\/api\/admin\/competition-engine\/round-links\/(\d+)\/duos\/semifinals$/);
+  if (semifinalMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method !== 'POST') return error('Método no permitido', 405);
+    return buildSemifinals(request, env, user, Number(semifinalMatch[1]));
+  }
+
+  const finalMatch = pathname.match(/^\/api\/admin\/competition-engine\/stages\/(\d+)\/duos\/final$/);
+  if (finalMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method !== 'POST') return error('Método no permitido', 405);
+    return buildFinal(request, env, user, Number(finalMatch[1]));
   }
 
   const tableMatch = pathname.match(/^\/api\/competition-engine\/round-links\/(\d+)\/duos\/table$/);
