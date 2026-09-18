@@ -265,7 +265,7 @@ async function computedTable(env: Env, roundLinkId: number) {
        JOIN users u ON u.id=cem.user_id
        WHERE cem.entry_id=?
          AND (cem.valid_from_round_id IS NULL OR cem.valid_from_round_id<=?)
-         AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id>=?)
+         AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id>?)
        ORDER BY cem.id`,
     ).bind(entry.id, context.round_id, context.round_id).all<{ user_id: string; full_name: string }>();
     const members = [];
@@ -610,6 +610,165 @@ async function buildFinal(request: Request, env: Env, user: SessionUser, semifin
   return json({ ok: true, semifinalStageId, targetStageId, roundLinkId, finalistEntryIds: winners });
 }
 
+async function duoMemberHistory(env: Env, entryId: number) {
+  const rows = await env.DB.prepare(
+    `SELECT cem.id,cem.user_id,u.full_name,cem.valid_from_round_id,cem.valid_to_round_id,
+            rf.name AS valid_from_round_name,rt.name AS valid_to_round_name,cem.joined_at,cem.left_at
+     FROM competition_entry_members cem
+     JOIN users u ON u.id=cem.user_id
+     LEFT JOIN rounds rf ON rf.id=cem.valid_from_round_id
+     LEFT JOIN rounds rt ON rt.id=cem.valid_to_round_id
+     WHERE cem.entry_id=?
+     ORDER BY cem.joined_at,cem.id`,
+  ).bind(entryId).all<{
+    id: number; user_id: string; full_name: string; valid_from_round_id: number | null; valid_to_round_id: number | null;
+    valid_from_round_name: string | null; valid_to_round_name: string | null; joined_at: string; left_at: string | null;
+  }>();
+  return (rows.results ?? []).map((row) => ({
+    membershipId: Number(row.id),
+    userId: row.user_id,
+    fullName: row.full_name,
+    validFromRoundId: row.valid_from_round_id == null ? null : Number(row.valid_from_round_id),
+    validFromRoundName: row.valid_from_round_name,
+    validUntilBeforeRoundId: row.valid_to_round_id == null ? null : Number(row.valid_to_round_id),
+    validUntilBeforeRoundName: row.valid_to_round_name,
+    joinedAt: row.joined_at,
+    leftAt: row.left_at,
+  }));
+}
+
+async function substituteDuoMember(request: Request, env: Env, user: SessionUser, entryId: number) {
+  const entry = await env.DB.prepare(
+    `SELECT ce.id,ce.competition_id,ce.entry_type,ce.display_name,c.season_id,c.code AS competition_code,
+            c.status AS competition_status,s.status AS season_status
+     FROM competition_entries ce
+     JOIN competitions c ON c.id=ce.competition_id
+     JOIN tafa_seasons s ON s.id=c.season_id
+     WHERE ce.id=? LIMIT 1`,
+  ).bind(entryId).first<{
+    id: number; competition_id: number; entry_type: string; display_name: string; season_id: number;
+    competition_code: string; competition_status: string; season_status: string;
+  }>();
+  if (!entry || entry.entry_type !== 'DUO' || entry.competition_code !== 'COPA_DUOS') {
+    return error('El dúo indicado no pertenece a Copa Dúos', 404);
+  }
+  if (entry.competition_status === 'finished' || entry.competition_status === 'archived'
+    || entry.season_status === 'finished' || entry.season_status === 'archived') {
+    return error('La competición o temporada ya está cerrada', 409);
+  }
+
+  const body = await request.json().catch(() => null) as {
+    outgoingUserId?: string; incomingUserId?: string; effectiveRoundId?: number;
+  } | null;
+  const outgoingUserId = body?.outgoingUserId?.trim() ?? '';
+  const incomingUserId = body?.incomingUserId?.trim() ?? '';
+  const effectiveRoundId = Number(body?.effectiveRoundId);
+  if (!outgoingUserId || !incomingUserId || outgoingUserId === incomingUserId) {
+    return error('Indicá correctamente quién sale y quién ingresa');
+  }
+  if (!Number.isInteger(effectiveRoundId) || effectiveRoundId <= 0) return error('Fecha de vigencia inválida');
+
+  const linkedRound = await env.DB.prepare(
+    `SELECT r.id,r.name,r.status
+     FROM competition_round_links crl
+     JOIN rounds r ON r.id=crl.round_id
+     WHERE crl.competition_id=? AND crl.round_id=?
+     ORDER BY crl.id LIMIT 1`,
+  ).bind(entry.competition_id, effectiveRoundId).first<{ id: number; name: string; status: string }>();
+  if (!linkedRound) return error('La Fecha de vigencia no está vinculada a esta Copa Dúos', 409);
+  if (linkedRound.status === 'finished') {
+    return error('No se puede hacer una sustitución retroactiva sobre una Fecha ya cerrada', 409);
+  }
+
+  const incoming = await env.DB.prepare(
+    `SELECT u.id,u.full_name
+     FROM season_division_members sdm
+     JOIN users u ON u.id=sdm.user_id
+     WHERE sdm.season_id=? AND sdm.user_id=? AND u.role='participant' AND u.is_active=1
+     LIMIT 1`,
+  ).bind(entry.season_id, incomingUserId).first<{ id: string; full_name: string }>();
+  if (!incoming) return error('El nuevo integrante no es un participante activo de esta temporada', 409);
+
+  const outgoingMembership = await env.DB.prepare(
+    `SELECT id FROM competition_entry_members
+     WHERE entry_id=? AND user_id=?
+       AND (valid_from_round_id IS NULL OR valid_from_round_id<=?)
+       AND (valid_to_round_id IS NULL OR valid_to_round_id>?)
+     ORDER BY id DESC LIMIT 1`,
+  ).bind(entryId, outgoingUserId, effectiveRoundId, effectiveRoundId).first<{ id: number }>();
+  if (!outgoingMembership) return error('El participante que sale no integra este dúo en la Fecha indicada', 409);
+
+  const activeMembers = await env.DB.prepare(
+    `SELECT cem.user_id,u.full_name
+     FROM competition_entry_members cem JOIN users u ON u.id=cem.user_id
+     WHERE cem.entry_id=?
+       AND (cem.valid_from_round_id IS NULL OR cem.valid_from_round_id<=?)
+       AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id>?)
+     ORDER BY cem.id`,
+  ).bind(entryId, effectiveRoundId, effectiveRoundId).all<{ user_id: string; full_name: string }>();
+  if ((activeMembers.results ?? []).length !== 2) return error('La composición actual del dúo no tiene exactamente dos integrantes', 409);
+
+  const conflict = await env.DB.prepare(
+    `SELECT ce.id,ce.display_name
+     FROM competition_entry_members cem
+     JOIN competition_entries ce ON ce.id=cem.entry_id
+     WHERE ce.competition_id=? AND ce.entry_type='DUO' AND cem.user_id=? AND ce.id<>?
+       AND (cem.valid_from_round_id IS NULL OR cem.valid_from_round_id<=?)
+       AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id>?)
+     LIMIT 1`,
+  ).bind(entry.competition_id, incomingUserId, entryId, effectiveRoundId, effectiveRoundId)
+    .first<{ id: number; display_name: string }>();
+  if (conflict) return error(`El nuevo integrante ya pertenece a otro dúo en esa Fecha: ${conflict.display_name}`, 409);
+
+  const before = await duoMemberHistory(env, entryId);
+  await env.DB.batch([
+    env.DB.prepare(
+      `UPDATE competition_entry_members
+       SET valid_to_round_id=?,left_at=datetime('now')
+       WHERE id=?`,
+    ).bind(effectiveRoundId, outgoingMembership.id),
+    env.DB.prepare(
+      `INSERT INTO competition_entry_members(entry_id,user_id,valid_from_round_id)
+       VALUES (?,?,?)`,
+    ).bind(entryId, incomingUserId, effectiveRoundId),
+  ]);
+
+  const currentMembers = await env.DB.prepare(
+    `SELECT u.full_name
+     FROM competition_entry_members cem JOIN users u ON u.id=cem.user_id
+     WHERE cem.entry_id=?
+       AND (cem.valid_from_round_id IS NULL OR cem.valid_from_round_id<=?)
+       AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id>?)
+     ORDER BY cem.id`,
+  ).bind(entryId, effectiveRoundId, effectiveRoundId).all<{ full_name: string }>();
+  const names = (currentMembers.results ?? []).map((row) => row.full_name);
+  const prefix = entry.display_name.includes(' · ') ? entry.display_name.split(' · ')[0] : 'Dúo';
+  if (names.length === 2) {
+    await env.DB.prepare(
+      `UPDATE competition_entries SET display_name=?,updated_at=datetime('now') WHERE id=?`,
+    ).bind(`${prefix} · ${names[0]} + ${names[1]}`, entryId).run();
+  }
+
+  const after = await duoMemberHistory(env, entryId);
+  await audit(env, user.id, 'competition.duos_member_substituted', 'competition_entry', String(entryId), {
+    outgoingUserId,
+    incomingUserId,
+    effectiveRoundId,
+    effectiveRoundName: linkedRound.name,
+    before,
+    after,
+  });
+  return json({
+    ok: true,
+    entryId,
+    outgoingUserId,
+    incomingUserId,
+    effectiveRoundId,
+    effectiveRoundName: linkedRound.name,
+    members: after,
+  });
+}
+
 export async function handleCompetitionDuos(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
 
@@ -656,6 +815,23 @@ export async function handleCompetitionDuos(request: Request, env: Env): Promise
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
     if (request.method !== 'POST') return error('Método no permitido', 405);
     return buildFinal(request, env, user, Number(finalMatch[1]));
+  }
+
+  const substituteMatch = pathname.match(/^\/api\/admin\/competition-engine\/entries\/(\d+)\/duos\/substitute$/);
+  if (substituteMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method !== 'POST') return error('Método no permitido', 405);
+    return substituteDuoMember(request, env, user, Number(substituteMatch[1]));
+  }
+
+  const memberHistoryMatch = pathname.match(/^\/api\/competition-engine\/entries\/(\d+)\/duos\/members$/);
+  if (memberHistoryMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (request.method !== 'GET') return error('Método no permitido', 405);
+    return json({ entryId: Number(memberHistoryMatch[1]), members: await duoMemberHistory(env, Number(memberHistoryMatch[1])) });
   }
 
   const tableMatch = pathname.match(/^\/api\/competition-engine\/round-links\/(\d+)\/duos\/table$/);
