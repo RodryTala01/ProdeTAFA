@@ -1,0 +1,13 @@
+.competition-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.competitions-admin .panel { min-width: 0; }
+.competitions-admin .panel-heading { flex-wrap: wrap; }
+.competitions-admin h2, .competition-stage { overflow-wrap: anywhere; }
+.competitions-admin summary { cursor: pointer; padding: 12px 0; font-weight: 700; }
+.competition-stage { border-top: 1px solid #64748b55; padding: 16px 0; display: grid; gap: 12px; }
+.competition-pending { padding: 12px; border-left: 3px solid #64748b; }
+@media (max-width: 700px) {
+  .competitions-admin .round-create { display: flex; flex-direction: column; align-items: stretch; }
+  .competitions-admin .topbar-actions { flex-wrap: wrap; }
+  .competitions-admin .button { min-height: 44px; white-space: normal; }
+  .competitions-admin .user-row { flex-wrap: wrap; }
+}
