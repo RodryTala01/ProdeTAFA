@@ -24,6 +24,7 @@ const RESULT_CODES = new Set([
   'QUARTERFINAL',
   'ROUND_OF_16',
   'ROUND_OF_32',
+  'ROUND_OF_64',
   'PHASE_5',
   'PHASE_4',
   'PHASE_3',
