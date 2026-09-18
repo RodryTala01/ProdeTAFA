@@ -30,6 +30,35 @@ const SLOT_DEFINITIONS: SlotDefinition[] = [
   { code: 'DUO_2', name: 'Dúo 2', sourceType: 'duo_champion_member', competitionCode: 'COPA_DUOS', duoMemberIndex: 1 },
 ];
 
+type BracketNodeDefinition = {
+  code: string;
+  label: string;
+  branch: 'UPPER' | 'LOWER' | 'FINAL';
+  sequence: number;
+  sourceAType: 'SLOT' | 'WINNER';
+  sourceARef: string;
+  sourceBType: 'SLOT' | 'WINNER';
+  sourceBRef: string;
+};
+
+const BRACKET_NODES: BracketNodeDefinition[] = [
+  { code: 'U1', label: '7.º Liga A vs 3.º Liga A', branch: 'UPPER', sequence: 1, sourceAType: 'SLOT', sourceARef: 'LIGA_A_7', sourceBType: 'SLOT', sourceBRef: 'LIGA_A_3' },
+  { code: 'U2', label: 'Ganador U1 vs Campeón Liga B', branch: 'UPPER', sequence: 2, sourceAType: 'WINNER', sourceARef: 'U1', sourceBType: 'SLOT', sourceBRef: 'LIGA_B_CHAMPION' },
+  { code: 'U3', label: 'Ganador U2 vs Campeón Copa A', branch: 'UPPER', sequence: 3, sourceAType: 'WINNER', sourceARef: 'U2', sourceBType: 'SLOT', sourceBRef: 'COPA_A_CHAMPION' },
+  { code: 'U4', label: 'Ganador U3 vs Campeón Copa Papa', branch: 'UPPER', sequence: 4, sourceAType: 'WINNER', sourceARef: 'U3', sourceBType: 'SLOT', sourceBRef: 'COPA_PAPA_CHAMPION' },
+  { code: 'U5', label: 'Ganador U4 vs Campeón Copa Total', branch: 'UPPER', sequence: 5, sourceAType: 'WINNER', sourceARef: 'U4', sourceBType: 'SLOT', sourceBRef: 'COPA_TOTAL_CHAMPION' },
+
+  { code: 'L1', label: '5.º Liga A vs Campeón Copa B', branch: 'LOWER', sequence: 6, sourceAType: 'SLOT', sourceARef: 'LIGA_A_5', sourceBType: 'SLOT', sourceBRef: 'COPA_B_CHAMPION' },
+  { code: 'L2', label: '4.º Liga A vs 6.º Liga A', branch: 'LOWER', sequence: 7, sourceAType: 'SLOT', sourceARef: 'LIGA_A_4', sourceBType: 'SLOT', sourceBRef: 'LIGA_A_6' },
+  { code: 'L3', label: 'Ganador L1 vs Ganador L2', branch: 'LOWER', sequence: 8, sourceAType: 'WINNER', sourceARef: 'L1', sourceBType: 'WINNER', sourceBRef: 'L2' },
+  { code: 'L4', label: 'Ganador L3 vs Dúo 2', branch: 'LOWER', sequence: 9, sourceAType: 'WINNER', sourceARef: 'L3', sourceBType: 'SLOT', sourceBRef: 'DUO_2' },
+  { code: 'L5', label: '2.º Liga A vs Dúo 1', branch: 'LOWER', sequence: 10, sourceAType: 'SLOT', sourceARef: 'LIGA_A_2', sourceBType: 'SLOT', sourceBRef: 'DUO_1' },
+  { code: 'L6', label: 'Ganador L4 vs Ganador L5', branch: 'LOWER', sequence: 11, sourceAType: 'WINNER', sourceARef: 'L4', sourceBType: 'WINNER', sourceBRef: 'L5' },
+  { code: 'L7', label: 'Ganador L6 vs Campeón Liga A', branch: 'LOWER', sequence: 12, sourceAType: 'WINNER', sourceARef: 'L6', sourceBType: 'SLOT', sourceBRef: 'LIGA_A_1' },
+
+  { code: 'F1', label: 'Final Copa Campeones', branch: 'FINAL', sequence: 13, sourceAType: 'WINNER', sourceARef: 'U5', sourceBType: 'WINNER', sourceBRef: 'L7' },
+];
+
 function json(data: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
   headers.set('content-type', 'application/json; charset=utf-8');
@@ -43,6 +72,32 @@ function readCookie(request: Request, name: string) {
     const [rawName, ...rawValue] = part.trim().split('=');
     if (rawName === name) return decodeURIComponent(rawValue.join('='));
   }
+  const bracketGetMatch = pathname.match(/^\/api\/competition-engine\/competitions\/(\d+)\/champions\/bracket$/);
+  if (bracketGetMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (request.method !== 'GET') return error('Método no permitido', 405);
+    return json({ competitionId: Number(bracketGetMatch[1]), bracket: await readBracket(env, Number(bracketGetMatch[1])) });
+  }
+
+  const bracketInitMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/champions\/bracket$/);
+  if (bracketInitMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method !== 'POST') return error('Método no permitido', 405);
+    return initBracket(env, user, Number(bracketInitMatch[1]));
+  }
+
+  const activateMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/champions\/nodes\/([A-Z0-9_-]+)\/activate$/);
+  if (activateMatch) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method !== 'POST') return error('Método no permitido', 405);
+    return activateNode(request, env, user, Number(activateMatch[1]), activateMatch[2]);
+  }
+
   return null;
 }
 function bytesToHex(bytes: Uint8Array) {
@@ -260,6 +315,8 @@ async function confirmSlots(request: Request, env: Env, user: SessionUser, compe
   const competition = await championsCompetition(env, competitionId);
   if (!competition || competition.code !== 'COPA_CAMPEONES') return error('Copa Campeones no encontrada', 404);
 
+  if (await bracketStarted(env, competitionId)) return error('No se pueden modificar cupos después de inicializar la llave', 409);
+
   const body = await request.json().catch(() => null) as {
     slots?: Array<{ slotCode?: string; userId?: string; reason?: string | null }>;
   } | null;
@@ -339,6 +396,218 @@ async function confirmSlots(request: Request, env: Env, user: SessionUser, compe
   const after = await readSlots(env, competitionId);
   await audit(env, user.id, 'competition.champions_slots_confirmed', String(competitionId), before, after);
   return json({ ok: true, competitionId, slots: after });
+}
+
+async function bracketStarted(env: Env, competitionId: number) {
+  const row = await env.DB.prepare(
+    `SELECT COUNT(*) AS total FROM competition_champions_nodes WHERE competition_id=?`,
+  ).bind(competitionId).first<{ total: number }>();
+  return Number(row?.total ?? 0) > 0;
+}
+
+async function resolveBracketSource(env: Env, competitionId: number, type: 'SLOT' | 'WINNER', ref: string) {
+  if (type === 'SLOT') {
+    const row = await env.DB.prepare(
+      `SELECT cqs.confirmed_entry_id,ce.display_name,cqs.status
+       FROM competition_qualification_slots cqs
+       LEFT JOIN competition_entries ce ON ce.id=cqs.confirmed_entry_id
+       WHERE cqs.competition_id=? AND cqs.slot_code=? LIMIT 1`,
+    ).bind(competitionId, ref).first<{
+      confirmed_entry_id: number | null; display_name: string | null; status: string;
+    }>();
+    if (!row || row.confirmed_entry_id == null || !['confirmed','replaced'].includes(row.status)) {
+      return { ready: false as const, entryId: null, displayName: null, source: ref };
+    }
+    return {
+      ready: true as const,
+      entryId: Number(row.confirmed_entry_id),
+      displayName: row.display_name,
+      source: ref,
+    };
+  }
+
+  const row = await env.DB.prepare(
+    `SELECT ce.winner_entry_id,w.display_name,ce.status,ce.admin_confirmed_at
+     FROM competition_champions_nodes ccn
+     LEFT JOIN competition_encounters ce ON ce.id=ccn.encounter_id
+     LEFT JOIN competition_entries w ON w.id=ce.winner_entry_id
+     WHERE ccn.competition_id=? AND ccn.node_code=? LIMIT 1`,
+  ).bind(competitionId, ref).first<{
+    winner_entry_id: number | null; display_name: string | null; status: string | null; admin_confirmed_at: string | null;
+  }>();
+  if (!row || row.winner_entry_id == null || row.status !== 'finished' || row.admin_confirmed_at == null) {
+    return { ready: false as const, entryId: null, displayName: null, source: ref };
+  }
+  return {
+    ready: true as const,
+    entryId: Number(row.winner_entry_id),
+    displayName: row.display_name,
+    source: ref,
+  };
+}
+
+async function readBracket(env: Env, competitionId: number) {
+  const rows = await env.DB.prepare(
+    `SELECT ccn.id,ccn.node_code,ccn.label,ccn.branch,ccn.sequence,
+            ccn.source_a_type,ccn.source_a_ref,ccn.source_b_type,ccn.source_b_ref,
+            ccn.stage_id,ccn.round_link_id,ccn.encounter_id,
+            ce.score_a,ce.score_b,ce.status AS encounter_status,ce.winner_entry_id,
+            ce.resolution,ce.admin_confirmed_at,w.display_name AS winner_name,
+            r.id AS round_id,r.name AS round_name,r.status AS round_status
+     FROM competition_champions_nodes ccn
+     LEFT JOIN competition_encounters ce ON ce.id=ccn.encounter_id
+     LEFT JOIN competition_entries w ON w.id=ce.winner_entry_id
+     LEFT JOIN competition_round_links crl ON crl.id=ccn.round_link_id
+     LEFT JOIN rounds r ON r.id=crl.round_id
+     WHERE ccn.competition_id=?
+     ORDER BY ccn.sequence`,
+  ).bind(competitionId).all<{
+    id: number; node_code: string; label: string; branch: string; sequence: number;
+    source_a_type: 'SLOT' | 'WINNER'; source_a_ref: string; source_b_type: 'SLOT' | 'WINNER'; source_b_ref: string;
+    stage_id: number | null; round_link_id: number | null; encounter_id: number | null;
+    score_a: number | null; score_b: number | null; encounter_status: string | null; winner_entry_id: number | null;
+    resolution: string | null; admin_confirmed_at: string | null; winner_name: string | null;
+    round_id: number | null; round_name: string | null; round_status: string | null;
+  }>();
+
+  const nodes = [];
+  for (const row of rows.results ?? []) {
+    const [sourceA, sourceB] = await Promise.all([
+      resolveBracketSource(env, competitionId, row.source_a_type, row.source_a_ref),
+      resolveBracketSource(env, competitionId, row.source_b_type, row.source_b_ref),
+    ]);
+    nodes.push({
+      id: Number(row.id),
+      code: row.node_code,
+      label: row.label,
+      branch: row.branch,
+      sequence: Number(row.sequence),
+      sourceA,
+      sourceB,
+      readyToActivate: row.encounter_id == null && sourceA.ready && sourceB.ready,
+      stageId: row.stage_id == null ? null : Number(row.stage_id),
+      roundLinkId: row.round_link_id == null ? null : Number(row.round_link_id),
+      encounter: row.encounter_id == null ? null : {
+        id: Number(row.encounter_id),
+        scoreA: row.score_a == null ? null : Number(row.score_a),
+        scoreB: row.score_b == null ? null : Number(row.score_b),
+        status: row.encounter_status,
+        winnerEntryId: row.winner_entry_id == null ? null : Number(row.winner_entry_id),
+        winnerName: row.winner_name,
+        resolution: row.resolution,
+        adminConfirmedAt: row.admin_confirmed_at,
+      },
+      round: row.round_id == null ? null : {
+        id: Number(row.round_id),
+        name: row.round_name,
+        status: row.round_status,
+      },
+    });
+  }
+  return nodes;
+}
+
+async function initBracket(env: Env, user: SessionUser, competitionId: number) {
+  const competition = await championsCompetition(env, competitionId);
+  if (!competition || competition.code !== 'COPA_CAMPEONES') return error('Copa Campeones no encontrada', 404);
+  const slots = await readSlots(env, competitionId);
+  if (slots.length !== SLOT_DEFINITIONS.length
+    || slots.some((slot) => !['confirmed','replaced'].includes(slot.status) || slot.confirmedEntryId == null)) {
+    return error('Primero confirmá los 14 cupos de Copa Campeones', 409);
+  }
+  if (await bracketStarted(env, competitionId)) return error('La llave de Copa Campeones ya fue inicializada', 409);
+
+  const statements = BRACKET_NODES.map((node) => env.DB.prepare(
+    `INSERT INTO competition_champions_nodes
+       (competition_id,node_code,label,branch,sequence,source_a_type,source_a_ref,source_b_type,source_b_ref)
+     VALUES (?,?,?,?,?,?,?,?,?)`,
+  ).bind(
+    competitionId,node.code,node.label,node.branch,node.sequence,
+    node.sourceAType,node.sourceARef,node.sourceBType,node.sourceBRef,
+  ));
+  await env.DB.batch(statements);
+
+  const bracket = await readBracket(env, competitionId);
+  await audit(env, user.id, 'competition.champions_bracket_initialized', String(competitionId), null, bracket);
+  return json({ ok: true, competitionId, bracket });
+}
+
+async function activateNode(
+  request: Request,
+  env: Env,
+  user: SessionUser,
+  competitionId: number,
+  nodeCode: string,
+) {
+  const competition = await championsCompetition(env, competitionId);
+  if (!competition || competition.code !== 'COPA_CAMPEONES') return error('Copa Campeones no encontrada', 404);
+
+  const node = await env.DB.prepare(
+    `SELECT id,node_code,source_a_type,source_a_ref,source_b_type,source_b_ref,encounter_id
+     FROM competition_champions_nodes
+     WHERE competition_id=? AND node_code=? LIMIT 1`,
+  ).bind(competitionId, nodeCode).first<{
+    id: number; node_code: string; source_a_type: 'SLOT' | 'WINNER'; source_a_ref: string;
+    source_b_type: 'SLOT' | 'WINNER'; source_b_ref: string; encounter_id: number | null;
+  }>();
+  if (!node) return error('Nodo de llave no encontrado', 404);
+  if (node.encounter_id != null) return error('Este cruce ya fue activado', 409);
+
+  const [sourceA, sourceB] = await Promise.all([
+    resolveBracketSource(env, competitionId, node.source_a_type, node.source_a_ref),
+    resolveBracketSource(env, competitionId, node.source_b_type, node.source_b_ref),
+  ]);
+  if (!sourceA.ready || !sourceB.ready || sourceA.entryId == null || sourceB.entryId == null) {
+    return json({
+      error: 'Todavía no están resueltas las dos fuentes de este cruce',
+      nodeCode,
+      sourceA,
+      sourceB,
+    }, { status: 409 });
+  }
+
+  const body = await request.json().catch(() => null) as { stageId?: number; roundLinkId?: number } | null;
+  const stageId = Number(body?.stageId);
+  const roundLinkId = Number(body?.roundLinkId);
+  if (!Number.isInteger(stageId) || stageId <= 0) return error('Etapa inválida');
+  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha inválida');
+
+  const stage = await env.DB.prepare(
+    `SELECT id,stage_type,status FROM competition_stages
+     WHERE id=? AND competition_id=? LIMIT 1`,
+  ).bind(stageId, competitionId).first<{ id: number; stage_type: string; status: string }>();
+  if (!stage || stage.stage_type !== 'KNOCKOUT') return error('La etapa debe ser eliminatoria y pertenecer a Copa Campeones', 409);
+  if (stage.status === 'finished' || stage.status === 'archived') return error('La etapa ya está cerrada', 409);
+
+  const link = await env.DB.prepare(
+    `SELECT id FROM competition_round_links
+     WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL'
+     LIMIT 1`,
+  ).bind(roundLinkId, competitionId, stageId).first<{ id: number }>();
+  if (!link) return error('La Fecha no está vinculada a la etapa elegida', 409);
+
+  const created = await env.DB.prepare(
+    `INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
+     VALUES (?,?,?,?,?,'pending') RETURNING id`,
+  ).bind(stageId, roundLinkId, nodeCode, sourceA.entryId, sourceB.entryId).first<{ id: number }>();
+  if (!created) return error('No se pudo activar el cruce', 500);
+
+  await env.DB.prepare(
+    `UPDATE competition_champions_nodes
+     SET stage_id=?,round_link_id=?,encounter_id=?,updated_at=datetime('now')
+     WHERE id=?`,
+  ).bind(stageId, roundLinkId, created.id, node.id).run();
+
+  const bracket = await readBracket(env, competitionId);
+  await audit(env, user.id, 'competition.champions_node_activated', String(competitionId), null, {
+    nodeCode,
+    stageId,
+    roundLinkId,
+    encounterId: Number(created.id),
+    entryAId: sourceA.entryId,
+    entryBId: sourceB.entryId,
+  });
+  return json({ ok: true, competitionId, nodeCode, encounterId: Number(created.id), bracket });
 }
 
 export async function handleCompetitionChampions(request: Request, env: Env): Promise<Response | null> {
