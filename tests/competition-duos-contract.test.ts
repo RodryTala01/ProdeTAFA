@@ -44,4 +44,26 @@ describe('Copa Duos progression contract', () => {
     expect(worker).toContain("stage_type !== 'KNOCKOUT'");
     expect(worker).toContain('competition_entry_bonuses');
   });
+
+  it('supports audited member substitution from an exact round forward', () => {
+    expect(worker).toContain('competition.duos_member_substituted');
+    expect(worker).toContain('valid_to_round_id=?');
+    expect(worker).toContain('valid_from_round_id)');
+    expect(worker).toContain('effectiveRoundId');
+  });
+
+  it('does not allow retroactive substitution on a finished round', () => {
+    expect(worker).toContain("linkedRound.status === 'finished'");
+    expect(worker).toContain('No se puede hacer una sustitución retroactiva');
+  });
+
+  it('keeps historical membership periods queryable', () => {
+    expect(worker).toContain('duoMemberHistory');
+    expect(worker).toContain('validUntilBeforeRoundId');
+    expect(worker).toContain('/duos/members');
+  });
+
+  it('uses exclusive membership end bounds so the incoming member owns the effective round', () => {
+    expect(worker).toContain('valid_to_round_id IS NULL OR cem.valid_to_round_id>?');
+  });
 });
