@@ -15,6 +15,7 @@ import { handleCompetitionTotalProgression } from './competition-total-progressi
 import { handleCompetitionDuos } from './competition-duos';
 import { handleCompetitionChampions } from './competition-champions';
 import { handleCompetitionPapa } from './competition-papa';
+import { handleCompetitionPromotion } from './competition-promotion';
 import { handleIffhs } from './iffhs';
 
 function jsonError(message: string, status: number) {
@@ -32,6 +33,9 @@ export default {
 
     if (competitionRoute) {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido', 403);
+
+      const promotionResponse = await handleCompetitionPromotion(request, env);
+      if (promotionResponse) return promotionResponse;
 
       const papaResponse = await handleCompetitionPapa(request, env);
       if (papaResponse) return papaResponse;
