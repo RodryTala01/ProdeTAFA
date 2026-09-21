@@ -1,4 +1,6 @@
 import type { Env } from './index';
+import { configureGroups } from './competition-groups';
+import { cupGroupContext } from './cup-ab-context';
 
 type SessionUser = {
   id: string;
@@ -12,6 +14,7 @@ type Participant = {
 };
 
 type DrawBody = {
+  reason?: string;
   rankingUserIds?: string[];
   defendingChampionUserId?: string | null;
   groupCount?: number;
@@ -204,7 +207,10 @@ async function drawGroups(request: Request, env: Env, user: SessionUser, stageId
   }
   if (groupCount < 2 || groupCount > participants.length) return error('Cantidad de grupos inválida');
 
-  const defendingChampionUserId = body.defendingChampionUserId?.trim() || null;
+  const context=await cupGroupContext(env,stageId);
+  if(context && ['finished','archived'].includes(context.stage.competition_status)) return error('La Copa está cerrada',409);
+  const defendingChampionUserId = context?.championKnown ? context.defendingChampionUserId :
+    body.defendingChampionUserId !== undefined ? (body.defendingChampionUserId?.trim() || null) : context?.defendingChampionUserId ?? null;
   if (defendingChampionUserId && !eligibleIds.has(defendingChampionUserId)) {
     return error('El campeón vigente indicado no es elegible para esta Copa');
   }
@@ -256,62 +262,12 @@ async function drawGroups(request: Request, env: Env, user: SessionUser, stageId
     return error(caught instanceof Error ? caught.message : 'No se pudieron crear las entradas de Copa', 500);
   }
 
-  const currentGroups = await env.DB.prepare(
-    `SELECT id FROM competition_groups WHERE stage_id = ?`,
-  ).bind(stageId).all<{ id: number }>();
-  const deleteStatements: D1PreparedStatement[] = [];
-  for (const group of currentGroups.results ?? []) {
-    deleteStatements.push(env.DB.prepare('DELETE FROM competition_group_entries WHERE group_id = ?').bind(group.id));
-  }
-  deleteStatements.push(env.DB.prepare('DELETE FROM competition_groups WHERE stage_id = ?').bind(stageId));
-  await env.DB.batch(deleteStatements);
-
-  for (let groupIndex = 0; groupIndex < groups.length; groupIndex += 1) {
-    const group = groups[groupIndex];
-    const createdGroup = await env.DB.prepare(
-      `INSERT INTO competition_groups (stage_id, code, name, sequence)
-       VALUES (?, ?, ?, ?) RETURNING id`,
-    ).bind(stageId, group.code, group.name, groupIndex + 1).first<{ id: number }>();
-    if (!createdGroup) return error('No se pudo guardar el sorteo', 500);
-
-    const membershipStatements: D1PreparedStatement[] = [];
-    for (let index = 0; index < group.userIds.length; index += 1) {
-      const userId = group.userIds[index];
-      const entryId = entryByUser.get(userId);
-      if (!entryId) return error('No se encontró una entrada sorteada', 500);
-      membershipStatements.push(
-        env.DB.prepare(
-          `INSERT INTO competition_group_entries (group_id, entry_id, seed_position)
-           VALUES (?, ?, ?)`,
-        ).bind(createdGroup.id, entryId, group.pots[index]),
-      );
-    }
-    if (membershipStatements.length > 0) await env.DB.batch(membershipStatements);
-  }
-
-  const participantById = new Map(participants.map((participant) => [participant.user_id, participant.full_name]));
-  const resultGroups = groups.map((group) => ({
-    code: group.code,
-    name: group.name,
-    participants: group.userIds.map((userId, index) => ({
-      userId,
-      fullName: participantById.get(userId) ?? userId,
-      pot: group.pots[index],
-      seedPosition: seedOrder.indexOf(userId) + 1,
-    })),
-  }));
-
-  await audit(env, user.id, 'competition.groups_drawn', 'competition_stage', String(stageId), {
-    competitionId: stage.competition_id,
-    competitionCode: stage.competition_code,
-    randomSeed,
-    groupCount,
-    defendingChampionUserId,
-    rankingUserIds: ranking,
-    effectiveSeedOrder: seedOrder,
-    groups: resultGroups,
-  });
-
+  const resultGroups=groups.map(group=>({...group,participants:group.userIds.map((userId,index)=>({userId,fullName:participants.find(p=>p.user_id===userId)?.full_name,pot:group.pots[index]}))}));
+  const configured=await configureGroups(new Request(request.url,{method:'POST',headers:request.headers,
+     body:JSON.stringify({groups,defendingChampionUserId,reason:body.reason})}),env,user,stageId,{
+      randomSeed,groupCount,defendingChampionUserId,rankingUserIds:ranking,effectiveSeedOrder:seedOrder,
+    });
+  if(!configured.ok) return configured;
   return json({
     ok: true,
     stageId,

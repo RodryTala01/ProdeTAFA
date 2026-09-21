@@ -87,7 +87,7 @@ async function audit(
 async function validateStage(env: Env, stageId: number) {
   return env.DB.prepare(
     `SELECT cs.id, cs.competition_id, cs.stage_type, cs.status,
-            c.season_id, c.status AS competition_status,
+            c.season_id, c.code AS competition_code, c.status AS competition_status,
             s.status AS season_status
      FROM competition_stages cs
      JOIN competitions c ON c.id = cs.competition_id
@@ -100,6 +100,7 @@ async function validateStage(env: Env, stageId: number) {
     status: string;
     season_id: number;
     competition_status: string;
+    competition_code: string;
     season_status: string;
   }>();
 }
@@ -211,7 +212,7 @@ async function refreshEncounter(env: Env, encounterId: number) {
   const tied = scoreA.totalPoints === scoreB.totalPoints;
   const roundFinished = encounter.round_status === 'finished';
 
-  let status = roundFinished ? (tied ? 'tied' : 'finished') : 'live';
+  let status = roundFinished ? (tied ? 'tied' : 'finished') : encounter.round_status === 'draft' ? 'pending' : 'live';
   let winnerEntryId: number | null = null;
   let resolution: string | null = null;
 
@@ -228,10 +229,11 @@ async function refreshEncounter(env: Env, encounterId: number) {
 
   await env.DB.prepare(
     `UPDATE competition_encounters
-     SET score_a = ?, score_b = ?, status = ?, winner_entry_id = ?, resolution = ?,
+     SET admin_confirmed_at = CASE WHEN winner_entry_id IS ? THEN admin_confirmed_at ELSE NULL END,
+         score_a = ?, score_b = ?, status = ?, winner_entry_id = ?, resolution = ?,
          updated_at = datetime('now')
      WHERE id = ?`,
-  ).bind(scoreA.totalPoints, scoreB.totalPoints, status, winnerEntryId, resolution, encounterId).run();
+  ).bind(winnerEntryId, scoreA.totalPoints, scoreB.totalPoints, status, winnerEntryId, resolution, encounterId).run();
 
   return encounterId;
 }
@@ -303,6 +305,8 @@ async function replaceEncounters(request: Request, env: Env, user: SessionUser, 
   if (stage.stage_type !== 'KNOCKOUT') return error('La etapa no es eliminatoria', 409);
   if (stage.status === 'finished' || stage.status === 'archived') return error('La etapa ya está cerrada', 409);
   if (stage.season_status === 'finished' || stage.season_status === 'archived') return error('La temporada ya está cerrada', 409);
+
+  if (['COPA_A','COPA_B'].includes(stage.competition_code)) return error('Configurá Copa A/B desde su avance de fases para validar todos los clasificados y la restricción 2.º vs 3.º',409);
 
   const body = await request.json().catch(() => null) as { encounters?: EncounterInput[] } | null;
   if (!Array.isArray(body?.encounters)) return error('Cruces inválidos');
@@ -376,7 +380,7 @@ async function replaceEncounters(request: Request, env: Env, user: SessionUser, 
   return json({ ok: true, stageId, encounters: after });
 }
 
-async function refreshStage(env: Env, stageId: number) {
+export async function refreshStage(env: Env, stageId: number) {
   const stage = await validateStage(env, stageId);
   if (!stage) return error('Etapa no encontrada', 404);
   if (stage.stage_type !== 'KNOCKOUT') return error('La etapa no es eliminatoria', 409);
@@ -394,7 +398,7 @@ async function confirmWinner(request: Request, env: Env, user: SessionUser, enco
     `SELECT ce.id, ce.stage_id, ce.entry_a_id, ce.entry_b_id,
             ce.winner_entry_id, ce.resolution,
             cs.competition_id, cs.stage_type,
-            c.season_id, s.status AS season_status
+            c.season_id, c.code AS competition_code, s.status AS season_status
      FROM competition_encounters ce
      JOIN competition_stages cs ON cs.id = ce.stage_id
      JOIN competitions c ON c.id = cs.competition_id
@@ -409,6 +413,7 @@ async function confirmWinner(request: Request, env: Env, user: SessionUser, enco
     resolution: string | null;
     competition_id: number;
     stage_type: string;
+    competition_code: string;
     season_id: number;
     season_status: string;
   }>();
@@ -419,6 +424,7 @@ async function confirmWinner(request: Request, env: Env, user: SessionUser, enco
   const body = await request.json().catch(() => null) as {
     winnerEntryId?: number;
     resolution?: 'normal' | 'tiebreak' | 'admin';
+    reason?: string;
   } | null;
   const winnerEntryId = Number(body?.winnerEntryId);
   if (!Number.isInteger(winnerEntryId) || winnerEntryId <= 0) return error('Ganador inválido');
@@ -426,6 +432,11 @@ async function confirmWinner(request: Request, env: Env, user: SessionUser, enco
 
   const requestedResolution = body?.resolution;
   const resolution = requestedResolution === 'tiebreak' || requestedResolution === 'normal' ? requestedResolution : 'admin';
+  const reason = typeof body?.reason === 'string' ? body.reason.trim() : '';
+  if (['COPA_A','COPA_B'].includes(encounter.competition_code)) {
+    if (resolution === 'admin' && !reason) return error('Indicá el motivo de la corrección');
+    if (resolution === 'tiebreak') return error('Resolvé el desempate desde el flujo TAFA',409);
+  }
   if (resolution === 'normal') {
     await refreshEncounter(env, encounterId);
     const recalculated = await env.DB.prepare(
@@ -437,15 +448,16 @@ async function confirmWinner(request: Request, env: Env, user: SessionUser, enco
   }
 
   const before = { winnerEntryId: encounter.winner_entry_id, resolution: encounter.resolution };
-  await env.DB.prepare(
-    `UPDATE competition_encounters
-     SET winner_entry_id = ?, resolution = ?, status = 'finished',
-         admin_confirmed_at = datetime('now'), updated_at = datetime('now')
-     WHERE id = ?`,
-  ).bind(winnerEntryId, resolution, encounterId).run();
-
-  const after = { winnerEntryId, resolution };
-  await audit(env, user.id, 'competition.encounter_winner_confirmed', 'competition_encounter', String(encounterId), before, after);
+  const after = { winnerEntryId, resolution, reason: reason || null };
+  await env.DB.batch([
+    env.DB.prepare(`UPDATE competition_encounters
+      SET winner_entry_id = ?, resolution = ?, status = 'finished',
+          admin_confirmed_at = datetime('now'), updated_at = datetime('now') WHERE id = ?`)
+      .bind(winnerEntryId, resolution, encounterId),
+    env.DB.prepare(`INSERT INTO audit_log (actor_user_id, action, entity_type, entity_id, before_json, after_json)
+      VALUES (?, 'competition.encounter_winner_confirmed', 'competition_encounter', ?, ?, ?)`)
+      .bind(user.id, String(encounterId), JSON.stringify(before), JSON.stringify(after)),
+  ]);
   return json({ ok: true, encounterId, winnerEntryId, resolution });
 }
 

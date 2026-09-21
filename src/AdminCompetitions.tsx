@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import AdminCupAb from './AdminCupAb';
 import CompetitionConfigPanel from './CompetitionConfigPanel';
 import { initialSeasonId, stageTypeLabel, statusLabel } from './competition-presentation';
 import './admin-competitions.css';
@@ -332,7 +333,9 @@ export default function AdminCompetitions() {
                   ) : <>
                   <button className="button button--ghost" onClick={() => setSelectedCompetitionId(null)}>Volver a competiciones</button>
                   <p>{selected.name} · Código: {competition.code}</p>
-                  {competition.family !== 'LEAGUE' && <p className="competition-pending">Configuración deportiva específica pendiente. El armado de grupos, parejas y cruces tendrá opciones asistida y manual, con validaciones y auditoría.</p>}
+                  {competition.family !== 'LEAGUE' && !['COPA_A','COPA_B'].includes(competition.code) && <p className="competition-pending">Configuración deportiva específica pendiente. El armado de grupos, parejas y cruces tendrá opciones asistida y manual, con validaciones y auditoría.</p>}
+                  {['COPA_A','COPA_B'].includes(competition.code) && competition.stages.some(s=>s.stageType==='ACCUMULATIVE_GROUPS') && <AdminCupAb key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  <details open={!competition.stages.some(s=>s.stageType==='ACCUMULATIVE_GROUPS') || !['COPA_A','COPA_B'].includes(competition.code)}><summary>Configuración general, etapas y Fechas</summary>
                   <CompetitionConfigPanel
                     key={competition.id}
                     competition={competition}
@@ -375,6 +378,7 @@ export default function AdminCompetitions() {
                       ))}
                     </div>
                   )}
+                  </details>
                   </>}
                 </div>
               ))}

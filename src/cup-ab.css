@@ -1,0 +1,50 @@
+.cup-ab,
+.cup-ab > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.cup-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.cup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 1rem;
+}
+.cup-ab fieldset {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1rem;
+}
+.cup-ab select,
+.cup-ab input {
+  min-width: 0;
+  width: 100%;
+}
+.cup-ab li {
+  overflow-wrap: anywhere;
+}
+.cup-ab small {
+  display: block;
+}
+.cup-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.cup-table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.cup-table-scroll td,
+.cup-table-scroll th {
+  padding: 0.6rem;
+  text-align: left;
+  white-space: nowrap;
+}
+.cup-ab .competition-stage {
+  overflow-wrap: anywhere;
+}

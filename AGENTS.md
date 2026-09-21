@@ -207,7 +207,7 @@ No implementar por ahora duplicación de fechas.
 
 ## Copas — siguiente gran fase funcional
 
-La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. El bloque actual completa únicamente la pantalla central Admin de Competiciones, detalle y edición general de competiciones/etapas, reutilizando ese backend y preservando Liga legacy.
+La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. El bloque actual agrega administración deportiva de Copa A/B sobre la pantalla central existente, reutilizando el motor y preservando Liga legacy.
 
 ### Armado manual y asistido
 
@@ -216,7 +216,10 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Admin puede cargar grupos, parejas, cruces y posiciones en llave resultantes de un sorteo externo.
 - Toda asignación manual debe validar elegibilidad y restricciones obligatorias y quedar auditada.
 - Copa Dúos también debe permitir cargar parejas sorteadas fuera de la app; el sorteo interno es opcional.
-- Las pantallas deportivas específicas quedan para bloques posteriores; no duplicar la lógica del motor existente.
+- Copa A/B Admin ofrece Resumen, Grupos, Octavos, Cuartos, Semifinal y Final. Las demás pantallas deportivas quedan para bloques posteriores; no duplicar el motor.
+- En Copa A y Copa B, el campeón vigente elegible ocupa A1. Grupos manuales como primera opción; bombos IFFHS de referencia y sorteo opcional.
+- Octavos valida en backend segundos contra terceros, todos una vez. Cuartos usa primeros de grupo y ganadores confirmados de Octavos; Semifinal y Final usan ganadores confirmados.
+- Copa A/B no tiene tercer puesto. Cruces editables antes de publicación/inicio, con motivo y auditoría al corregir. El modo manual no guarda randomSeed.
 
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 

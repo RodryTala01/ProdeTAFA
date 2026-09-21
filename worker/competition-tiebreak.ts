@@ -352,7 +352,6 @@ async function createForEncounter(env: Env, user: SessionUser, encounterId: numb
     season_status: string;
   }>();
   if (!encounter) return error('Cruce no encontrado', 404);
-  if (encounter.status !== 'tied') return error('Sólo se puede crear un desempate para un cruce empatado', 409);
   if (encounter.entry_a_id == null || encounter.entry_b_id == null) return error('El cruce no tiene dos participantes', 409);
   if (encounter.season_status === 'archived') return error('La temporada está archivada', 409);
 
@@ -362,6 +361,8 @@ async function createForEncounter(env: Env, user: SessionUser, encounterId: numb
      ORDER BY id DESC LIMIT 1`,
   ).bind(encounterId).first<{ id: number }>();
   if (existing) return json(await evaluateTiebreak(env, Number(existing.id)));
+
+  if (encounter.status !== 'tied') return error('Sólo se puede crear un desempate para un cruce empatado', 409);
 
   const created = await env.DB.prepare(
     `INSERT INTO competition_tiebreaks
@@ -413,7 +414,7 @@ async function addRound(request: Request, env: Env, user: SessionUser, tiebreakI
   if (tiebreak.original_round_id === roundId) return error('La Fecha original del cruce no puede usarse como su propio desempate', 409);
 
   const round = await env.DB.prepare(
-    `SELECT id, name, MIN(kickoff_at) AS first_kickoff
+    `SELECT r.id, r.name, MIN(m.kickoff_at) AS first_kickoff
      FROM rounds r
      LEFT JOIN matches m ON m.round_id = r.id
      WHERE r.id = ?

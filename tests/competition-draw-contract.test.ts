@@ -29,7 +29,8 @@ describe('Copa A/B draw contract', () => {
   it('stores a reproducible random seed and the full draw in audit', () => {
     expect(drawWorker).toContain('crypto.getRandomValues');
     expect(drawWorker).toContain('randomSeed');
-    expect(drawWorker).toContain("'competition.groups_drawn'");
+    expect(drawWorker).toContain('configureGroups(');
+    expect(readFileSync('worker/competition-groups.ts', 'utf8')).toContain("'competition.groups_drawn'");
     expect(drawWorker).toContain('effectiveSeedOrder');
   });
 

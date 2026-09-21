@@ -1,4 +1,5 @@
 import type { Env } from './index';
+import { cupGroupContext } from './cup-ab-context';
 
 type SessionUser = {
   id: string;
@@ -92,7 +93,7 @@ function normalizedCupCode(raw: string) {
   return code;
 }
 
-async function configureGroups(request: Request, env: Env, user: SessionUser, stageId: number) {
+export async function configureGroups(request: Request, env: Env, user: SessionUser, stageId: number, automatic?: Record<string, unknown>) {
   const stage = await env.DB.prepare(
     `SELECT cs.id, cs.competition_id, cs.stage_type, cs.status,
             c.code AS competition_code, c.season_id, c.division_id,
@@ -124,7 +125,7 @@ async function configureGroups(request: Request, env: Env, user: SessionUser, st
   ).bind(stageId).first<{ total: number }>();
   if (Number(linkedRounds?.total ?? 0) > 0) return error('Desvinculá las Fechas antes de reemplazar los grupos', 409);
 
-  const body = await request.json().catch(() => null) as { groups?: GroupAssignment[] } | null;
+  const body = await request.json().catch(() => null) as { groups?: GroupAssignment[]; defendingChampionUserId?: string | null; reason?: string } | null;
   if (!Array.isArray(body?.groups) || body.groups.length === 0) return error('Tenés que enviar al menos un grupo');
 
   const eligibleResult = await env.DB.prepare(
@@ -166,6 +167,13 @@ async function configureGroups(request: Request, env: Env, user: SessionUser, st
     return error(`Faltan participantes de la división: ${missing.join(', ')}`);
   }
 
+  const context=await cupGroupContext(env,stageId);
+  if(context && ['finished','archived'].includes(context.stage.competition_status)) return error('La Copa está cerrada',409);
+  const defendingChampionUserId=context?.championKnown ? context.defendingChampionUserId :
+    body.defendingChampionUserId !== undefined ? body.defendingChampionUserId : context?.defendingChampionUserId ?? null;
+  if(defendingChampionUserId && (!eligibleIds.has(defendingChampionUserId) || normalizedGroups.find(g=>g.code==='A')?.userIds[0]!==defendingChampionUserId)) {
+    return error('El campeón vigente elegible debe ocupar A1');
+  }
   const existingEntriesResult = await env.DB.prepare(
     `SELECT ce.id, cem.user_id
      FROM competition_entries ce
@@ -197,34 +205,19 @@ async function configureGroups(request: Request, env: Env, user: SessionUser, st
     statements.push(env.DB.prepare('DELETE FROM competition_group_entries WHERE group_id = ?').bind(group.id));
   }
   statements.push(env.DB.prepare('DELETE FROM competition_groups WHERE stage_id = ?').bind(stageId));
-  if (statements.length > 0) await env.DB.batch(statements);
-
-  for (let groupIndex = 0; groupIndex < normalizedGroups.length; groupIndex += 1) {
-    const group = normalizedGroups[groupIndex];
-    const createdGroup = await env.DB.prepare(
-      `INSERT INTO competition_groups (stage_id, code, name, sequence)
-       VALUES (?, ?, ?, ?) RETURNING id`,
-    ).bind(stageId, group.code, group.name, groupIndex + 1).first<{ id: number }>();
-    if (!createdGroup) return error('No se pudo crear un grupo', 500);
-
-    const membershipStatements: D1PreparedStatement[] = [];
-    for (let seedIndex = 0; seedIndex < group.userIds.length; seedIndex += 1) {
-      const entryId = entryByUser.get(group.userIds[seedIndex]);
-      if (!entryId) return error('No se encontró la entrada de un participante', 500);
-      membershipStatements.push(
-        env.DB.prepare(
-          `INSERT INTO competition_group_entries (group_id, entry_id, seed_position)
-           VALUES (?, ?, ?)`,
-        ).bind(createdGroup.id, entryId, seedIndex + 1),
-      );
-    }
-    if (membershipStatements.length > 0) await env.DB.batch(membershipStatements);
+  for (let groupIndex=0;groupIndex<normalizedGroups.length;groupIndex++) {
+    const group=normalizedGroups[groupIndex];
+    statements.push(env.DB.prepare('INSERT INTO competition_groups(stage_id,code,name,sequence) VALUES (?,?,?,?)')
+      .bind(stageId,group.code,group.name,groupIndex+1));
+    group.userIds.forEach((id,index)=>statements.push(env.DB.prepare(`INSERT INTO competition_group_entries(group_id,entry_id,seed_position)
+      VALUES ((SELECT id FROM competition_groups WHERE stage_id=? AND code=?),?,?)`)
+      .bind(stageId,group.code,entryByUser.get(id)!,index+1)));
   }
-
-  await audit(env, user.id, 'competition.groups_configured', 'competition_stage', String(stageId), {
-    competitionId: stage.competition_id,
-    groups: normalizedGroups,
-  });
+  statements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json)
+    VALUES (?,?,'competition_stage',?,?,?)`).bind(user.id,automatic?'competition.groups_drawn':'competition.groups_configured',String(stageId),
+    JSON.stringify(context?.assignments ?? []),JSON.stringify({competitionId:stage.competition_id,groups:normalizedGroups,
+      configurationMode:automatic?'AUTOMATIC':'MANUAL',defendingChampionUserId,reason:body.reason?.trim() || null,...automatic})));
+  await env.DB.batch(statements);
 
   return json({ ok: true, stageId, groups: normalizedGroups });
 }
@@ -377,7 +370,7 @@ async function groupStandings(request: Request, env: Env, cupCodeRaw: string) {
   }
 
   const linkedRounds = linkedRoundsResult.results ?? [];
-  const stageProvisional = linkedRounds.some((round) => round.status !== 'finished')
+  const stageProvisional = linkedRounds.length !== 2 || linkedRounds.some((round) => round.status !== 'finished')
     || Array.from(groups.values()).some((group) => group.standings.some((entry) => entry.provisional));
 
   return json({
@@ -420,6 +413,7 @@ export async function handleCompetitionGroups(request: Request, env: Env): Promi
     const user = await sessionUser(request, env);
     if (!user) return error('No autorizado', 401);
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if(request.method==='GET') { const context=await cupGroupContext(env,Number(adminMatch[1])); return context?json(context):error('Etapa no encontrada',404); }
     if (request.method !== 'POST') return error('Método no permitido', 405);
     return configureGroups(request, env, user, Number(adminMatch[1]));
   }
