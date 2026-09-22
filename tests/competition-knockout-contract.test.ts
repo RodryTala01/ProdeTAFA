@@ -35,6 +35,22 @@ describe('generic knockout contract', () => {
     expect(worker).toContain("resolution === 'admin' || encounter.resolution === 'tiebreak'");
   });
 
+  it('blocks generic bracket replacement for competitions with dedicated progression rules', () => {
+    for (const code of [
+      'COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION',
+    ]) expect(worker).toContain(code);
+    expect(worker).toContain('Configurá esta competición desde su flujo específico');
+  });
+
+  it('requires a reason for admin overrides in every dedicated competition flow', () => {
+    expect(worker).toContain("COPA_DUOS");
+    expect(worker).toContain("COPA_CAMPEONES");
+    expect(worker).toContain("COPA_PAPA");
+    expect(worker).toContain("PROMOCION");
+    expect(worker).toContain("resolution === 'admin' && !reason");
+    expect(worker).toContain('Resolvé el desempate desde el flujo TAFA');
+  });
+
   it('prevents replacing encounters that already have tiebreak history', () => {
     expect(worker).toContain('No se pueden reemplazar cruces que ya tienen desempates asociados');
   });
