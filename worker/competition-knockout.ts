@@ -306,7 +306,7 @@ async function replaceEncounters(request: Request, env: Env, user: SessionUser, 
   if (stage.status === 'finished' || stage.status === 'archived') return error('La etapa ya está cerrada', 409);
   if (stage.season_status === 'finished' || stage.season_status === 'archived') return error('La temporada ya está cerrada', 409);
 
-  if (['COPA_A','COPA_B','COPA_TOTAL'].includes(stage.competition_code)) return error('Configurá esta Copa desde su avance de fases para validar todos los clasificados y las restricciones correspondientes',409);
+  if (['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION'].includes(stage.competition_code)) return error('Configurá esta competición desde su flujo específico para validar todos los clasificados y las restricciones correspondientes',409);
 
   const body = await request.json().catch(() => null) as { encounters?: EncounterInput[] } | null;
   if (!Array.isArray(body?.encounters)) return error('Cruces inválidos');
@@ -433,7 +433,7 @@ async function confirmWinner(request: Request, env: Env, user: SessionUser, enco
   const requestedResolution = body?.resolution;
   const resolution = requestedResolution === 'tiebreak' || requestedResolution === 'normal' ? requestedResolution : 'admin';
   const reason = typeof body?.reason === 'string' ? body.reason.trim() : '';
-  if (['COPA_A','COPA_B','COPA_TOTAL'].includes(encounter.competition_code)) {
+  if (['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION'].includes(encounter.competition_code)) {
     if (resolution === 'admin' && !reason) return error('Indicá el motivo de la corrección');
     if (resolution === 'tiebreak') return error('Resolvé el desempate desde el flujo TAFA',409);
   }
