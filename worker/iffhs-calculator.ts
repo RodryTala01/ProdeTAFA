@@ -43,6 +43,7 @@ const CUP_RESULT_POINTS: Record<string, Record<string, number>> = {
   COPA_TOTAL: {
     CHAMPION: 100,
     RUNNER_UP: 75,
+    THIRD: 60,
     SEMIFINAL: 60,
     QUARTERFINAL: 45,
     ROUND_OF_16: 30,
@@ -58,6 +59,7 @@ const CUP_RESULT_POINTS: Record<string, Record<string, number>> = {
   COPA_PAPA: {
     CHAMPION: 100,
     RUNNER_UP: 75,
+    THIRD: 45,
     SEMIFINAL: 45,
     QUARTERFINAL: 30,
     ROUND_OF_16: 22,
