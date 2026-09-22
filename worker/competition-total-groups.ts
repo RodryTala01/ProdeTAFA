@@ -1,4 +1,5 @@
 import type { Env } from './index';
+import { handleIffhs } from './iffhs';
 
 type SessionUser = { id: string; role: 'admin' | 'participant'; is_active: number };
 type GroupInput = { code?: string; name?: string; userIds?: string[] };
@@ -37,21 +38,15 @@ async function sessionUser(request: Request, env: Env): Promise<SessionUser | nu
   ).bind(await sha256(token)).first<SessionUser>();
   return row ?? null;
 }
-async function audit(env: Env, actor: string, action: string, stageId: number, after: unknown) {
-  await env.DB.prepare(
-    `INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json)
-     VALUES (?,?,'competition_stage',?,?)`,
-  ).bind(actor, action, String(stageId), JSON.stringify(after)).run();
-}
 
 async function stageInfo(env: Env, stageId: number) {
   return env.DB.prepare(
-    `SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code,c.season_id,s.status AS season_status
+    `SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code,c.season_id,s.season_number,c.status AS competition_status,s.status AS season_status
      FROM competition_stages cs JOIN competitions c ON c.id=cs.competition_id
      JOIN tafa_seasons s ON s.id=c.season_id WHERE cs.id=? LIMIT 1`,
   ).bind(stageId).first<{
     id: number; competition_id: number; stage_type: string; status: string;
-    competition_code: string; season_id: number; season_status: string;
+    competition_code: string; season_id: number; season_number: number; competition_status: string; season_status: string;
   }>();
 }
 
@@ -85,10 +80,63 @@ async function ensureEntries(env: Env, competitionId: number, users: Array<{ use
   return byUser;
 }
 
-async function configureGroups(request: Request, env: Env, user: SessionUser, stageId: number) {
+export async function totalGroupContext(env: Env, stageId: number) {
+  const checked = await ensureTotalStage(env, stageId);
+  if (!checked.ok) return null;
+  const stage = checked.stage;
+  const people = await env.DB.prepare(`SELECT u.id AS userId,u.full_name AS fullName,d.code AS divisionCode
+    FROM season_division_members m JOIN users u ON u.id=m.user_id JOIN season_divisions d ON d.id=m.division_id
+    WHERE m.season_id=? AND u.role='participant' AND u.is_active=1 ORDER BY u.full_name COLLATE NOCASE`).bind(stage.season_id).all<{userId:string;fullName:string;divisionCode:string}>();
+  const assignments=await env.DB.prepare(`SELECT g.code,g.name,m.user_id AS userId FROM competition_groups g
+    JOIN competition_group_entries ge ON ge.group_id=g.id JOIN competition_entry_members m ON m.entry_id=ge.entry_id
+    WHERE g.stage_id=? ORDER BY g.sequence,ge.seed_position`).bind(stageId).all<{code:string;name:string;userId:string}>();
+  const champion=await env.DB.prepare(`SELECT m.user_id FROM competition_results r JOIN competitions c ON c.id=r.competition_id
+    JOIN tafa_seasons t ON t.id=c.season_id JOIN competition_entry_members m ON m.entry_id=r.entry_id
+    WHERE c.code='COPA_TOTAL' AND t.season_number<? AND r.result_code='CHAMPION' ORDER BY t.season_number DESC,r.confirmed_at DESC LIMIT 1`)
+    .bind(stage.season_number).first<{user_id:string}>();
+  const last=await env.DB.prepare(`SELECT after_json,created_at FROM audit_log WHERE entity_type='competition_stage' AND entity_id=?
+    AND action IN ('competition.total_groups_configured','competition.total_groups_drawn') ORDER BY id DESC LIMIT 1`).bind(String(stageId)).first<{after_json:string;created_at:string}>();
+  const fixture=await env.DB.prepare('SELECT COUNT(*) n FROM competition_encounters WHERE stage_id=?').bind(stageId).first<{n:number}>();
+  const links=await env.DB.prepare(`SELECT l.id,l.round_id AS roundId,r.name,r.status,COUNT(m.id) AS matchCount FROM competition_round_links l
+    JOIN rounds r ON r.id=l.round_id LEFT JOIN matches m ON m.round_id=r.id WHERE l.stage_id=? AND l.purpose='NORMAL' GROUP BY l.id ORDER BY l.sequence,l.id`)
+    .bind(stageId).all();
+  return {stage,eligible:people.results??[],assignments:assignments.results??[],links:links.results??[],fixtureCount:Number(fixture?.n??0),
+    defendingChampionUserId:people.results?.some(p=>p.userId===champion?.user_id)?champion!.user_id:null,
+    lastConfiguration:last?{...JSON.parse(last.after_json),createdAt:last.created_at}:null};
+}
+
+async function drawGroups(request:Request,env:Env,user:SessionUser,stageId:number) {
+  const context=await totalGroupContext(env,stageId);
+  if(!context)return error('Etapa de Copa Total no encontrada',404);
+  const body=await request.json().catch(()=>null) as {groupSizes?:number[]}|null;
+  const sizes=body?.groupSizes;
+  if(!Array.isArray(sizes)||!sizes.length||sizes.some(n=>!Number.isInteger(n)||n<3||n>5)||sizes.reduce((a,b)=>a+b,0)!==context.eligible.length) return error('Las plazas deben incluir a todos en grupos de 3 a 5');
+  const rankingResponse=await handleIffhs(new Request(new URL(`/api/competition-engine/iffhs/ranking?throughSeason=${context.stage.season_number-1}`,request.url),{headers:request.headers}),env);
+  if(!rankingResponse?.ok)return error('No se pudo obtener el ranking IFFHS',409);
+  const ranking=await rankingResponse.json() as {ranking:{userId:string;position:number}[]};
+  const rank=new Map(ranking.ranking.map(r=>[r.userId,r.position]));
+  const ordered=[...context.eligible].sort((a,b)=>(rank.get(a.userId)??Infinity)-(rank.get(b.userId)??Infinity)).map(p=>p.userId);
+  const champion=context.defendingChampionUserId;
+  const seedOrder=champion?[champion,...ordered.filter(id=>id!==champion)]:ordered;
+  const randomSeed=crypto.getRandomValues(new Uint32Array(1))[0];let state=randomSeed;
+  const random=()=>{state+=0x6d2b79f5;let v=state;v=Math.imul(v^(v>>>15),v|1);v^=v+Math.imul(v^(v>>>7),v|61);return ((v^(v>>>14))>>>0)/4294967296;};
+  const shuffle=<T,>(items:T[])=>{const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;};
+  const groups=sizes.map((_,i)=>({code:String.fromCharCode(65+i),name:`Grupo ${String.fromCharCode(65+i)}`,userIds:[] as string[]}));
+  let cursor=0;
+  for(let pot=0;cursor<seedOrder.length;pot++) {
+    const available=groups.map((g,i)=>i).filter(i=>groups[i].userIds.length<sizes[i]);
+    let users=seedOrder.slice(cursor,cursor+available.length);cursor+=users.length;
+    if(pot===0&&champion){groups[0].userIds.push(champion);users=users.filter(id=>id!==champion);available.splice(available.indexOf(0),1);}
+    const targets=shuffle(available);shuffle(users).forEach((id,i)=>groups[targets[i]].userIds.push(id));
+  }
+  return configureGroups(new Request(request.url,{method:'POST',headers:request.headers,body:JSON.stringify({groups})}),env,user,stageId,{randomSeed,rankingUserIds:ordered,effectiveSeedOrder:seedOrder,defendingChampionUserId:champion});
+}
+
+async function configureGroups(request: Request, env: Env, user: SessionUser, stageId: number, automatic?:Record<string,unknown>) {
   const checked = await ensureTotalStage(env, stageId);
   if (!checked.ok) return error(checked.error, checked.status);
   const stage = checked.stage;
+  if ([stage.season_status,stage.competition_status].some(v=>['finished','archived'].includes(v))) return error('La Copa o temporada está cerrada',409);
   if (stage.status !== 'draft') return error('Los grupos sólo pueden reemplazarse mientras la etapa está en borrador', 409);
 
   const encounters = await env.DB.prepare(`SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?`)
@@ -100,7 +148,7 @@ async function configureGroups(request: Request, env: Env, user: SessionUser, st
 
   const usersResult = await env.DB.prepare(
     `SELECT dm.user_id,u.full_name FROM season_division_members dm JOIN users u ON u.id=dm.user_id
-     WHERE dm.season_id=? AND u.role='participant' ORDER BY u.full_name COLLATE NOCASE`,
+     WHERE dm.season_id=? AND u.role='participant' AND u.is_active=1 ORDER BY u.full_name COLLATE NOCASE`,
   ).bind(stage.season_id).all<{ user_id: string; full_name: string }>();
   const participants = usersResult.results ?? [];
   const eligible = new Set(participants.map((row) => row.user_id));
@@ -129,25 +177,17 @@ async function configureGroups(request: Request, env: Env, user: SessionUser, st
   try { entryByUser = await ensureEntries(env, stage.competition_id, participants); }
   catch (caught) { return error(caught instanceof Error ? caught.message : 'No se pudieron crear las entradas', 500); }
 
-  const oldGroups = await env.DB.prepare(`SELECT id FROM competition_groups WHERE stage_id=?`).bind(stageId).all<{ id: number }>();
-  const deletes = (oldGroups.results ?? []).map((row) => env.DB.prepare(`DELETE FROM competition_group_entries WHERE group_id=?`).bind(row.id));
-  if (deletes.length) await env.DB.batch(deletes);
-  await env.DB.prepare(`DELETE FROM competition_groups WHERE stage_id=?`).bind(stageId).run();
-
-  for (let groupIndex = 0; groupIndex < groups.length; groupIndex += 1) {
-    const group = groups[groupIndex];
-    const created = await env.DB.prepare(
-      `INSERT INTO competition_groups(stage_id,code,name,sequence) VALUES (?,?,?,?) RETURNING id`,
-    ).bind(stageId, group.code, group.name, groupIndex + 1).first<{ id: number }>();
-    if (!created) return error('No se pudo guardar un grupo', 500);
-    const statements = group.userIds.map((userId, seedIndex) => env.DB.prepare(
-      `INSERT INTO competition_group_entries(group_id,entry_id,seed_position) VALUES (?,?,?)`,
-    ).bind(created.id, entryByUser.get(userId), seedIndex + 1));
-    await env.DB.batch(statements);
-  }
-
-  await audit(env, user.id, 'competition.total_groups_configured', stageId, groups);
-  return json({ ok: true, stageId, groups });
+  const before=await totalGroupContext(env,stageId);
+  const statements:D1PreparedStatement[]=[env.DB.prepare('DELETE FROM competition_groups WHERE stage_id=?').bind(stageId)];
+  groups.forEach((group,i)=>{
+    statements.push(env.DB.prepare('INSERT INTO competition_groups(stage_id,code,name,sequence) VALUES (?,?,?,?)').bind(stageId,group.code,group.name,i+1));
+    group.userIds.forEach((id,j)=>statements.push(env.DB.prepare(`INSERT INTO competition_group_entries(group_id,entry_id,seed_position)
+      VALUES ((SELECT id FROM competition_groups WHERE stage_id=? AND code=?),?,?)`).bind(stageId,group.code,entryByUser.get(id)!,j+1)));
+  });
+  statements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json) VALUES (?,?,'competition_stage',?,?,?)`)
+    .bind(user.id,automatic?'competition.total_groups_drawn':'competition.total_groups_configured',String(stageId),JSON.stringify(before?.assignments??[]),JSON.stringify({configurationMode:automatic?'AUTOMATIC':'MANUAL',groups,...automatic})));
+  await env.DB.batch(statements);
+  return json({ ok: true, stageId, groups,configurationMode:automatic?'AUTOMATIC':'MANUAL',...automatic });
 }
 
 function singleRoundRobin(entryIds: number[]) {
@@ -180,6 +220,7 @@ function fixtureForGroup(entryIds: number[]) {
 async function generateFixtures(env: Env, user: SessionUser, stageId: number) {
   const checked = await ensureTotalStage(env, stageId);
   if (!checked.ok) return error(checked.error, checked.status);
+  if ([checked.stage.status,checked.stage.season_status,checked.stage.competition_status].some(v=>['finished','archived'].includes(v)))return error('La Copa, etapa o temporada está cerrada',409);
   const existing = await env.DB.prepare(`SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?`)
     .bind(stageId).first<{ total: number }>();
   if (Number(existing?.total ?? 0) > 0) return error('El fixture de Copa Total ya fue generado', 409);
@@ -198,6 +239,7 @@ async function generateFixtures(env: Env, user: SessionUser, stageId: number) {
   const groups = groupsResult.results ?? [];
   if (groups.length === 0) return error('Primero configurá los grupos de Copa Total', 409);
 
+  const allStatements:D1PreparedStatement[]=[];
   const createdSummary: Array<{ group: string; miniDay: number; pairs: FixturePair[] }> = [];
   for (const group of groups) {
     const entriesResult = await env.DB.prepare(
@@ -216,12 +258,13 @@ async function generateFixtures(env: Env, user: SessionUser, stageId: number) {
            (stage_id,group_id,round_link_id,segment_id,slot_key,entry_a_id,entry_b_id,status)
          VALUES (?,?,?,?,?,?,?,'pending')`,
       ).bind(stageId, group.id, segment.round_link_id, segment.id, `${group.code}-M${miniDay}-${pairIndex + 1}`, pair[0], pair[1]));
-      if (statements.length) await env.DB.batch(statements);
+      allStatements.push(...statements);
       createdSummary.push({ group: group.code, miniDay, pairs });
     }
   }
 
-  await audit(env, user.id, 'competition.total_fixture_generated', stageId, createdSummary);
+  allStatements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json) VALUES (?,'competition.total_fixture_generated','competition_stage',?,?)`).bind(user.id,String(stageId),JSON.stringify(createdSummary)));
+  await env.DB.batch(allStatements);
   return json({ ok: true, stageId, fixture: createdSummary });
 }
 
@@ -243,13 +286,19 @@ async function scoreEntrySegment(env: Env, entryId: number, segmentId: number) {
   };
 }
 
-async function standings(env: Env, stageId: number) {
+export async function totalGroupStandings(env: Env, stageId: number) {
   const checked = await ensureTotalStage(env, stageId);
   if (!checked.ok) return null;
   const groupsResult = await env.DB.prepare(
     `SELECT id,code,name,sequence FROM competition_groups WHERE stage_id=? ORDER BY sequence`,
   ).bind(stageId).all<{ id: number; code: string; name: string; sequence: number }>();
 
+  const coverage=await env.DB.prepare(`SELECT COUNT(DISTINCT l.id) links,COUNT(DISTINCT seg.id) segments,COUNT(sm.match_id) matches,
+    SUM(CASE WHEN m.result_finalized_at IS NOT NULL OR m.is_void=1 THEN 1 ELSE 0 END) finalized
+    FROM competition_round_links l LEFT JOIN competition_round_segments seg ON seg.round_link_id=l.id
+    LEFT JOIN competition_round_segment_matches sm ON sm.segment_id=seg.id LEFT JOIN matches m ON m.id=sm.match_id
+    WHERE l.stage_id=? AND l.purpose='NORMAL'`).bind(stageId).first<{links:number;segments:number;matches:number;finalized:number}>();
+  const incomplete=coverage?.links!==2||coverage?.segments!==6||coverage?.matches!==24||coverage?.finalized!==24;
   const groups = [];
   for (const group of groupsResult.results ?? []) {
     const entriesResult = await env.DB.prepare(
@@ -271,14 +320,14 @@ async function standings(env: Env, stageId: number) {
       `SELECT id,entry_a_id,entry_b_id,segment_id FROM competition_encounters
        WHERE stage_id=? AND group_id=? ORDER BY id`,
     ).bind(stageId, group.id).all<{ id: number; entry_a_id: number; entry_b_id: number; segment_id: number }>();
-    let provisional = false;
+    let provisional = incomplete || !(encounters.results?.length);
     const fixtures = [];
     for (const encounter of encounters.results ?? []) {
       const [a, b] = await Promise.all([
         scoreEntrySegment(env, Number(encounter.entry_a_id), Number(encounter.segment_id)),
         scoreEntrySegment(env, Number(encounter.entry_b_id), Number(encounter.segment_id)),
       ]);
-      fixtures.push({ id: Number(encounter.id), entryAId: Number(encounter.entry_a_id), entryBId: Number(encounter.entry_b_id), scoreA: a.points, scoreB: b.points, complete: a.complete && b.complete });
+      fixtures.push({ segmentId:Number(encounter.segment_id), id: Number(encounter.id), entryAId: Number(encounter.entry_a_id), entryBId: Number(encounter.entry_b_id), scoreA: a.points, scoreB: b.points, complete: a.complete && b.complete });
       if (!a.complete || !b.complete) { provisional = true; continue; }
       const rowA = table.get(Number(encounter.entry_a_id));
       const rowB = table.get(Number(encounter.entry_b_id));
@@ -300,18 +349,21 @@ async function standings(env: Env, stageId: number) {
       previous = row; previousPosition = position;
       return { position, ...row, tiedOnAllCriteria: sameSportingScore };
     });
-    groups.push({ id: Number(group.id), code: group.code, name: group.name, provisional, standings: ranked, fixtures });
+    groups.push({ id: Number(group.id), code: group.code, name: group.name, sequence:group.sequence, provisional, standings: ranked, fixtures });
   }
   return { stageId, groups };
 }
 
 export async function handleCompetitionTotalGroups(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
+  const drawMatch=pathname.match(/^\/api\/admin\/competition-engine\/stages\/(\d+)\/total\/groups\/draw$/);
+  if(drawMatch){const user=await sessionUser(request,env);if(!user)return error('No autorizado',401);if(user.role!=='admin')return error('Acceso de administrador requerido',403);if(request.method!=='POST')return error('Método no permitido',405);return drawGroups(request,env,user,Number(drawMatch[1]));}
   const configureMatch = pathname.match(/^\/api\/admin\/competition-engine\/stages\/(\d+)\/total\/groups$/);
   if (configureMatch) {
     const user = await sessionUser(request, env);
     if (!user) return error('No autorizado', 401);
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if(request.method==='GET'){const c=await totalGroupContext(env,Number(configureMatch[1]));return c?json(c):error('Etapa no encontrada',404);}
     if (request.method !== 'POST') return error('Método no permitido', 405);
     return configureGroups(request, env, user, Number(configureMatch[1]));
   }
@@ -328,7 +380,7 @@ export async function handleCompetitionTotalGroups(request: Request, env: Env): 
     const user = await sessionUser(request, env);
     if (!user) return error('No autorizado', 401);
     if (request.method !== 'GET') return error('Método no permitido', 405);
-    const payload = await standings(env, Number(publicMatch[1]));
+    const payload = await totalGroupStandings(env, Number(publicMatch[1]));
     return payload ? json(payload) : error('Etapa de Copa Total no encontrada', 404);
   }
   return null;

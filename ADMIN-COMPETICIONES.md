@@ -108,3 +108,7 @@ Navegador Edge real a 390 × 844: grupos manuales A, sorteo B, tablas, tabs de f
 
 Todas las preparaciones usan D1 local y participantes/fixtures ficticios. No se ejecutó deploy, merge a main ni acceso a D1 remota.
 `npm test`: 257 tests correctos en 32 archivos. `npm run build`: correcto. Las migraciones locales existentes están aplicadas; no se agregó ninguna migración.
+
+## Administración de Copa Total
+
+Implementada en el bloque siguiente sin rehacer Copa A/B. Ver [guía completa de Copa Total](ADMIN-COPA-TOTAL.md) para flujos, preparación local, archivos y endpoints.

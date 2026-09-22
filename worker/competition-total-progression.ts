@@ -1,4 +1,6 @@
 import type { Env } from './index';
+import { totalGroupStandings } from './competition-total-groups';
+import { refreshStage } from './competition-knockout';
 
 type SessionUser = { id: string; role: 'admin' | 'participant'; is_active: number };
 type StageRow = {
@@ -8,6 +10,7 @@ type StageRow = {
   stage_type: string;
   status: string;
   season_status: string;
+  competition_status: string;
 };
 type StandingRow = {
   groupId: number;
@@ -65,16 +68,10 @@ async function sessionUser(request: Request, env: Env): Promise<SessionUser | nu
   ).bind(await sha256(token)).first<SessionUser>();
   return row ?? null;
 }
-async function audit(env: Env, actor: string, action: string, entityType: string, entityId: string, after: unknown) {
-  await env.DB.prepare(
-    `INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json)
-     VALUES (?,?,?,?,?)`,
-  ).bind(actor, action, entityType, entityId, JSON.stringify(after)).run();
-}
 
 async function stageInfo(env: Env, stageId: number) {
   return env.DB.prepare(
-    `SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code,s.status AS season_status
+    `SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code,c.status AS competition_status,s.status AS season_status
      FROM competition_stages cs
      JOIN competitions c ON c.id=cs.competition_id
      JOIN tafa_seasons s ON s.id=c.season_id
@@ -82,90 +79,11 @@ async function stageInfo(env: Env, stageId: number) {
   ).bind(stageId).first<StageRow>();
 }
 
-async function scoreEntrySegment(env: Env, entryId: number, segmentId: number) {
-  const row = await env.DB.prepare(
-    `SELECT COALESCE(SUM(ps.total_points),0) AS points,
-            COUNT(crsm.match_id) AS match_count,
-            COALESCE(SUM(CASE WHEN m.result_finalized_at IS NOT NULL OR m.is_void=1 THEN 1 ELSE 0 END),0) AS finalized_count
-     FROM competition_round_segment_matches crsm
-     JOIN matches m ON m.id=crsm.match_id
-     JOIN competition_entry_members cem ON cem.entry_id=?
-     LEFT JOIN official_predictions op ON op.user_id=cem.user_id AND op.match_id=m.id
-     LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id
-     WHERE crsm.segment_id=?`,
-  ).bind(entryId, segmentId).first<{ points: number; match_count: number; finalized_count: number }>();
-  return {
-    points: Number(row?.points ?? 0),
-    complete: Number(row?.match_count ?? 0) === 4 && Number(row?.finalized_count ?? 0) === 4,
-  };
-}
-
-async function totalStandings(env: Env, stageId: number) {
-  const source = await stageInfo(env, stageId);
-  if (!source || source.competition_code !== 'COPA_TOTAL' || source.stage_type !== 'ROUND_ROBIN_GROUPS') return null;
-  const groupsResult = await env.DB.prepare(
-    `SELECT id,code,name,sequence FROM competition_groups WHERE stage_id=? ORDER BY sequence`,
-  ).bind(stageId).all<{ id: number; code: string; name: string; sequence: number }>();
-  const flat: StandingRow[] = [];
-  let provisional = false;
-
-  for (const group of groupsResult.results ?? []) {
-    const entriesResult = await env.DB.prepare(
-      `SELECT cge.entry_id,ce.display_name
-       FROM competition_group_entries cge
-       JOIN competition_entries ce ON ce.id=cge.entry_id
-       WHERE cge.group_id=?
-       ORDER BY cge.seed_position,ce.display_name COLLATE NOCASE`,
-    ).bind(group.id).all<{ entry_id: number; display_name: string }>();
-    const table = new Map<number, Omit<StandingRow, 'groupId' | 'groupCode' | 'groupName' | 'groupSequence' | 'position' | 'gd' | 'tiedOnAllCriteria'>>();
-    for (const entry of entriesResult.results ?? []) {
-      table.set(Number(entry.entry_id), {
-        entryId: Number(entry.entry_id), displayName: entry.display_name,
-        played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, points: 0,
-      });
-    }
-
-    const encounters = await env.DB.prepare(
-      `SELECT entry_a_id,entry_b_id,segment_id
-       FROM competition_encounters
-       WHERE stage_id=? AND group_id=? ORDER BY id`,
-    ).bind(stageId, group.id).all<{ entry_a_id: number; entry_b_id: number; segment_id: number }>();
-
-    for (const encounter of encounters.results ?? []) {
-      const [a, b] = await Promise.all([
-        scoreEntrySegment(env, Number(encounter.entry_a_id), Number(encounter.segment_id)),
-        scoreEntrySegment(env, Number(encounter.entry_b_id), Number(encounter.segment_id)),
-      ]);
-      if (!a.complete || !b.complete) { provisional = true; continue; }
-      const rowA = table.get(Number(encounter.entry_a_id));
-      const rowB = table.get(Number(encounter.entry_b_id));
-      if (!rowA || !rowB) continue;
-      rowA.played += 1; rowB.played += 1;
-      rowA.gf += a.points; rowA.ga += b.points;
-      rowB.gf += b.points; rowB.ga += a.points;
-      if (a.points > b.points) { rowA.won += 1; rowB.lost += 1; rowA.points += 3; }
-      else if (a.points < b.points) { rowB.won += 1; rowA.lost += 1; rowB.points += 3; }
-      else { rowA.drawn += 1; rowB.drawn += 1; rowA.points += 1; rowB.points += 1; }
-    }
-
-    const ordered = Array.from(table.values())
-      .map((row) => ({ ...row, gd: row.gf - row.ga }))
-      .sort((a, b) => b.points - a.points || b.gd - a.gd || b.gf - a.gf || b.won - a.won || a.displayName.localeCompare(b.displayName));
-    let previous: typeof ordered[number] | null = null;
-    let previousPosition = 0;
-    for (let index = 0; index < ordered.length; index += 1) {
-      const row = ordered[index];
-      const same = previous != null && row.points === previous.points && row.gd === previous.gd && row.gf === previous.gf && row.won === previous.won;
-      const position = same ? previousPosition : index + 1;
-      flat.push({
-        groupId: Number(group.id), groupCode: group.code, groupName: group.name,
-        groupSequence: Number(group.sequence), position, ...row, tiedOnAllCriteria: same,
-      });
-      previous = row;
-      previousPosition = position;
-    }
-  }
-  return { source, provisional, standings: flat };
+async function totalStandings(env:Env,stageId:number) {
+  const source=await stageInfo(env,stageId);
+  const table=await totalGroupStandings(env,stageId);
+  if(!source||!table)return null;
+  return {source,provisional:!table.groups.length||table.groups.some(g=>g.provisional),standings:table.groups.flatMap(g=>g.standings.map(row=>({groupId:g.id,groupCode:g.code,groupName:g.name,groupSequence:g.sequence,...row}))) as StandingRow[]};
 }
 
 function sameWildcardScore(a: StandingRow, b: StandingRow) {
@@ -183,6 +101,7 @@ async function persistQualifiers(
   targetStageId: number,
   rows: Array<{ entry: StandingRow; type: 'DIRECT' | 'WILDCARD' | 'MANUAL'; rankingOrder: number; reason: unknown }>,
 ) {
+  const before=await env.DB.prepare('SELECT * FROM competition_stage_qualifiers WHERE target_stage_id=? ORDER BY ranking_order').bind(targetStageId).all();
   const statements: D1PreparedStatement[] = [
     env.DB.prepare(`DELETE FROM competition_stage_qualifiers WHERE target_stage_id=?`).bind(targetStageId),
   ];
@@ -197,19 +116,20 @@ async function persistQualifiers(
       row.entry.position, row.rankingOrder, JSON.stringify(row.reason), user.id,
     ));
   }
-  await env.DB.batch(statements);
-  await audit(env, user.id, 'competition.total_qualifiers_confirmed', 'competition_stage', String(sourceStageId), {
-    targetStageId,
+  statements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json) VALUES (?,'competition.total_qualifiers_confirmed','competition_stage',?,?,?)`).bind(user.id,String(sourceStageId),JSON.stringify(before.results??[]),JSON.stringify({
+    targetStageId,configurationMode:rows.some(r=>r.type==='MANUAL')?'MANUAL':'ASSISTED',
     qualifiers: rows.map((row) => ({
       entryId: row.entry.entryId, name: row.entry.displayName, group: row.entry.groupCode,
-      position: row.entry.position, type: row.type, rankingOrder: row.rankingOrder,
+      position: row.entry.position, type: row.type, rankingOrder: row.rankingOrder,reason:row.reason,
     })),
-  });
+  })));
+  await env.DB.batch(statements);
 }
 
-async function qualify(request: Request, env: Env, user: SessionUser, sourceStageId: number) {
+async function qualify(request: Request, env: Env, user: SessionUser, sourceStageId: number, preview=false) {
   const payload = await totalStandings(env, sourceStageId);
   if (!payload) return error('La etapa no es una fase de grupos de Copa Total', 409);
+  if ([payload.source.status,payload.source.season_status,payload.source.competition_status].some(v=>['finished','archived'].includes(v)))return error('La etapa, Copa o temporada está cerrada',409);
   if (payload.provisional) return error('Todavía hay mini-partidos de Copa Total sin resultados definitivos', 409);
   if (payload.standings.length === 0) return error('La fase de grupos no tiene participantes', 409);
 
@@ -221,6 +141,7 @@ async function qualify(request: Request, env: Env, user: SessionUser, sourceStag
     wildcardCount?: number;
     manualQualifiedEntryIds?: number[];
     manualWildcardEntryIds?: number[];
+    reason?:string;
   } | null;
   const targetStageId = Number(body?.targetStageId);
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa de Octavos inválida');
@@ -230,6 +151,8 @@ async function qualify(request: Request, env: Env, user: SessionUser, sourceStag
   }
   if (target.status === 'finished' || target.status === 'archived') return error('La etapa destino ya está cerrada', 409);
 
+  const already=await env.DB.prepare('SELECT COUNT(*) n FROM competition_encounters WHERE stage_id=?').bind(targetStageId).first<{n:number}>();
+  if(Number(already?.n)>0)return error('La clasificación ya está en uso por los cruces',409);
   const targetSize = body?.targetSize == null ? 16 : Number(body.targetSize);
   if (!Number.isInteger(targetSize) || targetSize < 2 || targetSize > payload.standings.length) return error('Cantidad objetivo de clasificados inválida');
 
@@ -239,15 +162,15 @@ async function qualify(request: Request, env: Env, user: SessionUser, sourceStag
     : null;
   if (manualQualified) {
     const unique = [...new Set(manualQualified)];
-    if (unique.length !== targetSize || unique.some((id) => !Number.isInteger(id) || !byId.has(id))) {
+    if (unique.length !== manualQualified.length || unique.length !== targetSize || unique.some((id) => !Number.isInteger(id) || !byId.has(id))) {
       return error(`La selección manual debe contener exactamente ${targetSize} clasificados válidos`);
     }
     const rows = unique.map((id, index) => ({
       entry: byId.get(id)!, type: 'MANUAL' as const, rankingOrder: index + 1,
-      reason: { mode: 'MANUAL', targetSize },
+      reason: { mode: 'MANUAL', targetSize,reason:body?.reason?.trim()||null },
     }));
-    await persistQualifiers(env, user, sourceStageId, targetStageId, rows);
-    return json({ ok: true, sourceStageId, targetStageId, mode: 'MANUAL', qualifiers: rows });
+    if(!preview) await persistQualifiers(env, user, sourceStageId, targetStageId, rows);
+    return json({ok:true,preview,sourceStageId,targetStageId,mode:'MANUAL',qualifiers:rows.map(r=>({entryId:r.entry.entryId,name:r.entry.displayName,group:r.entry.groupCode,position:r.entry.position,type:r.type}))});
   }
 
   const directPositions = Array.isArray(body?.directPositions) && body!.directPositions!.length > 0
@@ -268,7 +191,7 @@ async function qualify(request: Request, env: Env, user: SessionUser, sourceStag
     const selected = entries.filter((entry) => directPositions.includes(entry.position));
     if (selected.length > directPositions.length) {
       return json({
-        error: 'Hay un empate total dentro de un grupo justo en el corte de clasificación directa. Elegí los clasificados manualmente.',
+        manualResolutionRequired:true, error: 'Hay un empate total dentro de un grupo justo en el corte de clasificación directa. Elegí los clasificados manualmente.',
         group: selected[0]?.groupCode ?? null,
         tiedEntries: selected.map((entry) => ({ entryId: entry.entryId, name: entry.displayName, position: entry.position })),
       }, { status: 409 });
@@ -304,7 +227,7 @@ async function qualify(request: Request, env: Env, user: SessionUser, sourceStag
     : null;
   if (manualWildcards) {
     const allowed = new Set(wildcardCandidates.map((entry) => entry.entryId));
-    if (manualWildcards.length !== wildcardCount || manualWildcards.some((id) => !allowed.has(id))) {
+    if (manualWildcards.length !== body!.manualWildcardEntryIds!.length || manualWildcards.length !== wildcardCount || manualWildcards.some((id) => !allowed.has(id))) {
       return error(`La selección manual de comodines debe contener exactamente ${wildcardCount} candidatos válidos`);
     }
     chosenWildcards = manualWildcards.map((id) => byId.get(id)!);
@@ -316,11 +239,13 @@ async function qualify(request: Request, env: Env, user: SessionUser, sourceStag
     if (firstOut && sameWildcardScore(lastChosen, firstOut)) {
       const tied = wildcardCandidates.filter((entry) => sameWildcardScore(entry, lastChosen));
       return json({
-        error: 'Hay empate total en el corte de mejores terceros/comodines. Elegí manualmente quién clasifica.',
+        manualResolutionRequired:true, error: 'Hay empate total en el corte de mejores terceros/comodines. Elegí manualmente quién clasifica.',
+        direct:directRows.map(r=>({entryId:r.entry.entryId,name:r.entry.displayName,group:r.entry.groupCode,type:'DIRECT'})),
         cutoffTie: tied.map((entry) => ({
           entryId: entry.entryId, name: entry.displayName, group: entry.groupCode,
           points: entry.points, gd: entry.gd, gf: entry.gf, won: entry.won,
         })),
+        wildcardCandidates:wildcardCandidates.map(e=>({entryId:e.entryId,name:e.displayName,group:e.groupCode,points:e.points,gd:e.gd,gf:e.gf,won:e.won})),
         wildcardCount,
       }, { status: 409 });
     }
@@ -340,8 +265,8 @@ async function qualify(request: Request, env: Env, user: SessionUser, sourceStag
       },
     })),
   ];
-  await persistQualifiers(env, user, sourceStageId, targetStageId, rows);
-  return json({
+  if(!preview) await persistQualifiers(env, user, sourceStageId, targetStageId, rows);
+  return json({preview,
     ok: true, sourceStageId, targetStageId, targetSize, directPositions, wildcardPosition, wildcardCount,
     qualifiers: rows.map((row) => ({
       entryId: row.entry.entryId, name: row.entry.displayName, group: row.entry.groupCode,
@@ -375,7 +300,7 @@ async function qualifiersPayload(env: Env, sourceStageId: number, targetStageId:
   }));
 }
 
-async function validateTargetLink(env: Env, source: StageRow, targetStageId: number, roundLinkId: number) {
+async function validateTargetLink(env: Env, source: StageRow, targetStageId: number, roundLinkId: number, options:{replace?:boolean;reason?:string;preview?:boolean}={}) {
   const target = await stageInfo(env, targetStageId);
   if (!target || target.competition_id !== source.competition_id || target.stage_type !== 'KNOCKOUT') {
     return { ok: false as const, error: 'La etapa destino debe ser eliminatoria y pertenecer a la misma Copa Total' };
@@ -386,9 +311,15 @@ async function validateTargetLink(env: Env, source: StageRow, targetStageId: num
      WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL' LIMIT 1`,
   ).bind(roundLinkId, source.competition_id, targetStageId).first<{ id: number }>();
   if (!link) return { ok: false as const, error: 'La Fecha indicada no está vinculada a la etapa destino' };
+  if(source.id===targetStageId || [source.season_status,source.competition_status].some(v=>['finished','archived'].includes(v)))return {ok:false as const,error:'La Copa o temporada está cerrada, o el destino coincide con el origen'};
+  const lock=await env.DB.prepare(`SELECT r.status,r.published_at,EXISTS(SELECT 1 FROM matches m WHERE m.round_id=r.id AND julianday(m.kickoff_at)<=julianday('now')) started FROM competition_round_links l JOIN rounds r ON r.id=l.round_id WHERE l.id=?`).bind(roundLinkId).first<{status:string;published_at:string|null;started:number}>();
+  if(lock?.status!=='draft'||lock.published_at||lock.started)return {ok:false as const,error:'La Fecha destino ya fue publicada o iniciada'};
+  const unsafe=await env.DB.prepare(`SELECT COUNT(*) n FROM competition_encounters e LEFT JOIN competition_round_links l ON l.id=e.round_link_id LEFT JOIN rounds r ON r.id=l.round_id WHERE e.stage_id=? AND (e.admin_confirmed_at IS NOT NULL OR r.status<>'draft' OR r.published_at IS NOT NULL OR EXISTS(SELECT 1 FROM matches m WHERE m.round_id=r.id AND julianday(m.kickoff_at)<=julianday('now')) OR EXISTS(SELECT 1 FROM competition_tiebreaks t WHERE t.encounter_id=e.id))`).bind(targetStageId).first<{n:number}>();
+  if(Number(unsafe?.n)>0)return {ok:false as const,error:'Los cruces ya tienen actividad deportiva'};
+  if(options.replace&&!options.preview&&!options.reason?.trim())return {ok:false as const,error:'Indicá el motivo de la corrección'};
   const count = await env.DB.prepare(`SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?`)
     .bind(targetStageId).first<{ total: number }>();
-  if (Number(count?.total ?? 0) > 0) return { ok: false as const, error: 'La etapa destino ya tiene cruces' };
+  if (Number(count?.total ?? 0) > 0 && !options.replace && !options.preview) return { ok: false as const, error: 'La etapa destino ya tiene cruces' };
   return { ok: true as const, target };
 }
 
@@ -441,6 +372,7 @@ function pairParticipants(available: number[], body: { random?: boolean; pairs?:
 }
 
 async function confirmedOutcome(env: Env, stageId: number) {
+  await refreshStage(env,stageId);
   const rows = await env.DB.prepare(
     `SELECT id,entry_a_id,entry_b_id,winner_entry_id,status,admin_confirmed_at
      FROM competition_encounters WHERE stage_id=? ORDER BY id`,
@@ -465,34 +397,45 @@ async function confirmedOutcome(env: Env, stageId: number) {
 
 async function insertPairs(
   env: Env, user: SessionUser, sourceStageId: number, targetStageId: number, roundLinkId: number,
-  available: number[], body: { random?: boolean; pairs?: PairInput[] }, slotPrefix: string, action: string,
+  available: number[], body: { random?: boolean; pairs?: PairInput[];replace?:boolean;reason?:string;preview?:boolean }, slotPrefix: string, action: string,
 ) {
   const source = await stageInfo(env, sourceStageId);
   if (!source || source.competition_code !== 'COPA_TOTAL') return error('La etapa origen no pertenece a Copa Total', 409);
-  const targetCheck = await validateTargetLink(env, source, targetStageId, roundLinkId);
+  const targetCheck = await validateTargetLink(env, source, targetStageId, roundLinkId,body);
   if (!targetCheck.ok) return error(targetCheck.error, 409);
+  if(body.preview){const names=await env.DB.prepare('SELECT id AS entryId,display_name AS displayName FROM competition_entries WHERE competition_id=?').bind(source.competition_id).all<{entryId:number;displayName:string}>();return json({pool:(names.results??[]).filter(e=>available.includes(e.entryId))});}
   const paired = pairParticipants(available, body);
   if (!paired.ok) return error(paired.error, 409);
+  const before=await env.DB.prepare('SELECT * FROM competition_encounters WHERE stage_id=? ORDER BY id').bind(targetStageId).all();
   const statements = paired.pairs.map((pair, index) => env.DB.prepare(
     `INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
      VALUES (?,?,?,?,?,'pending')`,
   ).bind(targetStageId, roundLinkId, `${slotPrefix}-${index + 1}`, pair[0], pair[1]));
-  if (statements.length) await env.DB.batch(statements);
-  await audit(env, user.id, action, 'competition_stage', String(targetStageId), {
-    sourceStageId, targetStageId, roundLinkId, randomSeed: paired.randomSeed, pairs: paired.pairs,
-  });
-  return json({ ok: true, sourceStageId, targetStageId, roundLinkId, randomSeed: paired.randomSeed, pairs: paired.pairs });
+  if(body.replace)statements.unshift(env.DB.prepare('DELETE FROM competition_encounters WHERE stage_id=?').bind(targetStageId));
+  const configurationMode=Array.isArray(body.pairs)?'MANUAL':'AUTOMATIC';
+  const detail={sourceStageId,targetStageId,roundLinkId,configurationMode,...(configurationMode==='AUTOMATIC'?{randomSeed:paired.randomSeed}:{}),pairs:paired.pairs,reason:body.reason?.trim()||null};
+  statements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json) VALUES (?,?,'competition_stage',?,?,?)`).bind(user.id,action,String(targetStageId),JSON.stringify(before.results??[]),JSON.stringify(detail)));
+  await env.DB.batch(statements);
+  return json({ok:true,...detail});
 }
 
 async function buildProgression(request: Request, env: Env, user: SessionUser, sourceStageId: number, mode: string) {
-  const body = await request.json().catch(() => null) as {
-    targetStageId?: number; roundLinkId?: number; random?: boolean; pairs?: PairInput[];
+  const body = (request.method==='GET'?Object.fromEntries(new URL(request.url).searchParams):await request.json().catch(() => null)) as {
+    targetStageId?: number; roundLinkId?: number; random?: boolean; pairs?: PairInput[];replace?:boolean;reason?:string;preview?:boolean;
   } | null;
   const targetStageId = Number(body?.targetStageId);
   const roundLinkId = Number(body?.roundLinkId);
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa destino inválida');
   if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha destino inválida');
 
+  if(body)body.preview=request.method==='GET';
+  const source=await stageInfo(env,sourceStageId);
+  if(!source||source.competition_code!=='COPA_TOTAL')return error('La etapa origen no pertenece a Copa Total',409);
+  if([source.season_status,source.competition_status].some(v=>['finished','archived'].includes(v)))return error('La Copa o temporada está cerrada',409);
+  const stages=await env.DB.prepare("SELECT id FROM competition_stages WHERE competition_id=? AND stage_type='KNOCKOUT' ORDER BY sequence,id").bind(source.competition_id).all<{id:number}>();
+  const ordered=stages.results??[];
+  const sourceIndex=ordered.findIndex(s=>s.id===sourceStageId),targetIndex=ordered.findIndex(s=>s.id===targetStageId);
+  if(mode==='qualified' ? targetIndex!==0 : mode==='third-place' ? (sourceIndex!==2||targetIndex!==4) : (sourceIndex<0||targetIndex!==sourceIndex+1||targetIndex>3))return error('Las etapas deben seguir Octavos, Cuartos, Semifinal, Final y Tercer puesto',409);
   if (mode === 'qualified') {
     const rows = await env.DB.prepare(
       `SELECT entry_id FROM competition_stage_qualifiers
@@ -503,12 +446,14 @@ async function buildProgression(request: Request, env: Env, user: SessionUser, s
     return insertPairs(env, user, sourceStageId, targetStageId, roundLinkId, available, body ?? {}, 'R16', 'competition.total_r16_built');
   }
 
+  if(source.stage_type!=='KNOCKOUT')return error('El origen debe ser eliminatorio',409);
   const outcome = await confirmedOutcome(env, sourceStageId);
   if (!outcome.ok) return error(outcome.error, 409);
   if (mode === 'third-place') {
     if (outcome.losers.length !== 2) return error('El tercer puesto necesita exactamente los dos perdedores de semifinales', 409);
-    return insertPairs(env, user, sourceStageId, targetStageId, roundLinkId, outcome.losers, { pairs: [{ entryAId: outcome.losers[0], entryBId: outcome.losers[1] }] }, 'THIRD', 'competition.total_third_place_built');
+    return insertPairs(env, user, sourceStageId, targetStageId, roundLinkId, outcome.losers, {...body,pairs: [{ entryAId: outcome.losers[0], entryBId: outcome.losers[1] }] }, 'THIRD', 'competition.total_third_place_built');
   }
+  if(targetIndex===3&&outcome.winners.length!==2)return error('La Final requiere exactamente dos ganadores de Semifinal',409);
   const prefix = outcome.winners.length === 2 ? 'FINAL' : outcome.winners.length === 4 ? 'SF' : 'KO';
   return insertPairs(env, user, sourceStageId, targetStageId, roundLinkId, outcome.winners, body ?? {}, prefix, 'competition.total_next_round_built');
 }
@@ -516,13 +461,13 @@ async function buildProgression(request: Request, env: Env, user: SessionUser, s
 export async function handleCompetitionTotalProgression(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
 
-  const qualifyMatch = pathname.match(/^\/api\/admin\/competition-engine\/stages\/(\d+)\/total\/qualify$/);
+  const qualifyMatch = pathname.match(/^\/api\/admin\/competition-engine\/stages\/(\d+)\/total\/qualify(?:\/(preview))?$/);
   if (qualifyMatch) {
     const user = await sessionUser(request, env);
     if (!user) return error('No autorizado', 401);
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
     if (request.method !== 'POST') return error('Método no permitido', 405);
-    return qualify(request, env, user, Number(qualifyMatch[1]));
+    return qualify(request, env, user, Number(qualifyMatch[1]),Boolean(qualifyMatch[2]));
   }
 
   const qualifiersMatch = pathname.match(/^\/api\/competition-engine\/stages\/(\d+)\/total\/qualifiers$/);
@@ -541,7 +486,7 @@ export async function handleCompetitionTotalProgression(request: Request, env: E
     const user = await sessionUser(request, env);
     if (!user) return error('No autorizado', 401);
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
-    if (request.method !== 'POST') return error('Método no permitido', 405);
+    if (!['POST','GET'].includes(request.method)) return error('Método no permitido', 405);
     return buildProgression(request, env, user, Number(progressionMatch[1]), progressionMatch[2]);
   }
 

@@ -9,15 +9,15 @@ Estado: formato funcional confirmado a partir del Excel histórico y aclaracione
 
 ## Participación
 
-- Participan **todos los participantes activos**, sin importar si pertenecen a Primera o Segunda División.
+- Participan **todos los participantes activos pertenecientes a las divisiones de la temporada**, sin importar si pertenecen a Primera o Segunda División.
 - Se intenta distribuirlos en grupos de entre **3 y 5 participantes**.
 - Formato ideal: **8 grupos de 4 participantes**.
 - La cantidad real de grupos y clasificados puede adaptarse según el total de participantes.
 
 ## Sorteo y bombos
 
-- Los grupos se sortean con lógica de bombos basada en la **tabla IFFHS**, igual que en Copa A/B.
-- El campeón vigente de Copa Total ocupa la posición **A1** como cabeza de serie del Grupo A.
+- El armado manual es la opción principal. El sorteo opcional usa bombos basados en la **tabla IFFHS** de la temporada anterior, igual que en Copa A/B.
+- En el sorteo automático, el campeón vigente elegible de Copa Total ocupa **A1**. El armado manual no agrega restricciones deportivas adicionales.
 - El ranking IFFHS se toma entre los participantes elegibles para la edición.
 - El Admin conserva el control del sorteo y armado final.
 
@@ -156,3 +156,7 @@ Desde Octavos en adelante se usa la regla general de desempate de Copas:
 - Sí deben quedar guardados para la futura tabla general e historial estadístico.
 - Una misma Fecha Copa puede servir simultáneamente para Copa Total y otras Copas activas.
 - Cada participante completa un único pronóstico de 12 partidos por Fecha Copa.
+
+## Administración implementada
+
+La guía de interfaz, endpoints y prueba local está en [ADMIN-COPA-TOTAL.md](ADMIN-COPA-TOTAL.md). Se reutilizan las migraciones existentes, el motor de puntajes y los desempates TAFA.

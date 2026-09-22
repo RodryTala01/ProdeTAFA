@@ -15,9 +15,9 @@ describe('Copa Total segments contract', () => {
   });
 
   it('creates exactly three four-match segments per date', () => {
-    expect(worker).toContain('localSegment <= 3');
-    expect(worker).toContain('(localSegment - 1) * 4');
-    expect(worker).toContain('ids.slice(start, start + 4)');
+    expect(worker).toContain('local<=3');
+    expect(worker).toContain('(local-1)*4');
+    expect(worker).toContain('ids.slice((local-1)*4,local*4)');
   });
 
   it('stores explicit match ids instead of a visual index range', () => {
@@ -30,8 +30,8 @@ describe('Copa Total segments contract', () => {
   });
 
   it('creates six chronological mini dates across both Cup dates', () => {
-    expect(worker).toContain('(Number(link.sequence) - 1) * 3 + localSegment');
-    expect(worker).toContain('`MINI_${globalMiniDay}`');
+    expect(worker).toContain('linkIndex*3+local');
+    expect(worker).toContain('`MINI_${mini}`');
   });
 
   it('does not regenerate segments after encounters use them', () => {

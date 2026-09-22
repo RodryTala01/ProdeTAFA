@@ -207,7 +207,7 @@ No implementar por ahora duplicación de fechas.
 
 ## Copas — siguiente gran fase funcional
 
-La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. El bloque actual agrega administración deportiva de Copa A/B sobre la pantalla central existente, reutilizando el motor y preservando Liga legacy.
+La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. El bloque actual agrega administración completa de Copa Total sobre la pantalla central existente, reutilizando el motor y preservando Copa A/B y Liga legacy.
 
 ### Armado manual y asistido
 
@@ -216,10 +216,21 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Admin puede cargar grupos, parejas, cruces y posiciones en llave resultantes de un sorteo externo.
 - Toda asignación manual debe validar elegibilidad y restricciones obligatorias y quedar auditada.
 - Copa Dúos también debe permitir cargar parejas sorteadas fuera de la app; el sorteo interno es opcional.
-- Copa A/B Admin ofrece Resumen, Grupos, Octavos, Cuartos, Semifinal y Final. Las demás pantallas deportivas quedan para bloques posteriores; no duplicar el motor.
+- Copa A/B Admin ofrece Resumen, Grupos, Octavos, Cuartos, Semifinal y Final. Copa Total tiene su administración específica; las demás pantallas deportivas quedan para bloques posteriores. No duplicar el motor.
 - En Copa A y Copa B, el campeón vigente elegible ocupa A1. Grupos manuales como primera opción; bombos IFFHS de referencia y sorteo opcional.
 - Octavos valida en backend segundos contra terceros, todos una vez. Cuartos usa primeros de grupo y ganadores confirmados de Octavos; Semifinal y Final usan ganadores confirmados.
 - Copa A/B no tiene tercer puesto. Cruces editables antes de publicación/inicio, con motivo y auditoría al corregir. El modo manual no guarda randomSeed.
+
+### Copa Total Admin
+
+- Elegibles: participantes activos pertenecientes a las divisiones de la temporada, tanto A como B.
+- Grupos manuales como primera opción, entre 3 y 5 integrantes, todos exactamente una vez. No imponer restricciones adicionales al armado manual.
+- Sorteo opcional por bombos IFFHS de la temporada previa; campeón Total vigente elegible en A1. Guardar semilla y resultado auditado.
+- Exactamente dos Fechas de 12 partidos; seis mini-fechas de cuatro match_id persistidos. Fixture doble para grupos de 3/4, simple para 5 con sexta mini-fecha libre.
+- Tablas deportivas PTS/DG/GF/PG: igualdad completa conserva posición compartida. No decidir clasificados por nombre.
+- Clasificación configurable con vista previa, comodines y resolución manual de cortes empatados; selección excepcional completa con motivo y snapshot auditado.
+- Octavos, Cuartos y Semifinal admiten cruces manuales o automáticos, usando todos los clasificados/ganadores confirmados una vez. Final usa dos ganadores de Semifinal; tercer puesto usa dos perdedores confirmados y vínculo independiente.
+- Reutilizar knockout y desempate TAFA; edición bloqueada tras publicación/inicio o actividad. Cambios manuales auditados. No agregar UI de otras Copas ni de participante en este bloque.
 
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 

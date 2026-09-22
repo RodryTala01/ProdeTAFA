@@ -35,23 +35,17 @@ async function sessionUser(request: Request, env: Env): Promise<SessionUser | nu
   ).bind(await sha256(token)).first<SessionUser>();
   return row ?? null;
 }
-async function audit(env: Env, actorUserId: string, stageId: number, after: unknown) {
-  await env.DB.prepare(
-    `INSERT INTO audit_log (actor_user_id,action,entity_type,entity_id,after_json)
-     VALUES (?,'competition.total_segments_configured','competition_stage',?,?)`,
-  ).bind(actorUserId, String(stageId), JSON.stringify(after)).run();
-}
 
 async function stageInfo(env: Env, stageId: number) {
   return env.DB.prepare(
-    `SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code,s.status AS season_status
+    `SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code,c.status AS competition_status,s.status AS season_status
      FROM competition_stages cs
      JOIN competitions c ON c.id=cs.competition_id
      JOIN tafa_seasons s ON s.id=c.season_id
      WHERE cs.id=? LIMIT 1`,
   ).bind(stageId).first<{
     id: number; competition_id: number; stage_type: string; status: string;
-    competition_code: string; season_status: string;
+    competition_code: string; competition_status:string; season_status: string;
   }>();
 }
 
@@ -81,7 +75,9 @@ async function readSegments(env: Env, stageId: number) {
     matches: Array<{ matchId: number; sequence: number; home: string; away: string; kickoffAt: string }>;
   }>();
 
+  const roundOrder=new Map<number,number>();
   for (const row of rows.results ?? []) {
+    if(!roundOrder.has(row.round_link_id))roundOrder.set(row.round_link_id,roundOrder.size);
     if (row.segment_id == null || row.code == null || row.name == null || row.segment_sequence == null) continue;
     const segmentId = Number(row.segment_id);
     let segment = bySegment.get(segmentId);
@@ -91,7 +87,7 @@ async function readSegments(env: Env, stageId: number) {
         code: row.code,
         name: row.name,
         sequence: Number(row.segment_sequence),
-        globalMiniDay: (Number(row.round_sequence) - 1) * 3 + Number(row.segment_sequence),
+        globalMiniDay: roundOrder.get(row.round_link_id)! * 3 + Number(row.segment_sequence),
         roundLinkId: Number(row.round_link_id),
         roundId: Number(row.round_id),
         roundName: row.round_name,
@@ -115,6 +111,7 @@ async function configureSegments(env: Env, user: SessionUser, stageId: number) {
   if (stage.competition_code !== 'COPA_TOTAL') return error('Esta acción corresponde únicamente a Copa Total', 409);
   if (stage.stage_type !== 'ROUND_ROBIN_GROUPS') return error('La etapa de Copa Total debe ser de grupos con enfrentamientos', 409);
   if (stage.status === 'finished' || stage.status === 'archived') return error('La etapa ya está cerrada', 409);
+  if(['finished','archived'].includes(stage.competition_status))return error('La Copa está cerrada',409);
   if (stage.season_status === 'finished' || stage.season_status === 'archived') return error('La temporada ya está cerrada', 409);
 
   const linksResult = await env.DB.prepare(
@@ -145,32 +142,22 @@ async function configureSegments(env: Env, user: SessionUser, stageId: number) {
     matchIdsByLink.set(Number(link.id), ids);
   }
 
-  const deleteStatements = links.map((link) => env.DB.prepare(
-    `DELETE FROM competition_round_segments WHERE round_link_id=?`,
-  ).bind(link.id));
-  if (deleteStatements.length) await env.DB.batch(deleteStatements);
-
-  for (const link of links) {
-    const ids = matchIdsByLink.get(Number(link.id)) ?? [];
-    for (let localSegment = 1; localSegment <= 3; localSegment += 1) {
-      const globalMiniDay = (Number(link.sequence) - 1) * 3 + localSegment;
-      const created = await env.DB.prepare(
-        `INSERT INTO competition_round_segments (round_link_id,code,name,sequence)
-         VALUES (?,?,?,?) RETURNING id`,
-      ).bind(link.id, `MINI_${globalMiniDay}`, `Mini fecha ${globalMiniDay}`, localSegment).first<{ id: number }>();
-      if (!created) return error('No se pudo crear un segmento de Copa Total', 500);
-
-      const start = (localSegment - 1) * 4;
-      const segmentMatches = ids.slice(start, start + 4);
-      const statements = segmentMatches.map((matchId, index) => env.DB.prepare(
-        `INSERT INTO competition_round_segment_matches (segment_id,match_id,sequence) VALUES (?,?,?)`,
-      ).bind(created.id, matchId, index + 1));
-      await env.DB.batch(statements);
+  const statements:D1PreparedStatement[]=links.map(link=>env.DB.prepare('DELETE FROM competition_round_segments WHERE round_link_id=?').bind(link.id));
+  const frozen:unknown[]=[];
+  links.forEach((link,linkIndex)=>{
+    const ids=matchIdsByLink.get(Number(link.id))!;
+    for(let local=1;local<=3;local++){
+      const mini=linkIndex*3+local;
+      statements.push(env.DB.prepare('INSERT INTO competition_round_segments(round_link_id,code,name,sequence) VALUES (?,?,?,?)').bind(link.id,`MINI_${mini}`,`Mini fecha ${mini}`,local));
+      const matchIds=ids.slice((local-1)*4,local*4);
+      matchIds.forEach((id,i)=>statements.push(env.DB.prepare(`INSERT INTO competition_round_segment_matches(segment_id,match_id,sequence)
+        VALUES ((SELECT id FROM competition_round_segments WHERE round_link_id=? AND code=?),?,?)`).bind(link.id,`MINI_${mini}`,id,i+1)));
+      frozen.push({roundLinkId:link.id,miniDay:mini,matchIds});
     }
-  }
-
+  });
+  statements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json) VALUES (?,'competition.total_segments_configured','competition_stage',?,?)`).bind(user.id,String(stageId),JSON.stringify(frozen)));
+  await env.DB.batch(statements);
   const payload = await readSegments(env, stageId);
-  await audit(env, user.id, stageId, payload);
   return json({ ok: true, stageId, segments: payload });
 }
 

@@ -1,4 +1,5 @@
 export const cupAdmin = "/api/admin/competition-engine";
+export class CupApiError extends Error { constructor(public data:Record<string,any>){super(data.error || "No se pudo completar la acción");} }
 export async function cupApi<T>(
   url: string,
   method = "GET",
@@ -10,7 +11,7 @@ export async function cupApi<T>(
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
+  if (!response.ok) throw new CupApiError(data);
   return data as T;
 }
 export type CupStage = {

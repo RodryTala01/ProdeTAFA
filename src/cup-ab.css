@@ -48,3 +48,6 @@
 .cup-ab .competition-stage {
   overflow-wrap: anywhere;
 }
+
+.cup-ab .total-check { display:flex; align-items:center; gap:.7rem; padding:.4rem 0; }
+.cup-ab .total-check input { width:auto; flex:none; }
