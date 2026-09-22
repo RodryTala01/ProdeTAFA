@@ -33,6 +33,13 @@ describe('automatic IFFHS calculator contract', () => {
     expect(calculator).toContain('ROUND_OF_16: 22');
   });
 
+  it('awards third-place finishers the semifinal IFFHS value where third place exists', () => {
+    expect(calculator).toContain('COPA_TOTAL');
+    expect(calculator).toContain('THIRD: 60');
+    expect(calculator).toContain('COPA_PAPA');
+    expect(calculator).toContain('THIRD: 45');
+  });
+
   it('distinguishes Campeones 32avos, 16avos and octavos', () => {
     expect(results).toContain("'ROUND_OF_64'");
     expect(calculator).toContain('ROUND_OF_64: 10');
