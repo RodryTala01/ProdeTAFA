@@ -1,3 +1,4 @@
+import AdminCupChampions from './AdminCupChampions';
 import AdminCupDuos from './AdminCupDuos';
 import { useEffect, useMemo, useState } from 'react';
 import AdminCupAb from './AdminCupAb';
@@ -335,11 +336,12 @@ export default function AdminCompetitions() {
                   ) : <>
                   <button className="button button--ghost" onClick={() => setSelectedCompetitionId(null)}>Volver a competiciones</button>
                   <p>{selected.name} · Código: {competition.code}</p>
-                  {competition.family !== 'LEAGUE' && !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS'].includes(competition.code) && <p className="competition-pending">Configuración deportiva específica pendiente. El armado de grupos, parejas y cruces tendrá opciones asistida y manual, con validaciones y auditoría.</p>}
+                  {competition.family !== 'LEAGUE' && !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES'].includes(competition.code) && <p className="competition-pending">Configuración deportiva específica pendiente. El armado de grupos, parejas y cruces tendrá opciones asistida y manual, con validaciones y auditoría.</p>}
                   {['COPA_A','COPA_B'].includes(competition.code) && competition.stages.some(s=>s.stageType==='ACCUMULATIVE_GROUPS') && <AdminCupAb key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='COPA_TOTAL' && competition.stages.some(s=>s.stageType==='ROUND_ROBIN_GROUPS') && <AdminCupTotal key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='COPA_DUOS' && <AdminCupDuos key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
-                  <details open={!competition.stages.some(s=>['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS','SURVIVAL_TABLE'].includes(s.stageType)) || !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS'].includes(competition.code)}><summary>Configuración general, etapas y Fechas</summary>
+                  {competition.code==='COPA_CAMPEONES' && <AdminCupChampions key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  <details open={!competition.stages.some(s=>['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS','SURVIVAL_TABLE'].includes(s.stageType)) || !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES'].includes(competition.code)}><summary>Configuración general, etapas y Fechas</summary>
                   <CompetitionConfigPanel
                     key={competition.id}
                     competition={competition}

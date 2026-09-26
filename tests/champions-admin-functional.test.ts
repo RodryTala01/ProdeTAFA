@@ -183,6 +183,14 @@ beforeEach(() => {
 afterEach(() => db.close());
 
 describe('Copa Campeones backend funcional', () => {
+  it('bloquea mutaciones en temporada cerrada y regeneración después de inicializar', async () => {
+    const pref:any=await (await call('admin/competition-engine/competitions/100/champions/prefill','POST',{})).json();
+    await call('admin/competition-engine/competitions/100/champions/slots','PUT',{slots:pref.slots.map((s:any)=>({slotCode:s.slotCode,userId:s.proposedUser.id}))});
+    expect((await call('admin/competition-engine/competitions/100/champions/bracket','POST',{})).status).toBe(200);
+    expect((await call('admin/competition-engine/competitions/100/champions/prefill','POST',{})).status).toBe(409);
+    db.exec("UPDATE tafa_seasons SET status='finished' WHERE id=2");
+    for(const [path,method] of [['slots','PUT'],['bracket','POST'],['nodes/U1/activate','POST'],['prefill','POST']]) expect((await call('admin/competition-engine/competitions/100/champions/'+path,method,{})).status).toBe(409);
+  });
   it('prellena exactamente los 14 cupos deportivos desde la temporada anterior', async () => {
     const response = await call('admin/competition-engine/competitions/100/champions/prefill', 'POST', {});
     expect(response.status).toBe(200);

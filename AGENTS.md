@@ -207,7 +207,7 @@ No implementar por ahora duplicación de fechas.
 
 ## Copas — siguiente gran fase funcional
 
-La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. Copa Total Admin está terminada. El bloque actual agrega administración completa de Copa Dúos sobre la pantalla central existente, reutilizando el motor y preservando Copa A/B y Liga legacy.
+La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. Copa Total Admin está terminada. Copa Dúos Admin está terminada. El bloque actual agrega administración de Copa Campeones sobre la pantalla central existente, reutilizando el motor y preservando Copa A/B y Liga legacy.
 
 ### Armado manual y asistido
 
@@ -241,6 +241,13 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Empates múltiples: comparar todos en la misma Fecha Liga posterior con el evaluador TAFA existente, nunca usar plenos/parciales/nombres como criterio deportivo.
 - Con cuatro clasificados: semifinales fijas 1.º–4.º y 2.º–3.º, +2 sólo para primero y segundo. Final de ganadores confirmados, sin tercer puesto.
 - La confirmación deportiva no asigna automáticamente IFFHS; respetar la confirmación explícita de resultados y destinatarios tras sustituciones definida en RESULTS-IFFHS-DESIGN.md.
+
+### Copa Campeones Admin
+
+- Propuesta de 14 cupos desde la temporada anterior; mostrar propuesto y confirmado por separado. Vacantes y duplicados requieren decisión manual y motivo, nunca reemplazo automático.
+- Confirmar 14 personas únicas activas de la temporada antes de inicializar la llave fija de 13 nodos del backend. No convertirla en una llave de 16.
+- Ramas superior, inferior y final. Activar cada nodo únicamente con ambas fuentes confirmadas, eligiendo etapa eliminatoria y Fecha vinculada.
+- Reutilizar CupEncounter y TAFA. Sin tercer puesto ni correcciones genéricas que salteen las fuentes. Cupos bloqueados tras inicializar la llave; mutaciones bloqueadas en competición/temporada cerrada.
 
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 

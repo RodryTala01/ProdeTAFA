@@ -211,10 +211,12 @@ async function readSlots(env: Env, competitionId: number) {
 async function prefill(request: Request, env: Env, user: SessionUser, competitionId: number) {
   const competition = await championsCompetition(env, competitionId);
   if (!competition || competition.code !== 'COPA_CAMPEONES') return error('Copa Campeones no encontrada', 404);
+  if ([competition.status,competition.season_status].some(status=>['finished','archived'].includes(status))) return error('La competición o temporada ya está cerrada',409);
   if (competition.status === 'finished' || competition.status === 'archived'
     || competition.season_status === 'finished' || competition.season_status === 'archived') {
     return error('La competición o temporada ya está cerrada', 409);
   }
+  if (await bracketStarted(env, competitionId)) return error('No se pueden recalcular cupos después de inicializar la llave', 409);
   const encounters = await env.DB.prepare(
     `SELECT COUNT(*) AS total
      FROM competition_encounters ce
@@ -288,6 +290,7 @@ async function ensureIndividualEntry(env: Env, competitionId: number, userId: st
 async function confirmSlots(request: Request, env: Env, user: SessionUser, competitionId: number) {
   const competition = await championsCompetition(env, competitionId);
   if (!competition || competition.code !== 'COPA_CAMPEONES') return error('Copa Campeones no encontrada', 404);
+  if ([competition.status,competition.season_status].some(status=>['finished','archived'].includes(status))) return error('La competición o temporada ya está cerrada',409);
 
   if (await bracketStarted(env, competitionId)) return error('No se pueden modificar cupos después de inicializar la llave', 409);
 
@@ -484,6 +487,7 @@ async function readBracket(env: Env, competitionId: number) {
 async function initBracket(env: Env, user: SessionUser, competitionId: number) {
   const competition = await championsCompetition(env, competitionId);
   if (!competition || competition.code !== 'COPA_CAMPEONES') return error('Copa Campeones no encontrada', 404);
+  if ([competition.status,competition.season_status].some(status=>['finished','archived'].includes(status))) return error('La competición o temporada ya está cerrada',409);
   const slots = await readSlots(env, competitionId);
   if (slots.length !== SLOT_DEFINITIONS.length
     || slots.some((slot) => !['confirmed','replaced'].includes(slot.status) || slot.confirmedEntryId == null)) {
@@ -515,6 +519,7 @@ async function activateNode(
 ) {
   const competition = await championsCompetition(env, competitionId);
   if (!competition || competition.code !== 'COPA_CAMPEONES') return error('Copa Campeones no encontrada', 404);
+  if ([competition.status,competition.season_status].some(status=>['finished','archived'].includes(status))) return error('La competición o temporada ya está cerrada',409);
 
   const node = await env.DB.prepare(
     `SELECT id,node_code,source_a_type,source_a_ref,source_b_type,source_b_ref,encounter_id

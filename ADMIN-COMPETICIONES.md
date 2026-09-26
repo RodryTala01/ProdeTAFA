@@ -116,3 +116,7 @@ Implementada en el bloque siguiente sin rehacer Copa A/B. Ver [guía completa de
 ## Administración de Copa Dúos
 
 Ver [guía de Copa Dúos](ADMIN-COPA-DUOS.md): parejas manuales/automáticas, sustituciones, supervivencia, TAFA, semifinales y final.
+
+## Copa Campeones Admin
+
+Ver [guía de Copa Campeones](ADMIN-COPA-CAMPEONES.md): cupos, ramas fijas, activación de nodos y encuentros compartidos.
