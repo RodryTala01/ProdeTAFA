@@ -56,6 +56,18 @@ async function papaCompetition(env: Env, competitionId: number) {
   }>();
 }
 
+async function initialState(env: Env, competitionId: number) {
+  const rows = await env.DB.prepare(`SELECT e.*,a.user_id AS userAId,b.user_id AS userBId
+    FROM competition_encounters e JOIN competition_stages s ON s.id=e.stage_id
+    LEFT JOIN competition_entry_members a ON a.entry_id=e.entry_a_id
+    LEFT JOIN competition_entry_members b ON b.entry_id=e.entry_b_id
+    WHERE s.competition_id=? ORDER BY e.id`).bind(competitionId).all<{id:number;stage_id:number;round_link_id:number;slot_key:string;userAId:string;userBId:string|null;resolution:string|null;admin_confirmed_at:string|null}>();
+  const all=rows.results??[], initial=all.filter(e=>e.slot_key.startsWith('PAPA-R1-'));
+  let editable=initial.length>0&&initial.length===all.length&&initial.every(e=>!e.admin_confirmed_at||e.resolution==='bye');
+  if(editable){const activity=await env.DB.prepare(`SELECT r.id FROM competition_encounters e JOIN competition_round_links l ON l.id=e.round_link_id JOIN rounds r ON r.id=l.round_id LEFT JOIN matches m ON m.round_id=r.id WHERE e.stage_id=? AND (r.status<>'draft' OR julianday(m.kickoff_at)<=julianday('now') OR m.result_finalized_at IS NOT NULL) LIMIT 1`).bind(initial[0].stage_id).first();editable=!activity;}
+  return {stageId:initial[0]?.stage_id??null,roundLinkId:initial[0]?.round_link_id??null,editable,pairs:initial.map(e=>({userAId:e.userAId,userBId:e.userBId})),hasEncounters:all.length>0};
+}
+
 async function previousSeasonId(env: Env, seasonNumber: number) {
   const row = await env.DB.prepare(
     `SELECT id FROM tafa_seasons WHERE season_number=? LIMIT 1`,
@@ -149,6 +161,7 @@ async function seedingProposal(env: Env, competitionId: number) {
     byesNeeded: Math.max(0, bracketSize - count),
     proposedPairs,
     unpaired,
+    initial: await initialState(env,competitionId),
   };
 }
 
@@ -174,7 +187,9 @@ async function ensurePapaEntry(env: Env, competitionId: number, userId: string, 
   return Number(created.id);
 }
 
-async function validateTarget(env: Env, competitionId: number, stageId: number, roundLinkId: number) {
+async function validateTarget(env: Env, competitionId: number, stageId: number, roundLinkId: number, allowExisting = false) {
+  const competition=await papaCompetition(env,competitionId);
+  if(!competition||[competition.status,competition.season_status].some(s=>['finished','archived'].includes(s))) return {ok:false as const,error:'La competición o temporada ya está cerrada'};
   const stage = await env.DB.prepare(
     `SELECT id,stage_type,status FROM competition_stages
      WHERE id=? AND competition_id=? LIMIT 1`,
@@ -186,10 +201,12 @@ async function validateTarget(env: Env, competitionId: number, stageId: number, 
      WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL' LIMIT 1`,
   ).bind(roundLinkId, competitionId, stageId).first<{ id: number }>();
   if (!link) return { ok: false as const, error: 'La Fecha no está vinculada a la etapa indicada' };
+  const activity=await env.DB.prepare(`SELECT r.id FROM competition_round_links l JOIN rounds r ON r.id=l.round_id LEFT JOIN matches m ON m.round_id=r.id WHERE l.id=? AND (r.status<>'draft' OR julianday(m.kickoff_at)<=julianday('now') OR m.result_finalized_at IS NOT NULL) LIMIT 1`).bind(roundLinkId).first();
+  if(activity)return {ok:false as const,error:'La Fecha destino ya fue publicada o iniciada'};
   const existing = await env.DB.prepare(
     `SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?`,
   ).bind(stageId).first<{ total: number }>();
-  if (Number(existing?.total ?? 0) > 0) return { ok: false as const, error: 'La etapa ya tiene cruces configurados' };
+  if (!allowExisting && Number(existing?.total ?? 0) > 0) return { ok: false as const, error: 'La etapa ya tiene cruces configurados' };
   return { ok: true as const };
 }
 
@@ -197,7 +214,7 @@ async function confirmInitialBracket(request: Request, env: Env, user: SessionUs
   const competition = await papaCompetition(env, competitionId);
   if (!competition || competition.code !== 'COPA_PAPA') return error('Copa Papa no encontrada', 404);
   const body = await request.json().catch(() => null) as {
-    stageId?: number; roundLinkId?: number; pairs?: PairInput[];
+    stageId?: number; roundLinkId?: number; pairs?: PairInput[]; reason?: string;
   } | null;
   const stageId = Number(body?.stageId);
   const roundLinkId = Number(body?.roundLinkId);
@@ -205,7 +222,12 @@ async function confirmInitialBracket(request: Request, env: Env, user: SessionUs
   if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha inicial inválida');
   if (!Array.isArray(body?.pairs) || body.pairs.length === 0) return error('Tenés que confirmar los cruces iniciales');
 
-  const target = await validateTarget(env, competitionId, stageId, roundLinkId);
+  const before=await initialState(env,competitionId);
+  const replacing=before.pairs.length>0;
+  if(before.hasEncounters&&(!replacing||!before.editable)) return error('La llave inicial ya tuvo actividad o avance y no puede modificarse',409);
+  if(replacing&&(stageId!==before.stageId||roundLinkId!==before.roundLinkId)) return error('Conservá la etapa y Fecha originales al corregir la llave',409);
+  if(replacing&&!body?.reason?.trim()) return error('Indicá el motivo de la corrección',400);
+  const target = await validateTarget(env, competitionId, stageId, roundLinkId, replacing);
   if (!target.ok) return error(target.error, 409);
 
   const participants = await currentParticipants(env, competition.season_id);
@@ -228,6 +250,8 @@ async function confirmInitialBracket(request: Request, env: Env, user: SessionUs
   }
 
   const inserted = [];
+  const statements:D1PreparedStatement[]=[];
+  if(replacing)statements.push(env.DB.prepare("DELETE FROM competition_encounters WHERE stage_id=?").bind(stageId));
   for (let index = 0; index < normalized.length; index += 1) {
     const pair = normalized[index];
     const userA = byUser.get(pair.userAId)!;
@@ -238,17 +262,17 @@ async function confirmInitialBracket(request: Request, env: Env, user: SessionUs
       entryBId = await ensurePapaEntry(env, competitionId, userB.user_id, userB.full_name);
     }
     const slotKey = `PAPA-R1-${String(index + 1).padStart(2, '0')}`;
-    const created = await env.DB.prepare(
+    statements.push(env.DB.prepare(
       `INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
-       VALUES (?,?,?,?,?,'pending') RETURNING id`,
-    ).bind(stageId, roundLinkId, slotKey, entryAId, entryBId).first<{ id: number }>();
-    inserted.push({ encounterId: Number(created?.id), slotKey, entryAId, entryBId });
+       VALUES (?,?,?,?,?,'pending')`,
+    ).bind(stageId, roundLinkId, slotKey, entryAId, entryBId));
+    inserted.push({ slotKey, entryAId, entryBId });
   }
-
-  await audit(env, user.id, 'competition.papa_initial_bracket_confirmed', String(competitionId), {
-    stageId, roundLinkId, pairs: inserted,
-  });
-  return json({ ok: true, competitionId, stageId, roundLinkId, pairs: inserted });
+  statements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json) VALUES (?,?,'competition',?,?,?)`).bind(user.id,replacing?'competition.papa_initial_bracket_corrected':'competition.papa_initial_bracket_confirmed',String(competitionId),JSON.stringify(before),JSON.stringify({stageId,roundLinkId,pairs:inserted,reason:body?.reason?.trim()||null,configurationMode:'MANUAL'})));
+  await env.DB.batch(statements);
+  const saved=await env.DB.prepare('SELECT id,slot_key FROM competition_encounters WHERE stage_id=? ORDER BY id').bind(stageId).all<{id:number;slot_key:string}>();
+  const pairs=inserted.map(p=>({...p,encounterId:saved.results?.find(e=>e.slot_key===p.slotKey)?.id}));
+  return json({ ok: true, competitionId, stageId, roundLinkId, pairs });
 }
 
 async function confirmedOutcome(env: Env, stageId: number) {
@@ -282,6 +306,8 @@ async function buildNextRound(request: Request, env: Env, user: SessionUser, sou
   ).bind(sourceStageId).first<{ id: number; competition_id: number; competition_code: string }>();
   if (!source || source.competition_code !== 'COPA_PAPA') return error('La etapa origen no pertenece a Copa Papa', 409);
 
+  const thirdSource=await env.DB.prepare("SELECT id FROM competition_encounters WHERE stage_id=? AND slot_key='THIRD' LIMIT 1").bind(sourceStageId).first();
+  if(thirdSource)return error('El tercer puesto no alimenta otra ronda',409);
   const outcome = await confirmedOutcome(env, sourceStageId);
   if (!outcome.ok) return error(outcome.error, 409);
 
@@ -292,7 +318,12 @@ async function buildNextRound(request: Request, env: Env, user: SessionUser, sou
   if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha destino inválida');
   const target = await validateTarget(env, source.competition_id, targetStageId, roundLinkId);
   if (!target.ok) return error(target.error, 409);
+  const order=await env.DB.prepare('SELECT 1 FROM competition_stages a JOIN competition_stages b ON b.id=? WHERE a.id=? AND b.sequence>a.sequence').bind(targetStageId,sourceStageId).first();
+  if(!order)return error('La etapa destino debe ser posterior a la etapa origen',409);
 
+  if(outcome.winners.length<2)return error('La final ya tiene un único ganador; no hay otra ronda',409);
+  const built=await env.DB.prepare("SELECT id FROM audit_log WHERE action='competition.papa_next_round_built' AND entity_id=? AND json_extract(after_json,'$.sourceStageId')=? LIMIT 1").bind(String(source.competition_id),sourceStageId).first();
+  if(built)return error('La ronda siguiente ya fue construida desde esta etapa',409);
   const pairs: Array<[number, number | null]> = [];
   for (let index = 0; index < outcome.winners.length; index += 2) {
     pairs.push([outcome.winners[index], outcome.winners[index + 1] ?? null]);
@@ -318,7 +349,7 @@ async function buildThirdPlace(request: Request, env: Env, user: SessionUser, se
   if (!source || source.competition_code !== 'COPA_PAPA') return error('La etapa origen no pertenece a Copa Papa', 409);
   const outcome = await confirmedOutcome(env, semifinalStageId);
   if (!outcome.ok) return error(outcome.error, 409);
-  if (outcome.losers.length !== 2) return error('El tercer puesto requiere exactamente dos perdedores de semifinales', 409);
+  if (outcome.winners.length !== 2 || outcome.losers.length !== 2) return error('El tercer puesto requiere exactamente dos perdedores de semifinales', 409);
 
   const body = await request.json().catch(() => null) as { targetStageId?: number; roundLinkId?: number } | null;
   const targetStageId = Number(body?.targetStageId);
@@ -328,6 +359,8 @@ async function buildThirdPlace(request: Request, env: Env, user: SessionUser, se
   const target = await validateTarget(env, source.competition_id, targetStageId, roundLinkId);
   if (!target.ok) return error(target.error, 409);
 
+  const built=await env.DB.prepare("SELECT id FROM audit_log WHERE action='competition.papa_third_place_built' AND entity_id=? AND json_extract(after_json,'$.semifinalStageId')=? LIMIT 1").bind(String(source.competition_id),semifinalStageId).first();
+  if(built)return error('El tercer puesto ya fue construido',409);
   const created = await env.DB.prepare(
     `INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
      VALUES (?,?, 'THIRD', ?, ?, 'pending') RETURNING id`,

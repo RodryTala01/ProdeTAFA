@@ -120,3 +120,7 @@ Ver [guía de Copa Dúos](ADMIN-COPA-DUOS.md): parejas manuales/automáticas, su
 ## Copa Campeones Admin
 
 Ver [guía de Copa Campeones](ADMIN-COPA-CAMPEONES.md): cupos, ramas fijas, activación de nodos y encuentros compartidos.
+
+## Copa Papa Admin
+
+Ver [guía Copa Papa](ADMIN-COPA-PAPA.md): propuesta, llave manual, progresión fija, final y tercer puesto.

@@ -207,7 +207,7 @@ No implementar por ahora duplicación de fechas.
 
 ## Copas — siguiente gran fase funcional
 
-La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. Copa Total Admin está terminada. Copa Dúos Admin está terminada. El bloque actual agrega administración de Copa Campeones sobre la pantalla central existente, reutilizando el motor y preservando Copa A/B y Liga legacy.
+La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. Copa Total Admin está terminada. Copa Dúos Admin está terminada. Copa Campeones Admin está terminada. El bloque actual agrega administración de Copa Papa sobre la pantalla central existente, reutilizando el motor y preservando Copa A/B y Liga legacy.
 
 ### Armado manual y asistido
 
@@ -248,6 +248,14 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Confirmar 14 personas únicas activas de la temporada antes de inicializar la llave fija de 13 nodos del backend. No convertirla en una llave de 16.
 - Ramas superior, inferior y final. Activar cada nodo únicamente con ambas fuentes confirmadas, eligiendo etapa eliminatoria y Fecha vinculada.
 - Reutilizar CupEncounter y TAFA. Sin tercer puesto ni correcciones genéricas que salteen las fuentes. Cupos bloqueados tras inicializar la llave; mutaciones bloqueadas en competición/temporada cerrada.
+
+### Copa Papa Admin
+
+- Mantener COPA_PAPA y editar display_name para el homenaje desde Configuración general.
+- Propuesta espejo de temporada anterior: mejor Liga A vs peor Liga B, con no emparejados y byes de referencia visibles. Manual primero, todos los activos A/B exactamente una vez; rival null representa bye.
+- Corrección de llave inicial mediante su endpoint específico, con motivo, snapshot anterior y auditoría. Sólo antes de publicación/inicio/actividad o avance; conservar etapa y Fecha originales.
+- Progresión secuencial de ganadores confirmados, sin nuevos sorteos ni reconstrucción por knockout genérico. Final desde dos ganadores; tercer puesto desde exactamente dos perdedores de semifinales, con etapa/vínculo independiente.
+- Reutilizar CupEncounter para puntajes, ganadores y TAFA. Bloquear mutaciones con competición/temporada cerrada y bifurcaciones repetidas de la misma ronda.
 
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 

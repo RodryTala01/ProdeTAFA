@@ -127,6 +127,24 @@ beforeEach(() => {
 afterEach(() => db.close());
 
 describe('Copa Papa backend funcional', () => {
+  it('permite corregir manualmente antes de actividad, exige motivo y audita antes/después',async()=>{
+    const path='admin/competition-engine/competitions/100/papa/initial-bracket';
+    const body={stageId:201,roundLinkId:401,pairs:[{userAId:'P1',userBId:'P6'},{userAId:'P2',userBId:'P5'},{userAId:'P3',userBId:'P4'}]};
+    expect((await call(path,'POST',body)).status).toBe(200);
+    const proposal:any=await(await call('competition-engine/competitions/100/papa/seeding-proposal')).json();expect(proposal.initial.editable).toBe(true);expect(proposal.initial.pairs).toEqual(body.pairs);
+    expect((await call(path,'POST',body)).status).toBe(400);
+    const pairs=[{userAId:'P1',userBId:'P2'},{userAId:'P3',userBId:'P4'},{userAId:'P5',userBId:'P6'}];
+    expect((await call(path,'POST',{...body,pairs,reason:'Sorteo externo corregido'})).status).toBe(200);
+    const audit:any=db.prepare("SELECT before_json,after_json FROM audit_log WHERE action='competition.papa_initial_bracket_corrected'").get();expect(JSON.parse(audit.before_json).pairs).toEqual(body.pairs);expect(JSON.parse(audit.after_json).reason).toContain('externo');
+    expect((await call(path,'POST',{...body,pairs:[pairs[0]],reason:'Incompleto'})).status).toBe(409);
+    expect((db.prepare('SELECT COUNT(*) n FROM competition_encounters').get() as any).n).toBe(3);
+    db.exec("UPDATE rounds SET status='open' WHERE id=301");expect((await call(path,'POST',{...body,reason:'Tarde'})).status).toBe(409);
+  });
+  it('rechaza llave inicial con competición cerrada y Fecha publicada',async()=>{
+    const body={stageId:201,roundLinkId:401,pairs:[{userAId:'P1',userBId:'P6'},{userAId:'P2',userBId:'P5'},{userAId:'P3',userBId:'P4'}]};
+    db.exec("UPDATE competitions SET status='finished' WHERE id=100");expect((await call('admin/competition-engine/competitions/100/papa/initial-bracket','POST',body)).status).toBe(409);
+    db.exec("UPDATE competitions SET status='draft' WHERE id=100; UPDATE rounds SET status='open' WHERE id=301");expect((await call('admin/competition-engine/competitions/100/papa/initial-bracket','POST',body)).status).toBe(409);
+  });
   it('propone mejor Liga A contra peor Liga B en espejo', async () => {
     const response = await call('competition-engine/competitions/100/papa/seeding-proposal');
     expect(response.status).toBe(200);
@@ -229,5 +247,12 @@ describe('Copa Papa backend funcional', () => {
     const thirdData = await third.json() as any;
     expect(thirdData.entryAId).toBe(entries[1].id);
     expect(thirdData.entryBId).toBe(entries[3].id);
+    db.exec(`INSERT INTO competition_stages(id,competition_id,code,name,stage_type,sequence) VALUES (205,100,'FINAL','Final','KNOCKOUT',5),(206,100,'EXTRA','Extra','KNOCKOUT',6);
+      INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence,purpose) VALUES (405,100,205,304,1,'NORMAL'),(406,100,206,304,1,'NORMAL')`);
+    const final=await call('admin/competition-engine/stages/203/papa/next-round','POST',{targetStageId:205,roundLinkId:405});
+    expect(final.status).toBe(200);expect((await final.json() as any).pairs).toEqual([[entries[0].id,entries[2].id]]);
+    expect((await call('admin/competition-engine/stages/203/papa/next-round','POST',{targetStageId:206,roundLinkId:406})).status).toBe(409);
+    expect((await call('admin/competition-engine/stages/203/papa/third-place','POST',{targetStageId:206,roundLinkId:406})).status).toBe(409);
+
   });
 });
