@@ -1,4 +1,6 @@
 import type { Env } from './index';
+import { refreshStage } from './competition-knockout';
+import { evaluateTiebreak } from './competition-tiebreak';
 
 type SessionUser = { id: string; role: 'admin' | 'participant'; is_active: number };
 type CompetitionRow = {
@@ -152,34 +154,51 @@ async function drawDuos(env: Env, user: SessionUser, competitionId: number) {
   crypto.getRandomValues(seedBytes);
   const randomSeed = Number(seedBytes[0]);
   const ordered = shuffled(participants, mulberry32(randomSeed));
-  const pairs: Array<{ entryId: number; displayName: string; members: Array<{ userId: string; fullName: string }> }> = [];
+  return persistPairs(env,user,competitionId,Array.from({length:ordered.length/2},(_,i)=>[ordered[i*2],ordered[i*2+1]]),'AUTOMATIC',randomSeed);
+}
 
-  for (let index = 0; index < ordered.length; index += 2) {
-    const first = ordered[index];
-    const second = ordered[index + 1];
-    const duoNumber = index / 2 + 1;
-    const displayName = `Dúo ${duoNumber} · ${first.full_name} + ${second.full_name}`;
-    const created = await env.DB.prepare(
-      `INSERT INTO competition_entries(competition_id,entry_type,display_name,source_json)
-       VALUES (?,'DUO',?,?) RETURNING id`,
-    ).bind(competitionId, displayName, JSON.stringify({ source: 'random_draw', randomSeed, duoNumber }))
-      .first<{ id: number }>();
-    if (!created) return error('No se pudo crear uno de los dúos', 500);
-    await env.DB.batch([
-      env.DB.prepare(`INSERT INTO competition_entry_members(entry_id,user_id) VALUES (?,?)`).bind(created.id, first.user_id),
-      env.DB.prepare(`INSERT INTO competition_entry_members(entry_id,user_id) VALUES (?,?)`).bind(created.id, second.user_id),
-    ]);
-    pairs.push({
-      entryId: Number(created.id), displayName,
-      members: [
-        { userId: first.user_id, fullName: first.full_name },
-        { userId: second.user_id, fullName: second.full_name },
-      ],
-    });
+async function persistPairs(env:Env,user:SessionUser,competitionId:number,pairs:Array<Array<{user_id:string;full_name:string}>>,mode:string,randomSeed?:number) {
+  const statements:D1PreparedStatement[]=[];
+  const result=pairs.map((members,i)=>({displayName:`Dúo ${i+1} · ${members.map(m=>m.full_name).join(' + ')}`,members:members.map(m=>({userId:m.user_id,fullName:m.full_name}))}));
+  for(const [i,pair] of result.entries()) {
+    const source={source:mode==='MANUAL'?'manual':'random_draw',configurationMode:mode,duoNumber:i+1,...(randomSeed===undefined?{}:{randomSeed})};
+    statements.push(env.DB.prepare("INSERT INTO competition_entries(competition_id,entry_type,display_name,source_json) VALUES (?,'DUO',?,?)").bind(competitionId,pair.displayName,JSON.stringify(source)));
+    for(const m of pair.members) statements.push(env.DB.prepare(`INSERT INTO competition_entry_members(entry_id,user_id) VALUES ((SELECT id FROM competition_entries WHERE competition_id=? AND display_name=?),?)`).bind(competitionId,pair.displayName,m.userId));
   }
-
-  await audit(env, user.id, 'competition.duos_drawn', 'competition', String(competitionId), { randomSeed, pairs });
-  return json({ ok: true, competitionId, randomSeed, pairs });
+  const after={configurationMode:mode,...(randomSeed===undefined?{}:{randomSeed}),pairs:result};
+  statements.push(env.DB.prepare('INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json) VALUES (?,?,?,?,?)').bind(user.id,mode==='MANUAL'?'competition.duos_manual_configured':'competition.duos_drawn','competition',String(competitionId),JSON.stringify(after)));
+  await env.DB.batch(statements);
+  const saved = await env.DB.prepare("SELECT id,display_name FROM competition_entries WHERE competition_id=? AND entry_type='DUO' ORDER BY id").bind(competitionId).all<{id:number;display_name:string}>();
+  return json({ok:true,competitionId,...after,pairs:result.map(pair=>({...pair,entryId:saved.results?.find(e=>e.display_name===pair.displayName)?.id}))});
+}
+async function duoContext(env:Env,competitionId:number) {
+ const competition=await competitionInfo(env,competitionId);if(!competition||competition.code!=='COPA_DUOS')return null;
+ const eligible=await env.DB.prepare(`SELECT u.id AS userId,u.full_name AS fullName FROM season_division_members m JOIN users u ON u.id=m.user_id WHERE m.season_id=? AND u.role='participant' AND u.is_active=1 ORDER BY u.full_name`).bind(competition.season_id).all();
+ const entries=await env.DB.prepare("SELECT id,display_name AS displayName,status,source_json FROM competition_entries WHERE competition_id=? AND entry_type='DUO' ORDER BY id").bind(competitionId).all<{id:number;displayName:string;status:string;source_json:string}>();
+ const pairs=[];for(const e of entries.results??[])pairs.push({...e,configuration:JSON.parse(e.source_json||'{}'),members:await duoMemberHistory(env,e.id)});
+ return {competition,eligible:eligible.results??[],pairs};
+}
+async function manualDuos(request:Request,env:Env,user:SessionUser,competitionId:number) {
+ const c=await duoContext(env,competitionId);if(!c)return error('Copa Dúos no encontrada',404);
+ if([c.competition.status,c.competition.season_status].some(s=>['finished','archived'].includes(s)))return error('La competición o temporada ya está cerrada',409);
+ const anyEntry=await env.DB.prepare('SELECT id FROM competition_entries WHERE competition_id=? LIMIT 1').bind(competitionId).first();
+ if(anyEntry)return error('Ya existen parejas; no se pueden reemplazar',409);
+ if(c.eligible.length<2||c.eligible.length%2)return error('Cantidad impar o insuficiente: resolvé explícitamente la composición de la temporada antes de formar parejas',409);
+ const body=await request.json().catch(()=>null) as {pairs?:string[][]}|null;
+ if(!Array.isArray(body?.pairs)||body.pairs.some(p=>!Array.isArray(p)||p.length!==2||p.some(id=>typeof id!=='string')))return error('Cada dúo debe tener exactamente dos participantes');
+ const ids=body.pairs.flat();const people=new Map((c.eligible as Array<{userId:string;fullName:string}>).map(p=>[p.userId,p.fullName]));
+ if(new Set(ids).size!==ids.length)return error('No se permiten participantes repetidos ni pareja consigo mismo');
+ if(ids.some(id=>!people.has(id)))return error('Participante no elegible');
+ if(ids.length!==people.size)return error('Deben usarse todos los participantes elegibles exactamente una vez');
+ return persistPairs(env,user,competitionId,body.pairs.map(pair=>pair.map(id=>({user_id:id,full_name:people.get(id)!}))),'MANUAL');
+}
+async function mutableRound(env:Env,roundLinkId:number,requirePrior=false) {
+ const check=await ensureDuoRound(env,roundLinkId);if(!check.ok)return check.error;
+ const c=await competitionInfo(env,check.context.competition_id);
+ if(!c||[c.status,c.season_status,check.context.stage_status].some(s=>['finished','archived'].includes(s)))return 'La competición, etapa o temporada ya está cerrada';
+ if((await snapshotPayload(env,roundLinkId)).length)return 'Esta Fecha de Copa Dúos ya fue confirmada';
+ const prior=await env.DB.prepare(`SELECT l.id FROM competition_round_links l WHERE l.stage_id=? AND l.purpose='NORMAL' AND l.sequence<? AND NOT EXISTS(SELECT 1 FROM competition_survival_results r WHERE r.round_link_id=l.id) LIMIT 1`).bind(check.context.stage_id,check.context.sequence).first();
+ return requirePrior&&prior?'Confirmá las Fechas anteriores antes de continuar':null;
 }
 
 function normalizeBonusMap(raw: unknown) {
@@ -197,6 +216,7 @@ function normalizeBonusMap(raw: unknown) {
 async function saveRoundSettings(request: Request, env: Env, user: SessionUser, roundLinkId: number) {
   const checked = await ensureDuoRound(env, roundLinkId);
   if (!checked.ok) return error(checked.error, checked.status);
+  const blocked=await mutableRound(env,roundLinkId);if(blocked)return error(blocked,409);
   const body = await request.json().catch(() => null) as { eliminateCount?: number; bonusByPosition?: unknown } | null;
   const eliminateCount = Number(body?.eliminateCount ?? 0);
   const bonusByPosition = normalizeBonusMap(body?.bonusByPosition ?? {});
@@ -288,11 +308,20 @@ async function computedTable(env: Env, roundLinkId: number) {
     });
   }
 
-  const ordered = rows.sort((a, b) => b.totalPoints - a.totalPoints || a.displayName.localeCompare(b.displayName));
+  const tieLink=await env.DB.prepare('SELECT tiebreak_id,source_points_json FROM competition_survival_tiebreaks WHERE round_link_id=?').bind(roundLinkId).first<{tiebreak_id:number;source_points_json:string}>();
+  let resolvedOrder:number[]=[];let tieEvaluation:any=null;
+  if(tieLink){
+    tieEvaluation=await evaluateTiebreak(env,tieLink.tiebreak_id);
+    const fingerprint=JSON.stringify(rows.map(r=>[r.entryId,r.totalPoints]).sort((a,b)=>a[0]-b[0]));
+    if(fingerprint===tieLink.source_points_json && tieEvaluation?.tiebreak.status==='resolved'){
+      resolvedOrder=tieEvaluation.ranking?.map((e:any)=>e.entry_id)??[tieEvaluation.winnerEntryId,...tieEvaluation.entries.filter((e:any)=>e.entry_id!==tieEvaluation.winnerEntryId).map((e:any)=>e.entry_id)];
+    }
+  }
+  const ordered = rows.sort((a, b) => b.totalPoints - a.totalPoints || (resolvedOrder.length?resolvedOrder.indexOf(a.entryId)-resolvedOrder.indexOf(b.entryId):a.displayName.localeCompare(b.displayName)));
   let previousTotal: number | null = null;
   let previousPosition = 0;
   const ranked: ComputedDuoRow[] = ordered.map((row, index) => {
-    const tied = previousTotal != null && row.totalPoints === previousTotal;
+    const tied = !resolvedOrder.length && previousTotal != null && row.totalPoints === previousTotal;
     const position = tied ? previousPosition : index + 1;
     previousTotal = row.totalPoints;
     previousPosition = position;
@@ -306,7 +335,7 @@ async function computedTable(env: Env, roundLinkId: number) {
   if (eliminateCount > 0 && cutIndex > 0 && cutIndex < ranked.length) {
     const safe = ranked[cutIndex - 1];
     const eliminated = ranked[cutIndex];
-    if (safe.totalPoints === eliminated.totalPoints) {
+    if (!resolvedOrder.length && safe.totalPoints === eliminated.totalPoints) {
       boundaryTie = true;
       boundaryScore = safe.totalPoints;
       tiedAtBoundary = ranked.filter((row) => row.totalPoints === boundaryScore);
@@ -321,26 +350,27 @@ async function computedTable(env: Env, roundLinkId: number) {
     boundaryTie,
     boundaryScore,
     tiedAtBoundary: tiedAtBoundary.map((row) => ({ entryId: row.entryId, displayName: row.displayName, totalPoints: row.totalPoints })),
-    wouldEliminate,
+    wouldEliminate, tiebreak:tieEvaluation,
+    seedTie:ranked.length-eliminateCount===4 && ranked.slice(0,4).some(r=>r.tiedOnPoints),
   };
 }
 
 async function snapshotPayload(env: Env, roundLinkId: number) {
   const rows = await env.DB.prepare(
     `SELECT csr.entry_id,ce.display_name,csr.base_points,csr.bonus_points,csr.total_points,
-            csr.position,csr.decision,csr.next_bonus_points,csr.confirmed_at
+            csr.position,csr.decision,csr.next_bonus_points,csr.confirmed_at,csr.members_json
      FROM competition_survival_results csr
      JOIN competition_entries ce ON ce.id=csr.entry_id
      WHERE csr.round_link_id=? ORDER BY csr.position,ce.display_name COLLATE NOCASE`,
   ).bind(roundLinkId).all<{
     entry_id: number; display_name: string; base_points: number; bonus_points: number; total_points: number;
-    position: number; decision: string; next_bonus_points: number; confirmed_at: string;
+    position: number; decision: string; next_bonus_points: number; confirmed_at: string; members_json:string;
   }>();
   return (rows.results ?? []).map((row) => ({
-    entryId: Number(row.entry_id), displayName: row.display_name,
+    entryId: Number(row.entry_id), displayName: JSON.parse(row.members_json).length ? `${row.display_name.split(' · ')[0]} · ${JSON.parse(row.members_json).map((m:any)=>m.fullName).join(' + ')}` : row.display_name,
     basePoints: Number(row.base_points), bonusPoints: Number(row.bonus_points), totalPoints: Number(row.total_points),
     position: Number(row.position), decision: row.decision, nextBonusPoints: Number(row.next_bonus_points),
-    confirmedAt: row.confirmed_at,
+    confirmedAt: row.confirmed_at, members:JSON.parse(row.members_json),
   }));
 }
 
@@ -377,13 +407,15 @@ async function nextNormalRoundLink(env: Env, context: DuoRoundContext) {
 async function confirmRound(env: Env, user: SessionUser, roundLinkId: number) {
   const checked = await ensureDuoRound(env, roundLinkId);
   if (!checked.ok) return error(checked.error, checked.status);
+  const blocked=await mutableRound(env,roundLinkId,true);if(blocked)return error(blocked,409);
   if (checked.context.round_status !== 'finished') return error('La Fecha debe estar cerrada antes de confirmar la tabla de Dúos', 409);
   const existing = await snapshotPayload(env, roundLinkId);
   if (existing.length > 0) return error('Esta Fecha de Copa Dúos ya fue confirmada', 409);
   const computed = await computedTable(env, roundLinkId);
   if (!computed) return error('No se pudo calcular la tabla de Dúos', 500);
+  if(!computed.rows.length||computed.settings.eliminateCount>=computed.rows.length)return error('No hay suficientes dúos activos para esta configuración',409);
   if (computed.rows.some((row) => row.provisional)) return error('Todavía hay puntajes provisionales en esta Fecha', 409);
-  if (computed.boundaryTie) {
+  if (computed.boundaryTie || computed.seedTie) {
     return json({
       error: 'Hay empate en el corte de eliminación. Debe resolverse con el desempate TAFA antes de confirmar eliminados.',
       roundLinkId,
@@ -399,7 +431,7 @@ async function confirmRound(env: Env, user: SessionUser, roundLinkId: number) {
   const bonusMap = computed.settings.bonusByPosition;
   const awards = computed.rows.map((row) => ({
     row,
-    nextBonus: Number(bonusMap[String(row.position)] ?? 0),
+    nextBonus: reachesSemifinals ? (row.position <= 2 ? 2 : 0) : Number(bonusMap[String(row.position)] ?? 0),
   }));
   if (!nextLink && awards.some((award) => !eliminated.has(award.row.entryId) && award.nextBonus > 0) && !reachesSemifinals) {
     return error('Hay bonus para la próxima jornada pero todavía no existe una Fecha siguiente vinculada a esta etapa', 409);
@@ -411,21 +443,21 @@ async function confirmRound(env: Env, user: SessionUser, roundLinkId: number) {
     const decision = isEliminated ? 'ELIMINATED' : reachesSemifinals ? 'QUALIFIED' : 'ACTIVE';
     snapshotStatements.push(env.DB.prepare(
       `INSERT INTO competition_survival_results
-         (stage_id,round_link_id,entry_id,base_points,bonus_points,total_points,position,decision,next_bonus_points,confirmed_by_user_id)
-       VALUES (?,?,?,?,?,?,?,?,?,?)`,
+         (stage_id,round_link_id,entry_id,base_points,bonus_points,total_points,position,decision,next_bonus_points,confirmed_by_user_id,members_json)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
     ).bind(
       checked.context.stage_id, roundLinkId, award.row.entryId, award.row.basePoints, award.row.bonusPoints,
-      award.row.totalPoints, award.row.position, decision, isEliminated ? 0 : award.nextBonus, user.id,
+      award.row.totalPoints, award.row.position, decision, isEliminated ? 0 : award.nextBonus, user.id, JSON.stringify(award.row.members),
     ));
   }
-  if (snapshotStatements.length) await env.DB.batch(snapshotStatements);
+
 
   for (const entryId of eliminated) {
-    await env.DB.prepare(`UPDATE competition_entries SET status='eliminated',updated_at=datetime('now') WHERE id=?`).bind(entryId).run();
+    snapshotStatements.push(env.DB.prepare(`UPDATE competition_entries SET status='eliminated',updated_at=datetime('now') WHERE id=?`).bind(entryId));
   }
   if (reachesSemifinals) {
     for (const survivor of survivors) {
-      await env.DB.prepare(`UPDATE competition_entries SET status='qualified',updated_at=datetime('now') WHERE id=?`).bind(survivor.entryId).run();
+      snapshotStatements.push(env.DB.prepare(`UPDATE competition_entries SET status='qualified',updated_at=datetime('now') WHERE id=?`).bind(survivor.entryId));
     }
   }
 
@@ -439,13 +471,12 @@ async function confirmRound(env: Env, user: SessionUser, roundLinkId: number) {
         checked.context.competition_id, checked.context.stage_id, nextLink.id, award.row.entryId, award.nextBonus,
         `COPA_DUOS:${roundLinkId}:POSITION:${award.row.position}`,
       ));
-    if (bonusStatements.length) await env.DB.batch(bonusStatements);
+    snapshotStatements.push(...bonusStatements);
   }
 
+  snapshotStatements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json) VALUES (?,'competition.duos_round_confirmed','competition_round_link',?,?)`).bind(user.id,String(roundLinkId),JSON.stringify({eliminatedEntryIds:[...eliminated],reachesSemifinals,rows:awards})));
+  await env.DB.batch(snapshotStatements);
   const snapshot = await snapshotPayload(env, roundLinkId);
-  await audit(env, user.id, 'competition.duos_round_confirmed', 'competition_round_link', String(roundLinkId), {
-    eliminatedEntryIds: [...eliminated], reachesSemifinals, nextRoundLinkId: nextLink?.id ?? null, snapshot,
-  });
   return json({ ok: true, roundLinkId, reachesSemifinals, eliminatedEntryIds: [...eliminated], rows: snapshot });
 }
 
@@ -455,6 +486,8 @@ async function ensureDuoKnockoutTarget(
   stageId: number,
   roundLinkId: number,
 ) {
+  const c=await competitionInfo(env,competitionId);
+  if(!c||[c.status,c.season_status].some(s=>['finished','archived'].includes(s)))return {ok:false as const,error:'La competición o temporada ya está cerrada'};
   const stage = await env.DB.prepare(
     `SELECT cs.id,cs.competition_id,cs.stage_type,cs.status,c.code AS competition_code
      FROM competition_stages cs
@@ -476,6 +509,9 @@ async function ensureDuoKnockoutTarget(
      LIMIT 1`,
   ).bind(roundLinkId, competitionId, stageId).first<{ id: number; round_id: number }>();
   if (!link) return { ok: false as const, error: 'La Fecha indicada no pertenece a la etapa destino' };
+  const round=await env.DB.prepare(`SELECT r.status,MIN(m.kickoff_at) kickoff FROM rounds r LEFT JOIN matches m ON m.round_id=r.id WHERE r.id=? GROUP BY r.id`).bind(link.round_id).first<{status:string;kickoff:string|null}>();
+  if(round?.status!=='draft'||(round.kickoff&&new Date(round.kickoff).getTime()<=Date.now()))return {ok:false as const,error:'La Fecha destino ya fue publicada o iniciada'};
+
 
   const existing = await env.DB.prepare(
     `SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?`,
@@ -495,6 +531,7 @@ async function buildSemifinals(request: Request, env: Env, user: SessionUser, so
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa de semifinal inválida');
   if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha de semifinal inválida');
 
+  const order=await knockoutOrder(env,source.context.competition_id);if(order[0]!==targetStageId)return error('La etapa destino debe ser Semifinal',409);
   const snapshot = await snapshotPayload(env, sourceRoundLinkId);
   const qualified = snapshot
     .filter((row) => row.decision === 'QUALIFIED')
@@ -558,6 +595,8 @@ async function buildFinal(request: Request, env: Env, user: SessionUser, semifin
     return error('La etapa origen no es una semifinal de Copa Dúos válida', 409);
   }
 
+  const order=await knockoutOrder(env,semifinalStage.competition_id);if(order[0]!==semifinalStageId)return error('El origen debe ser Semifinal',409);
+  await refreshStage(env,semifinalStageId);
   const semis = await env.DB.prepare(
     `SELECT id,entry_a_id,entry_b_id,winner_entry_id,status,admin_confirmed_at
      FROM competition_encounters WHERE stage_id=? ORDER BY id`,
@@ -577,6 +616,7 @@ async function buildFinal(request: Request, env: Env, user: SessionUser, semifin
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa final inválida');
   if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha final inválida');
 
+  if(order[1]!==targetStageId)return error('El destino debe ser Final; Copa Dúos no tiene tercer puesto',409);
   const target = await ensureDuoKnockoutTarget(env, semifinalStage.competition_id, targetStageId, roundLinkId);
   if (!target.ok) return error(target.error, 409);
 
@@ -713,13 +753,17 @@ async function substituteDuoMember(request: Request, env: Env, user: SessionUser
      FROM competition_entry_members cem
      JOIN competition_entries ce ON ce.id=cem.entry_id
      WHERE ce.competition_id=? AND ce.entry_type='DUO' AND cem.user_id=? AND ce.id<>?
-       AND (cem.valid_from_round_id IS NULL OR cem.valid_from_round_id<=?)
        AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id>?)
      LIMIT 1`,
-  ).bind(entry.competition_id, incomingUserId, entryId, effectiveRoundId, effectiveRoundId)
+  ).bind(entry.competition_id, incomingUserId, entryId, effectiveRoundId)
     .first<{ id: number; display_name: string }>();
   if (conflict) return error(`El nuevo integrante ya pertenece a otro dúo en esa Fecha: ${conflict.display_name}`, 409);
 
+  if((activeMembers.results??[]).some(m=>m.user_id===incomingUserId))return error('El participante ya integra este dúo',409);
+  const later=await env.DB.prepare(`SELECT r.id FROM competition_round_links l JOIN rounds r ON r.id=l.round_id WHERE l.competition_id=? AND r.id>=? AND (r.status='finished' OR EXISTS(SELECT 1 FROM competition_survival_results sr WHERE sr.round_link_id=l.id)) LIMIT 1`).bind(entry.competition_id,effectiveRoundId).first();
+  if(later)return error('La sustitución modificaría una Fecha posterior ya confirmada o cerrada',409);
+  const scheduled=await env.DB.prepare('SELECT id FROM competition_entry_members WHERE entry_id=? AND valid_from_round_id>? LIMIT 1').bind(entryId,effectiveRoundId).first();
+  if(scheduled)return error('Ya existe una sustitución posterior; no se puede superponer vigencias',409);
   const before = await duoMemberHistory(env, entryId);
   await env.DB.batch([
     env.DB.prepare(
@@ -769,8 +813,31 @@ async function substituteDuoMember(request: Request, env: Env, user: SessionUser
   });
 }
 
+async function knockoutOrder(env:Env,competitionId:number){const r=await env.DB.prepare("SELECT id FROM competition_stages WHERE competition_id=? AND stage_type='KNOCKOUT' ORDER BY sequence,id").bind(competitionId).all<{id:number}>();return (r.results??[]).map(e=>Number(e.id));}
+async function createSurvivalTie(env:Env,user:SessionUser,roundLinkId:number){
+ const blocked=await mutableRound(env,roundLinkId,true);if(blocked)return error(blocked,409);
+ const table=await computedTable(env,roundLinkId);if(!table)return error('Tabla no encontrada',404);
+ if(table.context.round_status!=='finished'||table.rows.some(r=>r.provisional))return error('La Fecha debe estar cerrada y definitiva',409);
+ const existing=await env.DB.prepare('SELECT tiebreak_id FROM competition_survival_tiebreaks WHERE round_link_id=?').bind(roundLinkId).first<{tiebreak_id:number}>();
+ if(existing)return json(await evaluateTiebreak(env,existing.tiebreak_id));
+ if(!table.boundaryTie&&!table.seedTie)return error('No hay empate de eliminación o de clasificación a semifinales',409);
+ const created=await env.DB.prepare("INSERT INTO competition_tiebreaks(competition_id,stage_id,status) VALUES (?,?,'pending') RETURNING id").bind(table.context.competition_id,table.context.stage_id).first<{id:number}>();
+ if(!created)return error('No se pudo crear el desempate',500);
+ const fingerprint=JSON.stringify(table.rows.map(r=>[r.entryId,r.totalPoints]).sort((a,b)=>a[0]-b[0]));
+ await env.DB.batch([
+ env.DB.prepare('INSERT INTO competition_survival_tiebreaks(round_link_id,tiebreak_id,source_points_json) VALUES (?,?,?)').bind(roundLinkId,created.id,fingerprint),
+ ...table.rows.map(r=>env.DB.prepare('INSERT INTO competition_tiebreak_entries(tiebreak_id,entry_id) VALUES (?,?)').bind(created.id,r.entryId)),
+ env.DB.prepare("INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json) VALUES (?,'competition.duos_survival_tiebreak','competition_round_link',?,?)").bind(user.id,String(roundLinkId),JSON.stringify({tiebreakId:created.id,entryIds:table.rows.map(r=>r.entryId)}))]);
+ return json(await evaluateTiebreak(env,created.id));
+}
+
 export async function handleCompetitionDuos(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
+
+  const survivalTieMatch=pathname.match(/^\/api\/admin\/competition-engine\/round-links\/(\d+)\/duos\/tiebreak$/);
+  if(survivalTieMatch){const user=await sessionUser(request,env);if(!user)return error('No autorizado',401);if(user.role!=='admin')return error('Acceso de administrador requerido',403);if(request.method!=='POST')return error('Método no permitido',405);return createSurvivalTie(env,user,Number(survivalTieMatch[1]));}
+  const contextMatch=pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/duos(?:\/pairs)?$/);
+  if(contextMatch){const user=await sessionUser(request,env);if(!user)return error('No autorizado',401);if(user.role!=='admin')return error('Acceso de administrador requerido',403);if(request.method==='GET'){const c=await duoContext(env,Number(contextMatch[1]));return c?json(c):error('Copa Dúos no encontrada',404);}if(request.method==='POST'&&pathname.endsWith('/pairs'))return manualDuos(request,env,user,Number(contextMatch[1]));return error('Método no permitido',405);}
 
   const drawMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/duos\/draw$/);
   if (drawMatch) {

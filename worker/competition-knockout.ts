@@ -128,7 +128,7 @@ async function scoreEntryForRoundLink(env: Env, entryId: number, roundLinkId: nu
      JOIN competition_entry_members cem
        ON cem.entry_id = ?
       AND (cem.valid_from_round_id IS NULL OR cem.valid_from_round_id <= crl.round_id)
-      AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id >= crl.round_id)
+      AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id > crl.round_id)
      LEFT JOIN official_predictions op
        ON op.user_id = cem.user_id AND op.match_id = m.id
      LEFT JOIN prediction_scores ps ON ps.prediction_id = op.id

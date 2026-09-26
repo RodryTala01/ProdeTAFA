@@ -112,3 +112,7 @@ Todas las preparaciones usan D1 local y participantes/fixtures ficticios. No se 
 ## Administración de Copa Total
 
 Implementada en el bloque siguiente sin rehacer Copa A/B. Ver [guía completa de Copa Total](ADMIN-COPA-TOTAL.md) para flujos, preparación local, archivos y endpoints.
+
+## Administración de Copa Dúos
+
+Ver [guía de Copa Dúos](ADMIN-COPA-DUOS.md): parejas manuales/automáticas, sustituciones, supervivencia, TAFA, semifinales y final.

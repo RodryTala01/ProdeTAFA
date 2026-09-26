@@ -8,7 +8,7 @@ const app = readFileSync(resolve('worker/app.ts'), 'utf8');
 describe('TAFA competition tiebreak contract', () => {
   it('uses Buenos Aires calendar days explicitly', () => {
     expect(worker).toContain("America/Argentina/Buenos_Aires");
-    expect(worker).toContain('localDay(match.kickoff_at)');
+    expect(worker).toContain('localDay(m.kickoff_at)');
   });
 
   it('scores tiebreak matches from official predictions only', () => {

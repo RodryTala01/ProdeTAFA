@@ -207,7 +207,7 @@ No implementar por ahora duplicación de fechas.
 
 ## Copas — siguiente gran fase funcional
 
-La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. El bloque actual agrega administración completa de Copa Total sobre la pantalla central existente, reutilizando el motor y preservando Copa A/B y Liga legacy.
+La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. Copa Total Admin está terminada. El bloque actual agrega administración completa de Copa Dúos sobre la pantalla central existente, reutilizando el motor y preservando Copa A/B y Liga legacy.
 
 ### Armado manual y asistido
 
@@ -216,7 +216,7 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Admin puede cargar grupos, parejas, cruces y posiciones en llave resultantes de un sorteo externo.
 - Toda asignación manual debe validar elegibilidad y restricciones obligatorias y quedar auditada.
 - Copa Dúos también debe permitir cargar parejas sorteadas fuera de la app; el sorteo interno es opcional.
-- Copa A/B Admin ofrece Resumen, Grupos, Octavos, Cuartos, Semifinal y Final. Copa Total tiene su administración específica; las demás pantallas deportivas quedan para bloques posteriores. No duplicar el motor.
+- Copa A/B Admin ofrece Resumen, Grupos, Octavos, Cuartos, Semifinal y Final. Copa Total tiene su administración específica; Copa Dúos ofrece Resumen, Parejas, Fechas, Tabla, Semifinales y Final; las demás pantallas deportivas quedan para bloques posteriores. No duplicar el motor.
 - En Copa A y Copa B, el campeón vigente elegible ocupa A1. Grupos manuales como primera opción; bombos IFFHS de referencia y sorteo opcional.
 - Octavos valida en backend segundos contra terceros, todos una vez. Cuartos usa primeros de grupo y ganadores confirmados de Octavos; Semifinal y Final usan ganadores confirmados.
 - Copa A/B no tiene tercer puesto. Cruces editables antes de publicación/inicio, con motivo y auditoría al corregir. El modo manual no guarda randomSeed.
@@ -231,6 +231,16 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Clasificación configurable con vista previa, comodines y resolución manual de cortes empatados; selección excepcional completa con motivo y snapshot auditado.
 - Octavos, Cuartos y Semifinal admiten cruces manuales o automáticos, usando todos los clasificados/ganadores confirmados una vez. Final usa dos ganadores de Semifinal; tercer puesto usa dos perdedores confirmados y vínculo independiente.
 - Reutilizar knockout y desempate TAFA; edición bloqueada tras publicación/inicio o actividad. Cambios manuales auditados. No agregar UI de otras Copas ni de participante en este bloque.
+
+### Copa Dúos Admin
+
+- Parejas manuales como primera opción, sorteo opcional con semilla auditada. Todos los elegibles activos A/B exactamente una vez, dos por dúo. Cantidad impar requiere resolución Admin.
+- Sustitución excepcional con vigencia desde la Fecha elegida (límite superior exclusivo), sin modificar snapshots pasados ni superponer integrantes.
+- Tabla por Fecha: suma de los dos integrantes, ausencias 0, más bonus explícito; no acumular puntos deportivos anteriores.
+- Eliminación y bonus por posición configurables; confirmar únicamente resultados definitivos, sin cortes empatados ni puestos de semifinales ambiguos. Snapshot de integrantes/puntos, eliminación, bonus y auditoría en un batch.
+- Empates múltiples: comparar todos en la misma Fecha Liga posterior con el evaluador TAFA existente, nunca usar plenos/parciales/nombres como criterio deportivo.
+- Con cuatro clasificados: semifinales fijas 1.º–4.º y 2.º–3.º, +2 sólo para primero y segundo. Final de ganadores confirmados, sin tercer puesto.
+- La confirmación deportiva no asigna automáticamente IFFHS; respetar la confirmación explícita de resultados y destinatarios tras sustituciones definida en RESULTS-IFFHS-DESIGN.md.
 
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 

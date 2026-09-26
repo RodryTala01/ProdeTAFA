@@ -107,21 +107,7 @@ function localDay(utcTimestamp: string) {
   return `${values.get('year')}-${values.get('month')}-${values.get('day')}`;
 }
 
-async function entryScoreForMatch(env: Env, entryId: number, matchId: number, roundId: number) {
-  const row = await env.DB.prepare(
-    `SELECT COALESCE(SUM(ps.total_points), 0) AS points
-     FROM competition_entry_members cem
-     LEFT JOIN official_predictions op
-       ON op.user_id = cem.user_id AND op.match_id = ?
-     LEFT JOIN prediction_scores ps ON ps.prediction_id = op.id
-     WHERE cem.entry_id = ?
-       AND (cem.valid_from_round_id IS NULL OR cem.valid_from_round_id <= ?)
-       AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id > ?)`,
-  ).bind(matchId, entryId, roundId, roundId).first<{ points: number }>();
-  return Number(row?.points ?? 0);
-}
-
-async function evaluateTiebreak(env: Env, tiebreakId: number) {
+export async function evaluateTiebreak(env: Env, tiebreakId: number): Promise<any> {
   const tiebreak = await env.DB.prepare(
     `SELECT ct.id, ct.competition_id, ct.stage_id, ct.encounter_id,
             ct.status, ct.winner_entry_id, ct.resolution, ct.created_at, ct.resolved_at,
@@ -154,17 +140,7 @@ async function evaluateTiebreak(env: Env, tiebreakId: number) {
      ORDER BY cte.entry_id`,
   ).bind(tiebreakId).all<TiebreakEntry>();
   const entries = entriesResult.results ?? [];
-  if (entries.length !== 2) {
-    return {
-      tiebreak,
-      entries,
-      rounds: [],
-      days: [],
-      state: 'INVALID',
-      winnerEntryId: null,
-      resolutionDetail: 'El desempate necesita exactamente dos entradas.',
-    };
-  }
+  if(entries.length<2)return {tiebreak,entries,rounds:[],days:[],state:'INVALID',winnerEntryId:null,resolutionDetail:'Se necesitan al menos dos entradas.'};
 
   const roundsResult = await env.DB.prepare(
     `SELECT ctr.round_id, ctr.sequence, r.name, r.status
@@ -192,38 +168,32 @@ async function evaluateTiebreak(env: Env, tiebreakId: number) {
     };
   }
 
-  const evaluations: MatchEvaluation[] = [];
-  for (const round of rounds) {
-    const matchesResult = await env.DB.prepare(
-      `SELECT id, round_id, kickoff_at, result_finalized_at, is_void,
-              home_team_name, away_team_name
-       FROM matches
-       WHERE round_id = ?
-       ORDER BY kickoff_at, id`,
-    ).bind(round.round_id).all<TiebreakMatch>();
-
-    for (const match of matchesResult.results ?? []) {
-      const finalized = Boolean(match.result_finalized_at) || Boolean(match.is_void);
-      const [scoreA, scoreB] = finalized
-        ? await Promise.all([
-          entryScoreForMatch(env, entries[0].entry_id, match.id, round.round_id),
-          entryScoreForMatch(env, entries[1].entry_id, match.id, round.round_id),
-        ])
-        : [0, 0];
-
-      evaluations.push({
-        matchId: Number(match.id),
-        roundId: Number(match.round_id),
-        kickoffAt: match.kickoff_at,
-        localDay: localDay(match.kickoff_at),
-        label: `${match.home_team_name} vs ${match.away_team_name}`,
-        finalized,
-        scoreA,
-        scoreB,
-      });
-    }
+  // Load each member score once; all pair comparisons share the same TAFA evaluator.
+  const matches: TiebreakMatch[]=[];
+  for(const round of rounds){const r=await env.DB.prepare(`SELECT id,round_id,kickoff_at,result_finalized_at,is_void,home_team_name,away_team_name FROM matches WHERE round_id=? ORDER BY kickoff_at,id`).bind(round.round_id).all<TiebreakMatch>();matches.push(...(r.results??[]));}
+  const scores=new Map<string,number>();
+  for(const match of matches){
+    if(!match.result_finalized_at&&!match.is_void)continue;
+    const r=await env.DB.prepare(`SELECT cem.entry_id,COALESCE(SUM(ps.total_points),0) points FROM competition_tiebreak_entries te JOIN competition_entry_members cem ON cem.entry_id=te.entry_id LEFT JOIN official_predictions op ON op.user_id=cem.user_id AND op.match_id=? LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id WHERE te.tiebreak_id=? AND (cem.valid_from_round_id IS NULL OR cem.valid_from_round_id<=?) AND (cem.valid_to_round_id IS NULL OR cem.valid_to_round_id>?) GROUP BY cem.entry_id`).bind(match.id,tiebreakId,match.round_id,match.round_id).all<{entry_id:number;points:number}>();
+    for(const row of r.results??[])scores.set(`${match.id}:${row.entry_id}`,Number(row.points));
   }
-
+  const compare=(pair:TiebreakEntry[])=>evaluateDays(tiebreak,pair,rounds,matches.map(m=>({matchId:Number(m.id),roundId:Number(m.round_id),kickoffAt:m.kickoff_at,localDay:localDay(m.kickoff_at),label:`${m.home_team_name} vs ${m.away_team_name}`,finalized:!!m.result_finalized_at||!!m.is_void,scoreA:scores.get(`${m.id}:${pair[0].entry_id}`)??0,scoreB:scores.get(`${m.id}:${pair[1].entry_id}`)??0})));
+  if(entries.length===2)return compare(entries);
+  const wins=new Map(entries.map(e=>[e.entry_id,0]));let pending=false;const comparisons=[];
+  const survival=await env.DB.prepare('SELECT source_points_json FROM competition_survival_tiebreaks WHERE tiebreak_id=?').bind(tiebreakId).first<{source_points_json:string}>();
+  const original=new Map<number,number>(survival?JSON.parse(survival.source_points_json):[]);
+  for(let i=0;i<entries.length;i++)for(let j=i+1;j<entries.length;j++){
+    const a=entries[i],b=entries[j];
+    // Sporting totals already order non-tied duos. TAFA only separates equal totals.
+    const unequal=original.has(a.entry_id)&&original.get(a.entry_id)!==original.get(b.entry_id);
+    const evaluation=unequal?{winnerEntryId:original.get(a.entry_id)!>original.get(b.entry_id)!?a.entry_id:b.entry_id,resolutionDetail:'Orden por puntos de la Fecha original'}:compare([a,b]);
+    comparisons.push({entryAId:a.entry_id,entryBId:b.entry_id,winnerEntryId:evaluation.winnerEntryId,detail:evaluation.resolutionDetail});
+    if(evaluation.winnerEntryId)wins.set(evaluation.winnerEntryId,wins.get(evaluation.winnerEntryId)!+1);else pending=true;
+  }
+  const ordered=[...entries].sort((a,b)=>wins.get(b.entry_id)!-wins.get(a.entry_id)!);
+  return {tiebreak,entries,rounds,days:[],comparisons,ranking:pending?[]:ordered.map((e,i)=>({...e,position:i+1})),state:pending?'WAITING_GROUP':'RESOLVED_GROUP',winnerEntryId:pending?null:ordered[0].entry_id,resolutionDetail:pending?'Comparación conjunta TAFA pendiente: todos usan la misma Fecha Liga.':'Orden conjunto resuelto por TAFA en la misma Fecha Liga.'};
+}
+function evaluateDays(tiebreak:any,entries:TiebreakEntry[],rounds:any[],evaluations:MatchEvaluation[]):any {
   evaluations.sort((a, b) => {
     const kickoff = new Date(a.kickoffAt).getTime() - new Date(b.kickoffAt).getTime();
     return kickoff !== 0 ? kickoff : a.matchId - b.matchId;
@@ -393,10 +363,12 @@ async function addRound(request: Request, env: Env, user: SessionUser, tiebreakI
   const tiebreak = await env.DB.prepare(
     `SELECT ct.id, ct.encounter_id, ct.status,
             ce.round_link_id AS original_round_link_id,
-            crl.round_id AS original_round_id
+            COALESCE(crl.round_id,sl.round_id) AS original_round_id
      FROM competition_tiebreaks ct
      LEFT JOIN competition_encounters ce ON ce.id = ct.encounter_id
      LEFT JOIN competition_round_links crl ON crl.id = ce.round_link_id
+     LEFT JOIN competition_survival_tiebreaks st ON st.tiebreak_id=ct.id
+     LEFT JOIN competition_round_links sl ON sl.id=st.round_link_id
      WHERE ct.id = ? LIMIT 1`,
   ).bind(tiebreakId).first<{
     id: number;
@@ -432,6 +404,11 @@ async function addRound(request: Request, env: Env, user: SessionUser, tiebreakI
     }
   }
 
+    const duo=await env.DB.prepare("SELECT c.id FROM competitions c JOIN competition_tiebreaks t ON t.competition_id=c.id WHERE t.id=? AND c.code='COPA_DUOS'").bind(tiebreakId).first();
+  if(duo){const category=await env.DB.prepare('SELECT category FROM rounds WHERE id=?').bind(roundId).first<{category:string}>();if(category?.category!=='LIGA')return error('El desempate de tabla Dúos utiliza una Fecha Liga posterior',409);}
+  const previous=await env.DB.prepare('SELECT MAX(m.kickoff_at) last FROM competition_tiebreak_rounds tr JOIN matches m ON m.round_id=tr.round_id WHERE tr.tiebreak_id=?').bind(tiebreakId).first<{last:string|null}>();
+  if(previous?.last&&(!round.first_kickoff||new Date(round.first_kickoff)<=new Date(previous.last)))return error('La nueva Fecha debe ser posterior a las ya vinculadas',409);
+  if(duo&&!round.first_kickoff)return error('La Fecha necesita partidos con horarios para validar la cronología',409);
   const duplicate = await env.DB.prepare(
     `SELECT 1 AS present FROM competition_tiebreak_rounds
      WHERE tiebreak_id = ? AND round_id = ? LIMIT 1`,

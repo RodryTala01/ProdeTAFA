@@ -17,11 +17,13 @@ export default function EncounterCard({
   rounds,
   disabled,
   onChanged,
+  allowExceptional = true,
 }: {
   encounter: Encounter;
   rounds: CupRound[];
   disabled: boolean;
   onChanged: () => Promise<void>;
+  allowExceptional?: boolean;
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
@@ -177,50 +179,54 @@ export default function EncounterCard({
           </button>
         </div>
       )}
-      <details>
-        <summary>Corrección excepcional del ganador</summary>
-        <p>Usar sólo por decisión administrativa. Queda auditada con motivo.</p>
-        <label className="field">
-          Ganador
-          <select
-            aria-label="Ganador por corrección"
-            value={winner}
-            disabled={locked}
-            onChange={(ev) => setWinner(ev.target.value)}
+      {allowExceptional && (
+        <details>
+          <summary>Corrección excepcional del ganador</summary>
+          <p>
+            Usar sólo por decisión administrativa. Queda auditada con motivo.
+          </p>
+          <label className="field">
+            Ganador
+            <select
+              aria-label="Ganador por corrección"
+              value={winner}
+              disabled={locked}
+              onChange={(ev) => setWinner(ev.target.value)}
+            >
+              <option value="">Elegir</option>
+              {[e.entryA, e.entryB].filter(Boolean).map((entry) => (
+                <option key={entry!.id} value={entry!.id}>
+                  {entry!.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            Motivo
+            <input
+              value={reason}
+              disabled={locked}
+              onChange={(ev) => setReason(ev.target.value)}
+            />
+          </label>
+          <button
+            className="button button--secondary"
+            disabled={locked || !winner || !reason.trim()}
+            onClick={() =>
+              void run(async () => {
+                await cupApi(`${cupAdmin}/encounters/${e.id}/winner`, 'PUT', {
+                  winnerEntryId: Number(winner),
+                  resolution: 'admin',
+                  reason,
+                });
+                setReason('');
+              })
+            }
           >
-            <option value="">Elegir</option>
-            {[e.entryA, e.entryB].filter(Boolean).map((entry) => (
-              <option key={entry!.id} value={entry!.id}>
-                {entry!.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          Motivo
-          <input
-            value={reason}
-            disabled={locked}
-            onChange={(ev) => setReason(ev.target.value)}
-          />
-        </label>
-        <button
-          className="button button--secondary"
-          disabled={locked || !winner || !reason.trim()}
-          onClick={() =>
-            void run(async () => {
-              await cupApi(`${cupAdmin}/encounters/${e.id}/winner`, 'PUT', {
-                winnerEntryId: Number(winner),
-                resolution: 'admin',
-                reason,
-              });
-              setReason('');
-            })
-          }
-        >
-          Guardar corrección auditada
-        </button>
-      </details>
+            Guardar corrección auditada
+          </button>
+        </details>
+      )}
       {error && (
         <p role="alert" className="alert alert--error">
           {error}
