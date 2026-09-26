@@ -1,5 +1,12 @@
+import AdminCupPapa from './AdminCupPapa';
+import AdminCupChampions from './AdminCupChampions';
+import AdminCupDuos from './AdminCupDuos';
 import { useEffect, useMemo, useState } from 'react';
+import AdminCupAb from './AdminCupAb';
+import AdminCupTotal from './AdminCupTotal';
 import CompetitionConfigPanel from './CompetitionConfigPanel';
+import { initialSeasonId, stageTypeLabel, statusLabel } from './competition-presentation';
+import './admin-competitions.css';
 
 type Division = {
   id: number;
@@ -89,15 +96,6 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
-function statusLabel(status: string) {
-  if (status === 'draft') return 'Borrador';
-  if (status === 'active') return 'Activa';
-  if (status === 'finished') return 'Finalizada';
-  if (status === 'archived') return 'Archivada';
-  if (status === 'open') return 'Abierta';
-  return status;
-}
-
 function familyLabel(family: Competition['family']) {
   if (family === 'LEAGUE') return 'Liga';
   if (family === 'PROMOTION') return 'Promoción';
@@ -111,20 +109,23 @@ export default function AdminCompetitions() {
   const [roundByCompetition, setRoundByCompetition] = useState<Record<number, number | ''>>({});
   const [stageByCompetition, setStageByCompetition] = useState<Record<number, number | ''>>({});
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [selectedCompetitionId, setSelectedCompetitionId] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   async function load(preferredSeasonId?: number | null) {
     setError('');
+    setFetching(true);
     try {
       const next = await api<EngineData>('/api/admin/competition-engine');
       setData(next);
       const candidate = preferredSeasonId ?? selectedSeasonId;
       if (candidate && next.seasons.some((season) => season.id === candidate)) setSelectedSeasonId(candidate);
-      else setSelectedSeasonId(next.seasons[0]?.id ?? null);
+      else setSelectedSeasonId(initialSeasonId(next.seasons));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo cargar el motor de competiciones');
-    }
+    } finally { setFetching(false); }
   }
 
   useEffect(() => { void load(null); }, []);
@@ -233,22 +234,24 @@ export default function AdminCompetitions() {
   const availableRounds = data?.rounds ?? [];
 
   return (
-    <div className="form-stack">
+    <div className="form-stack competitions-admin">
       <section className="card panel">
         <div className="panel-heading">
           <div>
             <span className="eyebrow">TEMPORADA Y COMPETICIONES</span>
-            <h1>Motor T32</h1>
+            <h1>Competiciones</h1>
             <p>Una sola Fecha del Prode puede alimentar Liga A, Liga B y varias Copas a la vez.</p>
           </div>
-          <button className="button button--ghost" onClick={() => void load(selectedSeasonId)}>Actualizar</button>
+          <button className="button button--ghost" disabled={loading || fetching} onClick={() => void load(selectedSeasonId)}>Actualizar</button>
         </div>
-        {!hasT32 && (
-          <button className="button button--primary" disabled={loading} onClick={() => void createT32()}>
+        {data && !hasT32 && (
+          <button className="button button--primary" disabled={loading || fetching} onClick={() => void createT32()}>
             Crear Temporada 32
           </button>
         )}
-        {error && <div className="alert alert--error">{error}</div>}
+        {fetching && <p role="status">Cargando competiciones…</p>}
+        {data?.seasons.length === 0 && <p>No hay temporadas creadas todavía.</p>}
+        {error && <div role="alert" className="alert alert--error">{error}</div>}
         {success && <div className="alert alert--success">{success}</div>}
       </section>
 
@@ -256,7 +259,7 @@ export default function AdminCompetitions() {
         <section className="card panel">
           <label className="field">
             <span>Temporada TAFA</span>
-            <select value={selectedSeasonId ?? ''} onChange={(event) => setSelectedSeasonId(Number(event.target.value))}>
+            <select aria-label="Temporada TAFA" value={selectedSeasonId ?? ''} disabled={loading || fetching} onChange={(event) => { setSelectedSeasonId(Number(event.target.value)); setSelectedCompetitionId(null); setError(''); setSuccess(''); }}>
               {data.seasons.map((season) => (
                 <option key={season.id} value={season.id}>T{season.seasonNumber} · {season.name} · {statusLabel(season.status)}</option>
               ))}
@@ -275,16 +278,17 @@ export default function AdminCompetitions() {
             ))}
           </div>
 
-          <section className="card panel panel--wide">
+          <details className="card panel panel--wide">
+            <summary>Administrar temporada y divisiones</summary>
             <div className="panel-heading">
               <div>
                 <h2>Divisiones de {selected.name}</h2>
                 <p>La pertenencia a Liga A/B se guarda por temporada y no depende de la tabla vieja.</p>
               </div>
               <div className="topbar-actions">
-                {selected.status === 'draft' && <button className="button button--secondary" disabled={loading} onClick={() => void changeSeasonStatus('active')}>Activar T{selected.seasonNumber}</button>}
-                {selected.status === 'active' && <button className="button button--ghost" disabled={loading} onClick={() => void changeSeasonStatus('draft')}>Volver a borrador</button>}
-                <button className="button button--primary" disabled={loading} onClick={() => void saveAssignments()}>Guardar divisiones</button>
+                {selected.status === 'draft' && <button className="button button--secondary" disabled={loading || fetching} onClick={() => void changeSeasonStatus('active')}>Activar T{selected.seasonNumber}</button>}
+                {selected.status === 'active' && <button className="button button--ghost" disabled={loading || fetching} onClick={() => void changeSeasonStatus('draft')}>Volver a borrador</button>}
+                <button className="button button--primary" disabled={loading || fetching || selected?.status === 'finished' || selected?.status === 'archived'} onClick={() => void saveAssignments()}>Guardar divisiones</button>
               </div>
             </div>
 
@@ -294,6 +298,8 @@ export default function AdminCompetitions() {
                   <div className="avatar">{participant.fullName.slice(0, 1).toUpperCase()}</div>
                   <div className="user-data"><strong>{participant.fullName}</strong><span>T{selected.seasonNumber}</span></div>
                   <select
+                    aria-label={`División de ${participant.fullName}`}
+                    disabled={loading || fetching || selected.status === 'finished' || selected.status === 'archived'}
                     value={assignments[participant.id] ?? ''}
                     onChange={(event) => setAssignments((current) => ({ ...current, [participant.id]: event.target.value }))}
                   >
@@ -303,18 +309,19 @@ export default function AdminCompetitions() {
                 </div>
               ))}
             </div>
-          </section>
+          </details>
 
           <section className="card panel panel--wide">
             <div className="panel-heading">
               <div>
-                <h2>Competiciones</h2>
+                <h2>{selected.name}</h2>
                 <p>Configurá el nombre de cada edición, sus etapas y qué Fechas del Prode alimentan cada fase.</p>
               </div>
             </div>
 
-            <div className="user-list">
-              {selected.competitions.map((competition) => (
+            {selected.competitions.length === 0 && <p>Esta temporada todavía no tiene competiciones.</p>}
+            <div className={selectedCompetitionId === null ? "competition-cards" : "form-stack"}>
+              {selected.competitions.filter((competition) => selectedCompetitionId === null || competition.id === selectedCompetitionId).map((competition) => (
                 <div className="card panel" key={competition.id}>
                   <div className="panel-heading">
                     <div>
@@ -325,28 +332,43 @@ export default function AdminCompetitions() {
                     <span className="user-chip">{statusLabel(competition.status)}</span>
                   </div>
 
+                  {selectedCompetitionId !== competition.id ? (
+                    <button className="button button--primary" onClick={() => setSelectedCompetitionId(competition.id)}>Administrar {competition.displayName}</button>
+                  ) : <>
+                  <button className="button button--ghost" onClick={() => setSelectedCompetitionId(null)}>Volver a competiciones</button>
+                  <p>{selected.name} · Código: {competition.code}</p>
+                  {competition.family !== 'LEAGUE' && !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA'].includes(competition.code) && <p className="competition-pending">Configuración deportiva específica pendiente. El armado de grupos, parejas y cruces tendrá opciones asistida y manual, con validaciones y auditoría.</p>}
+                  {['COPA_A','COPA_B'].includes(competition.code) && competition.stages.some(s=>s.stageType==='ACCUMULATIVE_GROUPS') && <AdminCupAb key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  {competition.code==='COPA_TOTAL' && competition.stages.some(s=>s.stageType==='ROUND_ROBIN_GROUPS') && <AdminCupTotal key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  {competition.code==='COPA_DUOS' && <AdminCupDuos key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  {competition.code==='COPA_CAMPEONES' && <AdminCupChampions key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  {competition.code==='COPA_PAPA' && <AdminCupPapa key={competition.id} competition={competition} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  <details open={!competition.stages.some(s=>['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS','SURVIVAL_TABLE'].includes(s.stageType)) || !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA'].includes(competition.code)}><summary>Configuración general, etapas y Fechas</summary>
                   <CompetitionConfigPanel
+                    key={competition.id}
                     competition={competition}
-                    disabled={loading}
+                    disabled={loading || fetching || selected?.status === 'finished' || selected?.status === 'archived'}
                     onChanged={() => load(selected.id)}
                   />
 
                   {competition.stages.length > 0 && (
                     <div className="round-create">
                       <select
+                        aria-label="Etapa para vincular Fecha"
                         value={stageByCompetition[competition.id] ?? ''}
                         onChange={(event) => setStageByCompetition((current) => ({ ...current, [competition.id]: Number(event.target.value) }))}
                       >
-                        {competition.stages.map((stage) => <option key={stage.id} value={stage.id}>{stage.name} · {stage.stageType}</option>)}
+                        {competition.stages.map((stage) => <option key={stage.id} value={stage.id}>{stage.name} · {stageTypeLabel(stage.stageType)}</option>)}
                       </select>
                       <select
+                        aria-label="Fecha para vincular"
                         value={roundByCompetition[competition.id] ?? ''}
                         onChange={(event) => setRoundByCompetition((current) => ({ ...current, [competition.id]: event.target.value ? Number(event.target.value) : '' }))}
                       >
                         <option value="">Elegir Fecha...</option>
                         {availableRounds.map((round) => <option key={round.id} value={round.id}>{round.name} · {statusLabel(round.status)} · {round.category}</option>)}
                       </select>
-                      <button className="button button--secondary" disabled={loading || !roundByCompetition[competition.id]} onClick={() => void linkRound(competition)}>Vincular Fecha</button>
+                      <button className="button button--secondary" disabled={loading || fetching || selected.status === 'finished' || selected.status === 'archived' || !roundByCompetition[competition.id]} onClick={() => void linkRound(competition)}>Vincular Fecha</button>
                     </div>
                   )}
 
@@ -357,13 +379,15 @@ export default function AdminCompetitions() {
                           <div className="avatar">{link.sequence}</div>
                           <div className="user-data">
                             <strong>{link.roundName}</strong>
-                            <span>{link.purpose} · {link.category} · {statusLabel(link.roundStatus)}</span>
+                            <span>{competition.stages.find((stage) => stage.id === link.stageId)?.name} · {link.purpose === 'TIEBREAK' ? 'Desempate' : 'Jornada'} · {statusLabel(link.roundStatus)}</span>
                           </div>
-                          <button className="button button--ghost" disabled={loading} onClick={() => void unlinkRound(competition, link)}>Desvincular</button>
+                          <button className="button button--ghost" disabled={loading || fetching || selected?.status === 'finished' || selected?.status === 'archived'} onClick={() => void unlinkRound(competition, link)}>Desvincular</button>
                         </div>
                       ))}
                     </div>
                   )}
+                  </details>
+                  </>}
                 </div>
               ))}
             </div>

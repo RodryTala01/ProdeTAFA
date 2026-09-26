@@ -6,6 +6,7 @@ Estado: formato funcional confirmado a nivel de reglas generales. Los valores co
 
 - La Copa Dúos se disputa en parejas de 2 participantes.
 - Las parejas se forman de manera totalmente aleatoria.
+- El sorteo puede realizarse dentro o fuera de la app. Admin debe poder cargar manualmente las parejas resultantes, con validación de elegibilidad, sin integrantes duplicados y con auditoría. El sorteo automático es una opción asistida, nunca la única vía.
 - La pareja se considera estable durante la competencia, salvo cambio excepcional administrado manualmente.
 - El sistema debe permitir que, en una edición futura o ante una situación excepcional, el admin cambie un integrante del dúo sin perder la historia previa.
 - Un cambio de integrante debe tener vigencia desde una fecha/fase concreta hacia adelante; los resultados anteriores siguen asociados a la composición que realmente disputó esas jornadas.
@@ -27,6 +28,7 @@ Estado: formato funcional confirmado a nivel de reglas generales. Los valores co
 
 - Si existe un empate que afecta una clasificación o eliminación, no se resuelve mediante plenos/parciales u otros criterios secundarios.
 - El desempate se continúa en la siguiente Fecha Liga usando la regla general de desempates de Copa documentada para ProdeTAFA.
+- Si hay tres o más dúos empatados, todos se comparan en la misma Fecha Liga posterior con TAFA. No usar orden alfabético ni estadísticas secundarias para decidir el corte. También deben quedar definidos los puestos 1–4 antes de construir semifinales.
 - El admin conserva la confirmación final de clasificados/eliminados cuando corresponda.
 
 ## Llegada a semifinales
@@ -93,3 +95,7 @@ El Admin deberá poder:
 - Mostrar cualquier bonus que arrastre a la siguiente fecha.
 - Desde semifinales, mostrar el rival y el bonus inicial de +2 si corresponde.
 - Si hubo una sustitución histórica, las vistas de fechas pasadas deben seguir mostrando la composición que existía en esa fecha.
+
+## Implementación Admin
+
+Ver [ADMIN-COPA-DUOS.md](ADMIN-COPA-DUOS.md). La vigencia de salida es exclusiva: el integrante saliente ya no suma en esa Fecha y el entrante sí. Los snapshots confirmados conservan integrantes y puntajes.

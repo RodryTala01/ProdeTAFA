@@ -31,6 +31,18 @@ No usar `Test` como categoría de producción.
 - Algunas Copas son de eliminación directa y otras tienen fase de grupos. Los formatos exactos se definirán después de revisar el Excel.
 - Nombres de fases como `32avos` pueden mantenerse aunque haya menos cruces reales; no es necesario completar una llave teórica de 64 participantes.
 
+## Regla general de armado manual por Admin
+
+Los criterios deportivos de cada Copa definen **elegibilidad, cabezas de serie, bombos, restricciones y formato**, pero no obligan a que el sistema ejecute el sorteo o la designación final.
+
+- El sistema puede calcular y mostrar una propuesta de bombos, grupos, parejas, cruces o clasificados.
+- El Admin puede realizar el sorteo fuera de la app y **cargar manualmente el resultado**.
+- El Admin puede asignar manualmente participantes a grupos, llaves, parejas o cruces, respetando las restricciones deportivas que correspondan.
+- Ninguna Copa debe depender de un randomizador interno como única vía de configuración.
+- Los sorteos automáticos deben ser opcionales y funcionar como asistencia.
+- Toda asignación o corrección manual debe quedar auditada.
+- Esto también aplica a Copa Dúos: aunque la regla deportiva indique parejas aleatorias, el Admin puede hacer el sorteo por su cuenta y luego cargar manualmente la composición resultante.
+
 ## Pronóstico compartido
 
 - El participante completa **un solo pronóstico de 12 partidos por fecha**.
@@ -122,11 +134,11 @@ Formato confirmado tomando como referencia una edición con 16 participantes.
 ### Final
 
 - Se disputa sobre una Fecha Copa.
-- La lógica específica de tercer puesto/final se terminará de confirmar en el relevamiento, pero el campeón es quien obtiene el beneficio de permanencia indicado arriba.
+- Final entre los dos ganadores confirmados de semifinal. No hay tercer puesto en Copa A/B. El campeón de Copa A obtiene la permanencia indicada arriba.
 
 ## Copa B
 
-La Copa B usa el **mismo método estructural que Copa A** como formato base.
+La Copa B usa el **mismo método estructural que Copa A** como formato base. Su campeón vigente también ocupa A1 si sigue siendo elegible.
 
 ### Participación
 
@@ -206,3 +218,7 @@ Para cada una relevar:
 - criterios particulares.
 
 Después de ese relevamiento se definirá un modelo suficientemente flexible para soportar varias Copas sin hardcodear una tabla distinta por competición.
+
+## Admin Copa A/B implementado
+
+Grupos manuales y sorteo opcional comparten elegibilidad y auditoría. Octavos, Cuartos, Semifinal y Final se identifican por el orden de sus etapas KNOCKOUT, sin IDs fijos. Cada avance consulta los clasificados reales del backend; no acepta sustituciones arbitrarias ni duplicados. Los grupos requieren dos Fechas cerradas para avanzar. Los ganadores calculados requieren confirmación Admin antes del avance. Las correcciones de cruces sólo se permiten antes de publicar/iniciar y requieren motivo. El modo manual se registra como MANUAL sin semilla. Las excepciones de ganador también requieren motivo auditado.
