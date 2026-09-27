@@ -1,3 +1,4 @@
+import { handleCompetitionResults } from '../worker/competition-results';
 import { readFileSync, readdirSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
@@ -139,4 +140,41 @@ describe('IFFHS funcional', () => {
     expect(data.includedSeasons).toEqual([28,29,30,31,32]);
     expect(data.missingSeasons).toEqual([28,29,30,31]);
   });
+});
+
+const adminRequest=(path:string,method='GET',body?:unknown)=>new Request('http://localhost'+path,{method,headers:{cookie:'prode_session=admin','content-type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});
+describe('Resultados e IFFHS Admin integrados',()=>{
+ it('lee todas las entradas y confirma snapshot completo con autor y auditoría',async()=>{
+   db.prepare('DELETE FROM competition_results WHERE competition_id=1').run();
+   const path='/api/competition-engine/competitions/1/results';
+   const before=await (await handleCompetitionResults(adminRequest(path),env()))!.json() as any;
+   expect(before.entries).toHaveLength(2);expect(before.results).toEqual([]);
+   const rows=before.entries.map((e:any,i:number)=>({entryId:e.entryId,resultCode:i?'RUNNER_UP':'CHAMPION',finalPosition:i+1}));
+   const put='/api/admin/competition-engine/competitions/1/results';
+   expect((await handleCompetitionResults(adminRequest(put,'PUT',{results:rows.slice(0,1)}),env()))!.status).toBe(409);
+   const response=await handleCompetitionResults(adminRequest(put,'PUT',{results:rows}),env());expect(response!.status).toBe(200);
+   const saved=await response!.json() as any;expect(saved.results[0].confirmedBy).toBe('Admin');
+   expect((db.prepare("SELECT COUNT(*) n FROM audit_log WHERE action='competition.results_confirmed'").get() as any).n).toBe(1);
+   const again=await handleCompetitionResults(adminRequest(put,'PUT',{results:rows}),env());expect(again!.status).toBe(200);
+   expect((db.prepare('SELECT COUNT(*) n FROM competition_results WHERE competition_id=1').get() as any).n).toBe(2);
+   expect((db.prepare("SELECT COUNT(*) n FROM audit_log WHERE action='competition.results_confirmed'").get() as any).n).toBe(2);
+ });
+ it('exige destinatarios históricos explícitos cuando un dúo tuvo sustituciones',async()=>{
+   db.exec("UPDATE competition_entries SET entry_type='DUO' WHERE id=1; INSERT INTO competition_entry_members(entry_id,user_id) VALUES (1,'P3'),(1,'P4');");
+   const rows=[{entryId:1,resultCode:'CHAMPION',detail:{}},{entryId:2,resultCode:'RUNNER_UP'}];
+   const request=()=>adminRequest('/api/admin/competition-engine/competitions/1/results','PUT',{results:rows});
+   expect((await handleCompetitionResults(request(),env()))!.status).toBe(409);
+   rows[0].detail={iffhsUserIds:['P1','P4']};
+   expect((await handleCompetitionResults(request(),env()))!.status).toBe(200);
+ });
+ it('importa historia sin permitir sobrescritura ni cálculo sobre importados',async()=>{
+   const path='/api/admin/competition-engine/iffhs/seasons/32/totals';
+   const request=(points:number)=>adminRequest(path,'PUT',{rows:[{userId:'P1',totalPoints:points}]});
+   expect((await handleIffhs(request(123.45),env()))!.status).toBe(200);
+   expect((await handleIffhs(request(999),env()))!.status).toBe(409);
+   expect((db.prepare("SELECT total_points_scaled FROM iffhs_season_totals WHERE user_id='P1'").get() as any).total_points_scaled).toBe(12345);
+   expect((await calculateIffhsSeason(env(),'admin',32)).ok).toBe(false);
+   const response=await handleIffhs(adminRequest('/api/competition-engine/iffhs/seasons/32/components?userId=P1'),env());
+   const detail=await response!.json() as any;expect(detail.rows[0].totalSource).toBe('imported');expect(detail.rows[0].totalPoints).toBe(123.45);
+ });
 });

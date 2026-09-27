@@ -1,3 +1,5 @@
+import AdminResults from './AdminResults';
+import AdminIffhs from './AdminIffhs';
 import AdminPromotion from './AdminPromotion';
 import AdminCupPapa from './AdminCupPapa';
 import AdminCupChampions from './AdminCupChampions';
@@ -320,6 +322,7 @@ export default function AdminCompetitions() {
               </div>
             </div>
 
+            <AdminIffhs key={selected.id} seasonNumber={selected.seasonNumber} competitions={selected.competitions} participants={data?.participants??[]}/>
             {selected.competitions.length === 0 && <p>Esta temporada todavía no tiene competiciones.</p>}
             <div className={selectedCompetitionId === null ? "competition-cards" : "form-stack"}>
               {selected.competitions.filter((competition) => selectedCompetitionId === null || competition.id === selectedCompetitionId).map((competition) => (
@@ -345,6 +348,7 @@ export default function AdminCompetitions() {
                   {competition.code==='COPA_CAMPEONES' && <AdminCupChampions key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='COPA_PAPA' && <AdminCupPapa key={competition.id} competition={competition} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='PROMOCION' && <AdminPromotion key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  {competition.code!=='PROMOCION' && <AdminResults key={`results-${competition.id}`} competition={competition} seasonNumber={selected.seasonNumber} archived={selected.status==='archived'}/>}
                   <details open={!competition.stages.some(s=>['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS','SURVIVAL_TABLE'].includes(s.stageType)) || !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION'].includes(competition.code)}><summary>Configuración general, etapas y Fechas</summary>
                   <CompetitionConfigPanel
                     key={competition.id}

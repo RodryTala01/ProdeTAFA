@@ -1,6 +1,6 @@
 # Diseño — resultados finales, palmarés e IFFHS
 
-Estado: contrato previo a UI Admin.
+Estado: UI Admin implementada. Ver ADMIN-RESULTADOS-IFFHS.md para acceso y revisión.
 
 ## Objetivo
 

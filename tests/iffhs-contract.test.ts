@@ -35,7 +35,8 @@ describe('IFFHS contract', () => {
   });
 
   it('supports importing old season totals with audit', () => {
-    expect(worker).toContain("source = 'imported'");
+    expect(worker).toContain("VALUES (?, ?, ?, 'imported', datetime('now'))");
+    expect(worker).not.toContain("ON CONFLICT(season_number, user_id) DO UPDATE");
     expect(worker).toContain("'iffhs.season_totals_imported'");
   });
 });

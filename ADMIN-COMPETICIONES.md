@@ -128,3 +128,7 @@ Ver [guía Copa Papa](ADMIN-COPA-PAPA.md): propuesta, llave manual, progresión 
 ## Promoción Admin
 
 Ver [guía de Promoción](ADMIN-PROMOCION.md): cuatro cupos, cruces fijos y propuesta final de movimientos.
+
+## Resultados e IFFHS
+
+Ver [guía de resultados finales e IFFHS Admin](ADMIN-RESULTADOS-IFFHS.md).

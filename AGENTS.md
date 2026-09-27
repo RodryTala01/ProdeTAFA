@@ -265,6 +265,14 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Reutilizar CupEncounter y TAFA. Sólo con ambos ganadores confirmados generar cuatro movimientos propuestos: ganadores a Liga A, perdedores a Liga B; no aplicar automáticamente cambios de división.
 - Mostrar la vista previa y los movimientos persistidos por separado. No regenerar movimientos confirmados/aplicados ni mutar una competición o temporada cerrada.
 
+### Resultados finales e IFFHS Admin
+
+- `competition_results` sigue siendo la única fuente de resultados finales: confirmar un snapshot completo con una fila por entrada y auditoría atómica; permitir revisión mientras competición/temporada no estén archivadas.
+- Propuesta desde tabla definitiva de Liga, grupos, supervivencia y encuentros confirmados. Fases ambiguas requieren revisión explícita Admin; no inferir ganadores pendientes. Tercero sólo en Total/Papa.
+- Dúos con más de dos integrantes históricos requieren selección explícita de `detail.iffhsUserIds`, todos pertenecientes a esa historia.
+- IFFHS Admin permite revisar pendientes, calcular temporada, consultar ventana de cinco temporadas, faltantes y desglose por participante/competición, diferenciando `calculated` e `imported`.
+- La importación manual sólo agrega totales faltantes: no sobrescribir totales existentes. El cálculo sigue bloqueado si la temporada contiene importados.
+
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 
 Patrón conceptual indicado por el usuario:

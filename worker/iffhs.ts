@@ -210,6 +210,11 @@ async function importSeasonTotals(request: Request, env: Env, user: SessionUser,
     normalized.push({ userId, totalPoints, totalScaled: toScaled(totalPoints) });
   }
 
+  for (const row of normalized) {
+    const existing = await env.DB.prepare('SELECT source FROM iffhs_season_totals WHERE season_number=? AND user_id=?').bind(seasonNumber,row.userId).first();
+    if (existing) return error('Ya existe un total para uno de los participantes: no se sobrescriben históricos',409);
+  }
+
   const statements: D1PreparedStatement[] = [];
   for (const row of normalized) {
     statements.push(
@@ -217,10 +222,7 @@ async function importSeasonTotals(request: Request, env: Env, user: SessionUser,
         `INSERT INTO iffhs_season_totals
            (season_number, user_id, total_points_scaled, source, calculated_at)
          VALUES (?, ?, ?, 'imported', datetime('now'))
-         ON CONFLICT(season_number, user_id) DO UPDATE SET
-           total_points_scaled = excluded.total_points_scaled,
-           source = 'imported',
-           calculated_at = excluded.calculated_at`,
+`,
       ).bind(seasonNumber, row.userId, row.totalScaled),
     );
   }

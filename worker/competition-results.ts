@@ -81,29 +81,6 @@ async function sessionUser(request: Request, env: Env): Promise<SessionUser | nu
   return user ?? null;
 }
 
-async function audit(
-  env: Env,
-  actorUserId: string,
-  action: string,
-  entityType: string,
-  entityId: string,
-  before: unknown,
-  after: unknown,
-) {
-  await env.DB.prepare(
-    `INSERT INTO audit_log
-       (actor_user_id, action, entity_type, entity_id, before_json, after_json)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-  ).bind(
-    actorUserId,
-    action,
-    entityType,
-    entityId,
-    before == null ? null : JSON.stringify(before),
-    after == null ? null : JSON.stringify(after),
-  ).run();
-}
-
 async function readResults(env: Env, competitionId: number) {
   const competition = await env.DB.prepare(
     `SELECT c.id, c.code, c.display_name, c.status,
@@ -123,10 +100,11 @@ async function readResults(env: Env, competitionId: number) {
 
   const rows = await env.DB.prepare(
     `SELECT cr.id, cr.entry_id, cr.stage_id, cr.result_code, cr.final_position,
-            cr.detail_json, cr.confirmed_at,
+            cr.detail_json, cr.confirmed_at, u.full_name AS confirmed_by,
             ce.display_name AS entry_name, ce.entry_type,
             cs.name AS stage_name
      FROM competition_results cr
+     LEFT JOIN users u ON u.id = cr.confirmed_by_user_id
      JOIN competition_entries ce ON ce.id = cr.entry_id
      LEFT JOIN competition_stages cs ON cs.id = cr.stage_id
      WHERE cr.competition_id = ?
@@ -141,7 +119,7 @@ async function readResults(env: Env, competitionId: number) {
     result_code: string;
     final_position: number | null;
     detail_json: string | null;
-    confirmed_at: string;
+    confirmed_at: string; confirmed_by: string;
     entry_name: string;
     entry_type: string;
     stage_name: string | null;
@@ -167,7 +145,7 @@ async function readResults(env: Env, competitionId: number) {
       resultCode: row.result_code,
       finalPosition: row.final_position == null ? null : Number(row.final_position),
       detail: row.detail_json ? JSON.parse(row.detail_json) : null,
-      confirmedAt: row.confirmed_at,
+      confirmedAt: row.confirmed_at, confirmedBy: row.confirmed_by,
       members: (members.results ?? []).map((member) => ({
         userId: member.user_id,
         fullName: member.full_name,
@@ -186,6 +164,15 @@ async function readResults(env: Env, competitionId: number) {
     },
     results,
   };
+}
+
+async function resultEvidence(env: Env, competitionId: number) {
+  const entries = await env.DB.prepare(`SELECT id AS entryId,display_name AS entryName,entry_type AS entryType FROM competition_entries WHERE competition_id=? ORDER BY id`).bind(competitionId).all<{entryId:number;entryName:string;entryType:string}>();
+  const members = await env.DB.prepare(`SELECT m.entry_id AS entryId,m.user_id AS userId,u.full_name AS fullName,m.valid_from_round_id AS validFrom,m.valid_to_round_id AS validTo FROM competition_entry_members m JOIN users u ON u.id=m.user_id JOIN competition_entries e ON e.id=m.entry_id WHERE e.competition_id=? ORDER BY m.id`).bind(competitionId).all<{entryId:number;userId:string;fullName:string;validFrom:number|null;validTo:number|null}>();
+  const encounters = await env.DB.prepare(`SELECT e.id,e.stage_id AS stageId,e.slot_key AS slotKey,e.entry_a_id AS entryAId,e.entry_b_id AS entryBId,e.winner_entry_id AS winnerId,e.status,e.admin_confirmed_at AS confirmedAt,s.code AS stageCode,s.sequence FROM competition_encounters e JOIN competition_stages s ON s.id=e.stage_id WHERE s.competition_id=? ORDER BY s.sequence,e.id`).bind(competitionId).all();
+  const survival = await env.DB.prepare(`SELECT r.entry_id AS entryId,r.stage_id AS stageId,l.sequence,r.decision FROM competition_survival_results r JOIN competition_stages s ON s.id=r.stage_id JOIN competition_round_links l ON l.id=r.round_link_id WHERE s.competition_id=? ORDER BY l.sequence`).bind(competitionId).all();
+  const groups = await env.DB.prepare(`SELECT ge.entry_id AS entryId,g.stage_id AS stageId FROM competition_group_entries ge JOIN competition_groups g ON g.id=ge.group_id JOIN competition_stages s ON s.id=g.stage_id WHERE s.competition_id=?`).bind(competitionId).all();
+  return {entries:(entries.results??[]).map(e=>({...e,members:(members.results??[]).filter(m=>m.entryId===e.entryId)})),encounters:(encounters.results??[]) as {status:string;confirmedAt:string|null;winnerId:number|null}[],survival:survival.results??[],groups:groups.results??[]};
 }
 
 async function replaceResults(request: Request, env: Env, user: SessionUser, competitionId: number) {
@@ -253,6 +240,18 @@ async function replaceResults(request: Request, env: Env, user: SessionUser, com
     normalized.push({ entryId, stageId, resultCode, finalPosition, detailJson });
   }
 
+  const evidence = await resultEvidence(env, competitionId);
+  if (!normalized.length || normalized.length !== evidence.entries.length) return error('Confirmá un snapshot completo: una fila por entrada',409);
+  if (evidence.encounters.some(e=>e.status!=='finished'||!e.confirmedAt||!e.winnerId)) return error('Hay encuentros sin ganador confirmado',409);
+  for (const row of normalized) {
+    const entry = evidence.entries.find(e=>e.entryId===row.entryId)!;
+    const ids = [...new Set(entry.members.map(m=>m.userId))];
+    if (entry.entryType==='DUO' && ids.length>2) {
+      const detail = row.detailJson ? JSON.parse(row.detailJson) : null;
+      const chosen = detail?.iffhsUserIds;
+      if (!Array.isArray(chosen) || !chosen.length || new Set(chosen).size!==chosen.length || chosen.some(id=>!ids.includes(id))) return error('Elegí explícitamente los integrantes históricos que reciben IFFHS',409);
+    }
+  }
   const before = await readResults(env, competitionId);
   const statements: D1PreparedStatement[] = [
     env.DB.prepare('DELETE FROM competition_results WHERE competition_id = ?').bind(competitionId),
@@ -275,18 +274,9 @@ async function replaceResults(request: Request, env: Env, user: SessionUser, com
       ),
     );
   }
+  statements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json) VALUES (?,?,'competition',?,?,?)`).bind(user.id,'competition.results_confirmed',String(competitionId),JSON.stringify(before?.results??[]),JSON.stringify(normalized.map(r=>({...r,detail:r.detailJson?JSON.parse(r.detailJson):null})))));
   await env.DB.batch(statements);
-
   const after = await readResults(env, competitionId);
-  await audit(
-    env,
-    user.id,
-    'competition.results_confirmed',
-    'competition',
-    String(competitionId),
-    before?.results ?? null,
-    after?.results ?? null,
-  );
 
   return json(after);
 }
@@ -300,7 +290,7 @@ export async function handleCompetitionResults(request: Request, env: Env): Prom
     if (!user) return error('No autorizado', 401);
     if (request.method !== 'GET') return error('Método no permitido', 405);
     const payload = await readResults(env, Number(publicMatch[1]));
-    return payload ? json(payload) : error('Competición no encontrada', 404);
+    return payload ? json(user.role==='admin' ? {...payload,...await resultEvidence(env,Number(publicMatch[1]))} : payload) : error('Competición no encontrada', 404);
   }
 
   const adminMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/results$/);
