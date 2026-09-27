@@ -425,7 +425,7 @@ Antes de aplicar, resolver explícitamente el caso de participantes desactivados
 
 El backend actual construye el roster desde `season_division_members` sin filtro `users.is_active`.
 
-Definir comportamiento y cubrirlo con tests antes de usar transición real.
+UI implementada: ver ADMIN-TRANSICION.md. La regla deportiva de inactivos sigue pendiente; se bloquea la aplicación si el plan contiene alguno, sin incorporarlo ni excluirlo automáticamente. Hay tests para ese bloqueo y para desactivación posterior a la confirmación.
 
 ---
 

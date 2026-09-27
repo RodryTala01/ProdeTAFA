@@ -1,3 +1,4 @@
+import AdminSeasonTransition from './AdminSeasonTransition';
 import AdminResults from './AdminResults';
 import AdminIffhs from './AdminIffhs';
 import AdminPromotion from './AdminPromotion';
@@ -322,6 +323,7 @@ export default function AdminCompetitions() {
               </div>
             </div>
 
+            <AdminSeasonTransition key={`transition-${selected.id}`} seasonId={selected.id} seasonNumber={selected.seasonNumber} existingTarget={data?.seasons.find(s=>s.seasonNumber===selected.seasonNumber+1)??null} onOpenTarget={async id=>{setSelectedCompetitionId(null);await load(id);}}/>
             <AdminIffhs key={selected.id} seasonNumber={selected.seasonNumber} competitions={selected.competitions} participants={data?.participants??[]}/>
             {selected.competitions.length === 0 && <p>Esta temporada todavía no tiene competiciones.</p>}
             <div className={selectedCompetitionId === null ? "competition-cards" : "form-stack"}>

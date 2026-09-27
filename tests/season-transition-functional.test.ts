@@ -190,3 +190,58 @@ describe('Transicion de temporada funcional', () => {
     );
   });
 });
+
+async function confirmedPlan(){
+ const response=await call('admin/competition-engine/seasons/1/transition-plan','POST',{});
+ const plan=(await response.json() as any).plan;
+ const assignments=plan.assignments.map((a:any)=>({userId:a.userId,divisionCode:a.proposedDivisionCode,reason:'Revisión Admin de destinos'}));
+ expect((await call(`admin/competition-engine/transition-plans/${plan.id}/confirm`,'PUT',{assignments})).status).toBe(200);
+ return plan;
+}
+function completeIffhs(){for(let i=1;i<=8;i++)db.prepare("INSERT INTO iffhs_season_totals(season_number,user_id,total_points_scaled,source) VALUES (32,?,100,'calculated')").run('P'+i);}
+describe('Transición Admin: bloqueos actuales y recuperación',()=>{
+ it('recupera el plan sin crearlo al consultar la temporada',async()=>{
+  expect(await (await call('admin/competition-engine/seasons/1/transition-plan')).json()).toEqual({plan:null});
+  expect((db.prepare('SELECT COUNT(*) n FROM season_transition_plans').get() as any).n).toBe(0);
+  const p=await confirmedPlan();
+  const loaded=await (await call('admin/competition-engine/seasons/1/transition-plan')).json() as any;
+  expect(loaded.plan.id).toBe(p.id);expect(loaded.plan.status).toBe('confirmed');
+  expect(loaded.plan.applicationBlockers.some((b:any)=>b.code==='IFFHS_INCOMPLETE')).toBe(true);
+ });
+ it('bloquea inactivos sin excluirlos, reactivarlos ni crear T33',async()=>{
+  db.exec("UPDATE users SET is_active=0 WHERE id='P3'");
+  const p=await confirmedPlan();completeIffhs();
+  const loaded=await (await call(`admin/competition-engine/transition-plans/${p.id}`)).json() as any;
+  expect(loaded.plan.assignments).toHaveLength(8);expect(loaded.plan.assignments.find((a:any)=>a.userId==='P3').isActive).toBe(false);
+  expect(loaded.plan.applicationBlockers.find((b:any)=>b.code==='INACTIVE_POLICY_UNDEFINED').userIds).toEqual(['P3']);
+  const response=await call(`admin/competition-engine/transition-plans/${p.id}/apply`,'POST',{});
+  expect(response.status).toBe(409);expect((await response.json() as any).error).toContain('inactivos');
+  expect(db.prepare('SELECT id FROM tafa_seasons WHERE season_number=33').get()).toBeUndefined();
+  expect((db.prepare("SELECT is_active FROM users WHERE id='P3'").get() as any).is_active).toBe(0);
+ });
+ it('revalida desactivación ocurrida después de confirmar el plan',async()=>{
+  const p=await confirmedPlan();completeIffhs();db.exec("UPDATE users SET is_active=0 WHERE id='P2'");
+  expect((await call(`admin/competition-engine/transition-plans/${p.id}/apply`,'POST',{})).status).toBe(409);
+  expect(db.prepare('SELECT id FROM tafa_seasons WHERE season_number=33').get()).toBeUndefined();
+ });
+ it('no acepta totales de otras personas como IFFHS del roster',async()=>{
+  const p=await confirmedPlan();completeIffhs();db.exec("DELETE FROM iffhs_season_totals WHERE user_id='P8'; INSERT INTO users(id,full_name,phone_normalized,password_hash,role) VALUES ('outsider','Otro','other','hash','participant'); INSERT INTO iffhs_season_totals(season_number,user_id,total_points_scaled,source) VALUES (32,'outsider',100,'imported');");
+  const response=await call(`admin/competition-engine/transition-plans/${p.id}/apply`,'POST',{});
+  expect(response.status).toBe(409);expect((await response.json() as any).error).toContain('P8');
+  expect(db.prepare('SELECT id FROM tafa_seasons WHERE season_number=33').get()).toBeUndefined();
+ });
+ it('no modifica una T33 existente y muestra su estado real',async()=>{
+  const p=await confirmedPlan();completeIffhs();db.exec("INSERT INTO tafa_seasons(season_number,name,status) VALUES (33,'Existente','draft')");
+  const response=await call(`admin/competition-engine/transition-plans/${p.id}/apply`,'POST',{});expect(response.status).toBe(409);
+  expect((db.prepare('SELECT name FROM tafa_seasons WHERE season_number=33').get() as any).name).toBe('Existente');
+  const loaded=await (await call(`admin/competition-engine/transition-plans/${p.id}`)).json() as any;expect(loaded.plan.targetSeason.status).toBe('draft');
+ });
+ it('exige motivo al cambiar propuesta o al revisar aunque conserve destino',async()=>{
+  const p=(await (await call('admin/competition-engine/seasons/1/transition-plan','POST',{})).json() as any).plan;
+  const assignments=p.assignments.map((a:any)=>({userId:a.userId,divisionCode:a.proposedDivisionCode,reason:''}));assignments[0].divisionCode=assignments[0].divisionCode==='A'?'B':'A';
+  expect((await call(`admin/competition-engine/transition-plans/${p.id}/confirm`,'PUT',{assignments})).status).toBe(409);
+  assignments[0].divisionCode=p.assignments[0].proposedDivisionCode;db.prepare('UPDATE season_transition_assignments SET requires_review=1 WHERE plan_id=? AND user_id=?').run(p.id,assignments[0].userId);
+  expect((await call(`admin/competition-engine/transition-plans/${p.id}/confirm`,'PUT',{assignments})).status).toBe(409);
+  assignments[0].reason='Corrimiento revisado por Admin';expect((await call(`admin/competition-engine/transition-plans/${p.id}/confirm`,'PUT',{assignments})).status).toBe(200);
+ });
+});

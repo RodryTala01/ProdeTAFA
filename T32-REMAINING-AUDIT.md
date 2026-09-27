@@ -241,7 +241,7 @@ Pendiente:
 
 La consulta de roster de transición toma miembros de la temporada pero no filtra explícitamente `users.is_active=1`.
 
-Definir si un participante desactivado al cierre debe migrar automáticamente a la temporada siguiente. Si no, corregir antes de usar la transición real.
+La regla de inclusión de inactivos sigue sin definirse. El flujo Admin ahora bloquea la aplicación cuando el plan contiene participantes inactivos, revalidando su estado antes de crear la temporada. No los incluye/excluye ni reactiva automáticamente. Tests cubren el bloqueo y una desactivación posterior a la confirmación.
 
 ## 8. Vista participante — principal gap restante
 

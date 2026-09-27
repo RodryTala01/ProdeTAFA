@@ -93,19 +93,31 @@ async function readPlan(env: Env, planId: number) {
   }>();
   if (!plan) return null;
   const assignments = await env.DB.prepare(
-    `SELECT sta.user_id,u.full_name,sta.from_division_code,sta.proposed_division_code,
+    `SELECT sta.user_id,u.full_name,u.is_active,ift.user_id AS iffhs_user_id,sta.from_division_code,sta.proposed_division_code,
             sta.confirmed_division_code,sta.proposal_source,sta.proposal_reason,
             sta.requires_review,sta.confirmation_reason
      FROM season_transition_assignments sta
      JOIN users u ON u.id=sta.user_id
+     LEFT JOIN iffhs_season_totals ift ON ift.user_id=sta.user_id AND ift.season_number=?
      WHERE sta.plan_id=?
      ORDER BY sta.from_division_code,u.full_name COLLATE NOCASE`,
-  ).bind(planId).all<{
-    user_id: string; full_name: string; from_division_code: string; proposed_division_code: string;
+  ).bind(plan.source_season_number,planId).all<{
+    is_active:number; iffhs_user_id:string|null; user_id: string; full_name: string; from_division_code: string; proposed_division_code: string;
     confirmed_division_code: string | null; proposal_source: string; proposal_reason: string | null;
     requires_review: number; confirmation_reason: string | null;
   }>();
+  const target = await env.DB.prepare('SELECT id,season_number,status FROM tafa_seasons WHERE season_number=? LIMIT 1').bind(plan.target_season_number).first<{id:number;season_number:number;status:string}>();
+  const applicationBlockers: Array<{code:string;message:string;userIds?:string[]}> = [];
+  const inactive=(assignments.results??[]).filter(row=>!row.is_active);
+  const missing=(assignments.results??[]).filter(row=>!row.iffhs_user_id);
+  if(plan.status!=='applied') {
+    if(target)applicationBlockers.push({code:'TARGET_ALREADY_EXISTS',message:`T${plan.target_season_number} ya existe; no se creará ni modificará automáticamente.`});
+    if(inactive.length)applicationBlockers.push({code:'INACTIVE_POLICY_UNDEFINED',message:`Aplicación bloqueada: no está definido si los participantes inactivos deben integrar la temporada siguiente. Requiere definir esa regla: ${inactive.map(row=>row.full_name).join(', ')}.`,userIds:inactive.map(row=>row.user_id)});
+    if(missing.length)applicationBlockers.push({code:'IFFHS_INCOMPLETE',message:`Primero calculá/completá la IFFHS de T${plan.source_season_number} para: ${missing.map(row=>row.full_name).join(', ')}.`,userIds:missing.map(row=>row.user_id)});
+  }
   return {
+    applicationBlockers,
+    targetSeason:target?{id:Number(target.id),seasonNumber:Number(target.season_number),status:target.status}:null,
     id: Number(plan.id),
     sourceSeasonId: Number(plan.source_season_id),
     sourceSeasonNumber: Number(plan.source_season_number),
@@ -118,6 +130,7 @@ async function readPlan(env: Env, planId: number) {
     appliedAt: plan.applied_at,
     assignments: (assignments.results ?? []).map((row) => ({
       userId: row.user_id,
+      isActive: Boolean(row.is_active),
       fullName: row.full_name,
       fromDivisionCode: row.from_division_code,
       proposedDivisionCode: row.proposed_division_code,
@@ -431,17 +444,8 @@ async function applyPlan(env: Env, user: SessionUser, planId: number) {
   if (plan.status !== 'confirmed') return error('El plan debe estar confirmado antes de aplicarlo', 409);
   if (plan.assignments.some((row) => !row.confirmedDivisionCode)) return error('Faltan destinos confirmados', 409);
 
-  const existingTarget = await env.DB.prepare(
-    `SELECT id FROM tafa_seasons WHERE season_number=? LIMIT 1`,
-  ).bind(plan.targetSeasonNumber).first<{ id: number }>();
-  if (existingTarget) return error(`T${plan.targetSeasonNumber} ya existe; no se aplica el plan automáticamente sobre una temporada existente`, 409);
-
-  const iffhsCount = await env.DB.prepare(
-    `SELECT COUNT(*) AS total FROM iffhs_season_totals WHERE season_number=?`,
-  ).bind(plan.sourceSeasonNumber).first<{ total: number }>();
-  if (Number(iffhsCount?.total ?? 0) < plan.assignments.length) {
-    return error(`Primero calculá/completá la IFFHS de T${plan.sourceSeasonNumber}`, 409);
-  }
+  // Re-read current activity and individual IFFHS coverage immediately before creation.
+  if(plan.applicationBlockers.length) return error(plan.applicationBlockers.map(issue=>issue.message).join(' '),409);
 
   const createdSeason = await createTargetSeason(env, plan.targetSeasonNumber);
   if (!createdSeason) return error('No se pudo crear la temporada destino', 500);
@@ -487,6 +491,10 @@ export async function handleSeasonTransition(request: Request, env: Env): Promis
     const user = await sessionUser(request, env);
     if (!user) return error('No autorizado', 401);
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if(request.method==='GET') {
+      const existing=await env.DB.prepare('SELECT id FROM season_transition_plans WHERE source_season_id=? LIMIT 1').bind(Number(generateMatch[1])).first<{id:number}>();
+      return json({plan:existing?await readPlan(env,Number(existing.id)):null});
+    }
     if (request.method !== 'POST') return error('Método no permitido', 405);
     return generatePlan(env, user, Number(generateMatch[1]));
   }

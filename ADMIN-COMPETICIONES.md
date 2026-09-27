@@ -132,3 +132,7 @@ Ver [guía de Promoción](ADMIN-PROMOCION.md): cuatro cupos, cruces fijos y prop
 ## Resultados e IFFHS
 
 Ver [guía de resultados finales e IFFHS Admin](ADMIN-RESULTADOS-IFFHS.md).
+
+## Transición de temporada
+
+Ver [guía de transición Admin](ADMIN-TRANSICION.md): propuesta, revisión, confirmación, bloqueos y creación de la siguiente temporada en borrador.

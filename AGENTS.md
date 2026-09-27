@@ -273,6 +273,14 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - IFFHS Admin permite revisar pendientes, calcular temporada, consultar ventana de cinco temporadas, faltantes y desglose por participante/competición, diferenciando `calculated` e `imported`.
 - La importación manual sólo agrega totales faltantes: no sobrescribir totales existentes. El cálculo sigue bloqueado si la temporada contiene importados.
 
+### Transición de temporada Admin
+
+- Generar/recuperar propuesta, revisar issues y destinos A/B, confirmar y aplicar son pasos separados. Cambiar propuesta o confirmar una fila marcada para revisión requiere motivo.
+- Mostrar origen, división actual/propuesta/confirmada y motivos por participante. Conservar los issues originales como referencia; la confirmación queda auditada.
+- No está definida la inclusión de participantes inactivos en la siguiente temporada. Si el plan contiene alguno, bloquear su aplicación en UI y backend con nombres y explicación; no excluirlo, incluirlo ni reactivarlo automáticamente.
+- Revalidar antes de aplicar que cada participante del plan tenga IFFHS de la temporada origen. Totales de terceros no cubren faltantes del plan.
+- No aplicar sobre una temporada destino existente. Al aplicar correctamente, mostrar la nueva temporada en `draft` y permitir abrirla desde Admin.
+
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 
 Patrón conceptual indicado por el usuario:
