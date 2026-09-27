@@ -1,6 +1,11 @@
 .participant-round {
+  min-width: 0;
   display: grid;
   gap: 18px;
+}
+
+.participant-round > * {
+  min-width: 0;
 }
 
 .round-history-card {

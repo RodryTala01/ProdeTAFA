@@ -13,7 +13,10 @@
     "smoke:prod": "node scripts/smoke.mjs",
     "cf-typegen": "wrangler types",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
-    "db:migrate:remote": "wrangler d1 migrations apply DB --remote"
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "dev:e2e": "vite --config vite.e2e.config.ts",
+    "test:e2e:local": "node scripts/e2e-t32-local.mjs",
+    "db:migrate:e2e": "wrangler d1 migrations apply DB --local --persist-to .wrangler/e2e-t32"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

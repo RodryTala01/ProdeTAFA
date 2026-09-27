@@ -96,7 +96,15 @@ async function validateCompetitionResults(env: Env, competition: CompetitionMeta
     `SELECT COUNT(*) AS total FROM competition_entries WHERE competition_id=?`,
   ).bind(competition.id).first<{ total: number }>();
   const entryCount = Number(entries?.total ?? 0);
-  if (entryCount === 0) return null;
+  if (entryCount === 0) {
+    if (competition.code.startsWith('LIGA_')) {
+      const members = await env.DB.prepare(`SELECT COUNT(*) AS total FROM season_division_members m
+        JOIN competitions c ON c.season_id=m.season_id AND c.division_id=m.division_id WHERE c.id=?`)
+        .bind(competition.id).first<{total:number}>();
+      if (Number(members?.total ?? 0)>0) return `${competition.code} necesita preparar y confirmar sus resultados finales`;
+    }
+    return null;
+  }
   if (competition.status !== 'finished') {
     return `${competition.code} todavía no está finalizada`;
   }

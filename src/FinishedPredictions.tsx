@@ -38,15 +38,15 @@ async function api<T>(url: string): Promise<T> {
   return data;
 }
 
-function predictionLabel(match: Match, prediction: Prediction) {
-  if (match.matchType === 'PENALTIES_ONLY') {
-    if (prediction.extraTeamId === match.home.id) return match.home.name;
-    if (prediction.extraTeamId === match.away.id) return match.away.name;
-    return 'Sin pronóstico';
-  }
-
+export function predictionLabel(match: Match, prediction: Prediction) {
   if (prediction.homeScore === null || prediction.awayScore === null) return 'Sin pronóstico';
-  return `${prediction.homeScore} - ${prediction.awayScore}`;
+  const score = `${prediction.homeScore} - ${prediction.awayScore}`;
+  if (match.matchType === 'PENALTIES_ONLY') {
+    const team = prediction.extraTeamId === match.home.id ? match.home.name
+      : prediction.extraTeamId === match.away.id ? match.away.name : 'Sin selección';
+    return `${score} · Penales: ${team}`;
+  }
+  return score;
 }
 
 export default function FinishedPredictions({ roundId }: { roundId: number }) {

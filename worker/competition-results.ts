@@ -169,10 +169,45 @@ async function readResults(env: Env, competitionId: number) {
 async function resultEvidence(env: Env, competitionId: number) {
   const entries = await env.DB.prepare(`SELECT id AS entryId,display_name AS entryName,entry_type AS entryType FROM competition_entries WHERE competition_id=? ORDER BY id`).bind(competitionId).all<{entryId:number;entryName:string;entryType:string}>();
   const members = await env.DB.prepare(`SELECT m.entry_id AS entryId,m.user_id AS userId,u.full_name AS fullName,m.valid_from_round_id AS validFrom,m.valid_to_round_id AS validTo FROM competition_entry_members m JOIN users u ON u.id=m.user_id JOIN competition_entries e ON e.id=m.entry_id WHERE e.competition_id=? ORDER BY m.id`).bind(competitionId).all<{entryId:number;userId:string;fullName:string;validFrom:number|null;validTo:number|null}>();
-  const encounters = await env.DB.prepare(`SELECT e.id,e.stage_id AS stageId,e.slot_key AS slotKey,e.entry_a_id AS entryAId,e.entry_b_id AS entryBId,e.winner_entry_id AS winnerId,e.status,e.admin_confirmed_at AS confirmedAt,s.code AS stageCode,s.sequence FROM competition_encounters e JOIN competition_stages s ON s.id=e.stage_id WHERE s.competition_id=? ORDER BY s.sequence,e.id`).bind(competitionId).all();
+  // Group fixtures may end in a draw; only knockout encounters need a confirmed winner.
+  const encounters = await env.DB.prepare(`SELECT e.id,e.stage_id AS stageId,e.slot_key AS slotKey,e.entry_a_id AS entryAId,e.entry_b_id AS entryBId,e.winner_entry_id AS winnerId,e.status,e.admin_confirmed_at AS confirmedAt,s.code AS stageCode,s.sequence FROM competition_encounters e JOIN competition_stages s ON s.id=e.stage_id WHERE s.competition_id=? AND s.stage_type='KNOCKOUT' ORDER BY s.sequence,e.id`).bind(competitionId).all();
   const survival = await env.DB.prepare(`SELECT r.entry_id AS entryId,r.stage_id AS stageId,l.sequence,r.decision FROM competition_survival_results r JOIN competition_stages s ON s.id=r.stage_id JOIN competition_round_links l ON l.id=r.round_link_id WHERE s.competition_id=? ORDER BY l.sequence`).bind(competitionId).all();
   const groups = await env.DB.prepare(`SELECT ge.entry_id AS entryId,g.stage_id AS stageId FROM competition_group_entries ge JOIN competition_groups g ON g.id=ge.group_id JOIN competition_stages s ON s.id=g.stage_id WHERE s.competition_id=?`).bind(competitionId).all();
   return {entries:(entries.results??[]).map(e=>({...e,members:(members.results??[]).filter(m=>m.entryId===e.entryId)})),encounters:(encounters.results??[]) as {status:string;confirmedAt:string|null;winnerId:number|null}[],survival:survival.results??[],groups:groups.results??[]};
+}
+
+async function prepareLeagueResults(env: Env, user: SessionUser, competitionId: number) {
+  const c = await env.DB.prepare(`SELECT c.season_id,c.division_id,c.code,c.status,s.status AS season_status
+    FROM competitions c JOIN tafa_seasons s ON s.id=c.season_id WHERE c.id=?`).bind(competitionId)
+    .first<{season_id:number;division_id:number;code:string;status:string;season_status:string}>();
+  if (!c) return error('Competición no encontrada',404);
+  if (!['LIGA_A','LIGA_B'].includes(c.code)) return error('Esta preparación corresponde sólo a Liga',409);
+  if ([c.status,c.season_status].includes('archived')) return error('La temporada o competición está archivada',409);
+  const rounds = await env.DB.prepare(`SELECT r.status FROM competition_round_links l JOIN rounds r ON r.id=l.round_id
+    JOIN competition_stages s ON s.id=l.stage_id WHERE s.competition_id=? AND s.stage_type='LEAGUE_TABLE' AND l.purpose='NORMAL'`).bind(competitionId).all<{status:string}>();
+  if (rounds.results.length!==5 || rounds.results.some(r=>r.status!=='finished')) return error('La Liga necesita sus cinco Fechas finalizadas',409);
+  const members = await env.DB.prepare(`SELECT u.id,u.full_name FROM season_division_members m JOIN users u ON u.id=m.user_id
+    WHERE m.season_id=? AND m.division_id=? ORDER BY u.id`).bind(c.season_id,c.division_id).all<{id:string;full_name:string}>();
+  const existing = await resultEvidence(env,competitionId);
+  if (existing.entries.some(e=>e.entryType!=='INDIVIDUAL'||e.members.length!==1||!members.results.some(m=>m.id===e.members[0].userId)))
+    return error('Las entradas históricas de Liga no coinciden con la división; requiere revisión Admin',409);
+  const statements:D1PreparedStatement[]=[];
+  for (const m of members.results) {
+    if (existing.entries.some(e=>e.members.some(member=>member.userId===m.id))) continue;
+    const source=JSON.stringify({leagueResultUserId:m.id});
+    statements.push(env.DB.prepare(`INSERT INTO competition_entries(competition_id,entry_type,display_name,source_json)
+      SELECT ?,'INDIVIDUAL',?,? WHERE NOT EXISTS (SELECT 1 FROM competition_entries e JOIN competition_entry_members m ON m.entry_id=e.id WHERE e.competition_id=? AND m.user_id=?)`)
+      .bind(competitionId,m.full_name,source,competitionId,m.id));
+    statements.push(env.DB.prepare(`INSERT INTO competition_entry_members(entry_id,user_id)
+      SELECT e.id,? FROM competition_entries e WHERE e.competition_id=? AND e.source_json=?
+      AND NOT EXISTS (SELECT 1 FROM competition_entry_members m WHERE m.entry_id=e.id AND m.user_id=?)`).bind(m.id,competitionId,source,m.id));
+  }
+  if (statements.length) {
+    statements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json)
+      VALUES (?,'competition.league_result_entries_prepared','competition',?,?)`).bind(user.id,String(competitionId),JSON.stringify({userIds:members.results.map(m=>m.id)})));
+    await env.DB.batch(statements);
+  }
+  return json({...await readResults(env,competitionId),...await resultEvidence(env,competitionId)});
 }
 
 async function replaceResults(request: Request, env: Env, user: SessionUser, competitionId: number) {
@@ -241,6 +276,9 @@ async function replaceResults(request: Request, env: Env, user: SessionUser, com
   }
 
   const evidence = await resultEvidence(env, competitionId);
+  const pending = await env.DB.prepare(`SELECT 1 FROM competition_round_links l JOIN rounds r ON r.id=l.round_id
+    WHERE l.competition_id=? AND r.status<>'finished' LIMIT 1`).bind(competitionId).first();
+  if (pending) return error('Hay Fechas vinculadas sin finalizar',409);
   if (!normalized.length || normalized.length !== evidence.entries.length) return error('Confirmá un snapshot completo: una fila por entrada',409);
   if (evidence.encounters.some(e=>e.status!=='finished'||!e.confirmedAt||!e.winnerId)) return error('Hay encuentros sin ganador confirmado',409);
   for (const row of normalized) {
@@ -298,6 +336,7 @@ export async function handleCompetitionResults(request: Request, env: Env): Prom
     const user = await sessionUser(request, env);
     if (!user) return error('No autorizado', 401);
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method === 'POST') return prepareLeagueResults(env,user,Number(adminMatch[1]));
     if (request.method !== 'PUT') return error('Método no permitido', 405);
     return replaceResults(request, env, user, Number(adminMatch[1]));
   }

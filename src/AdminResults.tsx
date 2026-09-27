@@ -65,6 +65,7 @@ export default function AdminResults({
     setBusy(true);
     setError('');
     try {
+      if (c.code.startsWith('LIGA_')) await cupApi(`${cupAdmin}/competitions/${c.id}/results`, 'POST', {});
       const d = await loadResultEvidence(c);
       setData(d);
       const league = c.code.startsWith('LIGA_')

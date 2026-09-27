@@ -178,3 +178,43 @@ describe('Resultados e IFFHS Admin integrados',()=>{
    const detail=await response!.json() as any;expect(detail.rows[0].totalSource).toBe('imported');expect(detail.rows[0].totalPoints).toBe(123.45);
  });
 });
+
+
+describe('Regresiones de cierre E2E',()=>{
+ it('prepara las entradas de Liga desde la división, sin duplicarlas ni excluir inactivos históricos',async()=>{
+  db.exec(`UPDATE tafa_seasons SET status='active';
+    INSERT INTO competitions(id,season_id,division_id,code,canonical_name,display_name,family) VALUES (3,1,10,'LIGA_A','Liga A','Liga A','LEAGUE');
+    INSERT INTO competition_stages(id,competition_id,code,name,stage_type,sequence) VALUES (30,3,'LEAGUE','Liga','LEAGUE_TABLE',1);
+    UPDATE users SET is_active=0 WHERE id='P2';`);
+  expect((await calculateIffhsSeason(env(),'admin',32)).ok).toBe(false);
+  const req=()=>adminRequest('/api/admin/competition-engine/competitions/3/results','POST',{});
+  expect((await handleCompetitionResults(req(),env()))!.status).toBe(409);
+  for(let i=1;i<=5;i++){
+   db.prepare("INSERT INTO rounds(id,name,status) VALUES (?,?,'finished')").run(i,'Fecha '+i);
+   db.prepare('INSERT INTO competition_round_links(competition_id,stage_id,round_id,sequence) VALUES (3,30,?,?)').run(i,i);
+  }
+  for(let i=0;i<2;i++){
+   const response=await handleCompetitionResults(req(),env());expect(response!.status).toBe(200);
+   const d=await response!.json() as any;expect(d.entries).toHaveLength(2);expect(d.entries.flatMap((e:any)=>e.members.map((m:any)=>m.userId)).sort()).toEqual(['P1','P2']);
+  }
+  expect((db.prepare("SELECT COUNT(*) n FROM audit_log WHERE action='competition.league_result_entries_prepared'").get() as any).n).toBe(1);
+  const evidence=await (await handleCompetitionResults(adminRequest('/api/competition-engine/competitions/3/results'),env()))!.json() as any;
+  expect((await handleCompetitionResults(adminRequest('/api/admin/competition-engine/competitions/3/results','PUT',{results:evidence.entries.map((e:any,i:number)=>({entryId:e.entryId,resultCode:'POSITION',finalPosition:i+1}))}),env()))!.status).toBe(200);
+  db.exec("UPDATE competitions SET status='finished' WHERE id=3");
+  expect((await calculateIffhsSeason(env(),'admin',32)).ok).toBe(true);
+ });
+ it('Total admite empates de grupos pero exige Fechas terminadas y ganador confirmado en eliminatorias',async()=>{
+  db.exec(`INSERT INTO competition_stages(id,competition_id,code,name,stage_type,sequence) VALUES (10,1,'GROUPS','Grupos','ROUND_ROBIN_GROUPS',1),(11,1,'FINAL','Final','KNOCKOUT',2);
+   INSERT INTO rounds(id,name,status) VALUES (1,'Grupos','draft');
+   INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence) VALUES (1,1,10,1,1);
+   INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status) VALUES (10,1,'Grupo',1,2,'pending');`);
+  const req=()=>adminRequest('/api/admin/competition-engine/competitions/1/results','PUT',{results:[{entryId:1,resultCode:'CHAMPION'},{entryId:2,resultCode:'RUNNER_UP'}]});
+  expect((await handleCompetitionResults(req(),env()))!.status).toBe(409);
+  db.exec("UPDATE rounds SET status='finished'");
+  expect((await handleCompetitionResults(req(),env()))!.status).toBe(200);
+  db.exec("INSERT INTO competition_encounters(stage_id,slot_key,entry_a_id,entry_b_id,status) VALUES (11,'Final',1,2,'tied')");
+  expect((await handleCompetitionResults(req(),env()))!.status).toBe(409);
+  db.exec("UPDATE competition_encounters SET status='finished',winner_entry_id=1,admin_confirmed_at=datetime('now') WHERE stage_id=11");
+  expect((await handleCompetitionResults(req(),env()))!.status).toBe(200);
+ });
+});
