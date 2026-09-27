@@ -1,3 +1,4 @@
+import { statusLabel } from './competition-presentation';
 import { useEffect, useState } from 'react';
 import {
   transitionApi,
@@ -170,7 +171,7 @@ export default function AdminSeasonTransition({
       {target && (
         <p>
           T{target.seasonNumber} ya existe · estado:{' '}
-          {target.status === 'draft' ? 'Borrador (draft)' : target.status}.{' '}
+          {statusLabel(target.status)}.{' '}
           {plan?.status === 'applied'
             ? 'Creada mediante este plan.'
             : 'No se creará ni modificará automáticamente.'}
@@ -289,7 +290,7 @@ export default function AdminSeasonTransition({
                   const d = await transitionApi.apply(plan.id);
                   accept(d.plan);
                   setNotice(
-                    `T${d.targetSeason.seasonNumber} creada en estado draft. Plan aplicado y auditado.`,
+                    `T${d.targetSeason.seasonNumber} creada en borrador. Plan aplicado y auditado.`,
                   );
                 })
               }

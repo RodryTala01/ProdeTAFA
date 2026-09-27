@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import AdminCupAb from './AdminCupAb';
 import AdminCupTotal from './AdminCupTotal';
 import CompetitionConfigPanel from './CompetitionConfigPanel';
-import { initialSeasonId, stageTypeLabel, statusLabel } from './competition-presentation';
+import { initialSeasonId, isCompetitionClosed, stageTypeLabel, statusLabel } from './competition-presentation';
 import './admin-competitions.css';
 
 type Division = {
@@ -223,6 +223,7 @@ export default function AdminCompetitions() {
   }
 
   async function unlinkRound(competition: Competition, link: RoundLink) {
+    if (!window.confirm(`¿Desvincular ${link.roundName} de ${competition.displayName}? Puede afectar sus cálculos y cruces. Revisá el vínculo antes de continuar.`)) return;
     setLoading(true); setError(''); setSuccess('');
     try {
       await api(`/api/admin/competition-engine/competitions/${competition.id}/rounds/${link.id}`, { method: 'DELETE' });
@@ -342,7 +343,7 @@ export default function AdminCompetitions() {
                     <button className="button button--primary" onClick={() => setSelectedCompetitionId(competition.id)}>Administrar {competition.displayName}</button>
                   ) : <>
                   <button className="button button--ghost" onClick={() => setSelectedCompetitionId(null)}>Volver a competiciones</button>
-                  <p>{selected.name} · Código: {competition.code}</p>
+                  <p>{selected.name} · {competition.displayName}</p>
                   {competition.family !== 'LEAGUE' && !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION'].includes(competition.code) && <p className="competition-pending">Configuración deportiva específica pendiente. El armado de grupos, parejas y cruces tendrá opciones asistida y manual, con validaciones y auditoría.</p>}
                   {['COPA_A','COPA_B'].includes(competition.code) && competition.stages.some(s=>s.stageType==='ACCUMULATIVE_GROUPS') && <AdminCupAb key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='COPA_TOTAL' && competition.stages.some(s=>s.stageType==='ROUND_ROBIN_GROUPS') && <AdminCupTotal key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
@@ -363,6 +364,7 @@ export default function AdminCompetitions() {
                     <div className="round-create">
                       <select
                         aria-label="Etapa para vincular Fecha"
+                        disabled={loading || fetching || isCompetitionClosed(selected.status) || isCompetitionClosed(competition.status)}
                         value={stageByCompetition[competition.id] ?? ''}
                         onChange={(event) => setStageByCompetition((current) => ({ ...current, [competition.id]: Number(event.target.value) }))}
                       >
@@ -370,13 +372,14 @@ export default function AdminCompetitions() {
                       </select>
                       <select
                         aria-label="Fecha para vincular"
+                        disabled={loading || fetching || isCompetitionClosed(selected.status) || isCompetitionClosed(competition.status)}
                         value={roundByCompetition[competition.id] ?? ''}
                         onChange={(event) => setRoundByCompetition((current) => ({ ...current, [competition.id]: event.target.value ? Number(event.target.value) : '' }))}
                       >
                         <option value="">Elegir Fecha...</option>
                         {availableRounds.map((round) => <option key={round.id} value={round.id}>{round.name} · {statusLabel(round.status)} · {round.category}</option>)}
                       </select>
-                      <button className="button button--secondary" disabled={loading || fetching || selected.status === 'finished' || selected.status === 'archived' || !roundByCompetition[competition.id]} onClick={() => void linkRound(competition)}>Vincular Fecha</button>
+                      <button className="button button--secondary" disabled={loading || fetching || selected.status === 'finished' || selected.status === 'archived' || isCompetitionClosed(competition.status) || !roundByCompetition[competition.id]} onClick={() => void linkRound(competition)}>Vincular Fecha</button>
                     </div>
                   )}
 
@@ -389,7 +392,7 @@ export default function AdminCompetitions() {
                             <strong>{link.roundName}</strong>
                             <span>{competition.stages.find((stage) => stage.id === link.stageId)?.name} · {link.purpose === 'TIEBREAK' ? 'Desempate' : 'Jornada'} · {statusLabel(link.roundStatus)}</span>
                           </div>
-                          <button className="button button--ghost" disabled={loading || fetching || selected?.status === 'finished' || selected?.status === 'archived'} onClick={() => void unlinkRound(competition, link)}>Desvincular</button>
+                          <button className="button button--ghost" disabled={loading || fetching || selected?.status === 'finished' || selected?.status === 'archived' || isCompetitionClosed(competition.status)} onClick={() => void unlinkRound(competition, link)}>Desvincular</button>
                         </div>
                       ))}
                     </div>

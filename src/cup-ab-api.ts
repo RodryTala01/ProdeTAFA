@@ -5,12 +5,18 @@ export async function cupApi<T>(
   method = "GET",
   body?: unknown,
 ): Promise<T> {
-  const response = await fetch(url, {
+  let response: Response;
+  try { response = await fetch(url, {
     method,
     headers: { "content-type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),
+  }); } catch {
+    throw new CupApiError({error:'No se pudo conectar. Revisá tu conexión y volvé a intentar.'});
+  }
+  if (response.status === 401) throw new CupApiError({error:'Tu sesión venció. Volvé a ingresar para continuar.'});
+  const data = await response.json().catch(() => {
+    throw new CupApiError({error:'El servidor no pudo responder. Volvé a intentar en unos momentos.'});
   });
-  const data = await response.json();
   if (!response.ok) throw new CupApiError(data);
   return data as T;
 }

@@ -28,11 +28,16 @@ export type IffhsDetail = {
 };
 export const sourceLabel = (source: string | null) =>
   source === 'calculated'
-    ? 'Calculado (calculated)'
+    ? 'Calculado'
     : source === 'imported'
-      ? 'Importado (imported)'
+      ? 'Importado'
       : 'Sin datos';
-export function IffhsBreakdown({ row }: { row: IffhsDetail }) {
+const componentLabels: Record<string, string> = {
+  TITLE: 'Título', RUNNER_UP: 'Subcampeonato', POSITION: 'Posición final',
+  SPORT_POINTS: 'Puntos deportivos', FULLS: 'Plenos', ERROR_RANK: 'Posición por errores',
+  RESULT: 'Resultado final', GROUP_POINTS: 'Puntos de grupos',
+};
+export function IffhsBreakdown({ row, competitionNames = {} }: { row: IffhsDetail; competitionNames?: Record<string, string> }) {
   return (
     <section>
       <h4>
@@ -47,8 +52,8 @@ export function IffhsBreakdown({ row }: { row: IffhsDetail }) {
         <ul>
           {row.components.map((c, i) => (
             <li key={i}>
-              {c.competitionCode.replaceAll('_', ' ')} ·{' '}
-              {c.componentCode.replaceAll('_', ' ')}: {c.baseValue} ×{' '}
+              {competitionNames[c.competitionCode] ?? c.competitionCode.replaceAll('_', ' ')} ·{' '}
+              {componentLabels[c.componentCode] ?? c.componentCode.replaceAll('_', ' ')}: {c.baseValue} ×{' '}
               {c.multiplier} = {c.points} · {sourceLabel(c.source)}
             </li>
           ))}
@@ -243,7 +248,7 @@ export default function AdminIffhs({
       {detail && (
         <>
           <h3>Desglose T{detailSeason}</h3>
-          <IffhsBreakdown row={detail} />
+          <IffhsBreakdown row={detail} competitionNames={Number(detailSeason) === seasonNumber ? Object.fromEntries(competitions.map(c => [c.code, c.displayName])) : {}} />
         </>
       )}
       <details className="form-stack">

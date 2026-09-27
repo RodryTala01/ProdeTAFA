@@ -1,3 +1,4 @@
+import { statusLabel } from './competition-presentation';
 import { useEffect, useState } from 'react';
 import { cupApi, cupAdmin, type CupCompetition } from './cup-ab-api';
 import {
@@ -25,10 +26,14 @@ export default function AdminResults({
     [error, setError] = useState(''),
     [notice, setNotice] = useState(''),
     [busy, setBusy] = useState(false),
+    [retry, setRetry] = useState(0),
     [reviewed, setReviewed] = useState(false);
   const locked = busy || archived || c.status === 'archived';
   useEffect(() => {
     let active = true;
+    setError('');
+    setData(null);
+    setReviewed(false);
     loadResultEvidence(c)
       .then((d) => {
         if (active) {
@@ -53,7 +58,7 @@ export default function AdminResults({
     return () => {
       active = false;
     };
-  }, [c.id]);
+  }, [c.id, retry]);
   const change = (id: number, patch: Partial<ResultRow>) => {
     setReviewed(false);
     setRows((old) =>
@@ -62,8 +67,10 @@ export default function AdminResults({
   };
   async function propose() {
     if (!data) return;
+    setReviewed(false);
     setBusy(true);
     setError('');
+    setNotice('');
     try {
       if (c.code.startsWith('LIGA_')) await cupApi(`${cupAdmin}/competitions/${c.id}/results`, 'POST', {});
       const d = await loadResultEvidence(c);
@@ -87,6 +94,7 @@ export default function AdminResults({
   async function save() {
     setBusy(true);
     setError('');
+    setNotice('');
     try {
       await cupApi(`${cupAdmin}/competitions/${c.id}/results`, 'PUT', {
         results: rows,
@@ -96,7 +104,7 @@ export default function AdminResults({
       setRows(d.results);
       setReviewed(false);
       setNotice(
-        'Snapshot completo confirmado y auditado. Recalculá IFFHS si corresponde.',
+        'Resultados confirmados. Se guardó el historial de la confirmación. Recalculá IFFHS si corresponde.',
       );
     } catch (e) {
       setError((e as Error).message);
@@ -109,20 +117,21 @@ export default function AdminResults({
     <details className="form-stack">
       <summary>Resultados finales</summary>
       <p>
-        Fuente: competition_results. Confirmar reemplaza el snapshot completo y
-        afecta el histórico e IFFHS.
+        Confirmar guarda los resultados de todos los participantes. Si ya había
+        resultados confirmados, los reemplaza y afecta el historial e IFFHS.
       </p>
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
       {!data ? (
-        <p>Cargando resultados…</p>
+        error ? <button className="button button--secondary" onClick={() => setRetry(n => n + 1)}>Reintentar carga de resultados</button>
+          : <p role="status">Cargando resultados…</p>
       ) : (
         <>
           <p>
-            {data.results.length} de {data.entries.length} entradas confirmadas.
-            Estado de competición: {c.status}. Finalizá la competición desde
-            Configuración general antes de calcular IFFHS.
+            {data.results.length} de {data.entries.length} resultados confirmados.
+            Estado de competición: {statusLabel(c.status)}. {c.status !== 'finished' && c.status !== 'archived' && 'Finalizá la competición desde Configuración general antes de calcular IFFHS.'}
           </p>
+          {data.entries.length === 0 && <p>{c.code.startsWith('LIGA_') ? 'Al cerrar las cinco Fechas, prepará la propuesta para cargar los participantes y sus posiciones.' : 'Todavía no hay participantes en esta competición. Completá primero su configuración deportiva.'}</p>}
           {c.stages
             .filter((s) => s.stageType === 'KNOCKOUT')
             .map((s) => (
@@ -304,7 +313,7 @@ export default function AdminResults({
               checked={reviewed}
               onChange={(e) => setReviewed(e.target.checked)}
             />{' '}
-            Revisé el snapshot completo y sus destinatarios IFFHS.
+            Revisé todos los resultados y quiénes reciben puntos IFFHS.
           </label>
           <button
             className="button button--primary"

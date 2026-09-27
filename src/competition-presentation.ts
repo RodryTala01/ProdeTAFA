@@ -12,6 +12,9 @@ export function stageTypeLabel(value: string) {
 export function statusLabel(value: string) {
   return ({ draft: 'Borrador', active: 'Activa', finished: 'Finalizada', archived: 'Archivada', open: 'Abierta' } as Record<string, string>)[value] ?? value;
 }
+export function isCompetitionClosed(status: string) {
+  return status === 'finished' || status === 'archived';
+}
 export function initialSeasonId(seasons: { id: number; status: string }[]) {
   return seasons.find((season) => season.status === 'active')?.id ?? seasons[0]?.id ?? null;
 }

@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { STAGE_OPTIONS, stageTypeLabel, statusLabel, type StageType } from './competition-presentation';
+import { STAGE_OPTIONS, isCompetitionClosed, stageTypeLabel, statusLabel, type StageType } from './competition-presentation';
 
 type Stage = {
   id: number;
@@ -55,6 +55,9 @@ export default function CompetitionConfigPanel({ competition, disabled = false, 
 
   async function saveCompetition(event: FormEvent) {
     event.preventDefault();
+    if (status !== competition.status && isCompetitionClosed(status) && !window.confirm(status === 'archived'
+      ? `¿Archivar ${competition.displayName}? La edición quedará disponible para consulta y sin edición desde esta pantalla.`
+      : `¿Finalizar ${competition.displayName}? Revisá los resultados antes de cerrar: no podrás volverla a borrador ni modificar su estructura.`)) return;
     setBusy(true); setError(''); setSuccess('');
     try {
       await api(`/api/admin/competition-engine/competitions/${competition.id}`, {
@@ -113,7 +116,8 @@ export default function CompetitionConfigPanel({ competition, disabled = false, 
     } finally { setBusy(false); }
   }
 
-  const locked = disabled || busy;
+  const locked = disabled || busy || competition.status === 'archived';
+  const structureLocked = locked || isCompetitionClosed(competition.status);
 
   return (
     <div className="form-stack">
@@ -139,6 +143,7 @@ export default function CompetitionConfigPanel({ competition, disabled = false, 
         <button className="button button--secondary" disabled={locked || !displayName.trim()}>Guardar</button>
       </form>
 
+        {isCompetitionClosed(competition.status) && <p role="status">La competición está cerrada. Sus etapas y Fechas se conservan para consulta.</p>}
         <form className="round-create" onSubmit={createStage}>
           <label className="field">
             <span>Nueva etapa</span>
@@ -146,16 +151,16 @@ export default function CompetitionConfigPanel({ competition, disabled = false, 
               value={stageName}
               onChange={(event) => setStageName(event.target.value)}
               placeholder="Ej.: Fase de grupos, Octavos, Final"
-              disabled={locked}
+              disabled={structureLocked}
             />
           </label>
           <label className="field">
             <span>Formato</span>
-            <select aria-label="Formato" value={stageType} onChange={(event) => setStageType(event.target.value as StageType)} disabled={locked}>
+            <select aria-label="Formato" value={stageType} onChange={(event) => setStageType(event.target.value as StageType)} disabled={structureLocked}>
               {STAGE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
-          <button className="button button--secondary" disabled={locked || !stageName.trim()}>Crear etapa</button>
+          <button className="button button--secondary" disabled={structureLocked || !stageName.trim()}>Crear etapa</button>
         </form>
 
       {competition.stages.length === 0 && <p>Todavía no hay etapas. Creá la primera con el formulario.</p>}
@@ -173,15 +178,15 @@ export default function CompetitionConfigPanel({ competition, disabled = false, 
                 : <ul>{(competition.roundLinks ?? []).filter((link) => link.stageId === stage.id)
                   .sort((a, b) => a.sequence - b.sequence).map((link) => <li key={link.id}>{link.roundName} · {statusLabel(link.roundStatus)}</li>)}</ul>}
               <div className="topbar-actions">
-                <button type="button" className="button button--secondary" disabled={locked} onClick={() => setEditing({ ...stage })}>Editar {stage.name}</button>
-                <button type="button" className="button button--ghost" disabled={locked || (competition.roundLinks ?? []).some((link) => link.stageId === stage.id)} onClick={() => void deleteStage(stage)}>Eliminar {stage.name}</button>
+                <button type="button" className="button button--secondary" disabled={structureLocked} onClick={() => setEditing({ ...stage })}>Editar {stage.name}</button>
+                <button type="button" className="button button--ghost" disabled={structureLocked || (competition.roundLinks ?? []).some((link) => link.stageId === stage.id)} onClick={() => void deleteStage(stage)}>Eliminar {stage.name}</button>
               </div>
               {editing?.id === stage.id && <form className="form-stack" onSubmit={saveStage}>
-                <label className="field"><span>Nombre de etapa</span><input required disabled={locked} value={editing.name} onChange={(event) => setEditing({ ...editing, name: event.target.value })} /></label>
-                <label className="field"><span>Estado de etapa</span><select aria-label="Estado de etapa" disabled={locked} value={editing.status} onChange={(event) => setEditing({ ...editing, status: event.target.value })}>
+                <label className="field"><span>Nombre de etapa</span><input required disabled={structureLocked} value={editing.name} onChange={(event) => setEditing({ ...editing, name: event.target.value })} /></label>
+                <label className="field"><span>Estado de etapa</span><select aria-label="Estado de etapa" disabled={structureLocked} value={editing.status} onChange={(event) => setEditing({ ...editing, status: event.target.value })}>
                   {['draft', 'active', 'finished', 'archived'].map((value) => <option key={value} value={value}>{statusLabel(value)}</option>)}
                 </select></label>
-                <div className="topbar-actions"><button className="button button--primary" disabled={locked || !editing.name.trim()}>Guardar etapa</button><button type="button" className="button button--ghost" disabled={locked} onClick={() => setEditing(null)}>Cancelar</button></div>
+                <div className="topbar-actions"><button className="button button--primary" disabled={structureLocked || !editing.name.trim()}>Guardar etapa</button><button type="button" className="button button--ghost" disabled={structureLocked} onClick={() => setEditing(null)}>Cancelar</button></div>
               </form>}
             </section>
           ))}

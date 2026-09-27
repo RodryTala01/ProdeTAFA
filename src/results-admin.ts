@@ -176,7 +176,7 @@ export function resultErrors(
     rows.length !== d.entries.length ||
     new Set(rows.map((r) => r.entryId)).size !== d.entries.length
   )
-    errors.push('Falta el snapshot completo.');
+    errors.push('Falta completar los resultados de todos los participantes.');
   if (
     d.encounters.some(
       (e) => e.status !== 'finished' || !e.confirmedAt || !e.winnerId,
