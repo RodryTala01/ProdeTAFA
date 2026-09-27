@@ -573,6 +573,8 @@ async function participantCurrent(env: Env, user: SessionUser) {
       name: season.name,
       status: season.status,
       division: membership ? { id: Number(membership.id), code: membership.code, name: membership.name } : null,
+      // Season history only: DUO membership must be evaluated by Fecha in competition-contexts.
+      competitionMembershipScope: 'SEASON_HISTORY',
       competitions: (competitions.results ?? []).map((competition) => ({
         id: Number(competition.id),
         code: competition.code,

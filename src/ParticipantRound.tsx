@@ -1,3 +1,4 @@
+import ParticipantCompetitionContexts from './ParticipantCompetitionContexts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { nextPredictionField, type PredictionField } from './prediction-focus';
 import PredictionHistory from './PredictionHistory';
@@ -403,6 +404,8 @@ export default function ParticipantRound() {
 
       {isFinished && <RoundRanking roundId={round.id} mode="participant" />}
       {isFinished && <FinishedPredictions roundId={round.id} />}
+
+      <ParticipantCompetitionContexts key={round.id} roundId={round.id}/>
 
       <div className="prediction-list">
         {round.matches.map((match) => {

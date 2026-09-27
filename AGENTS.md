@@ -281,6 +281,16 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Revalidar antes de aplicar que cada participante del plan tenga IFFHS de la temporada origen. Totales de terceros no cubren faltantes del plan.
 - No aplicar sobre una temporada destino existente. Al aplicar correctamente, mostrar la nueva temporada en `draft` y permitir abrirla desde Admin.
 
+### Contextos deportivos del participante por Fecha
+
+- Una Fecha sigue teniendo un único pronóstico de 12 partidos y un único envío/reenvío. Mostrar sus contextos sobre el formulario sin duplicar controles.
+- GET `/api/participant/rounds/:roundId/competition-contexts` usa exclusivamente la sesión participante y sólo Fechas abiertas/finalizadas. No acepta un usuario arbitrario.
+- Derivar Liga por división; grupos por pertenencia; eliminatorias por encuentros; Total por segmentos/mini-fixtures; TAFA por sus propias Fechas y entradas, incluso sin vínculo TIEBREAK.
+- Dúos evalúa membresía en la Fecha: límite inferior inclusivo y superior exclusivo. Nombres y compañero se reconstruyen con esos integrantes, no con el nombre actual del dúo.
+- No excluir historia por estado actual de entrada. Survival excluye Fechas posteriores a eliminación/clasificación confirmada; knockout exige un encuentro real en esa Fecha.
+- La lista general de competiciones de temporada es histórica (`SEASON_HISTORY`); no demuestra vigencia de Dúos en una Fecha. Usar siempre el endpoint específico para ello.
+- No recalcular standings ni TAFA en frontend. Reutilizar cálculo de segmentos existente para mini-fixtures de Total.
+
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 
 Patrón conceptual indicado por el usuario:

@@ -268,7 +268,7 @@ async function generateFixtures(env: Env, user: SessionUser, stageId: number) {
   return json({ ok: true, stageId, fixture: createdSummary });
 }
 
-async function scoreEntrySegment(env: Env, entryId: number, segmentId: number) {
+export async function scoreEntrySegment(env: Env, entryId: number, segmentId: number) {
   const row = await env.DB.prepare(
     `SELECT COALESCE(SUM(ps.total_points),0) AS points,
             COUNT(crsm.match_id) AS match_count,

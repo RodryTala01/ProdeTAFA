@@ -1,3 +1,4 @@
+import { participantCompetitionContexts } from './participant-contexts';
 import { recalculateRoundScores } from './scoring';
 import { predictionHistory } from './prediction-history';
 
@@ -455,6 +456,16 @@ export async function handlePredictions(request: Request, env: Env): Promise<Res
   }
 
   if (!pathname.startsWith('/api/participant/')) return null;
+
+  const contextsMatch=pathname.match(/^\/api\/participant\/rounds\/(\d+)\/competition-contexts$/);
+  if(contextsMatch){
+    const user=await sessionUser(request,env);
+    if(!user||user.role!=='participant')return error('Acceso de participante requerido',403);
+    if(request.method!=='GET')return error('Método no permitido',405);
+    if(url.searchParams.has('userId'))return error('Sólo podés consultar tus propios contextos',403);
+    const payload=await participantCompetitionContexts(env,Number(contextsMatch[1]),user.id);
+    return payload?json(payload):error('Fecha no disponible',404);
+  }
 
   const historyMatch = pathname.match(/^\/api\/participant\/rounds\/(\d+)\/prediction-history$/);
   if (historyMatch) {

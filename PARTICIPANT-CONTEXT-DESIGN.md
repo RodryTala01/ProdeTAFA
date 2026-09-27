@@ -1,6 +1,6 @@
 # Diseño — contextos deportivos del participante por Fecha
 
-Estado: diseño previo a implementación.  
+Estado: implementado; ver PARTICIPANT-CONTEXTS.md para contrato final y validación.
 Objetivo: que el participante vea todos los usos deportivos de una Fecha sin duplicar el pronóstico.
 
 ## Principio
