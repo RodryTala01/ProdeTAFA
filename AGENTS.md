@@ -207,7 +207,7 @@ No implementar por ahora duplicación de fechas.
 
 ## Copas — siguiente gran fase funcional
 
-La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. Copa Total Admin está terminada. Copa Dúos Admin está terminada. Copa Campeones Admin está terminada. El bloque actual agrega administración de Copa Papa sobre la pantalla central existente, reutilizando el motor y preservando Copa A/B y Liga legacy.
+La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. Copa Total Admin está terminada. Copa Dúos Admin está terminada. Copa Campeones Admin está terminada. Copa Papa Admin está terminada. Promoción Admin utiliza la pantalla central y el backend existente, preservando las Copas y Liga legacy.
 
 ### Armado manual y asistido
 
@@ -256,6 +256,14 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Corrección de llave inicial mediante su endpoint específico, con motivo, snapshot anterior y auditoría. Sólo antes de publicación/inicio/actividad o avance; conservar etapa y Fecha originales.
 - Progresión secuencial de ganadores confirmados, sin nuevos sorteos ni reconstrucción por knockout genérico. Final desde dos ganadores; tercer puesto desde exactamente dos perdedores de semifinales, con etapa/vínculo independiente.
 - Reutilizar CupEncounter para puntajes, ganadores y TAFA. Bloquear mutaciones con competición/temporada cerrada y bifurcaciones repetidas de la misma ronda.
+
+### Promoción Admin
+
+- Propuesta de cuatro cupos: Liga A N−3 y N−2, Liga B 2.º y 3.º. Mostrar posiciones base, propuesto y confirmado por separado.
+- Corrección manual con motivo obligatorio, cuatro participantes activos únicos de la temporada y auditoría. Corrimientos ambiguos por Copa A/B requieren decisión Admin.
+- Exactamente dos cruces fijos: B 2.º contra A N−2 y B 3.º contra A N−3, con una misma Fecha. No permitir cruces libres ni modificar cupos después de crear los encuentros.
+- Reutilizar CupEncounter y TAFA. Sólo con ambos ganadores confirmados generar cuatro movimientos propuestos: ganadores a Liga A, perdedores a Liga B; no aplicar automáticamente cambios de división.
+- Mostrar la vista previa y los movimientos persistidos por separado. No regenerar movimientos confirmados/aplicados ni mutar una competición o temporada cerrada.
 
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 

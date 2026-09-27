@@ -16,7 +16,7 @@ describe('Promotion playoff contract', () => {
   });
 
   it('allows cup-driven slot shifts only through an audited admin replacement', () => {
-    expect(worker).toContain('replaced && !requested.reason');
+    expect(worker).toContain('(replaced || changed) && !requested.reason');
     expect(worker).toContain('por ejemplo Copa A o Copa B');
     expect(worker).toContain('competition.promotion_slots_confirmed');
   });

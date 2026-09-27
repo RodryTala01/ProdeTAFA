@@ -111,6 +111,10 @@ beforeEach(() => {
 afterEach(() => db.close());
 
 describe('Promocion backend funcional', () => {
+  it('bloquea todas las mutaciones en competición cerrada',async()=>{
+    db.exec("UPDATE competitions SET status='finished' WHERE id=100");
+    for(const [path,method] of [['prefill','POST'],['slots','PUT'],['matches','POST'],['stages/200/finalize','POST']])expect((await call('admin/competition-engine/competitions/100/promotion/'+path,method,{})).status).toBe(409);
+  });
   it('propone los dos cupos de A desde abajo y B2/B3', async () => {
     const response = await call('admin/competition-engine/competitions/100/promotion/prefill', 'POST', {});
     expect(response.status).toBe(200);
@@ -157,6 +161,10 @@ describe('Promocion backend funcional', () => {
     const built = await build.json() as any;
     expect(built.pairs).toHaveLength(2);
 
+    expect((await call('admin/competition-engine/competitions/100/promotion/slots','PUT',{slots:slots.map((s:any)=>({slotCode:s.slotCode,userId:s.proposedUser.id}))})).status).toBe(409);
+    expect((await call('admin/competition-engine/competitions/100/promotion/stages/200/finalize','POST',{})).status).toBe(409);
+    db.exec("INSERT INTO competition_stages(id,competition_id,code,name,stage_type,sequence) VALUES (201,100,'EXTRA','Extra','KNOCKOUT',2); INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence,purpose) VALUES(401,100,201,300,1,'NORMAL')");
+    expect((await call('admin/competition-engine/competitions/100/promotion/matches','POST',{stageId:201,roundLinkId:401})).status).toBe(409);
     const encounterRows = db.prepare(
       `SELECT id,entry_a_id FROM competition_encounters WHERE stage_id=200 ORDER BY slot_key`,
     ).all() as any[];
@@ -173,6 +181,11 @@ describe('Promocion backend funcional', () => {
     expect(finalize.status).toBe(200);
     const data = await finalize.json() as any;
     expect(data.movements).toHaveLength(4);
+    const saved:any=await(await call('competition-engine/competitions/100/promotion/slots')).json();expect(saved.movements).toHaveLength(4);expect(saved.movements.every((m:any)=>m.fullName&&['A','B'].includes(m.toDivision))).toBe(true);
+    expect((await call('admin/competition-engine/competitions/100/promotion/stages/999/finalize','POST',{})).status).toBe(409);
+    expect((await call('admin/competition-engine/competitions/100/promotion/stages/200/finalize','POST',{})).status).toBe(200);
+    expect((db.prepare('SELECT COUNT(*) n FROM season_division_movements').get() as any).n).toBe(4);
+
 
     const divisionA = 10;
     const divisionB = 11;

@@ -66,6 +66,9 @@ async function promotionCompetition(env: Env, competitionId: number) {
   }>();
 }
 
+async function hasMatches(env:Env,competitionId:number){return !!await env.DB.prepare('SELECT e.id FROM competition_encounters e JOIN competition_stages s ON s.id=e.stage_id WHERE s.competition_id=? LIMIT 1').bind(competitionId).first();}
+async function readMovements(env:Env,competitionId:number){const rows=await env.DB.prepare(`SELECT m.id,m.user_id AS userId,u.full_name AS fullName,f.code AS fromDivision,t.code AS toDivision,m.status,m.reason FROM season_division_movements m JOIN users u ON u.id=m.user_id LEFT JOIN season_divisions f ON f.id=m.from_division_id JOIN season_divisions t ON t.id=m.to_division_id JOIN competitions c ON c.season_id=m.season_id WHERE c.id=? AND m.reason IN (SELECT 'PROMOCION:'||e.id||':'||r.result FROM competition_encounters e JOIN competition_stages s ON s.id=e.stage_id CROSS JOIN (SELECT 'WINNER' result UNION ALL SELECT 'LOSER') r WHERE s.competition_id=c.id) ORDER BY m.id`).bind(competitionId).all();return rows.results??[];}
+
 async function leaguePositionUser(env: Env, seasonId: number, competitionCode: string, position: number) {
   const row = await env.DB.prepare(
     `SELECT cem.user_id,u.full_name
@@ -120,6 +123,7 @@ async function readSlots(env: Env, competitionId: number) {
 async function prefill(env: Env, user: SessionUser, competitionId: number) {
   const competition = await promotionCompetition(env, competitionId);
   if (!competition || competition.code !== 'PROMOCION') return error('Promoción no encontrada', 404);
+  if([competition.status,competition.season_status].some(s=>['finished','archived'].includes(s)))return error('La competición o temporada ya está cerrada',409);
 
   const encounters = await env.DB.prepare(
     `SELECT COUNT(*) AS total FROM competition_encounters ce
@@ -189,6 +193,8 @@ async function ensureEntry(env: Env, competitionId: number, userId: string, full
 async function confirmSlots(request: Request, env: Env, user: SessionUser, competitionId: number) {
   const competition = await promotionCompetition(env, competitionId);
   if (!competition || competition.code !== 'PROMOCION') return error('Promoción no encontrada', 404);
+  if([competition.status,competition.season_status].some(s=>['finished','archived'].includes(s)))return error('La competición o temporada ya está cerrada',409);
+  if(await hasMatches(env,competitionId))return error('Los cupos están bloqueados después de crear los cruces',409);
   const body = await request.json().catch(() => null) as {
     slots?: Array<{ slotCode?: string; userId?: string; reason?: string | null }>;
   } | null;
@@ -224,7 +230,8 @@ async function confirmSlots(request: Request, env: Env, user: SessionUser, compe
 
     const proposed = byCode.get(slot.code)?.proposedUser?.id ?? null;
     const replaced = proposed !== participant.id;
-    if (replaced && !requested.reason) {
+    const changed=byCode.get(slot.code)?.confirmedUser?.id!=null&&byCode.get(slot.code)?.confirmedUser?.id!==participant.id;
+    if ((replaced || changed) && !requested.reason) {
       return error(`El cupo ${slot.name} fue corrido/reemplazado: indicá el motivo (por ejemplo Copa A o Copa B)`, 409);
     }
     const entryId = await ensureEntry(env, competitionId, participant.id, participant.full_name, slot.code);
@@ -250,6 +257,8 @@ async function confirmSlots(request: Request, env: Env, user: SessionUser, compe
 async function buildMatches(request: Request, env: Env, user: SessionUser, competitionId: number) {
   const competition = await promotionCompetition(env, competitionId);
   if (!competition || competition.code !== 'PROMOCION') return error('Promoción no encontrada', 404);
+  if([competition.status,competition.season_status].some(s=>['finished','archived'].includes(s)))return error('La competición o temporada ya está cerrada',409);
+  if(await hasMatches(env,competitionId))return error('Los dos cruces de Promoción ya fueron creados',409);
   const slots = await readSlots(env, competitionId);
   const byCode = new Map(slots.map((slot) => [slot.slotCode, slot]));
   if (PROMOTION_SLOTS.some((slot) => byCode.get(slot.code)?.confirmedEntryId == null)) {
@@ -266,6 +275,7 @@ async function buildMatches(request: Request, env: Env, user: SessionUser, compe
     `SELECT id,stage_type,status FROM competition_stages WHERE id=? AND competition_id=? LIMIT 1`,
   ).bind(stageId, competitionId).first<{ id: number; stage_type: string; status: string }>();
   if (!stage || stage.stage_type !== 'KNOCKOUT') return error('La etapa de Promoción debe ser eliminatoria', 409);
+  if(['finished','archived'].includes(stage.status))return error('La etapa ya está cerrada',409);
   const link = await env.DB.prepare(
     `SELECT id FROM competition_round_links
      WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL' LIMIT 1`,
@@ -302,9 +312,12 @@ async function buildMatches(request: Request, env: Env, user: SessionUser, compe
 async function finalizeMovements(env: Env, user: SessionUser, competitionId: number, stageId: number) {
   const competition = await promotionCompetition(env, competitionId);
   if (!competition || competition.code !== 'PROMOCION') return error('Promoción no encontrada', 404);
+  if([competition.status,competition.season_status].some(s=>['finished','archived'].includes(s)))return error('La competición o temporada ya está cerrada',409);
 
+  const stage=await env.DB.prepare("SELECT id FROM competition_stages WHERE id=? AND competition_id=? AND stage_type='KNOCKOUT'").bind(stageId,competitionId).first();
+  if(!stage)return error('La etapa no pertenece a esta Promoción',409);
   const encounters = await env.DB.prepare(
-    `SELECT ce.id,ce.entry_a_id,ce.entry_b_id,ce.winner_entry_id,ce.status,ce.admin_confirmed_at,
+    `SELECT ce.id,ce.slot_key,ce.round_link_id,ce.entry_a_id,ce.entry_b_id,ce.winner_entry_id,ce.status,ce.admin_confirmed_at,
             aem.user_id AS user_a,bem.user_id AS user_b,wem.user_id AS winner_user
      FROM competition_encounters ce
      JOIN competition_entry_members aem ON aem.entry_id=ce.entry_a_id
@@ -312,11 +325,13 @@ async function finalizeMovements(env: Env, user: SessionUser, competitionId: num
      LEFT JOIN competition_entry_members wem ON wem.entry_id=ce.winner_entry_id
      WHERE ce.stage_id=? ORDER BY ce.id`,
   ).bind(stageId).all<{
-    id: number; entry_a_id: number; entry_b_id: number; winner_entry_id: number | null; status: string;
+    id: number; slot_key:string; round_link_id:number; entry_a_id: number; entry_b_id: number; winner_entry_id: number | null; status: string;
     admin_confirmed_at: string | null; user_a: string; user_b: string; winner_user: string | null;
   }>();
   const rows = encounters.results ?? [];
   if (rows.length !== 2) return error('Promoción debe tener exactamente dos cruces', 409);
+  if(new Set(rows.map(r=>r.slot_key)).size!==2||rows.some(r=>!['PROMO-1','PROMO-2'].includes(r.slot_key))||rows[0].round_link_id!==rows[1].round_link_id||new Set(rows.flatMap(r=>[r.user_a,r.user_b])).size!==4)return error('Los cruces no corresponden a la estructura fija de Promoción',409);
+  if(rows.some(r=>r.winner_entry_id!==r.entry_a_id&&r.winner_entry_id!==r.entry_b_id))return error('Faltan ganadores válidos',409);
   if (rows.some((row) => row.status !== 'finished' || row.winner_user == null || row.admin_confirmed_at == null)) {
     return error('Los dos cruces deben estar resueltos y confirmados por Admin', 409);
   }
@@ -329,6 +344,8 @@ async function finalizeMovements(env: Env, user: SessionUser, competitionId: num
   const divisionB = divisionByCode.get('B');
   if (!divisionA || !divisionB) return error('No están configuradas Liga A y Liga B para la temporada', 409);
 
+  const persisted=await readMovements(env,competitionId) as {status:string}[];
+  if(persisted.some(m=>m.status!=='proposed'))return error('Los movimientos ya fueron confirmados o aplicados; no se pueden regenerar',409);
   const before = await env.DB.prepare(
     `SELECT id,user_id,to_division_id,reason,status FROM season_division_movements
      WHERE season_id=? AND reason LIKE 'PROMOCION:%'`,
@@ -369,7 +386,7 @@ export async function handleCompetitionPromotion(request: Request, env: Env): Pr
     const user = await sessionUser(request, env);
     if (!user) return error('No autorizado', 401);
     if (request.method !== 'GET') return error('Método no permitido', 405);
-    return json({ competitionId: Number(publicSlots[1]), slots: await readSlots(env, Number(publicSlots[1])) });
+    return json({ competitionId: Number(publicSlots[1]), slots: await readSlots(env, Number(publicSlots[1])), movements: await readMovements(env,Number(publicSlots[1])) });
   }
 
   const prefillMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/promotion\/prefill$/);
