@@ -89,6 +89,8 @@ npm run db:migrate:remote
 
 ## Deploy
 
+El deploy no aplica migraciones: verifica su registro remoto con una consulta de sólo lectura y se bloquea si faltan. La migración de producción requiere un paso independiente autorizado. Revisar [seguridad y recuperación](DEPLOY-SAFETY.md) antes de publicar: D1 y Worker no se actualizan en una transacción común.
+
 `FOOTBALL_API_KEY` está declarada como secreto obligatorio del Worker.
 
 Para el primer deploy, con la clave ya presente en `.dev.vars`:
