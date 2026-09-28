@@ -173,7 +173,7 @@ Mejoras deseadas:
 
 Participante: `Pronósticos | Liga | Historial`.
 
-Administrador: `Fechas | Liga | Participantes`.
+Administrador: `Fechas | Competiciones | Liga actual | Participantes`.
 
 En móvil, navegación inferior fija y respeto de safe areas. La PWA debe sentirse como app instalada (`standalone`).
 
@@ -206,6 +206,90 @@ Se desea una pantalla inicial de Admin simple y operativa con información útil
 No implementar por ahora duplicación de fechas.
 
 ## Copas — siguiente gran fase funcional
+
+La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor nuevo. Copa A/B Admin está terminada. Copa Total Admin está terminada. Copa Dúos Admin está terminada. Copa Campeones Admin está terminada. Copa Papa Admin está terminada. Promoción Admin utiliza la pantalla central y el backend existente, preservando las Copas y Liga legacy.
+
+### Armado manual y asistido
+
+- Toda pantalla futura de configuración debe ofrecer modalidad asistida/automática y modalidad manual.
+- Elegibilidad, bombos, cabezas de serie y restricciones sirven para validar y sugerir; no obligan a sortear dentro de la app.
+- Admin puede cargar grupos, parejas, cruces y posiciones en llave resultantes de un sorteo externo.
+- Toda asignación manual debe validar elegibilidad y restricciones obligatorias y quedar auditada.
+- Copa Dúos también debe permitir cargar parejas sorteadas fuera de la app; el sorteo interno es opcional.
+- Copa A/B Admin ofrece Resumen, Grupos, Octavos, Cuartos, Semifinal y Final. Copa Total tiene su administración específica; Copa Dúos ofrece Resumen, Parejas, Fechas, Tabla, Semifinales y Final; las demás pantallas deportivas quedan para bloques posteriores. No duplicar el motor.
+- En Copa A y Copa B, el campeón vigente elegible ocupa A1. Grupos manuales como primera opción; bombos IFFHS de referencia y sorteo opcional.
+- Octavos valida en backend segundos contra terceros, todos una vez. Cuartos usa primeros de grupo y ganadores confirmados de Octavos; Semifinal y Final usan ganadores confirmados.
+- Copa A/B no tiene tercer puesto. Cruces editables antes de publicación/inicio, con motivo y auditoría al corregir. El modo manual no guarda randomSeed.
+
+### Copa Total Admin
+
+- Elegibles: participantes activos pertenecientes a las divisiones de la temporada, tanto A como B.
+- Grupos manuales como primera opción, entre 3 y 5 integrantes, todos exactamente una vez. No imponer restricciones adicionales al armado manual.
+- Sorteo opcional por bombos IFFHS de la temporada previa; campeón Total vigente elegible en A1. Guardar semilla y resultado auditado.
+- Exactamente dos Fechas de 12 partidos; seis mini-fechas de cuatro match_id persistidos. Fixture doble para grupos de 3/4, simple para 5 con sexta mini-fecha libre.
+- Tablas deportivas PTS/DG/GF/PG: igualdad completa conserva posición compartida. No decidir clasificados por nombre.
+- Clasificación configurable con vista previa, comodines y resolución manual de cortes empatados; selección excepcional completa con motivo y snapshot auditado.
+- Octavos, Cuartos y Semifinal admiten cruces manuales o automáticos, usando todos los clasificados/ganadores confirmados una vez. Final usa dos ganadores de Semifinal; tercer puesto usa dos perdedores confirmados y vínculo independiente.
+- Reutilizar knockout y desempate TAFA; edición bloqueada tras publicación/inicio o actividad. Cambios manuales auditados. No agregar UI de otras Copas ni de participante en este bloque.
+
+### Copa Dúos Admin
+
+- Parejas manuales como primera opción, sorteo opcional con semilla auditada. Todos los elegibles activos A/B exactamente una vez, dos por dúo. Cantidad impar requiere resolución Admin.
+- Sustitución excepcional con vigencia desde la Fecha elegida (límite superior exclusivo), sin modificar snapshots pasados ni superponer integrantes.
+- Tabla por Fecha: suma de los dos integrantes, ausencias 0, más bonus explícito; no acumular puntos deportivos anteriores.
+- Eliminación y bonus por posición configurables; confirmar únicamente resultados definitivos, sin cortes empatados ni puestos de semifinales ambiguos. Snapshot de integrantes/puntos, eliminación, bonus y auditoría en un batch.
+- Empates múltiples: comparar todos en la misma Fecha Liga posterior con el evaluador TAFA existente, nunca usar plenos/parciales/nombres como criterio deportivo.
+- Con cuatro clasificados: semifinales fijas 1.º–4.º y 2.º–3.º, +2 sólo para primero y segundo. Final de ganadores confirmados, sin tercer puesto.
+- La confirmación deportiva no asigna automáticamente IFFHS; respetar la confirmación explícita de resultados y destinatarios tras sustituciones definida en RESULTS-IFFHS-DESIGN.md.
+
+### Copa Campeones Admin
+
+- Propuesta de 14 cupos desde la temporada anterior; mostrar propuesto y confirmado por separado. Vacantes y duplicados requieren decisión manual y motivo, nunca reemplazo automático.
+- Confirmar 14 personas únicas activas de la temporada antes de inicializar la llave fija de 13 nodos del backend. No convertirla en una llave de 16.
+- Ramas superior, inferior y final. Activar cada nodo únicamente con ambas fuentes confirmadas, eligiendo etapa eliminatoria y Fecha vinculada.
+- Reutilizar CupEncounter y TAFA. Sin tercer puesto ni correcciones genéricas que salteen las fuentes. Cupos bloqueados tras inicializar la llave; mutaciones bloqueadas en competición/temporada cerrada.
+
+### Copa Papa Admin
+
+- Mantener COPA_PAPA y editar display_name para el homenaje desde Configuración general.
+- Propuesta espejo de temporada anterior: mejor Liga A vs peor Liga B, con no emparejados y byes de referencia visibles. Manual primero, todos los activos A/B exactamente una vez; rival null representa bye.
+- Corrección de llave inicial mediante su endpoint específico, con motivo, snapshot anterior y auditoría. Sólo antes de publicación/inicio/actividad o avance; conservar etapa y Fecha originales.
+- Progresión secuencial de ganadores confirmados, sin nuevos sorteos ni reconstrucción por knockout genérico. Final desde dos ganadores; tercer puesto desde exactamente dos perdedores de semifinales, con etapa/vínculo independiente.
+- Reutilizar CupEncounter para puntajes, ganadores y TAFA. Bloquear mutaciones con competición/temporada cerrada y bifurcaciones repetidas de la misma ronda.
+
+### Promoción Admin
+
+- Propuesta de cuatro cupos: Liga A N−3 y N−2, Liga B 2.º y 3.º. Mostrar posiciones base, propuesto y confirmado por separado.
+- Corrección manual con motivo obligatorio, cuatro participantes activos únicos de la temporada y auditoría. Corrimientos ambiguos por Copa A/B requieren decisión Admin.
+- Exactamente dos cruces fijos: B 2.º contra A N−2 y B 3.º contra A N−3, con una misma Fecha. No permitir cruces libres ni modificar cupos después de crear los encuentros.
+- Reutilizar CupEncounter y TAFA. Sólo con ambos ganadores confirmados generar cuatro movimientos propuestos: ganadores a Liga A, perdedores a Liga B; no aplicar automáticamente cambios de división.
+- Mostrar la vista previa y los movimientos persistidos por separado. No regenerar movimientos confirmados/aplicados ni mutar una competición o temporada cerrada.
+
+### Resultados finales e IFFHS Admin
+
+- `competition_results` sigue siendo la única fuente de resultados finales: confirmar un snapshot completo con una fila por entrada y auditoría atómica; permitir revisión mientras competición/temporada no estén archivadas.
+- Propuesta desde tabla definitiva de Liga, grupos, supervivencia y encuentros confirmados. Fases ambiguas requieren revisión explícita Admin; no inferir ganadores pendientes. Tercero sólo en Total/Papa.
+- Dúos con más de dos integrantes históricos requieren selección explícita de `detail.iffhsUserIds`, todos pertenecientes a esa historia.
+- IFFHS Admin permite revisar pendientes, calcular temporada, consultar ventana de cinco temporadas, faltantes y desglose por participante/competición, diferenciando `calculated` e `imported`.
+- La importación manual sólo agrega totales faltantes: no sobrescribir totales existentes. El cálculo sigue bloqueado si la temporada contiene importados.
+
+### Transición de temporada Admin
+
+- Generar/recuperar propuesta, revisar issues y destinos A/B, confirmar y aplicar son pasos separados. Cambiar propuesta o confirmar una fila marcada para revisión requiere motivo.
+- Mostrar origen, división actual/propuesta/confirmada y motivos por participante. Conservar los issues originales como referencia; la confirmación queda auditada.
+- No está definida la inclusión de participantes inactivos en la siguiente temporada. Si el plan contiene alguno, bloquear su aplicación en UI y backend con nombres y explicación; no excluirlo, incluirlo ni reactivarlo automáticamente.
+- Revalidar antes de aplicar que cada participante del plan tenga IFFHS de la temporada origen. Totales de terceros no cubren faltantes del plan.
+- No aplicar sobre una temporada destino existente. Al aplicar correctamente, mostrar la nueva temporada en `draft` y permitir abrirla desde Admin.
+
+### Contextos deportivos del participante por Fecha
+
+- Una Fecha sigue teniendo un único pronóstico de 12 partidos y un único envío/reenvío. Mostrar sus contextos sobre el formulario sin duplicar controles.
+- GET `/api/participant/rounds/:roundId/competition-contexts` usa exclusivamente la sesión participante y sólo Fechas abiertas/finalizadas. No acepta un usuario arbitrario.
+- Derivar Liga por división; grupos por pertenencia; eliminatorias por encuentros; Total por segmentos/mini-fixtures; TAFA por sus propias Fechas y entradas, incluso sin vínculo TIEBREAK.
+- Dúos evalúa membresía en la Fecha: límite inferior inclusivo y superior exclusivo. Nombres y compañero se reconstruyen con esos integrantes, no con el nombre actual del dúo.
+- No excluir historia por estado actual de entrada. Survival excluye Fechas posteriores a eliminación/clasificación confirmada; knockout exige un encuentro real en esa Fecha.
+- La lista general de competiciones de temporada es histórica (`SEASON_HISTORY`); no demuestra vigencia de Dúos en una Fecha. Usar siempre el endpoint específico para ello.
+- No recalcular standings ni TAFA en frontend. Reutilizar cálculo de segmentos existente para mini-fixtures de Total.
 
 Las Copas NO son simplemente una fase posterior desconectada de Liga: el calendario real alterna jornadas de Copa y Liga.
 

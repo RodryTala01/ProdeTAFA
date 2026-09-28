@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev/t32-competition-engine]
   pull_request:
     branches: [main]
 

@@ -1,3 +1,4 @@
+import ParticipantCompetitionContexts from './ParticipantCompetitionContexts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { nextPredictionField, type PredictionField } from './prediction-focus';
 import PredictionHistory from './PredictionHistory';
@@ -282,6 +283,7 @@ export default function ParticipantRound() {
   function focusEditable(input: HTMLInputElement | HTMLButtonElement | null | undefined) {
     if (input && !input.disabled) {
       input.focus();
+      if (window.matchMedia('(max-width: 700px)').matches) input.scrollIntoView({ block: 'nearest' });
       if (input instanceof HTMLInputElement) input.select();
     }
   }
@@ -403,6 +405,8 @@ export default function ParticipantRound() {
 
       {isFinished && <RoundRanking roundId={round.id} mode="participant" />}
       {isFinished && <FinishedPredictions roundId={round.id} />}
+
+      <ParticipantCompetitionContexts key={`contexts-${round.id}`} roundId={round.id}/>
 
       <div className="prediction-list">
         {round.matches.map((match) => {
@@ -539,7 +543,7 @@ export default function ParticipantRound() {
           </button>
         </section>
       )}
-      <PredictionHistory key={round.id} roundId={round.id} own />
+      <PredictionHistory key={`history-${round.id}`} roundId={round.id} own />
     </div>
   );
 }

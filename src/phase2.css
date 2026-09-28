@@ -30,8 +30,19 @@
     padding-bottom: calc(104px + env(safe-area-inset-bottom));
   }
 
+  .dashboard--narrow .submit-card {
+    bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+
+  .dashboard--narrow .prediction-card input,
+  .dashboard--narrow .penalty-option {
+    scroll-margin-top: 90px;
+    scroll-margin-bottom: calc(290px + env(safe-area-inset-bottom));
+  }
+
   .dashboard--narrow > .admin-tabs {
     position: fixed;
+    top: auto;
     left: max(12px, env(safe-area-inset-left));
     right: max(12px, env(safe-area-inset-right));
     bottom: max(12px, env(safe-area-inset-bottom));
