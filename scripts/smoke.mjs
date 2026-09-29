@@ -5,11 +5,23 @@ if (!baseUrl) {
   process.exit(1);
 }
 
+async function request(path) {
+  return fetch(`${baseUrl}${path}`, { redirect: 'follow' });
+}
+
 async function check(path, validate) {
-  const response = await fetch(`${baseUrl}${path}`, { redirect: 'follow' });
+  const response = await request(path);
   if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
   await validate(response);
   console.log(`✓ ${path}`);
+}
+
+async function checkStatus(path, expectedStatus) {
+  const response = await request(path);
+  if (response.status !== expectedStatus) {
+    throw new Error(`${path}: HTTP ${response.status}; se esperaba ${expectedStatus}`);
+  }
+  console.log(`✓ ${path} → HTTP ${expectedStatus}`);
 }
 
 try {
@@ -24,16 +36,39 @@ try {
     const data = await response.json();
     const missingTables = Array.isArray(data?.missingTables) ? data.missingTables : null;
     const missingColumns = Array.isArray(data?.missingColumns) ? data.missingColumns : null;
+    const missingTriggers = Array.isArray(data?.missingTriggers) ? data.missingTriggers : null;
     if (
       data?.ok !== true ||
+      data?.schemaReady !== true ||
       data?.leagueSchemaReady !== true ||
+      data?.competitionEngineSchemaReady !== true ||
+      data?.officialPredictionsReady !== true ||
+      data?.triggerSchemaReady !== true ||
+      data?.migrationLedgerReady !== true ||
+      data?.minimumMigration !== '0014_duos_admin.sql' ||
       data?.singleOpenRoundReady !== true ||
       missingTables === null || missingTables.length !== 0 ||
-      missingColumns === null || missingColumns.length !== 0
+      missingColumns === null || missingColumns.length !== 0 ||
+      missingTriggers === null || missingTriggers.length !== 0
     ) {
-      throw new Error('/api/health/deep: esquema de Liga o consistencia de fechas abiertas inválidos');
+      throw new Error('/api/health/deep: esquema productivo T32, triggers o consistencia de Fechas inválidos');
     }
   });
+
+  await check('/api/setup/status', async (response) => {
+    const data = await response.json();
+    if (data?.setupRequired !== false) {
+      throw new Error('/api/setup/status: producción no tiene administrador inicial configurado');
+    }
+  });
+
+  // Read-only route probes: these must exist and reject anonymous access.
+  await checkStatus('/api/auth/me', 401);
+  await checkStatus('/api/admin/competition-engine', 401);
+  await checkStatus('/api/competition-engine/current', 401);
+  await checkStatus('/api/competition-engine/iffhs/ranking', 401);
+  await checkStatus('/api/competition-engine/leagues/A/standings', 401);
+  await checkStatus('/api/participant/rounds/1/competition-contexts', 403);
 
   await check('/', async (response) => {
     const html = await response.text();
@@ -60,7 +95,7 @@ try {
     }
   });
 
-  console.log(`\nSmoke test OK: ${baseUrl}`);
+  console.log(`\nSmoke test T32 OK: ${baseUrl}`);
 } catch (error) {
   console.error(`\nSmoke test FALLÓ: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
