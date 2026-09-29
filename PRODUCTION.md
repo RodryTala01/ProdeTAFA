@@ -1,22 +1,81 @@
-# ProdeTAFA — Puesta en producción
+# ProdeTAFA — Producción
 
-Este documento cubre el primer deploy del MVP y de la Liga de Fase 2.
+Este documento describe el flujo productivo vigente para ProdeTAFA/T32.
 
-## Antes del primer deploy
+## Regla principal
 
-La base D1 remota ya está configurada en `wrangler.jsonc`. `FOOTBALL_API_KEY` está declarada como secreto obligatorio y nunca debe subirse al repositorio.
+Las migraciones D1 y el deploy del Worker son operaciones separadas.
 
-En la PC de desarrollo debe existir `.dev.vars` con:
+- `npm run db:migrate:remote` aplica migraciones remotas y modifica D1.
+- `npm run deploy` y `npm run deploy:first` **no aplican migraciones**.
+- Antes de publicar, ambos deploys ejecutan tests, build y un preflight read-only del registro `d1_migrations`.
+- Si hay una migración pendiente o desconocida, el deploy se bloquea.
+
+No ejecutar migraciones o deploys productivos sin autorización explícita.
+
+## Configuración
+
+La D1 remota está declarada en `wrangler.jsonc` mediante el binding `DB`.
+
+El Worker requiere el secreto:
 
 ```text
-FOOTBALL_API_KEY=tu_clave_real
+FOOTBALL_API_KEY
 ```
 
-`.dev.vars` está ignorado por Git.
+El Cron esperado es:
 
-## Primer deploy
+```text
+*/10 * * * *
+```
 
-Desde PowerShell, dentro de `ProdeTAFA`:
+Para desarrollo local, usar `.dev.vars`. Nunca subir secretos al repositorio.
+
+## Preflight read-only de Cloudflare
+
+Con una sesión Wrangler autenticada:
+
+```powershell
+npm run check:prod:config
+```
+
+El comando no modifica Cloudflare. Comprueba:
+
+- que `FOOTBALL_API_KEY` esté declarado como secreto obligatorio en `wrangler.jsonc`;
+- que Wrangler informe `FOOTBALL_API_KEY` entre los secretos remotos;
+- que el Cron `*/10 * * * *` esté declarado en la configuración versionada;
+- que exista al menos un deployment remoto visible.
+
+La existencia efectiva del Cron remoto debe confirmarse también en Cloudflare Dashboard:
+
+`Workers & Pages → prode-tafa → Settings/Triggers → Cron Triggers`.
+
+## Migraciones
+
+Antes de aplicar migraciones remotas:
+
+1. revisar el SQL pendiente;
+2. confirmar que el Worker actualmente publicado tolera el esquema expandido;
+3. ejecutar las migraciones como operación independiente;
+4. si una migración falla, detenerse en esa migración;
+5. no ejecutar SQL manual para saltar el ledger;
+6. no editar migraciones ya aplicadas.
+
+Comando autorizado para aplicar las pendientes:
+
+```powershell
+npm run db:migrate:remote
+```
+
+Después verificar el registro remoto. El deploy también volverá a comprobarlo de forma read-only.
+
+Consultar `DEPLOY-SAFETY.md` para recuperación ante fallos parciales.
+
+## Deploy
+
+### Primer deploy / carga inicial del secreto
+
+Sólo cuando corresponda inicializar el secreto desde `.dev.vars`:
 
 ```powershell
 git pull
@@ -24,95 +83,7 @@ npm install
 npm run deploy:first
 ```
 
-`deploy:first` ejecuta automáticamente, en este orden:
-
-1. tests;
-2. build;
-3. migraciones pendientes sobre D1 remota, incluidas `0002_league_seasons.sql` y `0003_league_entry_slot.sql`;
-4. deploy del Worker usando `.dev.vars` para cargar `FOOTBALL_API_KEY` como secreto.
-
-Si cualquiera de esos pasos falla, no continuar manualmente sin diagnosticarlo. Al finalizar, Wrangler debe mostrar la URL `https://prode-tafa.<subdominio>.workers.dev`.
-
-## Smoke test
-
-Copiar la URL de Workers y ejecutar:
-
-```powershell
-$env:BASE_URL="https://prode-tafa.<subdominio>.workers.dev"
-npm run smoke:prod
-```
-
-El smoke test comprueba:
-
-- `/api/health`;
-- `/api/health/deep`;
-- tablas `league_seasons`, `league_rounds` y `league_participants`;
-- columna `league_participants.eligible_from_slot` agregada por `0003`;
-- que no existan dos fechas `open` simultáneamente;
-- frontend principal;
-- manifest PWA `standalone` con iconos 192x192 y 512x512 declarados;
-- service worker real en `/sw.js`.
-
-Debe terminar con `Smoke test OK`.
-
-## Verificaciones Cloudflare
-
-```powershell
-npx wrangler secret list
-npx wrangler deployments list
-```
-
-En `secret list` debe figurar `FOOTBALL_API_KEY` sin mostrar su valor. En Cloudflare Dashboard revisar además:
-
-- D1 binding `DB` → `prode-tafa`;
-- Cron Trigger `*/10 * * * *`;
-- `FOOTBALL_API_KEY` como Secret.
-
-## Prueba end-to-end de Fase 1
-
-Usar una fecha real o de prueba con 12 partidos:
-
-1. Admin abre la fecha y ve los 12 partidos.
-2. Participante inicia sesión.
-3. Cargar pronósticos y comprobar autosave.
-4. En `PENALTIES_ONLY`, cargar marcador de 90 minutos + ganador de tanda pronosticado.
-5. Enviar y luego modificar/re-enviar un partido todavía abierto.
-6. Confirmar bloqueo en kickoff + 1 minuto.
-7. Intentar publicar otra fecha mientras esta siga `open`: debe devolver conflicto.
-8. Actualizar resultados y confirmar 3/1/0.
-9. Confirmar +1 sólo cuando un partido marcado Penales realmente llega a tanda y se acierta el ganador.
-10. Probar corrección manual de un partido marcado Penales que NO llegó a tanda: debe quedar sin bonus de penales.
-11. Probar corrección manual de uno que sí llegó y elegir ganador de tanda.
-12. Usar `Volver a API-Football`: resultado/puntos manuales deben quedar en pendiente hasta recuperar el dato oficial, sin mostrar scoring viejo.
-13. Confirmar anulado = 0 y no error.
-14. Confirmar ranking/desempates.
-15. Confirmar que no se puede cerrar con partidos pendientes.
-16. Cerrar la fecha cuando todo esté resuelto.
-17. Confirmar ranking final, historial y revelado de pronósticos enviados.
-18. Probar edición excepcional de pronóstico y auditoría.
-19. Confirmar que una fecha publicada no permite agregar/quitar partidos ni por API directa.
-
-## Prueba inicial de Liga — Fase 2
-
-1. Crear una temporada desde Admin → Liga.
-2. Vincular cinco fechas distintas en orden 1 a 5.
-3. Verificar que una fecha no pueda vincularse a dos temporadas.
-4. Verificar participantes iniciales en 0.
-5. Confirmar que sólo entren scores definitivos; provisionales quedan afuera.
-6. Con Fecha 1 ya finalizada, crear/reactivar un participante y confirmar que no reciba puntos retroactivos de Fecha 1.
-7. Crear/reactivar a alguien mientras una fecha actual siga abierta y confirmar que pueda contar desde esa fecha.
-8. Dejar un participante sin enviar una fecha: esa fecha debe aportar 0.
-9. Confirmar desempates: puntos, plenos, parciales, menos errores y extras.
-10. Confirmar que la Liga no pueda finalizar hasta tener exactamente cinco fechas cerradas.
-11. Finalizar las cinco fechas, cerrar Liga y comprobar histórico de temporada.
-
-## Cron y cuota de API-Football
-
-Durante una jornada con partidos verificar que los resultados cambien sin tocar `Actualizar resultados`, revisar consumo en API-Football y confirmar que el Cron de 10 minutos permanece dentro de las 100 consultas/día disponibles. Si el consumo real es mayor al esperado, ajustar ventana/frecuencia antes de cerrar Fase 1.
-
-## Deploys siguientes
-
-Una vez que el secreto ya existe:
+### Deploys normales
 
 ```powershell
 git pull
@@ -120,10 +91,148 @@ npm install
 npm run deploy
 ```
 
-`npm run deploy` ejecuta tests, build y migraciones remotas antes de publicar.
+El flujo de deploy es:
 
-## Criterio de cierre
+1. tests;
+2. build;
+3. consulta read-only de `d1_migrations`;
+4. publicación del Worker.
 
-Fase 1 queda oficialmente cerrada cuando deploy + smoke + flujo Admin/Participante + bloqueo kickoff + Cron + cuota real estén verificados en producción.
+No hay migraciones dentro del comando de deploy.
 
-La Liga queda validada cuando funcione en producción el ciclo completo `crear temporada → vincular 5 fechas → puntuar resultados definitivos → alta tardía sin retroactividad → acumular tabla → cerrar Liga`.
+## Smoke de producción
+
+Después de publicar:
+
+```powershell
+$env:BASE_URL="https://prode-tafa.<subdominio>.workers.dev"
+npm run smoke:prod
+```
+
+El smoke es read-only y comprueba:
+
+- `/api/health`;
+- `/api/health/deep`;
+- todas las tablas versionadas desde 0001 hasta 0014;
+- columnas agregadas por migraciones;
+- triggers versionados de historial y pronóstico oficial;
+- presencia de `0014_duos_admin.sql` en el ledger D1;
+- que no existan dos Fechas `open` simultáneamente;
+- que producción ya tenga administrador inicial;
+- que las rutas principales de T32 existan y rechacen acceso anónimo:
+  - Admin Competition Engine;
+  - contexto actual del participante;
+  - IFFHS;
+  - Liga A;
+  - contextos deportivos por Fecha;
+- frontend principal;
+- manifest PWA;
+- service worker.
+
+El smoke no crea usuarios, Fechas, temporadas ni resultados.
+
+Debe terminar con:
+
+```text
+Smoke test T32 OK
+```
+
+## Health profundo
+
+`GET /api/health/deep` debe informar:
+
+- `schemaReady: true`;
+- `leagueSchemaReady: true`;
+- `competitionEngineSchemaReady: true`;
+- `officialPredictionsReady: true`;
+- `triggerSchemaReady: true`;
+- `migrationLedgerReady: true`;
+- `singleOpenRoundReady: true`;
+- `missingTables: []`;
+- `missingColumns: []`;
+- `missingTriggers: []`.
+
+La cobertura de esquema está ligada a las migraciones mediante tests. Si se agrega una migración nueva, CI obliga a actualizar el contrato de health.
+
+## E2E T32 → T33
+
+El escenario completo vive en `scripts/e2e-t32-local.mjs`.
+
+CI lo ejecuta en una D1 local aislada mediante:
+
+```powershell
+npm run test:e2e:ci
+```
+
+El escenario valida, entre otros puntos:
+
+- 32 participantes;
+- Liga A y Liga B;
+- 18 Fechas;
+- un snapshot oficial de 12 pronósticos por participante/Fecha;
+- Copa A y Copa B;
+- Copa Total;
+- Copa Dúos;
+- Copa Campeones;
+- Copa Papa;
+- Promoción;
+- desempates TAFA;
+- resultados finales;
+- IFFHS;
+- transición T32 → T33;
+- contextos de competición del participante.
+
+Nunca apuntar este escenario E2E a producción.
+
+## Prueba funcional en producción
+
+Las pruebas que escriben datos reales deben ser deliberadas y mínimas. No reutilizar el E2E local contra producción.
+
+Para una jornada real comprobar:
+
+1. Admin puede abrir una Fecha válida de 12 partidos.
+2. Participante inicia sesión y guarda pronósticos.
+3. El autosave no pierde cambios.
+4. El envío genera el snapshot oficial.
+5. El bloqueo de kickoff impide modificaciones tardías.
+6. La sincronización de resultados funciona con API-Football.
+7. El Cron actualiza sin intervención manual.
+8. El scoring 3/1/0 y el extra por penales son correctos.
+9. Una Fecha no puede cerrarse con resultados pendientes.
+10. Rankings, historial y contextos de competición se muestran correctamente.
+
+## API-Football y Cron
+
+Durante una jornada real:
+
+- verificar que `FOOTBALL_API_KEY` siga disponible;
+- comprobar que el Cron corre cada 10 minutos;
+- observar consumo real de API-Football;
+- confirmar que la sincronización automática actualiza resultados;
+- si el consumo supera la cuota prevista, ajustar frecuencia/ventana antes de depender del Cron en una jornada completa.
+
+## Staging
+
+Las pruebas destructivas o el E2E completo remoto deben ejecutarse en un Worker + D1 de staging, nunca sobre la D1 productiva.
+
+Crear staging requiere acceso autenticado a Cloudflare y debe mantener:
+
+- D1 separada;
+- nombre de Worker separado;
+- secretos separados;
+- Cron deshabilitado o explícitamente controlado;
+- ninguna escritura hacia producción.
+
+## Criterio de cierre T32
+
+T32 puede considerarse cerrada cuando:
+
+- migraciones remotas están completas;
+- Worker productivo está publicado;
+- tests y build pasan;
+- E2E T32 → T33 pasa en CI aislada;
+- smoke T32 pasa contra producción;
+- preflight read-only de Cloudflare pasa;
+- Cron remoto está confirmado;
+- al menos una sincronización real de API-Football fue observada correctamente;
+- no hay errores funcionales pendientes de severidad alta.
