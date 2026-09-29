@@ -27,9 +27,9 @@ INSERT INTO official_predictions
   (id,user_id,match_id,predicted_home_score,predicted_away_score,
    predicted_extra_team_provider_id,is_admin_override,updated_at,source)
 SELECT p.id,p.user_id,p.match_id,
-  CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_home_score ELSE json_extract(j.value,'$.homeScore') END,
-  CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_away_score ELSE json_extract(j.value,'$.awayScore') END,
-  CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_extra_team_provider_id ELSE json_extract(j.value,'$.extraTeamId') END,
+  ( CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_home_score ELSE json_extract(j.value,'$.homeScore') END ),
+  ( CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_away_score ELSE json_extract(j.value,'$.awayScore') END ),
+  ( CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_extra_team_provider_id ELSE json_extract(j.value,'$.extraTeamId') END ),
   p.is_admin_override, COALESCE(h.created_at,rs.last_submitted_at), 'legacy_baseline'
 FROM predictions p JOIN matches m ON m.id=p.match_id
 JOIN round_submissions rs ON rs.round_id=m.round_id AND rs.user_id=p.user_id
@@ -37,8 +37,8 @@ LEFT JOIN prediction_history h ON h.id=(
   SELECT MAX(h2.id) FROM prediction_history h2 WHERE h2.round_id=m.round_id
     AND h2.user_id=p.user_id AND h2.event_type IN ('first_submit','resubmit'))
 LEFT JOIN json_each(COALESCE(h.after_json,'[]')) j ON json_extract(j.value,'$.matchId')=p.match_id
-WHERE CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_home_score ELSE json_extract(j.value,'$.homeScore') END IS NOT NULL
-  AND CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_away_score ELSE json_extract(j.value,'$.awayScore') END IS NOT NULL;
+WHERE ( CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_home_score ELSE json_extract(j.value,'$.homeScore') END ) IS NOT NULL
+  AND ( CASE WHEN h.id IS NULL OR p.is_admin_override=1 THEN p.predicted_away_score ELSE json_extract(j.value,'$.awayScore') END ) IS NOT NULL;
 
 -- Discard only derived scores without a matching official input; never keep stale
 -- draft-based scores. Normal result recalculation can regenerate them.
@@ -64,7 +64,7 @@ CREATE INDEX idx_official_events ON prediction_submission_events(round_id,user_i
 -- Only actual submission snapshots from 0004 are official evidence. Never copy
 -- its 'change' autosave events into the new official timeline.
 INSERT INTO prediction_submission_events(round_id,user_id,event_type,actor_kind,created_at,after_json)
-SELECT round_id,user_id,CASE event_type WHEN 'first_submit' THEN 'FIRST_SUBMISSION' ELSE 'RESUBMISSION' END,
+SELECT round_id,user_id,( CASE event_type WHEN 'first_submit' THEN 'FIRST_SUBMISSION' ELSE 'RESUBMISSION' END ),
   actor_kind,created_at,after_json FROM prediction_history
 WHERE event_type IN ('first_submit','resubmit') ORDER BY id;
 CREATE TRIGGER official_events_no_update BEFORE UPDATE ON prediction_submission_events
@@ -72,30 +72,30 @@ BEGIN SELECT RAISE(ABORT,'Official history is append-only'); END;
 CREATE TRIGGER official_events_no_delete BEFORE DELETE ON prediction_submission_events
 BEGIN SELECT RAISE(ABORT,'Official history is append-only'); END;
 
+-- Use RAISE ... WHERE instead of CASE ... END; inside triggers: D1 query
+-- splitting can mistake an unparenthesized CASE end for the trigger end.
+-- Parenthesized CASE expressions keep END separated from punctuation for Wrangler.
 -- Validate again INSIDE the submission write, avoiding a race with autosave,
 -- match rescheduling, or the administrator closing the round.
 
 CREATE TRIGGER validate_official_submission_insert BEFORE INSERT ON round_submissions
 BEGIN 
-  SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM rounds WHERE id=NEW.round_id AND status='open')
-    THEN RAISE(ABORT,'La fecha no está abierta') END;
-  SELECT CASE WHEN NOT EXISTS (
-    SELECT 1 FROM matches WHERE round_id=NEW.round_id AND julianday(kickoff_at)+1.0/1440 > julianday('now'))
-    THEN RAISE(ABORT,'No quedan partidos abiertos para enviar') END;
-  SELECT CASE WHEN EXISTS (
+  SELECT RAISE(ABORT,'La fecha no está abierta') WHERE NOT EXISTS (SELECT 1 FROM rounds WHERE id=NEW.round_id AND status='open');
+  SELECT RAISE(ABORT,'No quedan partidos abiertos para enviar') WHERE NOT EXISTS (
+    SELECT 1 FROM matches WHERE round_id=NEW.round_id AND julianday(kickoff_at)+1.0/1440 > julianday('now'));
+  SELECT RAISE(ABORT,'Faltan completar partidos todavía abiertos') WHERE EXISTS (
     SELECT 1 FROM matches m LEFT JOIN predictions p ON p.match_id=m.id AND p.user_id=NEW.user_id
     WHERE m.round_id=NEW.round_id AND julianday(m.kickoff_at)+1.0/1440 > julianday('now')
       AND (p.predicted_home_score IS NULL OR p.predicted_away_score IS NULL
         OR (m.match_type='PENALTIES_ONLY' AND (p.predicted_extra_team_provider_id IS NULL
-          OR p.predicted_extra_team_provider_id NOT IN (m.home_team_provider_id,m.away_team_provider_id)))))
-    THEN RAISE(ABORT,'Faltan completar partidos todavía abiertos') END;
+          OR p.predicted_extra_team_provider_id NOT IN (m.home_team_provider_id,m.away_team_provider_id)))));
  END;
 CREATE TRIGGER promote_official_submission_insert AFTER INSERT ON round_submissions
 BEGIN
   INSERT INTO official_predictions
     (id,user_id,match_id,predicted_home_score,predicted_away_score,predicted_extra_team_provider_id,updated_at,source)
   SELECT p.id,p.user_id,p.match_id,p.predicted_home_score,p.predicted_away_score,
-    CASE WHEN m.match_type='PENALTIES_ONLY' THEN p.predicted_extra_team_provider_id ELSE NULL END,
+    ( CASE WHEN m.match_type='PENALTIES_ONLY' THEN p.predicted_extra_team_provider_id ELSE NULL END ),
     strftime('%Y-%m-%dT%H:%M:%fZ','now'),'submission'
   FROM predictions p JOIN matches m ON m.id=p.match_id
   WHERE p.user_id=NEW.user_id AND m.round_id=NEW.round_id
@@ -115,33 +115,30 @@ BEGIN
       SELECT json_object('matchId',m.id,'homeName',m.home_team_name,'awayName',m.away_team_name,
  'matchType',m.match_type,'homeScore',p.predicted_home_score,'awayScore',p.predicted_away_score,
  'extraTeamId',p.predicted_extra_team_provider_id,
- 'extraTeam',CASE p.predicted_extra_team_provider_id
- WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END) AS item
+ 'extraTeam',( CASE p.predicted_extra_team_provider_id
+ WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END )) AS item
       FROM matches m LEFT JOIN official_predictions p ON p.match_id=m.id AND p.user_id=NEW.user_id
       WHERE m.round_id=NEW.round_id ORDER BY m.kickoff_at,m.id));
 END;
 
 CREATE TRIGGER validate_official_submission_update BEFORE UPDATE ON round_submissions
 BEGIN 
-  SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM rounds WHERE id=NEW.round_id AND status='open')
-    THEN RAISE(ABORT,'La fecha no está abierta') END;
-  SELECT CASE WHEN NOT EXISTS (
-    SELECT 1 FROM matches WHERE round_id=NEW.round_id AND julianday(kickoff_at)+1.0/1440 > julianday('now'))
-    THEN RAISE(ABORT,'No quedan partidos abiertos para enviar') END;
-  SELECT CASE WHEN EXISTS (
+  SELECT RAISE(ABORT,'La fecha no está abierta') WHERE NOT EXISTS (SELECT 1 FROM rounds WHERE id=NEW.round_id AND status='open');
+  SELECT RAISE(ABORT,'No quedan partidos abiertos para enviar') WHERE NOT EXISTS (
+    SELECT 1 FROM matches WHERE round_id=NEW.round_id AND julianday(kickoff_at)+1.0/1440 > julianday('now'));
+  SELECT RAISE(ABORT,'Faltan completar partidos todavía abiertos') WHERE EXISTS (
     SELECT 1 FROM matches m LEFT JOIN predictions p ON p.match_id=m.id AND p.user_id=NEW.user_id
     WHERE m.round_id=NEW.round_id AND julianday(m.kickoff_at)+1.0/1440 > julianday('now')
       AND (p.predicted_home_score IS NULL OR p.predicted_away_score IS NULL
         OR (m.match_type='PENALTIES_ONLY' AND (p.predicted_extra_team_provider_id IS NULL
-          OR p.predicted_extra_team_provider_id NOT IN (m.home_team_provider_id,m.away_team_provider_id)))))
-    THEN RAISE(ABORT,'Faltan completar partidos todavía abiertos') END;
+          OR p.predicted_extra_team_provider_id NOT IN (m.home_team_provider_id,m.away_team_provider_id)))));
  END;
 CREATE TRIGGER promote_official_submission_update AFTER UPDATE ON round_submissions
 BEGIN
   INSERT INTO official_predictions
     (id,user_id,match_id,predicted_home_score,predicted_away_score,predicted_extra_team_provider_id,updated_at,source)
   SELECT p.id,p.user_id,p.match_id,p.predicted_home_score,p.predicted_away_score,
-    CASE WHEN m.match_type='PENALTIES_ONLY' THEN p.predicted_extra_team_provider_id ELSE NULL END,
+    ( CASE WHEN m.match_type='PENALTIES_ONLY' THEN p.predicted_extra_team_provider_id ELSE NULL END ),
     strftime('%Y-%m-%dT%H:%M:%fZ','now'),'submission'
   FROM predictions p JOIN matches m ON m.id=p.match_id
   WHERE p.user_id=NEW.user_id AND m.round_id=NEW.round_id
@@ -161,8 +158,8 @@ BEGIN
       SELECT json_object('matchId',m.id,'homeName',m.home_team_name,'awayName',m.away_team_name,
  'matchType',m.match_type,'homeScore',p.predicted_home_score,'awayScore',p.predicted_away_score,
  'extraTeamId',p.predicted_extra_team_provider_id,
- 'extraTeam',CASE p.predicted_extra_team_provider_id
- WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END) AS item
+ 'extraTeam',( CASE p.predicted_extra_team_provider_id
+ WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END )) AS item
       FROM matches m LEFT JOIN official_predictions p ON p.match_id=m.id AND p.user_id=NEW.user_id
       WHERE m.round_id=NEW.round_id ORDER BY m.kickoff_at,m.id));
 END;
@@ -174,13 +171,13 @@ WHEN (NEW.source='admin' OR EXISTS (SELECT 1 FROM round_submissions s JOIN match
 BEGIN
  INSERT INTO prediction_submission_events(round_id,user_id,match_id,event_type,actor_kind,fields_json,before_json,after_json)
  SELECT m.round_id,NEW.user_id,m.id,'PREDICTION_CHANGE',
-   CASE WHEN NEW.source='admin' THEN 'admin' ELSE 'participant' END,
+   ( CASE WHEN NEW.source='admin' THEN 'admin' ELSE 'participant' END ),
    '["homeScore","awayScore","extraTeamId"]',
    NULL,json_object('matchId',m.id,'homeName',m.home_team_name,'awayName',m.away_team_name,
  'matchType',m.match_type,'homeScore',NEW.predicted_home_score,'awayScore',NEW.predicted_away_score,
  'extraTeamId',NEW.predicted_extra_team_provider_id,
- 'extraTeam',CASE NEW.predicted_extra_team_provider_id
- WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END)
+ 'extraTeam',( CASE NEW.predicted_extra_team_provider_id
+ WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END ))
  FROM matches m WHERE m.id=NEW.match_id;
 END;
 CREATE TRIGGER invalidate_official_score_insert AFTER INSERT ON official_predictions
@@ -195,7 +192,7 @@ WHEN (NEW.source='admin' OR EXISTS (SELECT 1 FROM round_submissions s JOIN match
 BEGIN
  INSERT INTO prediction_submission_events(round_id,user_id,match_id,event_type,actor_kind,fields_json,before_json,after_json)
  SELECT m.round_id,NEW.user_id,m.id,'PREDICTION_CHANGE',
-   CASE WHEN NEW.source='admin' THEN 'admin' ELSE 'participant' END,
+   ( CASE WHEN NEW.source='admin' THEN 'admin' ELSE 'participant' END ),
    (SELECT json_group_array(field) FROM (
      SELECT 'homeScore' AS field WHERE OLD.predicted_home_score IS NOT NEW.predicted_home_score
      UNION ALL SELECT 'awayScore' WHERE OLD.predicted_away_score IS NOT NEW.predicted_away_score
@@ -203,12 +200,12 @@ BEGIN
    json_object('matchId',m.id,'homeName',m.home_team_name,'awayName',m.away_team_name,
  'matchType',m.match_type,'homeScore',OLD.predicted_home_score,'awayScore',OLD.predicted_away_score,
  'extraTeamId',OLD.predicted_extra_team_provider_id,
- 'extraTeam',CASE OLD.predicted_extra_team_provider_id
- WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END),json_object('matchId',m.id,'homeName',m.home_team_name,'awayName',m.away_team_name,
+ 'extraTeam',( CASE OLD.predicted_extra_team_provider_id
+ WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END )),json_object('matchId',m.id,'homeName',m.home_team_name,'awayName',m.away_team_name,
  'matchType',m.match_type,'homeScore',NEW.predicted_home_score,'awayScore',NEW.predicted_away_score,
  'extraTeamId',NEW.predicted_extra_team_provider_id,
- 'extraTeam',CASE NEW.predicted_extra_team_provider_id
- WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END)
+ 'extraTeam',( CASE NEW.predicted_extra_team_provider_id
+ WHEN m.home_team_provider_id THEN m.home_team_name WHEN m.away_team_provider_id THEN m.away_team_name END ))
  FROM matches m WHERE m.id=NEW.match_id;
 END;
 CREATE TRIGGER invalidate_official_score_update AFTER UPDATE ON official_predictions
