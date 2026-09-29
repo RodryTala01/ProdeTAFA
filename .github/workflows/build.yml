@@ -24,3 +24,19 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+
+
+  t32-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: T32 isolated E2E
+        run: npm run test:e2e:ci
