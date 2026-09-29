@@ -16,7 +16,9 @@
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "dev:e2e": "vite --config vite.e2e.config.ts",
     "test:e2e:local": "node scripts/e2e-t32-local.mjs",
-    "db:migrate:e2e": "wrangler d1 migrations apply DB --local --persist-to .wrangler/e2e-t32"
+    "db:migrate:e2e": "wrangler d1 migrations apply DB --local --persist-to .wrangler/e2e-t32",
+    "check:prod:config": "node scripts/check-production-config.mjs",
+    "test:e2e:ci": "node scripts/e2e-t32-ci.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

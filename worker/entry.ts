@@ -2,6 +2,15 @@ import baseWorker, { type Env } from './index';
 import { handleLeague } from './league';
 import { handleHistory } from './history';
 import { participantPasswordResetPolicy, publicationPolicy } from './policies';
+import {
+  CORE_PRODUCTION_TABLES,
+  MINIMUM_PRODUCTION_MIGRATION,
+  REQUIRED_PRODUCTION_COLUMNS,
+  REQUIRED_PRODUCTION_MIGRATIONS,
+  REQUIRED_PRODUCTION_TABLES,
+  REQUIRED_PRODUCTION_TRIGGERS,
+  T32_PRODUCTION_TABLES,
+} from './health-schema';
 
 const SESSION_COOKIE = 'prode_session';
 const encoder = new TextEncoder();
@@ -91,37 +100,92 @@ export async function syncOpenLeagueParticipants(env: Env) {
 }
 
 async function deepHealth(env: Env) {
-  const required = ['league_seasons', 'league_rounds', 'league_participants', 'official_predictions', 'prediction_submission_events'];
-  const result = await env.DB.prepare(
-    `SELECT name FROM sqlite_master
-     WHERE type = 'table'
-       AND name IN ('league_seasons', 'league_rounds', 'league_participants', 'official_predictions', 'prediction_submission_events')`,
+  const tableResult = await env.DB.prepare(
+    "SELECT name FROM sqlite_master WHERE type = 'table'",
   ).all<{ name: string }>();
-  const found = new Set((result.results ?? []).map((row) => row.name));
-  const missingTables = required.filter((name) => !found.has(name));
+  const foundTables = new Set((tableResult.results ?? []).map((row) => row.name));
+  const missingTables = REQUIRED_PRODUCTION_TABLES.filter((name) => !foundTables.has(name));
 
-  let eligibilityColumnReady = false;
-  if (missingTables.length === 0) {
-    const columns = await env.DB.prepare('PRAGMA table_info(league_participants)').all<{ name: string }>();
-    eligibilityColumnReady = (columns.results ?? []).some((column) => column.name === 'eligible_from_slot');
+  const missingColumns: string[] = [];
+  for (const [table, requiredColumns] of Object.entries(REQUIRED_PRODUCTION_COLUMNS)) {
+    if (!foundTables.has(table)) continue;
+    const columns = await env.DB.prepare(`PRAGMA table_info(${table})`).all<{ name: string }>();
+    const foundColumns = new Set((columns.results ?? []).map((column) => column.name));
+    for (const column of requiredColumns) {
+      if (!foundColumns.has(column)) missingColumns.push(`${table}.${column}`);
+    }
   }
 
-  const openRound = await env.DB.prepare(
-    `SELECT COUNT(*) AS total FROM rounds WHERE status = 'open'`,
-  ).first<{ total: number }>();
-  const openRoundCount = Number(openRound?.total ?? 0);
-  const singleOpenRoundReady = openRoundCount <= 1;
+  const triggerResult = await env.DB.prepare(
+    "SELECT name FROM sqlite_master WHERE type = 'trigger'",
+  ).all<{ name: string }>();
+  const foundTriggers = new Set((triggerResult.results ?? []).map((row) => row.name));
+  const missingTriggers = REQUIRED_PRODUCTION_TRIGGERS.filter((name) => !foundTriggers.has(name));
 
-  const ok = missingTables.length === 0 && eligibilityColumnReady && singleOpenRoundReady;
+  let appliedMigrations: string[] = [];
+  try {
+    const migrations = await env.DB.prepare(
+      'SELECT name FROM d1_migrations ORDER BY name',
+    ).all<{ name: string }>();
+    appliedMigrations = (migrations.results ?? []).map((row) => row.name);
+  } catch {
+    appliedMigrations = [];
+  }
+  const missingMigrations = REQUIRED_PRODUCTION_MIGRATIONS.filter(name => !appliedMigrations.includes(name));
+  const migrationLedgerReady = missingMigrations.length === 0;
+
+  const legacyMissing = CORE_PRODUCTION_TABLES.filter((name) => !foundTables.has(name));
+  const t32Missing = T32_PRODUCTION_TABLES.filter((name) => !foundTables.has(name));
+  const legacyColumnsReady = !missingColumns.includes('league_participants.eligible_from_slot');
+  const t32ColumnsReady = !missingColumns.includes('rounds.category')
+    && !missingColumns.includes('competition_survival_results.members_json');
+  const triggerSchemaReady = missingTriggers.length === 0;
+  const leagueSchemaReady = legacyMissing.length === 0 && legacyColumnsReady;
+  const competitionEngineSchemaReady = t32Missing.length === 0 && t32ColumnsReady;
+  const officialPredictionsReady = foundTables.has('official_predictions')
+    && foundTables.has('prediction_submission_events')
+    && [
+      'official_events_no_update',
+      'official_events_no_delete',
+      'validate_official_submission_insert',
+      'promote_official_submission_insert',
+      'validate_official_submission_update',
+      'promote_official_submission_update',
+      'audit_official_insert',
+      'invalidate_official_score_insert',
+      'audit_official_update',
+      'invalidate_official_score_update',
+    ].every((name) => foundTriggers.has(name));
+
+  const openRound = foundTables.has('rounds') && !missingColumns.includes('rounds.status') ? await env.DB.prepare(
+    "SELECT COUNT(*) AS total FROM rounds WHERE status = 'open'",
+  ).first<{ total: number }>() : null;
+  const openRoundCount = openRound ? Number(openRound.total) : null;
+  const singleOpenRoundReady = openRoundCount !== null && openRoundCount <= 1;
+
+  const schemaReady = missingTables.length === 0
+    && missingColumns.length === 0
+    && triggerSchemaReady
+    && migrationLedgerReady;
+  const ok = schemaReady && singleOpenRoundReady;
+
   return json({
     ok,
     app: 'prode-tafa',
-    leagueSchemaReady: missingTables.length === 0 && eligibilityColumnReady,
-    officialPredictionsReady: found.has('official_predictions') && found.has('prediction_submission_events'),
+    schemaReady,
+    leagueSchemaReady,
+    competitionEngineSchemaReady,
+    officialPredictionsReady,
+    triggerSchemaReady,
+    migrationLedgerReady,
+    minimumMigration: MINIMUM_PRODUCTION_MIGRATION,
+    latestAppliedMigration: appliedMigrations.at(-1) ?? null,
     singleOpenRoundReady,
     openRoundCount,
     missingTables,
-    missingColumns: eligibilityColumnReady ? [] : ['league_participants.eligible_from_slot'],
+    missingColumns,
+    missingTriggers,
+    missingMigrations,
   }, ok ? 200 : 503);
 }
 
