@@ -6,6 +6,7 @@ import {
   CORE_PRODUCTION_TABLES,
   MINIMUM_PRODUCTION_MIGRATION,
   REQUIRED_PRODUCTION_COLUMNS,
+  REQUIRED_PRODUCTION_MIGRATIONS,
   REQUIRED_PRODUCTION_TABLES,
   REQUIRED_PRODUCTION_TRIGGERS,
   T32_PRODUCTION_TABLES,
@@ -130,7 +131,8 @@ async function deepHealth(env: Env) {
   } catch {
     appliedMigrations = [];
   }
-  const migrationLedgerReady = appliedMigrations.includes(MINIMUM_PRODUCTION_MIGRATION);
+  const missingMigrations = REQUIRED_PRODUCTION_MIGRATIONS.filter(name => !appliedMigrations.includes(name));
+  const migrationLedgerReady = missingMigrations.length === 0;
 
   const legacyMissing = CORE_PRODUCTION_TABLES.filter((name) => !foundTables.has(name));
   const t32Missing = T32_PRODUCTION_TABLES.filter((name) => !foundTables.has(name));
@@ -155,11 +157,11 @@ async function deepHealth(env: Env) {
       'invalidate_official_score_update',
     ].every((name) => foundTriggers.has(name));
 
-  const openRound = await env.DB.prepare(
+  const openRound = foundTables.has('rounds') && !missingColumns.includes('rounds.status') ? await env.DB.prepare(
     "SELECT COUNT(*) AS total FROM rounds WHERE status = 'open'",
-  ).first<{ total: number }>();
-  const openRoundCount = Number(openRound?.total ?? 0);
-  const singleOpenRoundReady = openRoundCount <= 1;
+  ).first<{ total: number }>() : null;
+  const openRoundCount = openRound ? Number(openRound.total) : null;
+  const singleOpenRoundReady = openRoundCount !== null && openRoundCount <= 1;
 
   const schemaReady = missingTables.length === 0
     && missingColumns.length === 0
@@ -183,6 +185,7 @@ async function deepHealth(env: Env) {
     missingTables,
     missingColumns,
     missingTriggers,
+    missingMigrations,
   }, ok ? 200 : 503);
 }
 

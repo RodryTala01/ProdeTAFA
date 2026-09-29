@@ -1,3 +1,5 @@
+import { DatabaseSync } from 'node:sqlite';
+import worker from '../worker/entry';
 import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -22,16 +24,12 @@ function createdTables(sql: string) {
     .sort();
 }
 
-function createdTriggers(sql: string) {
-  return [...sql.matchAll(/CREATE TRIGGER(?: IF NOT EXISTS)?\s+([A-Za-z0-9_]+)/gi)]
-    .map((match) => match[1])
-    .sort();
-}
-
-function addedColumns(sql: string) {
-  return [...sql.matchAll(/ALTER TABLE\s+([A-Za-z0-9_]+)\s+ADD COLUMN\s+([A-Za-z0-9_]+)/gi)]
-    .map((match) => `${match[1]}.${match[2]}`)
-    .sort();
+function migratedDatabase() {
+  const db = new DatabaseSync(':memory:');
+  db.exec(allSql);
+  db.exec('CREATE TABLE d1_migrations(name TEXT)');
+  for(const name of migrationFiles)db.prepare('INSERT INTO d1_migrations VALUES(?)').run(name);
+  return db;
 }
 
 describe('contrato de health productivo', () => {
@@ -40,15 +38,21 @@ describe('contrato de health productivo', () => {
     expect([...T32_PRODUCTION_TABLES].sort()).toEqual(createdTables(t32Sql));
   });
 
-  it('cubre las columnas agregadas por ALTER TABLE', () => {
+  it('cubre todas las columnas del esquema migrado', () => {
     const requiredColumns = Object.entries(REQUIRED_PRODUCTION_COLUMNS)
       .flatMap(([table, columns]) => columns.map((column) => `${table}.${column}`))
       .sort();
-    expect(requiredColumns).toEqual(addedColumns(allSql));
+    const db=migratedDatabase();
+    try {
+      const actual=REQUIRED_PRODUCTION_TABLES.flatMap(table=>db.prepare('PRAGMA table_info('+table+')').all().map(c=>table+'.'+c.name)).sort();
+      expect(requiredColumns).toEqual(actual);
+    } finally {db.close();}
   });
 
   it('cubre todos los triggers versionados', () => {
-    expect([...REQUIRED_PRODUCTION_TRIGGERS].sort()).toEqual(createdTriggers(allSql));
+    const db=migratedDatabase();
+    try {expect([...REQUIRED_PRODUCTION_TRIGGERS].sort()).toEqual(db.prepare("SELECT name FROM sqlite_master WHERE type='trigger' ORDER BY name").all().map(r=>r.name));}
+    finally {db.close();}
   });
 
   it('exige como mínimo la última migración versionada', () => {
@@ -119,5 +123,30 @@ describe('preflight de configuración productiva', () => {
       (args) => args[0] === 'secret' ? JSON.stringify([{ name: 'FOOTBALL_API_KEY' }]) : '[]',
       config,
     )).toThrow(/deployment/);
+  });
+});
+
+// Exercise health against real migration output, including DROP TRIGGER in 0005.
+describe('health profundo sobre SQLite migrada',()=>{
+  it.each(['complete','missing-ledger','missing-column','missing-trigger','missing-rounds'])('%s',async(mode)=>{
+    const db=migratedDatabase();
+    try {
+      if(mode==='missing-ledger')db.exec("DELETE FROM d1_migrations WHERE name='0007_iffhs.sql'");
+      if(mode==='missing-column')db.exec('ALTER TABLE competition_survival_results DROP COLUMN members_json');
+      if(mode==='missing-trigger')db.exec('DROP TRIGGER audit_official_insert');
+      if(mode==='missing-rounds'){db.exec('PRAGMA foreign_keys=OFF');db.exec('DROP TABLE rounds');}
+      const DB={prepare(sql:string){
+        expect(sql).toMatch(/^(SELECT|PRAGMA)/);
+        return {async all(){return {results:db.prepare(sql).all()};},async first(){return db.prepare(sql).get()??null;}};
+      }};
+      const r=await worker.fetch(new Request('http://local/api/health/deep'),{DB} as any,{} as any);
+      const body:any=await r.json();
+      expect(r.status).toBe(mode==='complete'?200:503);
+      expect(body.ok).toBe(mode==='complete');
+      if(mode==='complete'){expect(body.missingTriggers).toEqual([]);expect(body.migrationLedgerReady).toBe(true);}
+      if(mode==='missing-ledger')expect(body.missingMigrations).toEqual(['0007_iffhs.sql']);
+      if(mode==='missing-column')expect(body.missingColumns).toContain('competition_survival_results.members_json');
+      if(mode==='missing-trigger')expect(body.missingTriggers).toContain('audit_official_insert');
+    } finally {db.close();}
   });
 });
