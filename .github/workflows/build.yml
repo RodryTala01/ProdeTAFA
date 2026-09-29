@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, dev/t32-competition-engine]
   pull_request:
-    branches: [main]
+    branches: [main, chore/t32-production-hardening]
 
 jobs:
   build:
