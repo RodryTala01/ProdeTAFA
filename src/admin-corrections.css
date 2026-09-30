@@ -4,9 +4,9 @@
 }
 
 .correction-section {
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 16px;
-  background: rgba(255,255,255,.025);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface-raised);
   overflow: hidden;
 }
 
@@ -14,7 +14,7 @@
   cursor: pointer;
   padding: 16px 18px;
   font-weight: 800;
-  color: #e2e8f0;
+  color: var(--text);
 }
 
 .correction-list,
@@ -26,9 +26,9 @@
 
 .correction-match,
 .audit-entry {
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 14px;
-  background: rgba(15,23,42,.55);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
 }
 
 .correction-match-summary {
@@ -49,15 +49,15 @@
 .correction-muted,
 .audit-entry span,
 .audit-entry small {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .correction-editor {
   display: grid;
   gap: 14px;
   padding: 16px;
-  border-top: 1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.025);
+  border-top: 1px solid var(--border);
+  background: var(--surface-raised);
 }
 
 .correction-score-row {
@@ -77,7 +77,7 @@
 .correction-score-row span,
 .correction-wide-field span,
 .correction-participant-select span {
-  color: #cbd5e1;
+  color: var(--text-muted);
   font-size: .85rem;
   font-weight: 700;
 }
@@ -88,10 +88,10 @@
 .correction-participant-select select {
   width: 100%;
   min-height: 44px;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 11px;
-  background: rgba(255,255,255,.06);
-  color: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  color: var(--text);
   padding: 9px 11px;
 }
 
@@ -111,7 +111,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #cbd5e1;
+  color: var(--text-muted);
 }
 
 .correction-actions {
@@ -136,7 +136,7 @@
 }
 
 .audit-entry strong {
-  color: #e2e8f0;
+  color: var(--text);
 }
 
 @media (max-width: 700px) {

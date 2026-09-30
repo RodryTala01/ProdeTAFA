@@ -307,8 +307,9 @@ Patrón conceptual indicado por el usuario:
 
 - Primero garantizar funcionamiento y reglas.
 - Después realizar pulido/rediseño visual antes de empaquetar Android.
-- Identidad visual definitiva (colores/branding TAFA) se definirá más adelante.
-- No implementar modo oscuro por ahora; puede evaluarse después.
+- Etapa 1 de diseño autorizada: tema exclusivamente oscuro, negro/carbón, texto blanco/gris y verde brillante moderado. Usar el logo TAFA oficial sin rediseñarlo.
+- Centralizar paleta, tipografías, spacing y radios 4/6/8 px en `src/design-tokens.css`; componentes compartidos en `src/components.css` y `src/ui.tsx`. Sin gradientes, glow, blur decorativo ni emojis.
+- Home y Competiciones son referencias con datos ficticios exclusivamente en `/design` bajo `import.meta.env.DEV`. No incorporar fixtures al build productivo. No cambiar endpoints, modelos, migraciones ni reglas deportivas por diseño. Ver `DESIGN-SYSTEM.md`.
 - La APK/AAB queda hacia el final, una vez cerradas funcionalidad y diseño.
 
 ## Seguridad y consistencia

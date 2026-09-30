@@ -15,7 +15,7 @@
 
 .reveal-heading p {
   margin: 0;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .reveal-body {
@@ -25,9 +25,9 @@
 }
 
 .reveal-participant {
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 16px;
-  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface-raised);
   overflow: hidden;
 }
 
@@ -37,11 +37,11 @@
   justify-content: space-between;
   gap: 12px;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid var(--border);
 }
 
 .reveal-participant-heading span {
-  color: #bfdbfe;
+  color: var(--text-muted);
   font-weight: 800;
 }
 
@@ -55,7 +55,7 @@
   gap: 12px;
   align-items: center;
   padding: 11px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid var(--border);
 }
 
 .reveal-prediction:last-child {
@@ -63,7 +63,7 @@
 }
 
 .reveal-prediction > span {
-  color: #cbd5e1;
+  color: var(--text-muted);
 }
 
 .reveal-prediction > strong {
@@ -71,7 +71,7 @@
 }
 
 .reveal-prediction > small {
-  color: #94a3b8;
+  color: var(--text-muted);
   min-width: 44px;
   text-align: right;
 }

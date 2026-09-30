@@ -1,3 +1,4 @@
+import { Icon } from './ui';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import RoundRanking from './RoundRanking';
 import AdminCorrections from './AdminCorrections';
@@ -63,7 +64,7 @@ function formatKickoff(value: string) {
 function Team({ name, logoUrl }: { name: string; logoUrl: string | null }) {
   return (
     <div className="fixture-team">
-      {logoUrl ? <img src={logoUrl} alt="" /> : <span className="team-fallback">⚽</span>}
+      {logoUrl ? <img src={logoUrl} alt="" /> : <span className="team-fallback" aria-hidden="true">{name.slice(0, 2).toUpperCase()}</span>}
       <strong>{name}</strong>
     </div>
   );
@@ -246,7 +247,7 @@ export default function AdminRounds() {
         {success && <div className="alert alert--success">{success}</div>}
 
         {!selected ? (
-          <section className="card empty-round"><span className="empty-icon">⚽</span><h2>Creá o elegí una fecha</h2><p>Después vas a poder buscar los partidos reales y agregarlos.</p></section>
+          <section className="card empty-round"><Icon name="calendar" /><h2>Creá o elegí una fecha</h2><p>Después vas a poder buscar los partidos reales y agregarlos.</p></section>
         ) : (
           <>
             <section className="card round-header-card">
