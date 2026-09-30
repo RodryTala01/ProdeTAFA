@@ -11,7 +11,7 @@ export function CompetitionContextList({
 }) {
   return (
     <section
-      className="card panel"
+      className="participant-contexts"
       aria-label="Contextos deportivos de esta Fecha"
     >
       <h3>Estás jugando esta Fecha en:</h3>

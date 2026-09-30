@@ -1,3 +1,4 @@
+import { Brand, Icon, PasswordField } from './ui';
 import PredictionHistoryBrowser from './PredictionHistoryBrowser';
 import { FormEvent, useEffect, useState } from 'react';
 import AdminRounds from './AdminRounds';
@@ -64,20 +65,20 @@ function SetupScreen({ onReady }: { onReady: (user: User) => void }) {
 
   return (
     <main className="shell shell--centered"><section className="card auth-card">
-      <div className="brand-mark">T</div><span className="eyebrow">PRODE TAFA</span><h1>Configuración inicial</h1>
+      <Brand /><h1>Configuración inicial</h1>
       <p>Creá tu cuenta de administrador. Esta pantalla desaparece después del primer registro.</p>
       <form className="form-stack" onSubmit={submit}>
         <Field label="Nombre y apellido" value={fullName} onChange={setFullName} placeholder="Rodrigo Talarico" autoComplete="name" />
         <Field label="Teléfono" value={phone} onChange={setPhone} placeholder="11 1234 5678" autoComplete="tel" />
         <Field label="Contraseña" value={password} onChange={setPassword} type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
-        {error && <div className="alert alert--error">{error}</div>}
+        {error && <div className="alert alert--error" role="alert">{error}</div>}
         <button className="button button--primary" disabled={loading}>{loading ? 'Creando…' : 'Crear administrador'}</button>
       </form>
     </section></main>
   );
 }
 
-function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
+export function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -94,13 +95,12 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
   }
 
   return (
-    <main className="shell shell--centered"><section className="card auth-card">
-      <div className="brand-mark">T</div><span className="eyebrow">PRODE TAFA</span><h1>Entrar al Prode</h1>
-      <p>Usá el teléfono y la contraseña que te asignó el administrador.</p>
+    <main className="shell shell--centered"><section className="auth-card auth-card--login" aria-label="Ingresar a Prode TAFA">
+      <Brand large />
       <form className="form-stack" onSubmit={submit}>
-        <Field label="Teléfono" value={phone} onChange={setPhone} placeholder="11 1234 5678" autoComplete="username" />
-        <Field label="Contraseña" value={password} onChange={setPassword} type="password" autoComplete="current-password" />
-        {error && <div className="alert alert--error">{error}</div>}
+        <Field label="Teléfono" value={phone} onChange={setPhone} type="tel" placeholder="11 1234 5678" autoComplete="username" />
+        <PasswordField value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
+        {error && <div className="alert alert--error" role="alert">{error}</div>}
         <button className="button button--primary" disabled={loading}>{loading ? 'Ingresando…' : 'Ingresar'}</button>
       </form>
     </section></main>
@@ -110,8 +110,8 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
 function Header({ user, subtitle, onLogout }: { user: User; subtitle: string; onLogout: () => void }) {
   return (
     <header className="topbar">
-      <div className="brand-inline"><div className="brand-mark brand-mark--small">T</div><div><strong>Prode TAFA</strong><span>{subtitle}</span></div></div>
-      <div className="topbar-actions"><span className="user-chip">{user.fullName}</span><button className="button button--ghost" onClick={onLogout}>Salir</button></div>
+      <div className="brand-inline"><Brand /><span className="header-context">{subtitle}</span></div>
+      <div className="topbar-actions"><span className="user-chip">{user.fullName}</span><button className="button button--ghost logout-button" onClick={onLogout} aria-label="Salir"><Icon name="logout" /><span>Salir</span></button></div>
     </header>
   );
 }
@@ -180,7 +180,7 @@ function ParticipantsAdmin() {
       </form></section>
       <section className="card panel panel--wide">
         <div className="panel-heading"><div><h2>Cuentas creadas</h2><p>Desactivar bloquea el acceso sin borrar historial.</p></div><button className="button button--ghost" onClick={() => void loadUsers()}>Actualizar</button></div>
-        {error && <div className="alert alert--error">{error}</div>}{success && <div className="alert alert--success">{success}</div>}
+        {error && <div className="alert alert--error" role="alert">{error}</div>}{success && <div className="alert alert--success">{success}</div>}
         <div className="user-list">{users.map((entry) => <div className="user-row" key={entry.id}>
           <div className="avatar">{entry.fullName.slice(0, 1).toUpperCase()}</div><div className="user-data"><strong>{entry.fullName}</strong><span>{entry.phone} · {entry.role === 'admin' ? 'Administrador' : `Participante · ${entry.isActive ? 'Activo' : 'Inactivo'}`}</span></div>
           {entry.role === 'participant' && <div className="topbar-actions"><button className="button button--secondary" onClick={() => setHistoryUser(entry)}>Historial</button><button className="button button--secondary" onClick={() => { setResetUser(entry); setNewPassword(''); }}>Cambiar clave</button><button className="button button--ghost" disabled={loading} onClick={() => void toggleParticipant(entry)}>{entry.isActive ? 'Desactivar' : 'Reactivar'}</button></div>}

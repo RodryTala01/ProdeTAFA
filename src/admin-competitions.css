@@ -3,8 +3,8 @@
 .competitions-admin .panel-heading { flex-wrap: wrap; }
 .competitions-admin h2, .competition-stage { overflow-wrap: anywhere; }
 .competitions-admin summary { cursor: pointer; padding: 12px 0; font-weight: 700; }
-.competition-stage { border-top: 1px solid #64748b55; padding: 16px 0; display: grid; gap: 12px; }
-.competition-pending { padding: 12px; border-left: 3px solid #64748b; }
+.competition-stage { border-top: 1px solid var(--border); padding: 16px 0; display: grid; gap: 12px; }
+.competition-pending { padding: 12px; border-left: 3px solid var(--border); }
 @media (max-width: 700px) {
   .competitions-admin .round-create { display: flex; flex-direction: column; align-items: stretch; }
   .competitions-admin .topbar-actions { flex-wrap: wrap; }

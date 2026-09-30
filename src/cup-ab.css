@@ -16,8 +16,8 @@
 .cup-ab fieldset {
   min-width: 0;
   margin: 0;
-  border: 1px solid #ddd;
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
   padding: 1rem;
 }
 .cup-ab select,
@@ -49,5 +49,5 @@
   overflow-wrap: anywhere;
 }
 
-.cup-ab .total-check { display:flex; align-items:center; gap:.7rem; padding:.4rem 0; }
-.cup-ab .total-check input { width:auto; flex:none; }
+.cup-ab .total-check { display: flex; align-items: center; gap: .7rem; padding: .4rem 0; }
+.cup-ab .total-check input { width: auto; flex: none; }

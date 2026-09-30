@@ -1,3 +1,4 @@
+import { TeamIdentity as Team } from './ui';
 import ParticipantCompetitionContexts from './ParticipantCompetitionContexts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { nextPredictionField, type PredictionField } from './prediction-focus';
@@ -127,15 +128,6 @@ function scoreLabel(resultType: string | null) {
   if (resultType === 'PENALTIES') return 'PENALES';
   if (resultType === 'VOID') return 'ANULADO';
   return 'ERROR';
-}
-
-function Team({ name, logoUrl }: { name: string; logoUrl: string | null }) {
-  return (
-    <div className="prediction-team">
-      {logoUrl ? <img src={logoUrl} alt="" /> : <span className="prediction-team-fallback">⚽</span>}
-      <span>{name}</span>
-    </div>
-  );
 }
 
 export default function ParticipantRound() {
@@ -386,7 +378,7 @@ export default function ParticipantRound() {
         </section>
       )}
 
-      <section className="card participant-round-header">
+      <section className="participant-round-header">
         <div>
           <span className="eyebrow">{isFinished ? 'FECHA FINALIZADA' : 'FECHA ABIERTA'}</span>
           <h1>{round.name}</h1>
@@ -442,7 +434,7 @@ export default function ParticipantRound() {
                   aria-label={`Goles ${match.home.name}`}
                 />
               </div>
-              <span className="score-separator">-</span>
+              <span className="score-separator" aria-hidden="true">—</span>
               <div className="score-side score-side--away">
                 <input
                   ref={(element) => { awayInputs.current[match.id] = element; }}
@@ -463,9 +455,9 @@ export default function ParticipantRound() {
           return (
             <article className={`card prediction-card ${isLocked ? 'prediction-card--locked' : ''}`} key={match.id}>
               <div className="prediction-meta">
-                <span>{match.competitionName || 'Competencia'}</span>
-                <time>{formatKickoff(match.kickoffAt)}</time>
-                <time dateTime={match.lockedAt}>Cierre: {formatKickoff(match.lockedAt)} (Argentina)</time>
+                <span className="prediction-competition">{match.competitionLogoUrl && <img src={match.competitionLogoUrl} alt="" loading="lazy" />}{match.competitionName || 'Competencia'}</span>
+                <time dateTime={match.kickoffAt}>{formatKickoff(match.kickoffAt)}</time>
+                <time className="prediction-lock-time" dateTime={match.lockedAt}>Cierre: {formatKickoff(match.lockedAt)} (Argentina)</time>
                 <b className={isLocked ? 'match-countdown match-countdown--closed' : 'match-countdown'}>
                   {isFinished ? 'Finalizado' : countdownLabel(match, now)}
                 </b>
@@ -516,7 +508,7 @@ export default function ParticipantRound() {
               )}
 
               <div className="prediction-footer">
-                <small>{isLocked ? 'El pronóstico ya no puede modificarse.' : (saveState[match.id] || 'Se guarda automáticamente.')}</small>
+                <small role="status">{isLocked ? 'El pronóstico ya no puede modificarse.' : (saveState[match.id] || 'Se guarda automáticamente.')}</small>
                 {match.score && (
                   <div className="score-earned">
                     <strong>{match.score.points} pt{match.score.points === 1 ? '' : 's'} · {scoreLabel(match.score.resultType)}</strong>

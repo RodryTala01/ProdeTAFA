@@ -1,0 +1,45 @@
+/* Prode TAFA · Identity 01. All visual color decisions live here. */
+:root {
+  color-scheme: dark;
+  --bg: #090a09;
+  --surface: #121412;
+  --surface-raised: #1b1e1b;
+  --surface-hover: #232723;
+  --border: #303630;
+  --border-strong: #586158;
+  --text: #f2f4ef;
+  --text-muted: #a8b0a6;
+  --text-subtle: #929b91;
+  --accent: #b5ef52;
+  --accent-hover: #c8fa75;
+  --accent-ink: #101608;
+  --accent-soft: #202b14;
+  --success: #9ddd8b;
+  --success-soft: #18291a;
+  --warning: #f1c66d;
+  --warning-soft: #2d2515;
+  --danger: #ff9b96;
+  --danger-soft: #311c1c;
+  --info: #9fc8f4;
+  --info-soft: #172635;
+  --overlay: #000b;
+  --font-body: Arial, "Helvetica Neue", system-ui, sans-serif;
+  --font-display: "Arial Narrow", "Roboto Condensed", "Franklin Gothic Medium", Arial, sans-serif;
+  --radius-sm: 4px;
+  --radius-control: 6px;
+  --radius-panel: 8px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --container: 1160px;
+  --container-reading: 800px;
+  --control-height: 44px;
+  --header-height: 64px;
+  --nav-height: 64px;
+  --transition: 140ms ease;
+  --shadow-floating: 0 8px 24px #0006;
+}

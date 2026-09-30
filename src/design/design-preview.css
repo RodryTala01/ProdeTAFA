@@ -1,0 +1,20 @@
+/* Development-only review chrome. Never part of the product interface. */
+.design-notice { padding: 8px 20px; background: var(--surface-raised); border-bottom: 1px solid var(--border); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: .625rem; letter-spacing: .04em; }
+.design-notice > div { display: flex; gap: 16px; }
+.design-notice button, .design-notice a { padding: 4px 0; border: 0; background: transparent; font-size: .6875rem; color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.reference-nav .admin-tab { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.reference-nav .icon { width: 17px; height: 17px; }
+.system-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+.component-samples { display: flex; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+.design-dialog { color: var(--text); width: min(440px, calc(100% - 32px)); padding: 24px; box-shadow: var(--shadow-floating); }
+.design-dialog::backdrop { background: var(--overlay); }
+@media (max-width: 700px) {
+  .design-notice { flex-wrap: wrap; padding: 8px 16px; gap: 8px; }
+  .design-notice > div { gap: 24px; }
+  .design-notice button, .design-notice a { min-height: 32px; display: inline-flex; align-items: center; }
+  .system-grid { grid-template-columns: 1fr; gap: 24px; }
+  .design-dashboard { padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
+  .design-dashboard > .reference-nav { position: fixed; top: auto; bottom: 0; left: 0; right: 0; z-index: 40; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; padding: 0 8px env(safe-area-inset-bottom); margin: 0; min-height: calc(var(--nav-height) + env(safe-area-inset-bottom)); background: var(--surface); border: 0; border-top: 1px solid var(--border); }
+  .design-dashboard > .reference-nav .admin-tab { min-height: var(--nav-height); min-width: 0; flex-direction: column; gap: 5px; font-size: .6875rem; padding: 8px 2px; border-bottom: 0; border-top: 2px solid transparent; }
+  .design-dashboard > .reference-nav .admin-tab--active { border-top-color: var(--accent); }
+}
