@@ -171,7 +171,7 @@ Mejoras deseadas:
 
 ### Navegación
 
-Participante: `Pronósticos | Liga | Historial`.
+Participante: `Inicio | Pronósticos | Competiciones | Mi Club`. Inicio es la pantalla posterior al login. Liga se consulta dentro de Competiciones e Historial desde Mi Club y Pronósticos; conservar las implementaciones existentes.
 
 Administrador: `Fechas | Competiciones | Liga actual | Participantes`.
 
@@ -309,7 +309,8 @@ Patrón conceptual indicado por el usuario:
 - Después realizar pulido/rediseño visual antes de empaquetar Android.
 - Etapa 1 de diseño autorizada: tema exclusivamente oscuro, negro/carbón, texto blanco/gris y verde brillante moderado. Usar el logo TAFA oficial sin rediseñarlo.
 - Centralizar paleta, tipografías, spacing y radios 4/6/8 px en `src/design-tokens.css`; componentes compartidos en `src/components.css` y `src/ui.tsx`. Sin gradientes, glow, blur decorativo ni emojis.
-- Home y Competiciones son referencias con datos ficticios exclusivamente en `/design` bajo `import.meta.env.DEV`. No incorporar fixtures al build productivo. No cambiar endpoints, modelos, migraciones ni reglas deportivas por diseño. Ver `DESIGN-SYSTEM.md`.
+- Etapa 2: Home y Competiciones reales usan APIs existentes. Sólo se permite ampliar lecturas para exponer datos ya persistidos sin alterar reglas. Referencias ficticias neutras exclusivamente en `/design` bajo `import.meta.env.DEV`; nunca en Home productiva. Sin migraciones ni cambios deportivos. Ver `DESIGN-SYSTEM.md`.
+- Navegación participante mediante hash, header compacto con menú de perfil; barra inferior móvil con cuatro destinos. Retirar el prompt visible de instalación, conservando manifest y service worker.
 - La APK/AAB queda hacia el final, una vez cerradas funcionalidad y diseño.
 
 ## Seguridad y consistencia

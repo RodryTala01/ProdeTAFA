@@ -566,6 +566,12 @@ async function participantCurrent(env: Env, user: SessionUser) {
     status: string;
   }>();
 
+  // Public metadata only. Preserve the existing historical membership list below.
+  const catalog = await env.DB.prepare(
+    `SELECT id, code, display_name, family, status FROM competitions
+     WHERE season_id = ? ORDER BY sort_order, id`,
+  ).bind(season.id).all<{ id: number; code: string; display_name: string; family: CompetitionFamily; status: string }>();
+
   return json({
     season: {
       id: Number(season.id),
@@ -575,6 +581,9 @@ async function participantCurrent(env: Env, user: SessionUser) {
       division: membership ? { id: Number(membership.id), code: membership.code, name: membership.name } : null,
       // Season history only: DUO membership must be evaluated by Fecha in competition-contexts.
       competitionMembershipScope: 'SEASON_HISTORY',
+      competitionCatalog: (catalog.results ?? []).map(c => ({
+        id: Number(c.id), code: c.code, displayName: c.display_name, family: c.family, status: c.status,
+      })),
       competitions: (competitions.results ?? []).map((competition) => ({
         id: Number(competition.id),
         code: competition.code,

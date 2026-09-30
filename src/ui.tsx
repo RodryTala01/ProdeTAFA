@@ -1,7 +1,8 @@
 import { useId, useState, type InputHTMLAttributes } from 'react';
 
-type IconName = 'eye' | 'eye-off' | 'arrow' | 'home' | 'list' | 'trophy' | 'logout' | 'calendar' | 'check';
+type IconName = 'eye' | 'eye-off' | 'arrow' | 'home' | 'list' | 'trophy' | 'logout' | 'calendar' | 'check' | 'user';
 const paths: Record<IconName, string> = {
+  user: 'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0 M4 21v-2a8 8 0 0 1 16 0v2',
   eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
   'eye-off': 'm3 3 18 18 M10 5a12 12 0 0 1 12 7 17 17 0 0 1-4 5 M6 6a17 17 0 0 0-4 6s3.5 7 10 7a12 12 0 0 0 5-1 M10 10a3 3 0 0 0 4 4',
   arrow: 'M4 12h16 m-6-6 6 6-6 6',

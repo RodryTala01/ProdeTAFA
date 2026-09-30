@@ -182,7 +182,7 @@ function LegacyLeagueView({ data, reload }: { data: LegacyResponse; reload: () =
   );
 }
 
-export default function LeagueView() {
+export default function LeagueView({ initialLeagueCode }: { initialLeagueCode?: 'LIGA_A' | 'LIGA_B' } = {}) {
   const [engineData, setEngineData] = useState<EngineLeagueData | null>(null);
   const [legacyData, setLegacyData] = useState<LegacyResponse | null>(null);
   const [leagueCode, setLeagueCode] = useState<'LIGA_A' | 'LIGA_B'>('LIGA_A');
@@ -215,14 +215,14 @@ export default function LeagueView() {
       if (contextResponse.ok) {
         const context = await contextResponse.json() as CurrentCompetitionContext;
         if (context.season) {
-          const preferred = context.season.division?.code === 'B' ? 'LIGA_B' : 'LIGA_A';
+          const preferred = initialLeagueCode ?? (context.season.division?.code === 'B' ? 'LIGA_B' : 'LIGA_A');
           await loadEngine(preferred);
           return;
         }
       }
       await loadLegacy();
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo cargar la Liga');
+    } catch {
+      setError('No pudimos cargar la Liga. Intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -234,8 +234,8 @@ export default function LeagueView() {
     try {
       if (engineData) await loadEngine(leagueCode);
       else await loadLegacy();
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo actualizar la Liga');
+    } catch {
+      setError('No pudimos actualizar la Liga. Intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -248,8 +248,8 @@ export default function LeagueView() {
     setExpandedUserId(null);
     try {
       await loadEngine(nextLeagueCode);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo cargar esa división');
+    } catch {
+      setError('No pudimos cargar esa división. Intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -262,7 +262,7 @@ export default function LeagueView() {
   }, []);
 
   if (loading && !engineData && !legacyData) return <section className="card panel"><p>Cargando Liga...</p></section>;
-  if (error && !engineData && !legacyData) return <section className="card panel"><div className="alert alert--error">{error}</div></section>;
+  if (error && !engineData && !legacyData) return <section className="card panel"><div className="alert alert--error" role="alert">{error}</div><button className="button button--secondary" onClick={() => void loadInitial()}>Reintentar</button></section>;
   if (legacyData) return <LegacyLeagueView data={legacyData} reload={() => void refresh()} />;
   if (!engineData) return <section className="card panel"><div className="alert alert--error">No se pudo determinar la Liga activa.</div></section>;
 

@@ -12,7 +12,7 @@ export default function PredictionHistoryBrowser({ participantId = '', own = fal
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'No se pudieron cargar las fechas');
         setRounds(data.rounds);
-      }).catch((caught) => { if (!controller.signal.aborted) setError(caught.message); });
+      }).catch(() => { if (!controller.signal.aborted) setError('No pudimos cargar las Fechas. Volvé a intentarlo.'); });
     return () => controller.abort();
   }, [own]);
   return <section className="card prediction-history">

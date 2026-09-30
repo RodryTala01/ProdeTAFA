@@ -4,9 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import AdminRounds from './AdminRounds';
 import AdminLeague from './AdminLeague';
 import AdminCompetitions from './AdminCompetitions';
-import ParticipantRound from './ParticipantRound';
-import LeagueView from './LeagueView';
-import ParticipantHistory from './ParticipantHistory';
+import ParticipantDashboard from './ParticipantDashboard';
 
 type Role = 'admin' | 'participant';
 
@@ -216,23 +214,6 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
   );
 }
 
-function ParticipantDashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
-  const [section, setSection] = useState<'round' | 'league' | 'history'>('round');
-  return (
-    <main className="app-shell">
-      <Header user={user} subtitle="Participante" onLogout={onLogout} />
-      <section className="dashboard dashboard--narrow">
-        <nav className="admin-tabs" aria-label="Prode">
-          <button className={`admin-tab ${section === 'round' ? 'admin-tab--active' : ''}`} onClick={() => setSection('round')}>Pronósticos</button>
-          <button className={`admin-tab ${section === 'league' ? 'admin-tab--active' : ''}`} onClick={() => setSection('league')}>Liga</button>
-          <button className={`admin-tab ${section === 'history' ? 'admin-tab--active' : ''}`} onClick={() => setSection('history')}>Historial</button>
-        </nav>
-        {section === 'round' ? <ParticipantRound /> : section === 'league' ? <LeagueView /> : <><PredictionHistoryBrowser own /><ParticipantHistory /></>}
-      </section>
-    </main>
-  );
-}
-
 export default function AppV2() {
   const [loading, setLoading] = useState(true);
   const [setupRequired, setSetupRequired] = useState(false);
@@ -256,13 +237,16 @@ export default function AppV2() {
 
   async function logout() {
     try { await api('/api/auth/logout', { method: 'POST', body: '{}' }); }
-    finally { setUser(null); }
+    finally { window.history.replaceState(null, '', window.location.pathname); setUser(null); }
   }
 
   if (loading) return <main className="shell shell--centered"><div className="loader">Cargando Prode TAFA…</div></main>;
   if (fatalError) return <main className="shell shell--centered"><section className="card auth-card"><h1>No pudimos iniciar</h1><div className="alert alert--error">{fatalError}</div></section></main>;
   if (setupRequired) return <SetupScreen onReady={(createdUser) => { setUser(createdUser); setSetupRequired(false); }} />;
-  if (!user) return <LoginScreen onLogin={setUser} />;
+  if (!user) return <LoginScreen onLogin={(loggedUser) => {
+    window.history.replaceState(null, '', loggedUser.role === 'participant' ? '#/inicio' : window.location.pathname);
+    setUser(loggedUser);
+  }} />;
   if (user.role === 'admin') return <AdminDashboard user={user} onLogout={() => void logout()} />;
   return <ParticipantDashboard user={user} onLogout={() => void logout()} />;
 }
