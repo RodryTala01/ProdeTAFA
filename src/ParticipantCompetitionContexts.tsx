@@ -40,7 +40,7 @@ export function CompetitionContextList({
       ) : (
         <p>No hay competiciones vinculadas a tu participación en esta Fecha.</p>
       )}
-      <p>Un único pronóstico de 12 partidos para todos estos contextos.</p>
+      <p>Un único pronóstico de 12 partidos cuenta para todas estas competiciones.</p>
     </section>
   );
 }
@@ -68,8 +68,8 @@ export default function ParticipantCompetitionContexts({
       .then((d) => {
         if (!controller.signal.aborted) setData(d);
       })
-      .catch((e) => {
-        if (!controller.signal.aborted) setError(e.message);
+      .catch(() => {
+        if (!controller.signal.aborted) setError('No pudimos cargar las competiciones');
       });
     return () => controller.abort();
   }, [roundId, retry]);

@@ -48,9 +48,28 @@ Tests de contrato de contraste WCAG AA, Login/autofill, contraseña oculta y tog
 
 Revisión de navegador a 1440×960, 768×1024 y 390×844; Login, referencias y pantallas reales de Admin/Participante. El smoke local verifica envío/reenvío, penales, persistencia visual, lectura de Liga/Historial y ausencia de overflow general. Tablas anchas conservan scroll en su propio contenedor.
 
-## Etapa 2 (sin implementar)
+## Etapa 2 · Navegación y Home reales
 
-- Acordar navegación real de Inicio/Competiciones y conectar los modelos de presentación exclusivamente a datos existentes.
+- Rama `design/02-navigation-home`, posterior al merge de Etapa 1 (`c2f1d8f`). Sin deploy.
+- Participante: Inicio, Pronósticos, Competiciones y Mi Club. Admin conserva su navegación. Login de participante abre Inicio; refrescar conserva la sección mediante hash y Atrás usa el historial del navegador. No se agrega router ni dependencia.
+- `ParticipantDashboard.tsx` organiza la navegación; `ParticipantHome.tsx` presenta Inicio, directorio y Mi Club; `participant-home.ts` concentra lecturas y adaptación visual. Se conservan ParticipantRound, LeagueView, ParticipantHistory y PredictionHistoryBrowser.
+- Home lee `/api/participant/round`, `/api/competition-engine/current`, standings de la división propia y contextos de la Fecha abierta. La última Fecha finalizada nunca se presenta como próxima. Borrador y cambios pendientes se detectan comparando los valores ya expuestos por backend; no se modifica autosave/envío/scoring.
+- Extensión mínima read-only: `season.competitionCatalog` en `/api/competition-engine/current` expone nombre, código, familia y estado de todas las competiciones persistidas de la temporada activa. El campo histórico `competitions` y su semántica `SEASON_HISTORY` no cambian. Sin nuevas rutas, migraciones ni escrituras.
+- Liga usa posición/puntos devueltos por backend. La división propia se muestra primero; los enlaces de Liga A/B permiten abrir explícitamente la tabla existente. No se reconstruyen fases ni elegibilidad en cliente.
+- Sin contexto específico de la Fecha, una membresía histórica se muestra como “Participación registrada”, nunca como “En juego” ni con un compañero Dúos supuesto. Si no existe membresía ni contexto, se indica “No participa”. El catálogo no inventa competiciones que no estén configuradas.
+- Lecturas al entrar a secciones de resumen, reintento explícito, refresco cada minuto y al recuperar foco. Errores parciales permiten seguir usando las secciones que cargaron.
+- Mi Club agrupa identidad, Liga y accesos al historial. Escudos pendientes usan iniciales. No hay perfil editable ni estadísticas nuevas.
+- No se monta PwaInstallPrompt. Manifest/service worker siguen intactos.
+
+### Datos que quedan pendientes
+
+- No hay backend de anuncios: se presenta el estado vacío, sin avisos simulados.
+- No existe resumen único de fase/eliminación vigente para todas las Copas. Se muestra sólo participación histórica y contextos reales de la Fecha; los interiores completos quedan para Etapa 5.
+- No se incorporan escudos definitivos, estadísticas avanzadas, brackets ni lógica deportiva. Los fixtures de `/design` ahora usan nombres neutros y siguen excluidos del build productivo.
+
+## Etapas siguientes (sin implementar)
+
+- Etapa 3: profundizar la experiencia de Pronósticos, conservando su comportamiento deportivo.
 - Extender la composición compacta a los interiores de cada competición, preservando su motor específico.
 - Integrar escudos/trofeos definitivos y preparar iconos instalables oficiales en la fase PWA.
 - Revisar instalación real en dispositivos y ergonomía con teclado virtual cuando se aborde la etapa mobile.

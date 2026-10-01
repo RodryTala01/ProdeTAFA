@@ -32,8 +32,8 @@ export default function ParticipantHistory() {
       const data = await response.json() as { rounds?: HistoryRound[]; error?: string };
       if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
       setRounds(data.rounds ?? []);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo cargar el historial');
+    } catch {
+      setError('No pudimos cargar tu historial. Intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -47,13 +47,13 @@ export default function ParticipantHistory() {
     <div className="form-stack">
       <section className="card panel">
         <div className="panel-heading">
-          <div><span className="eyebrow">HISTORIAL</span><h1>Tus fechas</h1><p>Resumen de todas las fechas que ya cerraron.</p></div>
+          <div><span className="eyebrow">HISTORIAL</span><h1>Tus Fechas</h1><p>Resumen de tus Fechas finalizadas.</p></div>
           <button className="button button--ghost" onClick={() => void load()}>Actualizar</button>
         </div>
         {error && <div className="alert alert--error">{error}</div>}
       </section>
 
-      {rounds.length === 0 ? (
+      {!error && rounds.length === 0 ? (
         <section className="card panel"><p>Todavía no tenés fechas finalizadas.</p></section>
       ) : (
         <section className="card panel panel--wide">

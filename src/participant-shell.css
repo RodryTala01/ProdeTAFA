@@ -1,0 +1,41 @@
+.participant-dashboard { min-width: 0; }
+.participant-dashboard--predictions { max-width: var(--container-reading); }
+.participant-content { min-width: 0; outline: none; }
+.participant-content h1, .participant-content h2 { overflow-wrap: anywhere; }
+.participant-nav { display: flex; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+.participant-nav a { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 12px; color: var(--text-muted); text-decoration: none; border-bottom: 2px solid transparent; font-weight: 600; font-size: .875rem; }
+.participant-nav a[aria-current="page"] { color: var(--accent); border-color: var(--accent); }
+.profile-menu { position: relative; }
+.profile-menu summary { min-height: 44px; display: flex; align-items: center; gap: 12px; cursor: pointer; list-style: none; }
+.profile-menu summary::-webkit-details-marker { display: none; }
+.profile-name { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .875rem; }
+.profile-menu__items { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 210px; padding: 8px; border: 1px solid var(--border-strong); background: var(--surface); border-radius: var(--radius-panel); box-shadow: var(--shadow-floating); }
+.profile-menu__items a, .profile-menu__items button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px; min-height: 44px; color: var(--text); background: transparent; border: 0; text-decoration: none; text-align: left; }
+.profile-menu__items a:hover, .profile-menu__items button:hover { background: var(--surface-hover); }
+.club-avatar { flex: 0 0 auto; width: 56px; height: 64px; }
+.club-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.home-submission { color: var(--text); font-weight: 600; }
+.competition-directory { list-style: none; padding: 0; margin: 0; }
+.competition-directory > li { border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+.competition-directory .sports-list, .competition-directory .sports-list__row { border: 0; }
+.competition-directory summary { display: flex; align-items: center; gap: 16px; min-height: 80px; cursor: pointer; padding: 16px 0; }
+.competition-directory summary > span:nth-child(2) { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.competition-directory summary small { display: block; color: var(--text-muted); margin-top: 6px; }
+.competition-directory__detail { padding: 0 0 12px 56px; }
+.participant-shell .sports-list__result { max-width: 130px; }
+.participant-shell .status-badge { white-space: normal; text-align: right; }
+@media (max-width: 700px) {
+  .participant-dashboard { padding-bottom: calc(var(--nav-height) + 32px + env(safe-area-inset-bottom)); }
+  .participant-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0 4px env(safe-area-inset-bottom); background: var(--surface); border: 0; border-top: 1px solid var(--border); }
+  .participant-nav a { min-width: 0; min-height: var(--nav-height); flex-direction: column; justify-content: center; gap: 5px; padding: 8px 2px; font-size: .6875rem; border-bottom: 0; border-top: 2px solid transparent; }
+  .participant-nav a[aria-current="page"] { border-top-color: var(--accent); }
+  .participant-nav .icon { width: 20px; height: 20px; }
+  .participant-shell .submit-card { bottom: calc(var(--nav-height) + env(safe-area-inset-bottom)); }
+  .participant-shell input, .participant-shell button { scroll-margin-bottom: calc(220px + env(safe-area-inset-bottom)); }
+  .profile-name { max-width: 120px; font-size: .75rem; }
+  .profile-menu summary { gap: 8px; }
+  .club-layout { grid-template-columns: 1fr; gap: 16px; }
+  .participant-shell .sports-list__row { grid-template-columns: 32px minmax(0, 1fr); }
+  .participant-shell .sports-list__result { grid-column: 2; display: flex; justify-content: space-between; max-width: none; }
+  .participant-shell .competition-emblem { width: 32px; height: 40px; }
+}

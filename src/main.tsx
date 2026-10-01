@@ -1,7 +1,6 @@
 import { lazy, Suspense, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import AppV2 from './AppV2';
-import PwaInstallPrompt from './PwaInstallPrompt';
 import './design-tokens.css';
 import './styles.css';
 import './components.css';
@@ -22,6 +21,6 @@ const DesignPreview = import.meta.env.DEV && window.location.pathname === '/desi
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {DesignPreview ? <Suspense fallback={<p className="loader">Cargando referencia…</p>}><DesignPreview /></Suspense> : <><AppV2 /><PwaInstallPrompt /></>}
+    {DesignPreview ? <Suspense fallback={<p className="loader">Cargando referencia…</p>}><DesignPreview /></Suspense> : <AppV2 />}
   </StrictMode>,
 );
