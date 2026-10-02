@@ -51,8 +51,8 @@ Aplicación permanente de Prode para aproximadamente 40 participantes. Priorizar
 - Si el proveedor modifica kickoff antes del cierre, adaptar el cierre.
 - Backend, no sólo UI, debe rechazar escrituras tardías.
 - Mostrar hora exacta de cierre y cuenta regresiva por partido.
-- No hace falta barra global `x/12` por ahora.
-- No pedir confirmación previa al envío ni advertencias por marcadores altos por ahora.
+- Etapa 3: mostrar contador global `x/12` sin barra. Contar borradores editables y oficiales cerrados; los cerrados incompletos no bloquean el envío de los abiertos.
+- Primer envío directo, sin modal ni advertencias por marcadores altos. Al reenviar cambios, confirmar una comparación contra `officialPrediction` con Antes/Ahora y Penales; cancelar no publica.
 - Después de enviar, mostrar una confirmación visible con la hora del último envío.
 - El texto visible para la selección extra será simplemente `Penales`.
 

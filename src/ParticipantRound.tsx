@@ -5,6 +5,8 @@ import { nextPredictionField, type PredictionField } from './prediction-focus';
 import PredictionHistory from './PredictionHistory';
 import FinishedPredictions from './FinishedPredictions';
 import RoundRanking from './RoundRanking';
+import PredictionChanges from './PredictionChanges';
+import { changedPredictions, completionCount, completePrediction, globalSaveState, predictionChanged, officialDraft, penaltyName } from './prediction-presentation';
 import './participant-round.css';
 
 type Match = {
@@ -87,17 +89,10 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
-function formatKickoff(value: string) {
-  return new Intl.DateTimeFormat('es-AR', {
-    timeZone: 'America/Argentina/Buenos_Aires',
-    weekday: 'short',
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).format(new Date(value));
-}
+const kickoffFormatter = new Intl.DateTimeFormat('es-AR', {
+  timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
+});
+function formatKickoff(value: string) { return kickoffFormatter.format(new Date(value)); }
 
 function formatDuration(milliseconds: number) {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
@@ -107,7 +102,7 @@ function formatDuration(milliseconds: number) {
   const seconds = totalSeconds % 60;
 
   if (days > 0) return `${days}d ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m`;
-  if (hours > 0) return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
@@ -140,6 +135,14 @@ export default function ParticipantRound() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [reviewing, setReviewing] = useState(false);
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+  const [compact, setCompact] = useState(() => { try { return localStorage.getItem('tafa.predictions.compact') === 'true'; } catch { return false; } });
+  const versions = useRef<Record<number, number>>({});
+  const submitButton = useRef<HTMLButtonElement>(null);
+  const reviewingRef = useRef(false);
+  const returnFocus = useRef(false);
+  useEffect(() => { if (!reviewing && returnFocus.current) { submitButton.current?.focus(); returnFocus.current = false; } }, [reviewing]);
   const [now, setNow] = useState(Date.now());
   const timers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
   const pendingSaves = useRef<Record<number, Promise<void>>>({});
@@ -157,6 +160,7 @@ export default function ParticipantRound() {
     try {
       const query = roundId === null ? '' : `?roundId=${roundId}`;
       const data = await api<{ round: Round | null }>(`/api/participant/round${query}`);
+      if (roundId !== selectedRoundIdRef.current || reviewingRef.current) return;
       setRound(data.round);
       if (data.round) {
         serverOffset.current = new Date(data.round.serverNow).getTime() - Date.now();
@@ -176,7 +180,7 @@ export default function ParticipantRound() {
         });
       }
     } catch (caught) {
-      if (initial) setError(caught instanceof Error ? caught.message : 'No se pudo cargar la fecha');
+      setError(caught instanceof Error ? caught.message : 'No se pudo cargar la fecha');
     } finally {
       if (initial) setLoading(false);
     }
@@ -219,6 +223,8 @@ export default function ParticipantRound() {
     Object.values(timers.current).forEach(clearTimeout);
     selectedRoundIdRef.current = roundId;
     setSelectedRoundId(roundId);
+    versions.current = {};
+    setExpanded({});
     setDrafts({});
     setSaveState({});
     setSuccess('');
@@ -233,13 +239,14 @@ export default function ParticipantRound() {
   function saveMatch(match: Match, draft: Draft): Promise<void> {
     // Serialize each match so an older autosave cannot overwrite a newer edit
     // or arrive after the explicit submission snapshot.
+    const version = versions.current[match.id] ?? 0;
     const previous = pendingSaves.current[match.id] ?? Promise.resolve();
-    const next = previous.catch(() => {}).then(() => persistMatch(match, draft));
+    const next = previous.catch(() => {}).then(() => persistMatch(match, draft, version));
     pendingSaves.current[match.id] = next;
     return next;
   }
 
-  async function persistMatch(match: Match, draft: Draft) {
+  async function persistMatch(match: Match, draft: Draft, version: number) {
     setSaveState((current) => ({ ...current, [match.id]: 'Guardando…' }));
     try {
       const homeScore = draft.homeScore === '' ? null : Number(draft.homeScore);
@@ -252,15 +259,19 @@ export default function ParticipantRound() {
           extraTeamId: draft.extraTeamId,
         }),
       });
-      setSaveState((current) => ({ ...current, [match.id]: 'Guardado' }));
+      if ((versions.current[match.id] ?? 0) === version) setSaveState((current) => ({ ...current, [match.id]: 'Guardado' }));
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'Error al guardar';
-      setSaveState((current) => ({ ...current, [match.id]: message }));
+      if ((versions.current[match.id] ?? 0) === version) setSaveState((current) => ({ ...current, [match.id]: message }));
       throw caught;
     }
   }
 
   function updateDraft(match: Match, patch: Partial<Draft>) {
+    if (locked(match) || submitting || reviewing) return;
+    versions.current[match.id] = (versions.current[match.id] ?? 0) + 1;
+    setSaveState(current => ({ ...current, [match.id]: 'Guardando…' }));
+    setSuccess('');
     const next = { ...drafts[match.id], ...patch };
     setDrafts((current) => ({ ...current, [match.id]: next }));
     if (timers.current[match.id]) clearTimeout(timers.current[match.id]);
@@ -300,7 +311,9 @@ export default function ParticipantRound() {
   }
 
   async function submitRound() {
-    if (!round || round.status !== 'open') return;
+    if (!round || round.status !== 'open' || submitting) return;
+    reviewingRef.current = false;
+    setReviewing(false);
     setSubmitting(true);
     setError('');
     setSuccess('');
@@ -321,7 +334,7 @@ export default function ParticipantRound() {
         submissionCount: data.submissionCount,
       } : current);
       await loadRound(false, round.id);
-      setSuccess('Pronóstico enviado correctamente. Los próximos cambios serán borradores hasta Reenviar.');
+      setSuccess('Pronóstico enviado');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo enviar el pronóstico');
     } finally {
@@ -348,16 +361,27 @@ export default function ParticipantRound() {
     return (
       <section className="card participant-empty">
         <span className="eyebrow">PRODE TAFA</span>
-        <h1>No hay una fecha disponible todavía</h1>
-        <p>Cuando el administrador publique la próxima fecha, los partidos van a aparecer acá.</p>
+        <h1>Todavía no hay una Fecha disponible.</h1>
+        <p>Cuando se publique la próxima, vas a poder cargar tus pronósticos acá.</p>
       </section>
     );
   }
 
   const isFinished = round.status === 'finished';
+  const changes = changedPredictions(round.matches, drafts, now);
+  const complete = completionCount(round.matches, drafts, now, !isFinished);
+  const canSubmit = openMatches.length > 0 && openMatches.every(match => completePrediction(match, drafts[match.id]));
+  const saving = globalSaveState(Object.values(saveState));
+  function cancelReview() { reviewingRef.current = false; setReviewing(false); }
+  function requestSubmit() {
+    if (!canSubmit || submitting) return;
+    if (round!.submitted && changes.length) { reviewingRef.current = true; returnFocus.current = true; setReviewing(true); }
+    else void submitRound();
+  }
+
 
   return (
-    <div className="participant-round">
+    <div className={`participant-round ${compact ? 'participant-round--compact' : ''}`}>
       {rounds.length > 1 && (
         <section className="card round-history-card">
           <div>
@@ -365,6 +389,7 @@ export default function ParticipantRound() {
             <strong>Ver otra fecha</strong>
           </div>
           <select
+            disabled={submitting || reviewing || Object.values(saveState).includes('Guardando…')}
             value={selectedRoundId ?? round.id}
             onChange={(event) => void chooseRound(Number(event.target.value))}
             aria-label="Elegir fecha del Prode"
@@ -379,27 +404,18 @@ export default function ParticipantRound() {
       )}
 
       <section className="participant-round-header">
-        <div>
-          <span className="eyebrow">{isFinished ? 'FECHA FINALIZADA' : 'FECHA ABIERTA'}</span>
-          <h1>{round.name}</h1>
-          <p>{isFinished
-            ? 'La fecha está cerrada y los puntos son definitivos.'
-            : `${openMatches.length} partido${openMatches.length === 1 ? '' : 's'} todavía abierto${openMatches.length === 1 ? '' : 's'}.`}</p>
-        </div>
-        <div className="participant-summary">
-          <div className="points-total"><span>{isFinished ? 'Puntos finales' : 'Puntos actuales'}</span><strong>{round.pointsTotal}</strong></div>
-          <div className={`submission-state ${round.submitted ? 'submission-state--ok' : ''}`}>
-            <strong>{isFinished ? 'Finalizado' : round.submitted ? `Pronóstico enviado · ${round.lastSubmittedAt ? submissionTime(round.lastSubmittedAt) : ''}` : 'Borrador'}</strong>
-            <span>{round.submitted ? `Envíos: ${round.submissionCount}` : 'Sin envío registrado'}</span>
-          </div>
-        </div>
+        <div><span className="eyebrow">{isFinished ? 'FECHA FINALIZADA' : 'FECHA ABIERTA'} · {round.matches.length} PARTIDOS</span><h1>{round.name}</h1><p>Horarios de Argentina · America/Argentina/Buenos_Aires</p></div>
+        <div className="points-total"><span>{isFinished ? 'Puntos finales' : 'Puntos actuales'}</span><strong>{round.pointsTotal}</strong></div>
       </section>
-
-      {isFinished && <RoundRanking roundId={round.id} mode="participant" />}
-      {isFinished && <FinishedPredictions roundId={round.id} />}
-
       <ParticipantCompetitionContexts key={`contexts-${round.id}`} roundId={round.id}/>
-
+      <div className="prediction-toolbar">
+        <div><strong>{complete}/{round.matches.length} completados</strong>{!isFinished && <span role="status" aria-live="polite"> · {saving}</span>}
+          {round.submitted && <p className="submission-state--ok">Pronóstico enviado{round.lastSubmittedAt ? ` · ${submissionTime(round.lastSubmittedAt)}` : ''}</p>}
+          {round.submitted && changes.length > 0 && <p>Cambiaste {changes.length} partido{changes.length === 1 ? '' : 's'} desde tu último envío.</p>}
+        </div>
+        <label className="compact-switch"><input type="checkbox" checked={compact} onChange={event => { setCompact(event.target.checked); try { localStorage.setItem('tafa.predictions.compact', String(event.target.checked)); } catch { /* Optional preference. */ } }}/>Vista compacta</label>
+      </div>
+      <div className="prediction-columns" aria-hidden="true"><span>LOCAL</span><span>PRONÓSTICO</span><span>VISITANTE</span></div>
       <div className="prediction-list">
         {round.matches.map((match) => {
           const isLocked = locked(match);
@@ -408,7 +424,9 @@ export default function ParticipantRound() {
             awayScore: match.officialPrediction.awayScore === null ? '' : String(match.officialPrediction.awayScore),
             extraTeamId: match.officialPrediction.extraTeamId,
           } : drafts[match.id] ?? { homeScore: '', awayScore: '', extraTeamId: null };
-          const isFinal = FINAL_STATUSES.has(match.status);
+          const isFinal = FINAL_STATUSES.has(match.status) || match.result.isVoid;
+          const collapsed = (isFinal || isFinished) && !expanded[match.id];
+          const saveError = saveState[match.id] && !['Guardado', 'Guardando…'].includes(saveState[match.id]);
           const isLive = LIVE_STATUSES.has(match.status);
           const resultHome = isFinal ? (match.result.homeRegulation ?? match.result.homeCurrent) : match.result.homeCurrent;
           const resultAway = isFinal ? (match.result.awayRegulation ?? match.result.awayCurrent) : match.result.awayCurrent;
@@ -429,7 +447,7 @@ export default function ParticipantRound() {
                   max="99"
                   inputMode="numeric"
                   value={draft.homeScore}
-                  disabled={isLocked || submitting}
+                  disabled={isLocked || submitting || reviewing}
                   onChange={(event) => updateHomeScore(match, event.target.value)}
                   aria-label={`Goles ${match.home.name}`}
                 />
@@ -443,7 +461,7 @@ export default function ParticipantRound() {
                   max="99"
                   inputMode="numeric"
                   value={draft.awayScore}
-                  disabled={isLocked || submitting}
+                  disabled={isLocked || submitting || reviewing}
                   onChange={(event) => updateAwayScore(match, event.target.value)}
                   aria-label={`Goles ${match.away.name}`}
                 />
@@ -453,26 +471,26 @@ export default function ParticipantRound() {
           );
 
           return (
-            <article className={`card prediction-card ${isLocked ? 'prediction-card--locked' : ''}`} key={match.id}>
+            <article className={`prediction-card ${isLive ? 'prediction-card--live' : ''} ${collapsed ? 'prediction-card--collapsed' : ''}`} key={match.id}>
               <div className="prediction-meta">
                 <span className="prediction-competition">{match.competitionLogoUrl && <img src={match.competitionLogoUrl} alt="" loading="lazy" />}{match.competitionName || 'Competencia'}</span>
                 <time dateTime={match.kickoffAt}>{formatKickoff(match.kickoffAt)}</time>
-                <time className="prediction-lock-time" dateTime={match.lockedAt}>Cierre: {formatKickoff(match.lockedAt)} (Argentina)</time>
-                <b className={isLocked ? 'match-countdown match-countdown--closed' : 'match-countdown'}>
-                  {isFinished ? 'Finalizado' : countdownLabel(match, now)}
+                <details className="prediction-lock-time"><summary>Hora de cierre</summary><time dateTime={match.lockedAt}>{formatKickoff(match.lockedAt)}</time></details>
+                <b className={`match-countdown ${isLocked ? 'match-countdown--closed' : Date.parse(match.lockedAt) - now <= 600_000 ? 'match-countdown--soon' : ''}`}>
+                  {isFinal || isFinished ? 'Finalizado' : isLive ? 'EN VIVO · Cerrado' : compact && !isLocked && Date.parse(match.lockedAt) - now > 600_000 ? 'Abierto' : countdownLabel(match, now)}
                 </b>
               </div>
 
-              {scoreInputs}
+              {isLocked ? <div className="score-prediction prediction-readonly"><Team name={match.home.name} logoUrl={match.home.logoUrl}/><div aria-label="Tu pronóstico"><strong>{draft.homeScore || '—'} – {draft.awayScore || '—'}</strong><small>Tu pronóstico</small></div><Team name={match.away.name} logoUrl={match.away.logoUrl}/></div> : scoreInputs}
 
-              {match.matchType === 'PENALTIES_ONLY' && (
+              {!collapsed && match.matchType === 'PENALTIES_ONLY' && (
                 <div className="penalty-prediction">
-                  <p><strong>Penales</strong></p>
-                  <div className="penalty-options">
+                  <p><strong>SI HAY PENALES</strong></p>
+                  <div className="penalty-options" hidden={isLocked}>
                     <button
                       ref={(element) => { penaltyInputs.current[match.id] = element; }}
                       type="button"
-                      disabled={isLocked || submitting}
+                      disabled={isLocked || submitting || reviewing}
                       aria-pressed={draft.extraTeamId === match.home.id}
                       className={`penalty-option ${draft.extraTeamId === match.home.id ? 'penalty-option--selected' : ''}`}
                       onClick={() => updatePenalty(match, match.home.id)}
@@ -481,7 +499,7 @@ export default function ParticipantRound() {
                     </button>
                     <button
                       type="button"
-                      disabled={isLocked || submitting}
+                      disabled={isLocked || submitting || reviewing}
                       aria-pressed={draft.extraTeamId === match.away.id}
                       className={`penalty-option ${draft.extraTeamId === match.away.id ? 'penalty-option--selected' : ''}`}
                       onClick={() => updatePenalty(match, match.away.id)}
@@ -489,7 +507,8 @@ export default function ParticipantRound() {
                       <Team name={match.away.name} logoUrl={match.away.logoUrl} />
                     </button>
                   </div>
-                  <small>El marcador corresponde a los 90 minutos. Si el partido llega a penales, acertar el ganador de la tanda suma 1 punto extra.</small>
+                  {isLocked && <span>Tu elección: {penaltyName(match, draft.extraTeamId)}</span>}
+                  <small className="prediction-secondary">El marcador es de los 90′. Acertar el ganador por penales suma +1.</small>
                 </div>
               )}
 
@@ -499,7 +518,7 @@ export default function ParticipantRound() {
                     <strong>Partido anulado · no suma ni resta puntos</strong>
                   ) : (
                     <>
-                      <span>{isFinal ? 'Resultado 90′' : isLive ? 'Resultado actual' : 'Resultado'}</span>
+                      <span>{isFinal ? 'Resultado 90′' : isLive ? 'EN VIVO' : 'Resultado'}</span>
                       <strong>{resultHome ?? '-'} - {resultAway ?? '-'}</strong>
                       {isFinal && match.result.wentToPenalties && penaltyWinner && <small>Ganó por penales: {penaltyWinner}</small>}
                     </>
@@ -508,33 +527,34 @@ export default function ParticipantRound() {
               )}
 
               <div className="prediction-footer">
-                <small role="status">{isLocked ? 'El pronóstico ya no puede modificarse.' : (saveState[match.id] || 'Se guarda automáticamente.')}</small>
+                <small>{isFinal || isFinished ? 'Finalizado' : isLocked ? 'Cerrado' : round.submitted && predictionChanged(match, draft) ? 'Modificado · pendiente de reenvío' : round.submitted && completePrediction(match, officialDraft(match.officialPrediction)) ? 'Enviado' : !completePrediction(match, draft) ? 'Incompleto' : saveState[match.id] === 'Guardado' ? 'Completado · guardado' : 'Completado'}</small>
+                {!isLocked && saveError && <div className="prediction-save-error" role="alert">{match.home.name} — {match.away.name}: {saveState[match.id]} <button type="button" className="button button--ghost" disabled={submitting || reviewing} onClick={() => void saveMatch(match, draft).catch(() => {})}>Reintentar guardado</button></div>}
                 {match.score && (
                   <div className="score-earned">
-                    <strong>{match.score.points} pt{match.score.points === 1 ? '' : 's'} · {scoreLabel(match.score.resultType)}</strong>
+                    <strong>{match.score.points > 0 ? '+' : ''}{match.score.points} · {scoreLabel(match.score.resultType)}</strong>
                     {match.score.extraPoints > 0 && <small>+{match.score.extraPoints} por penales</small>}
                     {match.score.provisional && <small>provisional</small>}
                   </div>
                 )}
               </div>
+              {(isFinal || isFinished) && <button type="button" className="prediction-expand" aria-expanded={!collapsed} aria-controls={`match-detail-${match.id}`} onClick={() => setExpanded(current => ({ ...current, [match.id]: !current[match.id] }))}>{collapsed ? 'Ver detalle' : 'Ocultar detalle'}</button>}
+              {(isFinal || isFinished) && <div id={`match-detail-${match.id}`} hidden={collapsed} className="prediction-detail">{match.score ? `${match.score.basePoints} puntos por marcador · ${match.score.extraPoints} por penales` : 'Sin puntaje registrado'}</div>}
             </article>
           );
         })}
       </div>
 
-      {!isFinished && (
-        <section className="card submit-card">
-          <div className="submit-copy">
-            <strong>{round.submitted ? 'Reenviar' : 'Enviar pronóstico'}</strong>
-            <p>Todos los partidos que todavía estén abiertos deben estar completos.</p>
-            {error && <div className="alert alert--error submit-alert">{error}</div>}
-            {success && <div className="alert alert--success submit-alert">{success}</div>}
-          </div>
-          <button className="button button--primary" disabled={submitting || openMatches.length === 0} onClick={() => void submitRound()}>
-            {submitting ? 'Enviando…' : round.submitted ? 'Reenviar' : 'Enviar pronóstico'}
-          </button>
-        </section>
-      )}
+      {!isFinished && <section className="card submit-card">
+        <div className="submit-copy">
+          <p>{openMatches.length === 0 ? 'Los pronósticos ya cerraron.' : !canSubmit ? 'Completá los partidos abiertos para enviar.' : round.submitted && changes.length ? 'Tus cambios todavía no están enviados.' : 'Todo listo para enviar.'}</p>
+          {error && <div role="alert" className="alert alert--error submit-alert">{error}</div>}
+          {success && <div role="status" className="alert alert--success submit-alert">{success}</div>}
+        </div>
+        {openMatches.length > 0 && <button ref={submitButton} className="button button--primary" disabled={submitting || !canSubmit || reviewing} onClick={requestSubmit}>{submitting ? 'Enviando…' : round.submitted ? 'Reenviar' : 'Enviar pronóstico'}</button>}
+      </section>}
+      {reviewing && <PredictionChanges changes={changes} busy={submitting} onCancel={cancelReview} onConfirm={() => void submitRound()}/>}
+      {isFinished && <RoundRanking roundId={round.id} mode="participant" />}
+      {isFinished && <FinishedPredictions roundId={round.id} />}
       <PredictionHistory key={`history-${round.id}`} roundId={round.id} own />
     </div>
   );

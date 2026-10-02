@@ -14,17 +14,17 @@ export function CompetitionContextList({
       className="participant-contexts"
       aria-label="Contextos deportivos de esta Fecha"
     >
-      <h3>Estás jugando esta Fecha en:</h3>
+
       {contexts.length ? (
         <ul>
           {contexts.map((c) => (
             <li key={c.id}>
-              {contextLabel(c)}
+              {contextLabel(c)}{c.kind === 'KNOCKOUT' && c.encounter.scoreSelf !== null && c.encounter.scoreOpponent !== null && <strong> · {c.encounter.scoreSelf}–{c.encounter.scoreOpponent}</strong>}
               {c.kind === 'TOTAL_GROUP' && (
                 <ul>
                   {c.miniFixtures.map((f) => (
                     <li key={f.encounterId}>
-                      Mini-fecha {f.miniDay} · vs {f.opponentName}
+                      Mini-fecha {f.miniDay} · vs {f.opponentName} · {f.scoreSelf}–{f.scoreOpponent}{!f.complete && ' (parcial)'}
                     </li>
                   ))}
                   {!c.miniFixtures.length && (
@@ -40,7 +40,7 @@ export function CompetitionContextList({
       ) : (
         <p>No hay competiciones vinculadas a tu participación en esta Fecha.</p>
       )}
-      <p>Un único pronóstico de 12 partidos cuenta para todas estas competiciones.</p>
+
     </section>
   );
 }
