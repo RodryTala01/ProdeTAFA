@@ -1,0 +1,111 @@
+/* Admin uses the shared palette and denser, task-oriented layouts. */
+.admin-shell .dashboard { max-width:1240px; }
+.admin-shell .panel { padding:18px; }
+.admin-shell .panel-heading { gap:12px; flex-wrap:wrap; }
+.admin-shell h1 { font-size:1.75rem; margin:4px 0 8px; }
+.admin-shell h2 { font-size:1.2rem; }
+.admin-shell .topbar { min-height:68px; }
+.admin-shell .topbar .header-context { font-size:.75rem; }
+.admin-shell .admin-tabs { margin-bottom:20px; }
+.admin-shell .admin-tab[aria-current=page] { color:var(--accent); border-bottom-color:var(--accent); }
+.admin-menu { position:relative; flex-shrink:0; }
+.admin-menu > summary { display:flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; cursor:pointer; list-style:none; border:1px solid var(--border); border-radius:var(--radius-control); color:var(--text-muted); font-size:1.25rem; }
+.admin-menu > summary::-webkit-details-marker { display:none; }
+.admin-menu[open] > summary { background:var(--surface-hover); color:var(--text); }
+.admin-menu-items { position:absolute; right:0; top:calc(100% + 4px); z-index:30; width:max-content; min-width:200px; max-width:min(290px,80vw); padding:6px; border:1px solid var(--border-strong); border-radius:var(--radius-control); background:var(--surface-raised); }
+.admin-menu:not([open]) .admin-menu-items { display:none; }
+.admin-menu-items button,.admin-menu-items a { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:8px 12px; border:0; background:transparent; color:var(--text); font-size:.8125rem; text-align:left; white-space:normal; }
+.admin-menu-items button:hover { background:var(--surface-hover); }
+.admin-menu-items .admin-menu-danger { border-top:1px solid var(--border); color:var(--danger); margin-top:4px; }
+.admin-menu-name { display:block; padding:8px 12px; color:var(--text-muted); font-size:.75rem; }
+.admin-modal { width:min(480px,calc(100% - 24px)); max-height:90dvh; overflow:auto; padding:20px; color:var(--text); background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--radius-panel); }
+.admin-modal::backdrop { background:var(--overlay); }
+.admin-modal .panel-heading { display:flex; justify-content:space-between; align-items:start; gap:12px; }
+.admin-modal h2 { font-size:1.25rem; }
+.admin-modal p { font-size:.875rem; overflow-wrap:anywhere; }
+.admin-filter-bar { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin:20px 0; }
+.admin-filter-bar > .field:first-child { flex:1 1 220px; }
+.admin-filter-bar > .field:nth-child(2) { flex:0 1 150px; }
+.participants-admin .user-row { padding:10px 0; display:flex; flex-wrap:nowrap; border:0; border-bottom:1px solid var(--border); border-radius:0; background:transparent; }
+.participants-admin .user-data { flex:1; min-width:0; }
+.participants-admin .user-data strong { overflow-wrap:anywhere; }
+.participants-admin .user-data span { color:var(--text-muted); font-size:.75rem; }
+.participants-admin .user-list { overflow:visible; }
+.admin-success { color:var(--success); font-size:.875rem; }
+.admin-shell .admin-disclosure { min-width:0; margin-top:8px; }
+.admin-shell .admin-disclosure > summary { padding:12px 0; min-height:44px; cursor:pointer; font-weight:600; }
+.admin-shell .admin-disclosure > .card { border:0; padding:12px 0; }
+.admin-shell .rounds-layout { grid-template-columns:250px minmax(0,1fr); gap:20px; }
+.admin-shell .rounds-sidebar { padding:14px; top:80px; }
+.admin-shell .rounds-title-row h2 { font-size:1rem; }
+.admin-shell .round-count { background:transparent; min-width:28px; min-height:28px; }
+.admin-shell .round-create { margin-top:12px; flex-wrap:wrap; }
+.admin-shell .round-create input { flex:1 1 110px; }
+.admin-shell .round-list { gap:0; max-height:65dvh; overflow:auto; }
+.admin-shell .round-item { border-radius:0; border:0; border-bottom:1px solid var(--border); border-left:2px solid transparent; padding:12px 10px; background:transparent; }
+.admin-shell .round-item--active { border-left-color:var(--accent); background:var(--accent-soft); }
+.admin-shell .round-item small { font-size:.6875rem; }
+.admin-shell .round-item strong { font-size:.8125rem; }
+.admin-shell .round-header-card,.admin-shell .selected-matches,.admin-shell .fixture-search-card { padding:16px; }
+.admin-shell .round-header-card { flex-wrap:wrap; gap:12px; }
+.admin-shell .round-header-card p { font-size:.8125rem; }
+.admin-shell .round-header-card .topbar-actions { flex-wrap:wrap; }
+.admin-shell .round-progress { min-height:44px; min-width:90px; background:transparent; flex-wrap:wrap; gap:4px; }
+.admin-shell .round-progress small { flex-basis:100%; font-size:.625rem; text-align:center; color:var(--text-muted); }
+.admin-shell .round-progress strong { font-size:1.5rem; }
+.admin-shell .round-progress--complete { color:var(--accent); }
+.admin-shell .stored-match-list,.admin-shell .fixture-list { gap:0; }
+.admin-shell .stored-match { flex-direction:row; padding:12px 0; border:0; border-bottom:1px solid var(--border); border-radius:0; background:transparent; gap:8px; }
+.admin-shell .stored-match-main { flex:1; }
+.admin-shell .stored-match small { font-size:.6875rem; }
+.admin-shell .stored-teams { display:grid; grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr); gap:8px; }
+.admin-shell .fixture-team img { flex-shrink:0; }
+.admin-shell .fixture-team strong { font-size:.8125rem; }
+.admin-shell .fixture-search-form { grid-template-columns:1fr 1fr auto; gap:8px; }
+.admin-shell .fixture-search-form label { font-size:.75rem; }
+.admin-shell .fixture-search-card .section-heading p { font-size:.75rem; margin:4px 0 0; }
+.admin-shell .fixture-card { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 12px; padding:12px 0; border:0; border-bottom:1px solid var(--border); background:transparent; border-radius:0; }
+.admin-shell .fixture-meta { grid-column:1/-1; font-size:.6875rem; }
+.admin-shell .fixture-meta img { width:20px; height:20px; }
+.admin-shell .fixture-meta time { font-size:.6875rem; }
+.admin-shell .fixture-versus { grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr); margin:0; gap:8px; }
+.admin-shell .fixture-actions { flex-wrap:nowrap; }
+.admin-shell .fixture-actions .button { padding:8px 10px; font-size:.75rem; }
+.admin-shell .penalty-badge,.admin-shell .added-badge { padding:3px 6px; margin-top:4px; font-weight:600; }
+.admin-season-summary { display:flex; flex-wrap:wrap; gap:20px; border-bottom:1px solid var(--border); padding-bottom:14px; }
+.admin-season-summary .stat-card { padding:0; border:0; background:transparent; display:flex; align-items:baseline; gap:8px; }
+.admin-season-summary .stat-card strong { font-size:1rem; }
+.competition-directory { display:grid; }
+.competition-directory-row { padding:16px 0; display:flex; align-items:center; justify-content:space-between; gap:16px; border-bottom:1px solid var(--border); }
+.competition-directory-row .panel-heading { flex:1; margin:0; }
+.competition-directory-row h2 { margin:4px 0; }
+.competition-directory-row p { font-size:.75rem; margin:0; }
+.competition-directory-row .button { font-size:.75rem; }
+.competition-workspace > .panel-heading { padding-bottom:12px; border-bottom:1px solid var(--border); }
+.admin-task-note { display:block; color:var(--warning); margin-top:6px; font-size:.75rem; }
+.admin-help,.admin-league-note p { font-size:.75rem; color:var(--text-muted); }
+.admin-shell .competitions-admin .table-wrap,.admin-shell .competitions-admin .table-scroll { overflow-x:auto; max-width:100%; }
+@media(max-width:900px) {
+ .admin-shell .rounds-layout { grid-template-columns:1fr; }
+ .admin-shell .rounds-sidebar { position:static; }
+ .admin-shell .round-list { max-height:190px; }
+ .competition-directory-row { flex-wrap:wrap; }
+}
+@media(max-width:600px) {
+ .admin-shell .dashboard { padding:16px 12px 32px; }
+ .admin-shell .panel { padding:12px; }
+ .admin-shell .header-context { display:block; }
+ .admin-shell .round-header-card,.admin-shell .selected-matches,.admin-shell .fixture-search-card { padding:12px; }
+ .admin-shell .fixture-card { grid-template-columns:1fr; }
+ .admin-shell .fixture-actions { justify-content:flex-end; }
+ .admin-shell .fixture-search-form { grid-template-columns:1fr 1fr; }
+ .admin-shell .fixture-search-form .button { grid-column:1/-1; }
+ .admin-shell .fixture-versus .fixture-team:last-child { justify-content:flex-end; text-align:right; }
+ .admin-shell .fixture-versus > span { text-align:center; }
+ .admin-shell .fixture-team { gap:5px; }
+ .admin-shell .stored-teams .fixture-team strong,.admin-shell .fixture-versus .fixture-team strong { white-space:normal; overflow-wrap:anywhere; }
+ .admin-shell .admin-tabs { gap:20px; }
+ .admin-modal { padding:16px; }
+ .competition-directory-row { gap:8px; }
+ .competition-directory-row > .button { width:100%; }
+}

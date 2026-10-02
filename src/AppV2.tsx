@@ -1,8 +1,9 @@
 import { Brand, Icon, PasswordField } from './ui';
-import PredictionHistoryBrowser from './PredictionHistoryBrowser';
+import ParticipantsAdmin from './ParticipantsAdmin';
+import { AdminMenu } from './AdminUI';
+import './admin-shell.css';
 import { FormEvent, useEffect, useState } from 'react';
 import AdminRounds from './AdminRounds';
-import AdminLeague from './AdminLeague';
 import AdminCompetitions from './AdminCompetitions';
 import ParticipantDashboard from './ParticipantDashboard';
 
@@ -24,7 +25,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
     headers: { 'content-type': 'application/json', ...init?.headers },
   });
   const data = await response.json().catch(() => ({})) as T & ApiError;
-  if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
+  if (!response.ok) throw new Error(response.status >= 500 ? 'No pudimos completar la operación. Reintentá en unos instantes.' : data.error || 'No pudimos completar la operación.');
   return data;
 }
 
@@ -109,106 +110,28 @@ function Header({ user, subtitle, onLogout }: { user: User; subtitle: string; on
   return (
     <header className="topbar">
       <div className="brand-inline"><Brand /><span className="header-context">{subtitle}</span></div>
-      <div className="topbar-actions"><span className="user-chip">{user.fullName}</span><button className="button button--ghost logout-button" onClick={onLogout} aria-label="Salir"><Icon name="logout" /><span>Salir</span></button></div>
+      <AdminMenu label={`Perfil de ${user.fullName}`} trigger={<span className="avatar">{user.fullName.slice(0,2).toUpperCase()}</span>}><span className="admin-menu-name">{user.fullName}</span><button onClick={onLogout}><Icon name="logout"/> Cerrar sesión</button></AdminMenu>
     </header>
   );
 }
 
-function ParticipantsAdmin() {
-  const [historyUser, setHistoryUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [resetUser, setResetUser] = useState<User | null>(null);
-  const [newPassword, setNewPassword] = useState('');
-
-  async function loadUsers() {
-    try { setUsers((await api<{ users: User[] }>('/api/admin/users')).users); }
-    catch (caught) { setError(caught instanceof Error ? caught.message : 'No se pudieron cargar los participantes'); }
-  }
-  useEffect(() => { void loadUsers(); }, []);
-
-  async function createParticipant(event: FormEvent) {
-    event.preventDefault(); setLoading(true); setError(''); setSuccess('');
-    try {
-      const data = await api<{ user: User }>('/api/admin/users', { method: 'POST', body: JSON.stringify({ fullName, phone, password }) });
-      setUsers((current) => [...current, data.user].sort((a, b) => a.fullName.localeCompare(b.fullName)));
-      setFullName(''); setPhone(''); setPassword('');
-      setSuccess(`${data.user.fullName} fue agregado correctamente. Si hay una Liga abierta, entra desde esta temporada con 0 puntos previos.`);
-    } catch (caught) { setError(caught instanceof Error ? caught.message : 'No se pudo crear el participante'); }
-    finally { setLoading(false); }
-  }
-
-  async function resetPassword(event: FormEvent) {
-    event.preventDefault(); if (!resetUser) return;
-    setLoading(true); setError(''); setSuccess('');
-    try {
-      await api(`/api/admin/users/${encodeURIComponent(resetUser.id)}/password`, { method: 'PUT', body: JSON.stringify({ password: newPassword }) });
-      setSuccess(`Contraseña de ${resetUser.fullName} actualizada.`); setResetUser(null); setNewPassword('');
-    } catch (caught) { setError(caught instanceof Error ? caught.message : 'No se pudo cambiar la contraseña'); }
-    finally { setLoading(false); }
-  }
-
-  async function toggleParticipant(entry: User) {
-    if (entry.role !== 'participant') return;
-    setLoading(true); setError(''); setSuccess('');
-    try {
-      const data = await api<{ isActive: boolean }>(`/api/admin/users/${encodeURIComponent(entry.id)}/status`, { method: 'PUT', body: JSON.stringify({ isActive: !entry.isActive }) });
-      setUsers((current) => current.map((item) => item.id === entry.id ? { ...item, isActive: data.isActive } : item));
-      setSuccess(data.isActive ? `${entry.fullName} fue reactivado.` : `${entry.fullName} fue desactivado. Su historial se conserva.`);
-    } catch (caught) { setError(caught instanceof Error ? caught.message : 'No se pudo cambiar el estado'); }
-    finally { setLoading(false); }
-  }
-
-  const participants = users.filter((entry) => entry.role === 'participant');
-  const active = participants.filter((entry) => entry.isActive).length;
-
-  return <>
-    <div className="dashboard-heading"><div><span className="eyebrow">CUENTAS</span><h1>Participantes</h1><p>Administrá quién puede jugar el Prode.</p></div><div className="stat-card"><span>Activos</span><strong>{active}/{participants.length}</strong></div></div>
-    <div className="grid-two">
-      <section className="card panel"><h2>Agregar participante</h2><form className="form-stack" onSubmit={createParticipant}>
-        <Field label="Nombre y apellido" value={fullName} onChange={setFullName} placeholder="Nombre del participante" />
-        <Field label="Teléfono" value={phone} onChange={setPhone} placeholder="11 1234 5678" />
-        <Field label="Contraseña inicial" value={password} onChange={setPassword} type="password" placeholder="Mínimo 6 caracteres" />
-        <button className="button button--primary" disabled={loading}>{loading ? 'Guardando…' : 'Agregar participante'}</button>
-      </form></section>
-      <section className="card panel panel--wide">
-        <div className="panel-heading"><div><h2>Cuentas creadas</h2><p>Desactivar bloquea el acceso sin borrar historial.</p></div><button className="button button--ghost" onClick={() => void loadUsers()}>Actualizar</button></div>
-        {error && <div className="alert alert--error" role="alert">{error}</div>}{success && <div className="alert alert--success">{success}</div>}
-        <div className="user-list">{users.map((entry) => <div className="user-row" key={entry.id}>
-          <div className="avatar">{entry.fullName.slice(0, 1).toUpperCase()}</div><div className="user-data"><strong>{entry.fullName}</strong><span>{entry.phone} · {entry.role === 'admin' ? 'Administrador' : `Participante · ${entry.isActive ? 'Activo' : 'Inactivo'}`}</span></div>
-          {entry.role === 'participant' && <div className="topbar-actions"><button className="button button--secondary" onClick={() => setHistoryUser(entry)}>Historial</button><button className="button button--secondary" onClick={() => { setResetUser(entry); setNewPassword(''); }}>Cambiar clave</button><button className="button button--ghost" disabled={loading} onClick={() => void toggleParticipant(entry)}>{entry.isActive ? 'Desactivar' : 'Reactivar'}</button></div>}
-        </div>)}</div>
-      </section>
-    </div>
-    {historyUser && <section><h2>{historyUser.fullName}</h2><button className="button button--ghost" onClick={() => setHistoryUser(null)}>Cerrar historial</button><PredictionHistoryBrowser key={historyUser.id} participantId={historyUser.id} /></section>}
-    {resetUser && <div className="modal-backdrop" onMouseDown={() => setResetUser(null)}><section className="modal card" onMouseDown={(event) => event.stopPropagation()}><span className="eyebrow">RESTABLECER CONTRASEÑA</span><h2>{resetUser.fullName}</h2><form className="form-stack" onSubmit={resetPassword}><Field label="Nueva contraseña" value={newPassword} onChange={setNewPassword} type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" /><div className="modal-actions"><button type="button" className="button button--ghost" onClick={() => setResetUser(null)}>Cancelar</button><button className="button button--primary" disabled={loading}>Guardar contraseña</button></div></form></section></div>}
-  </>;
-}
 
 function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
-  const [section, setSection] = useState<'rounds' | 'competitions' | 'league' | 'participants'>('rounds');
+  const [section, setSection] = useState<'rounds' | 'competitions' | 'participants'>('rounds');
   return (
-    <main className="app-shell">
-      <Header user={user} subtitle="Administración" onLogout={onLogout} />
+    <main className="app-shell admin-shell">
+      <Header user={user} subtitle="Administrador" onLogout={onLogout} />
       <section className="dashboard">
         <nav className="admin-tabs" aria-label="Administración">
-          <button className={`admin-tab ${section === 'rounds' ? 'admin-tab--active' : ''}`} onClick={() => setSection('rounds')}>Fechas</button>
-          <button className={`admin-tab ${section === 'competitions' ? 'admin-tab--active' : ''}`} onClick={() => setSection('competitions')}>Competiciones</button>
-          <button className={`admin-tab ${section === 'league' ? 'admin-tab--active' : ''}`} onClick={() => setSection('league')}>Liga actual</button>
-          <button className={`admin-tab ${section === 'participants' ? 'admin-tab--active' : ''}`} onClick={() => setSection('participants')}>Participantes</button>
+          <button className={`admin-tab ${section === 'rounds' ? 'admin-tab--active' : ''}`} aria-current={section === 'rounds' ? 'page' : undefined} onClick={() => setSection('rounds')}>Fechas</button>
+          <button className={`admin-tab ${section === 'competitions' ? 'admin-tab--active' : ''}`} aria-current={section === 'competitions' ? 'page' : undefined} onClick={() => setSection('competitions')}>Competiciones</button>
+          <button className={`admin-tab ${section === 'participants' ? 'admin-tab--active' : ''}`} aria-current={section === 'participants' ? 'page' : undefined} onClick={() => setSection('participants')}>Participantes</button>
         </nav>
         {section === 'rounds'
           ? <AdminRounds />
           : section === 'competitions'
             ? <AdminCompetitions />
-            : section === 'league'
-              ? <AdminLeague />
-              : <ParticipantsAdmin />}
+            : <ParticipantsAdmin />}
       </section>
     </main>
   );
