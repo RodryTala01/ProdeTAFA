@@ -35,7 +35,9 @@ describe('T32 competition engine contracts', () => {
   it('exposes competition administration without removing the legacy Liga screen', () => {
     expect(appUi).toContain("import AdminCompetitions from './AdminCompetitions'");
     expect(appUi).toContain('>Competiciones</button>');
-    expect(appUi).toContain('>Liga actual</button>');
+    expect(adminUi).toContain("import AdminLeague from './AdminLeague'");
+    expect(adminUi).toContain('>Administrar Liga anterior</button>');
+    expect(adminUi).toContain('<AdminLeague/>');
   });
 
   it('keeps the worker on local D1 configuration and routes the new API before the existing worker', () => {
