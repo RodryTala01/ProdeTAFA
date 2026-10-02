@@ -81,7 +81,7 @@
 .submit-alert { margin-top:8px; font-size:.75rem; }
 .participant-empty { padding:32px; }
 .resubmit-dialog { width:min(560px,calc(100% - 24px)); max-height:85dvh; overflow:auto; padding:24px; background:var(--surface); color:var(--text); border:1px solid var(--border-strong); border-radius:var(--radius-panel); }
-.resubmit-dialog::backdrop { background:rgba(0,0,0,.75); }
+.resubmit-dialog::backdrop { background:var(--overlay); }
 .resubmit-dialog h2 { font-size:1.4rem; }
 .prediction-changes { padding:0; list-style:none; }
 .prediction-changes li { border-bottom:1px solid var(--border); padding:14px 0; font-size:.875rem; }
