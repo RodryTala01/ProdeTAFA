@@ -173,7 +173,7 @@ Mejoras deseadas:
 
 Participante: `Inicio | Pronósticos | Competiciones | Mi Club`. Inicio es la pantalla posterior al login. Liga se consulta dentro de Competiciones e Historial desde Mi Club y Pronósticos; conservar las implementaciones existentes.
 
-Administrador: `Fechas | Competiciones | Liga actual | Participantes`.
+Administrador: `Fechas | Competiciones | Participantes`. Inicia en Fechas. Liga A/B dentro de Competiciones; conservar acceso identificado a la administración de Liga anterior.
 
 En móvil, navegación inferior fija y respeto de safe areas. La PWA debe sentirse como app instalada (`standalone`).
 
@@ -311,6 +311,7 @@ Patrón conceptual indicado por el usuario:
 - Centralizar paleta, tipografías, spacing y radios 4/6/8 px en `src/design-tokens.css`; componentes compartidos en `src/components.css` y `src/ui.tsx`. Sin gradientes, glow, blur decorativo ni emojis.
 - Etapa 2: Home y Competiciones reales usan APIs existentes. Sólo se permite ampliar lecturas para exponer datos ya persistidos sin alterar reglas. Referencias ficticias neutras exclusivamente en `/design` bajo `import.meta.env.DEV`; nunca en Home productiva. Sin migraciones ni cambios deportivos. Ver `DESIGN-SYSTEM.md`.
 - Navegación participante mediante hash, header compacto con menú de perfil; barra inferior móvil con cuatro destinos. Retirar el prompt visible de instalación, conservando manifest y service worker.
+- Etapa 4: Admin compacto, Fechas con búsqueda cronológica y confirmaciones, directorio de Competiciones y Participantes con filtros/menús. Reutilizar APIs sin nuevas reglas, schema ni migraciones. Credenciales recién asignadas sólo en memoria hasta cerrar el diálogo; nunca recuperar contraseñas existentes.
 - La APK/AAB queda hacia el final, una vez cerradas funcionalidad y diseño.
 
 ## Seguridad y consistencia

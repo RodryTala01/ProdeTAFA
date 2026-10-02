@@ -84,3 +84,13 @@ Revisión de navegador a 1440×960, 768×1024 y 390×844; Login, referencias y p
 - Vista compacta reduce ayuda y countdown lejano; mantiene horario y cierre exacto accesible. Preferencia opcional localStorage `tafa.predictions.compact`, tolerante a almacenamiento no disponible.
 - Diálogo nativo, labels, aria-live global, aria-pressed en penales, aria-expanded en detalles y restauración de foco. Sin dependencias nuevas en frontend; happy-dom es sólo de desarrollo para tests de interacción React.
 - Sin backend, migraciones, scoring ni reglas nuevas. Etapa 4 no iniciada.
+## Etapa 4 · Admin
+
+- Navegación principal Fechas / Competiciones / Participantes. Ingreso abre Fechas; perfil y cierre de sesión en menú compacto.
+- Fechas: sidebar por ID descendente, selección inicial de la abierta o más reciente; nueva Fecha seleccionada automáticamente. Búsqueda por horario ascendente y filtro conservado al agregar. Partidos existentes también por kickoff, sin orden manual. Contador X/12, faltantes y bloqueo de Publicar cuando ya existe una abierta.
+- Confirmaciones nativas accesibles para publicar/cerrar/quitar, desvincular y cambiar estado de temporada. Mantienen todos los endpoints y sus validaciones. Menús secundarios con Escape/click exterior, sin nuevas dependencias.
+- Directorio de Competiciones muestra únicamente datos persistidos: familia, estado, etapas activas si existen, vínculos y ausencia de etapas/Fechas. No se infieren clasificaciones ni ganadores. Herramientas de temporada, IFFHS y transición en sección desplegable; cada administración específica conserva su motor.
+- Liga A/B se administra desde su entrada de Competiciones. La Liga anterior conserva un acceso explícito independiente, también disponible sin temporada TAFA. No se confunden ni migran ambas estructuras.
+- Participantes: búsqueda nombre/teléfono, Todos/Activos/Inactivos, acciones en menú, alta/cambio de clave en modal y confirmación de desactivación. Copia de credenciales sólo después de asignarlas; memoria efímera hasta cerrar el diálogo, sin almacenamiento ni recuperación de contraseñas.
+- Layout denso con tablas desplazables, sidebar acotada en móvil, tokens existentes y targets de 44px. Sin cambios de backend, schema, migraciones, reglas deportivas, cron ni secrets.
+- Pendientes deliberados: importación múltiple, assets definitivos y editor nuevo de brackets. No se implementan en esta etapa. Se conservan componentes y cruces existentes.

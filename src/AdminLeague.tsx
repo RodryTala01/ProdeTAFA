@@ -1,3 +1,4 @@
+import { AdminConfirm } from './AdminUI';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 
 type Round = {
@@ -62,6 +63,7 @@ function roundStatusLabel(status: string) {
 }
 
 export default function AdminLeague() {
+  const [confirm, setConfirm] = useState<{ title: string; message: string; run: () => Promise<void> } | null>(null);
   const [data, setData] = useState<AdminLeagueData | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [name, setName] = useState('');
@@ -121,8 +123,6 @@ export default function AdminLeague() {
 
   async function unlinkRound(target: Round) {
     if (!selected) return;
-    const confirmed = window.confirm(`¿Desvincular ${target.name} de ${selected.name}? Los puntos de esa fecha dejarán de contar en la Liga.`);
-    if (!confirmed) return;
     setLoading(true); setError(''); setSuccess('');
     try {
       await api(`/api/admin/leagues/${selected.id}/rounds/${target.id}`, { method: 'DELETE' });
@@ -135,8 +135,6 @@ export default function AdminLeague() {
 
   async function finishSeason() {
     if (!selected) return;
-    const confirmed = window.confirm(`¿Finalizar ${selected.name}? Después no se podrán cambiar sus fechas vinculadas.`);
-    if (!confirmed) return;
     setLoading(true); setError(''); setSuccess('');
     try {
       await api(`/api/admin/leagues/${selected.id}/finish`, { method: 'PUT', body: '{}' });
@@ -149,6 +147,7 @@ export default function AdminLeague() {
 
   return (
     <div className="form-stack">
+      {confirm && <AdminConfirm title={confirm.title} busy={loading} onCancel={() => setConfirm(null)} onConfirm={() => { const action = confirm.run; setConfirm(null); void action(); }}>{confirm.message}</AdminConfirm>}
       <section className="card panel">
         <div className="panel-heading">
           <div><span className="eyebrow">LIGA</span><h1>Temporadas</h1><p>Creá la temporada y vinculá exactamente 5 fechas del Prode.</p></div>
@@ -206,14 +205,14 @@ export default function AdminLeague() {
                       <strong>{round?.name ?? `Fecha ${slot} sin vincular`}</strong>
                       <span>{round ? `${round.finalizedMatches}/${round.matchCount} partidos definidos · ${roundStatusLabel(round.status)}` : 'Pendiente'}</span>
                     </div>
-                    {round && selected.status === 'open' && <button className="button button--ghost" disabled={loading} onClick={() => void unlinkRound(round)}>Desvincular</button>}
+                    {round && selected.status === 'open' && <button className="button button--ghost" disabled={loading} onClick={() => setConfirm({ title: `¿Desvincular ${round.name}?`, message: 'Los puntos de esta Fecha dejarán de contar en la Liga.', run: () => unlinkRound(round) })}>Desvincular</button>}
                   </div>
                 );
               })}
             </div>
 
             {selected.status === 'open' && (
-              <button className="button button--secondary" disabled={loading || selected.roundCount !== 5} onClick={() => void finishSeason()}>
+              <button className="button button--secondary" disabled={loading || selected.roundCount !== 5} onClick={() => setConfirm({ title: `¿Finalizar ${selected.name}?`, message: 'Después no se podrán cambiar sus Fechas vinculadas.', run: finishSeason })}>
                 Finalizar Liga
               </button>
             )}

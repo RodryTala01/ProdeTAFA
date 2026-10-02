@@ -1,5 +1,6 @@
 import { Icon } from './ui';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { AdminConfirm, AdminMenu } from './AdminUI';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import RoundRanking from './RoundRanking';
 import AdminCorrections from './AdminCorrections';
 import PredictionHistory from './PredictionHistory';
@@ -39,7 +40,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
     headers: { 'content-type': 'application/json', ...init?.headers },
   });
   const data = (await response.json().catch(() => ({}))) as T & ApiError;
-  if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
+  if (!response.ok) throw new Error(response.status >= 500 ? 'No pudimos completar la operación. Reintentá en unos instantes.' : data.error || 'No pudimos completar la operación.');
   return data;
 }
 
@@ -57,20 +58,25 @@ function addDaysToInput(value: string, days: number) {
 
 function formatKickoff(value: string) {
   return new Intl.DateTimeFormat('es-AR', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+    timeZone: 'America/Argentina/Buenos_Aires', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
   }).format(new Date(value));
 }
 
 function Team({ name, logoUrl }: { name: string; logoUrl: string | null }) {
   return (
     <div className="fixture-team">
-      {logoUrl ? <img src={logoUrl} alt="" /> : <span className="team-fallback" aria-hidden="true">{name.slice(0, 2).toUpperCase()}</span>}
-      <strong>{name}</strong>
+      {logoUrl ? <img src={logoUrl} alt="" loading="lazy" /> : <span className="team-fallback" aria-hidden="true">{name.slice(0, 2).toUpperCase()}</span>}
+      <strong title={name}>{name}</strong>
     </div>
   );
 }
 
 export default function AdminRounds() {
+  const [confirm, setConfirm] = useState<{ title: string; message: string; action: string; run: () => Promise<void> } | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const detailVersion = useRef(0);
+  const searchStart = useRef<HTMLInputElement>(null);
   const today = localDateInputValue();
   const [rounds, setRounds] = useState<RoundSummary[]>([]);
   const [selected, setSelected] = useState<RoundDetail | null>(null);
@@ -88,14 +94,19 @@ export default function AdminRounds() {
   const [success, setSuccess] = useState('');
 
   async function loadRound(id: number) {
-    const data = await api<{ round: RoundDetail }>(`/api/admin/rounds/${id}`);
-    setSelected({ ...data.round, matchCount: data.round.matches.length });
+    const version = ++detailVersion.current;
+    setDetailLoading(true);
+    try {
+      const data = await api<{ round: RoundDetail }>(`/api/admin/rounds/${id}`);
+      if (version === detailVersion.current) setSelected({ ...data.round, matches: [...data.round.matches].sort((a,b) => Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt) || a.id-b.id), matchCount: data.round.matches.length });
+    } finally { if (version === detailVersion.current) setDetailLoading(false); }
   }
 
   async function loadRounds(selectId?: number) {
     const data = await api<{ rounds: RoundSummary[] }>('/api/admin/rounds');
-    setRounds(data.rounds);
-    const id = selectId ?? selected?.id;
+    const ordered = [...data.rounds].sort((a,b) => b.id-a.id);
+    setRounds(ordered);
+    const id = selectId ?? selected?.id ?? ordered.find(item => item.status === 'open')?.id ?? ordered[0]?.id;
     if (id) await loadRound(id);
   }
 
@@ -113,6 +124,7 @@ export default function AdminRounds() {
       setNewRoundName('');
       setSuccess(`${data.round.name} creada.`);
       await loadRounds(data.round.id);
+      requestAnimationFrame(() => searchStart.current?.focus());
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo crear la fecha');
     } finally { setLoading(false); }
@@ -165,7 +177,8 @@ export default function AdminRounds() {
     try {
       const query = new URLSearchParams({ from: searchFrom, to: searchTo });
       const data = await api<{ fixtures: Fixture[]; requestCount: number }>(`/api/admin/fixtures?${query.toString()}`);
-      setFixtures(data.fixtures);
+      setFixtures([...data.fixtures].sort((a,b) => Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt)));
+      setHasSearched(true);
       setSuccess(data.fixtures.length
         ? `${data.fixtures.length} partidos encontrados. Se usaron ${data.requestCount} consultas a API-Football.`
         : `No se encontraron partidos en ese rango. Se usaron ${data.requestCount} consultas.`);
@@ -218,23 +231,25 @@ export default function AdminRounds() {
   const isDraft = selected?.status === 'draft';
   const isOpen = selected?.status === 'open';
   const isFinished = selected?.status === 'finished';
-  const statusLabel = isDraft ? 'Borrador' : isOpen ? 'Publicada' : 'Cerrada';
+  const statusLabel = isDraft ? 'Borrador' : isOpen ? 'Abierta' : 'Cerrada';
 
+  const busy = loading || syncing || closing || detailLoading;
   return (
     <div className="rounds-layout">
+      {confirm && <AdminConfirm title={confirm.title} action={confirm.action} busy={busy} onCancel={() => setConfirm(null)} onConfirm={() => { const action = confirm.run; setConfirm(null); void action(); }}>{confirm.message}</AdminConfirm>}
       <aside className="card rounds-sidebar">
         <div className="rounds-title-row">
           <div><span className="eyebrow">FECHAS</span><h2>Fechas del Prode</h2></div>
           <span className="round-count">{rounds.length}</span>
         </div>
         <form className="round-create" onSubmit={createRound}>
-          <input value={newRoundName} onChange={(event) => setNewRoundName(event.target.value)} placeholder="Ej: Fecha 1" required />
-          <button className="button button--primary" disabled={loading}>Crear</button>
+          <input value={newRoundName} onChange={(event) => setNewRoundName(event.target.value)} placeholder="Ej: Fecha 1" aria-label="Nombre de la nueva Fecha" required />
+          <button className="button button--primary" disabled={busy}>Crear Fecha</button>
         </form>
         <div className="round-list">
           {rounds.map((round) => (
-            <button type="button" className={`round-item ${selected?.id === round.id ? 'round-item--active' : ''}`} key={round.id} onClick={() => void loadRound(round.id)}>
-              <span><strong>{round.name}</strong><small>{round.status === 'draft' ? 'Borrador' : round.status === 'open' ? 'Publicada' : 'Cerrada'}</small></span>
+            <button type="button" className={`round-item ${selected?.id === round.id ? 'round-item--active' : ''}`} key={round.id} aria-current={selected?.id === round.id ? 'true' : undefined} disabled={busy} onClick={() => { setError(''); setSuccess(''); void loadRound(round.id).catch(() => setError('No pudimos abrir la Fecha. Reintentá.')); }}>
+              <span><strong>{round.name}</strong><small>{round.status === 'draft' ? 'Borrador' : round.status === 'open' ? 'Abierta' : 'Cerrada'}</small></span>
               <b>{round.matchCount}/12</b>
             </button>
           ))}
@@ -243,9 +258,10 @@ export default function AdminRounds() {
       </aside>
 
       <section className="round-main">
-        {error && <div className="alert alert--error">{error}</div>}
-        {success && <div className="alert alert--success">{success}</div>}
+        {error && <div role="alert" className="alert alert--error">{error}</div>}
+        {success && <div role="status" className="alert alert--success">{success}</div>}
 
+        {detailLoading && <p role="status">Cargando Fecha…</p>}
         {!selected ? (
           <section className="card empty-round"><Icon name="calendar" /><h2>Creá o elegí una fecha</h2><p>Después vas a poder buscar los partidos reales y agregarlos.</p></section>
         ) : (
@@ -254,87 +270,56 @@ export default function AdminRounds() {
               <div>
                 <span className="eyebrow">FECHA SELECCIONADA</span>
                 <h1>{selected.name}</h1>
-                <p>{selected.matches.length} de 12 partidos cargados · {statusLabel}.</p>
+                <p>{statusLabel} · Horarios de Argentina</p>{isDraft && selected.matches.length < 12 && <p>Faltan {12-selected.matches.length} partidos para completar la Fecha.</p>}
               </div>
               <div className="topbar-actions">
-                {isDraft && selected.matches.length === 12 && (
-                  <button className="button button--primary" disabled={loading} onClick={() => void publishRound()}>Publicar fecha</button>
+                {isDraft && (
+                  <button className="button button--primary" disabled={busy || selected.matches.length !== 12 || rounds.some(round => round.status === 'open' && round.id !== selected.id)} onClick={() => setConfirm({ title: `¿Publicar ${selected.name}?`, message: 'Los participantes podrán pronosticar. Después de publicar no se pueden agregar ni quitar partidos.', action: 'Publicar', run: publishRound })}>Publicar</button>
                 )}
                 {!isDraft && (
-                  <button className="button button--secondary" disabled={syncing} onClick={() => void syncResults()}>
+                  <button className="button button--secondary" disabled={busy} onClick={() => void syncResults()}>
                     {syncing ? 'Actualizando…' : 'Actualizar resultados'}
                   </button>
                 )}
                 {isOpen && (
-                  <button className="button button--primary" disabled={closing || syncing} onClick={() => void finishRound()}>
-                    {closing ? 'Cerrando…' : 'Cerrar fecha'}
+                  <button className="button button--primary" disabled={busy} onClick={() => setConfirm({ title: `¿Cerrar ${selected.name}?`, message: 'La Fecha quedará finalizada y sus pronósticos y ranking serán visibles para todos. Revisá los resultados antes de continuar.', action: 'Cerrar Fecha', run: finishRound })}>
+                    {closing ? 'Cerrando…' : 'Cerrar Fecha'}
                   </button>
                 )}
                 {isOpen && <span className="added-badge">✓ Visible para participantes</span>}
                 {isFinished && <span className="added-badge">✓ Fecha cerrada</span>}
-                <div className="round-progress"><strong>{selected.matches.length}</strong><span>/ 12</span></div>
+                <div className={`round-progress ${selected.matches.length === 12 ? 'round-progress--complete' : ''}`} aria-label={`${selected.matches.length} de 12 partidos`}><small>PARTIDOS</small><strong>{selected.matches.length}</strong><span>/ 12</span></div>
               </div>
             </section>
 
-            {selected.matches.length > 0 && (
-              <section className="card selected-matches">
-                <div className="section-heading"><h2>Partidos agregados</h2><span>{isDraft ? 'Se guardan en D1' : 'Resultados desde API-Football'}</span></div>
-                <div className="stored-match-list">
-                  {selected.matches.map((match) => (
-                    <div className="stored-match" key={match.id}>
-                      <div className="stored-match-main">
-                        <small>{match.competitionName || 'Competencia'} · {formatKickoff(match.kickoffAt)} · {match.status}</small>
-                        <div className="stored-teams"><Team name={match.home.name} logoUrl={match.home.logoUrl} /><span>vs</span><Team name={match.away.name} logoUrl={match.away.logoUrl} /></div>
-                        {match.goals.home !== null && match.goals.away !== null && <span className="penalty-badge">Resultado {match.goals.home} - {match.goals.away}</span>}
-                        {match.matchType === 'PENALTIES_ONLY' && <span className="penalty-badge">PENALES</span>}
-                      </div>
-                      {isDraft && <button className="button button--ghost button--danger" disabled={loading} onClick={() => void removeMatch(match)}>Quitar</button>}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {!isDraft && <RoundRanking roundId={selected.id} mode="admin" refreshToken={rankingRefresh} />}
-            <PredictionHistory key={selected.id} roundId={selected.id} />
-
-            {!isDraft && (
-              <AdminCorrections
-                roundId={selected.id}
-                refreshToken={rankingRefresh}
-                onChanged={() => {
-                  setRankingRefresh((value) => value + 1);
-                  void loadRound(selected.id);
-                }}
-              />
-            )}
-
+            {isDraft && rounds.some(round => round.status === 'open' && round.id !== selected.id) && <p className="alert">Ya hay una Fecha abierta. Cerrala antes de publicar otra.</p>}
             {isDraft && selected.matches.length < 12 && (
               <section className="card fixture-search-card">
-                <div className="section-heading"><div><h2>Buscar partidos reales</h2><p>Buscá hasta 7 días. Usamos una consulta diaria y unimos los resultados.</p></div></div>
+                <div className="section-heading"><div><h2>Buscar partidos reales</h2><p>Elegí hasta 7 días. Los próximos partidos aparecen primero.</p></div></div>
                 <form className="fixture-search-form" onSubmit={searchMatches}>
-                  <label><span>Desde</span><input type="date" value={searchFrom} onChange={(event) => changeSearchFrom(event.target.value)} required /></label>
+                  <label><span>Desde</span><input ref={searchStart} type="date" value={searchFrom} onChange={(event) => changeSearchFrom(event.target.value)} required /></label>
                   <label><span>Hasta</span><input type="date" value={searchTo} onChange={(event) => setSearchTo(event.target.value)} required /></label>
                   <button className="button button--primary" disabled={searching}>{searching ? 'Buscando…' : 'Buscar semana'}</button>
                 </form>
+                {hasSearched && !fixtures.length && <p>No hay partidos en este rango. Probá otras fechas.</p>}
                 {fixtures.length > 0 && (
                   <>
-                    <input className="fixture-filter" value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="Filtrar por equipo, liga o país…" />
-                    <p className="fixture-results-count">{filteredFixtures.length} de {fixtures.length} partidos · filtro local</p>
+                    <input className="fixture-filter" value={searchText} onChange={(event) => setSearchText(event.target.value)} aria-label="Filtrar partidos" placeholder="Equipo, liga o país…" />
+                    <p className="fixture-results-count">{filteredFixtures.length} de {fixtures.length} partidos</p>
                     <div className="fixture-list">
                       {filteredFixtures.map((fixture) => {
                         const alreadyAdded = addedFixtureIds.has(fixture.providerFixtureId);
                         return (
                           <article className="fixture-card" key={fixture.providerFixtureId}>
                             <div className="fixture-meta">
-                              {fixture.competition.logoUrl && <img src={fixture.competition.logoUrl} alt="" />}
+                              {fixture.competition.logoUrl && <img src={fixture.competition.logoUrl} alt="" loading="lazy" />}
                               <span><strong>{fixture.competition.name}</strong><small>{fixture.competition.country}{fixture.competition.round ? ` · ${fixture.competition.round}` : ''}</small></span>
-                              <time>{formatKickoff(fixture.kickoffAt)}</time>
+                              <time dateTime={fixture.kickoffAt}>{formatKickoff(fixture.kickoffAt)}</time>
                             </div>
                             <div className="fixture-versus"><Team name={fixture.home.name} logoUrl={fixture.home.logoUrl} /><span>VS</span><Team name={fixture.away.name} logoUrl={fixture.away.logoUrl} /></div>
                             <div className="fixture-actions">
                               {alreadyAdded ? <span className="added-badge">✓ Ya agregado</span> : (
-                                <><button className="button button--primary" disabled={loading} onClick={() => void addFixture(fixture, 'NORMAL')}>Agregar</button><button className="button button--secondary" disabled={loading} onClick={() => void addFixture(fixture, 'PENALTIES_ONLY')}>Agregar como PENALES</button></>
+                                <><button className="button button--primary" disabled={busy} onClick={() => void addFixture(fixture, 'NORMAL')}>Agregar</button><AdminMenu label={`Opciones para agregar ${fixture.home.name} vs ${fixture.away.name}`}><button disabled={busy} onClick={() => void addFixture(fixture, 'PENALTIES_ONLY')}>Agregar con Penales</button></AdminMenu></>
                               )}
                             </div>
                           </article>
@@ -345,6 +330,41 @@ export default function AdminRounds() {
                 )}
               </section>
             )}
+
+            {selected.matches.length > 0 && (
+              <section className="card selected-matches">
+                <div className="section-heading"><h2>Partidos agregados</h2><span>{isDraft ? 'Ordenados por horario' : 'Resultados desde API-Football'}</span></div>
+                <div className="stored-match-list">
+                  {selected.matches.map((match, index) => (
+                    <div className="stored-match" key={match.id}>
+                      <div className="stored-match-main">
+                        <small>{index + 1}. {match.competitionName || 'Competencia'} · {formatKickoff(match.kickoffAt)} · {match.status}</small>
+                        <div className="stored-teams"><Team name={match.home.name} logoUrl={match.home.logoUrl} /><span>vs</span><Team name={match.away.name} logoUrl={match.away.logoUrl} /></div>
+                        {match.goals.home !== null && match.goals.away !== null && <span className="penalty-badge">Resultado {match.goals.home} - {match.goals.away}</span>}
+                        {match.matchType === 'PENALTIES_ONLY' && <span className="penalty-badge">PENALES</span>}
+                      </div>
+                      {isDraft && <AdminMenu label={`Acciones de ${match.home.name} vs ${match.away.name}`}><button className="admin-menu-danger" disabled={busy} onClick={() => setConfirm({ title: '¿Quitar partido?', message: `${match.home.name} vs ${match.away.name} se quitará del borrador. Podés volver a agregarlo desde la búsqueda.`, action: 'Quitar partido', run: () => removeMatch(match) })}>Quitar partido</button></AdminMenu>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {!isDraft && <details className="card panel admin-disclosure"><summary>Ranking de la Fecha</summary><RoundRanking roundId={selected.id} mode="admin" refreshToken={rankingRefresh} /></details>}
+            <PredictionHistory key={selected.id} roundId={selected.id} />
+
+            {!isDraft && (
+              <details className="card panel admin-disclosure"><summary>Corregir resultados y pronósticos</summary><AdminCorrections
+                roundId={selected.id}
+                refreshToken={rankingRefresh}
+                onChanged={() => {
+                  setRankingRefresh((value) => value + 1);
+                  void loadRound(selected.id);
+                }}
+              /></details>
+            )}
+
+
           </>
         )}
       </section>
