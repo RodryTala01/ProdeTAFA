@@ -69,7 +69,18 @@ Revisión de navegador a 1440×960, 768×1024 y 390×844; Login, referencias y p
 
 ## Etapas siguientes (sin implementar)
 
-- Etapa 3: profundizar la experiencia de Pronósticos, conservando su comportamiento deportivo.
+- Etapa 4: continuar el plan de diseño aprobado, sin cambios deportivos en este bloque.
 - Extender la composición compacta a los interiores de cada competición, preservando su motor específico.
 - Integrar escudos/trofeos definitivos y preparar iconos instalables oficiales en la fase PWA.
 - Revisar instalación real en dispositivos y ergonomía con teclado virtual cuando se aborde la etapa mobile.
+## Etapa 3 · Pronósticos
+
+- Fixture continuo, header compacto, escudos sin recorte, columnas únicas en escritorio. Contextos y resultados de cruces usan exclusivamente datos existentes del backend.
+- Contador sin barra: borrador de partidos editables y snapshot oficial para cerrados. Marcadores enteros 0–99 (validación existente); Penales requiere selección. Denominador: partidos de la Fecha (12 publicada). Los cerrados sin pronóstico no bloquean el envío de abiertos.
+- Autosave conserva debounce de 500 ms y cola serial por partido. Indicador global marca pendiente desde la edición, con versión de edición para evitar que respuestas anteriores anuncien Guardado. Los errores identifican partido y ofrecen reintento.
+- Primer envío directo. Reenvío con diferencias abre diálogo Antes/Ahora contra officialPrediction, incluyendo nombres del ganador por penales. Mientras se revisa se bloquea edición y actualización del snapshot por polling; el reloj sigue cerrando partidos. Cancelar no publica. Confirmar conserva el guardado y endpoint existentes. Sin diferencias se conserva el evento de reenvío directo.
+- Cerrados muestran oficial en modo lectura. Finalizados colapsan por defecto manteniendo equipos, horario, pronóstico, resultado y puntos; detalle expandible para metadatos y penales. Sin abiertos no hay botón Enviar. Historial, ranking y revelado final permanecen.
+- Countdown usa reloj local corregido con serverNow. Advertencia visual a menos de 10 minutos (sin cambiar lockedAt). Un timer existente de un segundo y refresh existente de un minuto; formateador de fecha compartido. Sin nuevas llamadas a API-Football.
+- Vista compacta reduce ayuda y countdown lejano; mantiene horario y cierre exacto accesible. Preferencia opcional localStorage `tafa.predictions.compact`, tolerante a almacenamiento no disponible.
+- Diálogo nativo, labels, aria-live global, aria-pressed en penales, aria-expanded en detalles y restauración de foco. Sin dependencias nuevas en frontend; happy-dom es sólo de desarrollo para tests de interacción React.
+- Sin backend, migraciones, scoring ni reglas nuevas. Etapa 4 no iniciada.
