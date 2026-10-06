@@ -4,13 +4,14 @@ import ParticipantRound from './ParticipantRound';
 import ParticipantHistory from './ParticipantHistory';
 import PredictionHistoryBrowser from './PredictionHistoryBrowser';
 import LeagueView from './LeagueView';
+import ParticipantCompetitionsPage from './ParticipantCompetitions';
 import ParticipantHome, { HomeErrors, ParticipantClub, ParticipantCompetitions } from './ParticipantHome';
 import { emptyHome, loadHome } from './participant-home';
 import { participantRoute, participantSections, type ParticipantRoute } from './participant-navigation';
 import './participant-shell.css';
 
 export function ParticipantNavigation({ route }: { route: ParticipantRoute }) {
-  return <nav className="participant-nav" aria-label="Navegación del participante">{participantSections.map(item => <a key={item.id} href={`#/${item.id}`} aria-current={route.split('/')[0] === item.id ? 'page' : undefined}><Icon name={item.icon} /><span>{item.label}</span></a>)}</nav>;
+  return <nav className="participant-nav" aria-label="Navegación del participante">{participantSections.map(item => <a key={item.id} href={`#/${item.id}`} aria-current={route.split('?')[0].split('/')[0] === item.id ? 'page' : undefined}><Icon name={item.icon} /><span>{item.label}</span></a>)}</nav>;
 }
 
 export default function ParticipantDashboard({ user, onLogout }: { user: { id: string; fullName: string }; onLogout: () => void }) {
@@ -38,7 +39,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
   }, []);
   useEffect(() => {
     const controller = new AbortController();
-    if (route === 'pronosticos' || route.includes('/')) return;
+    if (route === 'pronosticos' || route.startsWith('competiciones') || route.includes('/')) return;
     setLoading(true);
     loadHome(controller.signal).then(next => {
       if (!controller.signal.aborted) { setData(next); setLoading(false); }
@@ -55,7 +56,8 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
       <section ref={content} className="participant-content" tabIndex={-1} aria-label="Contenido del participante">
         {route === 'pronosticos' ? <><div className="section-heading"><h2>Pronósticos</h2><a className="button button--ghost" href="#/club/historial">Ver historial</a></div><ParticipantRound /></>
           : route === 'club/historial' ? <><a className="button button--ghost" href="#/club">Volver a Mi Club</a><ParticipantHistory /><PredictionHistoryBrowser own /></>
-          : route.startsWith('competiciones/liga') ? <><a className="button button--ghost" href="#/competiciones">Volver a Competiciones</a><LeagueView key={route} initialLeagueCode={route.endsWith('-a') ? 'LIGA_A' : route.endsWith('-b') ? 'LIGA_B' : undefined} /></>
+          : route === 'competiciones/liga' ? <><a className="button button--ghost" href="#/competiciones">Volver a Competiciones</a><LeagueView /></>
+          : route.startsWith('competiciones') || route.startsWith('club/participante/') ? <ParticipantCompetitionsPage route={route}/>
           : loading ? <p className="loader" role="status">Cargando tu temporada…</p>
           : <><HomeErrors errors={data.errors} retry={() => setRevision(n => n + 1)} />{route === 'inicio' ? <ParticipantHome name={user.fullName} data={data} /> : route === 'club' ? <ParticipantClub name={user.fullName} data={data} /> : <ParticipantCompetitions data={data} />}</>}
       </section>

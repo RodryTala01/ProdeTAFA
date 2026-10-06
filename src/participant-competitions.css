@@ -1,0 +1,46 @@
+.participant-competitions { min-width:0; }
+.sport-heading { padding:16px 0; border-bottom:1px solid var(--border); margin-bottom:16px; }
+.sport-heading h1 { margin:6px 0; font-size:1.8rem; }
+.sport-heading p,.sport-directory-row p { margin:6px 0; color:var(--text-muted); }
+.sport-directory-row { display:grid; grid-template-columns:48px minmax(0,1fr) 20px; align-items:center; gap:16px; padding:20px 0; border-bottom:1px solid var(--border); text-decoration:none; color:var(--text); }
+.sport-directory-row h2 { margin:0; font-size:1.15rem; }
+.sport-directory-row small { color:var(--text-muted); }
+.sport-directory-row:hover { background:var(--surface-hover); }
+.sport-tabs { display:flex; flex-wrap:wrap; gap:20px; border-bottom:1px solid var(--border); margin:16px 0; }
+.sport-tabs a,.sport-tabs button { padding:12px 0; min-height:44px; border:0; border-bottom:2px solid transparent; background:transparent; color:var(--text-muted); text-decoration:none; font:inherit; cursor:pointer; }
+.sport-tabs [aria-pressed=true],.sport-tabs [aria-current=page] { border-bottom-color:var(--accent); color:var(--accent); }
+.sport-rounds { display:flex; gap:24px; overflow-x:auto; padding-bottom:16px; max-width:100%; scroll-snap-type:x proximity; }
+.sport-rounds > section,.sport-rounds > div { flex:0 0 290px; scroll-snap-align:start; min-width:0; }
+.sport-rounds h2,.sport-rounds h3 { font-size:1rem; }
+.sport-encounter { border:1px solid var(--border); border-radius:var(--radius-control); padding:12px; margin:12px 0; background:var(--surface); }
+.sport-encounter--mine { border-left:2px solid var(--accent); }
+.sport-encounter > div { display:grid; grid-template-columns:1fr auto; gap:8px; padding:10px 0; border-bottom:1px solid var(--border); }
+.sport-encounter small { display:block; color:var(--text-muted); font-size:.72rem; }
+.sport-encounter .sport-winner,.sport-encounter .sport-winner small { color:var(--accent); }
+.sport-table { width:100%; border-collapse:collapse; font-size:.875rem; }
+.sport-table th,.sport-table td { padding:12px 8px; border-bottom:1px solid var(--border); text-align:left; }
+.sport-table thead { color:var(--text-muted); font-size:.65rem; text-transform:uppercase; }
+.sport-table tbody th { font-weight:500; }
+.sport-table a { color:inherit; text-decoration:none; display:block; }
+.sport-table a:hover { text-decoration:underline; }
+.sport-table small { display:block; font-size:.65rem; color:var(--text-muted); }
+.sport-points { font-weight:750; font-variant-numeric:tabular-nums; }
+.sport-mine { background:var(--accent-soft); border-left:2px solid var(--accent); }
+.sport-avatar { display:inline-flex; width:30px; height:30px; align-items:center; justify-content:center; border:1px solid var(--border); font-size:.65rem; text-transform:uppercase; }
+.sport-table-scroll { overflow-x:auto; }
+.sport-history { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; padding:16px 0; border-bottom:1px solid var(--border); color:var(--text); text-decoration:none; }
+.sport-edition { max-width:360px; margin:16px 0; }
+@media(max-width:600px) { .league-secondary { display:none; } .sport-table th,.sport-table td { padding:12px 4px; } .league-sport-table { table-layout:auto; } .league-sport-table th:nth-child(3) { width:100%; overflow-wrap:anywhere; } .sport-directory-row { gap:10px; } .sport-rounds > section,.sport-rounds > div { flex-basis: min(290px,85vw); } }
+.sport-zone-start td,.sport-zone-start th { border-top:2px solid var(--border-strong); }
+.sport-zone-start.sport-zone-champion td,.sport-zone-start.sport-zone-champion th,.sport-zone-start.sport-zone-promotion td,.sport-zone-start.sport-zone-promotion th { border-top-color:var(--success); }
+.sport-zone-start.sport-zone-champions td,.sport-zone-start.sport-zone-champions th { border-top-color:var(--info); }
+.sport-zone-start.sport-zone-playoff td,.sport-zone-start.sport-zone-playoff th { border-top-color:var(--warning); }
+.sport-zone-start.sport-zone-relegation td,.sport-zone-start.sport-zone-relegation th { border-top-color:var(--danger); }
+.sport-zone-legend { display:flex; flex-wrap:wrap; gap:16px; margin-top:16px; font-size:.75rem; }
+.sport-zone-legend span { border-top:2px solid var(--border-strong); padding-top:6px; }
+.sport-zone-legend .sport-zone-champion,.sport-zone-legend .sport-zone-promotion { border-color:var(--success); }
+.sport-zone-legend .sport-zone-champions { border-color:var(--info); }
+.sport-zone-legend .sport-zone-playoff { border-color:var(--warning); }
+.sport-zone-legend .sport-zone-relegation { border-color:var(--danger); }
+.sport-footnote { color:var(--text-muted); font-size:.75rem; }
+.sport-table tbody th { text-transform:none; letter-spacing:normal; font-size:.875rem; }

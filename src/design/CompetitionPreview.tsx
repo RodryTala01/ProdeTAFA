@@ -1,0 +1,5 @@
+import {useState} from 'react';
+import {CompetitionDirectory,SportingEncounter} from '../ParticipantCompetitions';
+import LeagueView from '../LeagueView';
+import {previewOverview,previewLeague} from './competition-fixtures';
+export default function CompetitionPreview({initial}:{initial:string}){const [view,setView]=useState(initial);return <main className="dashboard participant-competitions"><p className="eyebrow">DEV · DATOS FICTICIOS · SIN CONEXIÓN A APIs</p><nav className="sport-tabs">{[['competitions-full','Directorio'],['league','Liga'],['cuadro','Cuadro']].map(([id,label])=><button key={id} onClick={()=>setView(id)} aria-pressed={view===id}>{label}</button>)}</nav>{view==='league'?<LeagueView preview={previewLeague}/>:view==='cuadro'?<><h1>Copa A · ejemplo</h1><div className="sport-rounds">{previewOverview.season!.stages.map(st=><section key={st.id}><h2>{st.name}</h2>{previewOverview.season!.encounters.filter(e=>e.stageId===st.id).map(e=><SportingEncounter key={e.id} e={e} s={previewOverview.season!} user="demo-1"/>)}{st.code==='FINAL'&&<p>Rival por definir</p>}</section>)}</div></>:<CompetitionDirectory data={previewOverview}/>}</main>;}

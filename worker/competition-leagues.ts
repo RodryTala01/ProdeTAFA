@@ -1,3 +1,4 @@
+import {leagueZone} from './league-display-zones';
 import type { Env } from './index';
 
 type SessionUser = {
@@ -242,6 +243,7 @@ async function leagueStandings(request: Request, env: Env, leagueCodeRaw: string
 
   const standings = (standingsResult.results ?? []).map((row, index) => ({
     position: index + 1,
+    zone: leagueZone(index+1,(standingsResult.results??[]).length,competition.division_code),
     userId: row.user_id,
     fullName: row.full_name,
     roundsPlayed: Number(row.rounds_played ?? 0),
