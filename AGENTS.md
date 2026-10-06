@@ -346,3 +346,8 @@ Orden funcional acordado a partir de septiembre de 2026:
 7. generar APK/AAB al final.
 
 Si una regla futura es ambigua, no inventar una extensión grande: mantener el comportamiento más conservador, documentarlo y preservar compatibilidad con estas reglas.
+
+### Diseño Etapa 5 — participante
+- Competiciones tiene rutas hash por edición; no oculta las competiciones ajenas. Usar únicamente estados persistidos y ganadores confirmados.
+- Overview público de sesión participante: sólo lectura, sin campos privados, preserva vigencia de integrantes y resultados históricos. No recalcular deportes en frontend.
+- Liga usa tabla compacta y perfil básico; zonas de referencia conservadas desde backend. Movimiento de posición pendiente de un comparador histórico explícito.

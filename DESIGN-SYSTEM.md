@@ -94,3 +94,10 @@ Revisión de navegador a 1440×960, 768×1024 y 390×844; Login, referencias y p
 - Participantes: búsqueda nombre/teléfono, Todos/Activos/Inactivos, acciones en menú, alta/cambio de clave en modal y confirmación de desactivación. Copia de credenciales sólo después de asignarlas; memoria efímera hasta cerrar el diálogo, sin almacenamiento ni recuperación de contraseñas.
 - Layout denso con tablas desplazables, sidebar acotada en móvil, tokens existentes y targets de 44px. Sin cambios de backend, schema, migraciones, reglas deportivas, cron ni secrets.
 - Pendientes deliberados: importación múltiple, assets definitivos y editor nuevo de brackets. No se implementan en esta etapa. Se conservan componentes y cruces existentes.
+
+## Etapa 5 — Competiciones y Liga
+- Directorio completo, rutas hash por Copa y edición; cuadros de resultados persistidos, grupos desde cálculos existentes, tabla Dúos por Fecha y cuadro fijo de Campeones.
+- Lectura participante `/api/competition-engine/overview`: catálogo, etapas, membresías históricas, cruces guardados y resultados confirmados; sin teléfonos, credenciales ni escrituras. Temporadas draft excluidas.
+- Liga compacta: estadísticas secundarias ocultas en móvil, perfil básico por enlace, zonas de referencia anteriores trasladadas al read model sin cambiar clasificación. Sin flechas de movimiento: no existe un comparador histórico fiable.
+- `/design?view=competitions-full` y `/design?view=league`: fixtures ficticios DEV-only, sin requests. Trofeos/escudos definitivos pendientes para imágenes.
+- Los cuadros muestran datos guardados; su consulta no dispara el refresh con escrituras del endpoint knockout. La confirmación deportiva sigue exclusivamente en Admin.

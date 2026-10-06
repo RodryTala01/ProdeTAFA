@@ -1,3 +1,4 @@
+import { competitionOverview } from './competition-overview';
 type Env = {
   DB: D1Database;
 };
@@ -598,11 +599,17 @@ async function participantCurrent(env: Env, user: SessionUser) {
 export async function handleCompetitionEngine(request: Request, env: Env): Promise<Response | null> {
   const url = new URL(request.url);
   const pathname = url.pathname;
-  const isRoute = pathname.startsWith('/api/admin/competition-engine') || pathname === '/api/competition-engine/current';
+  const isRoute = pathname.startsWith('/api/admin/competition-engine') || pathname === '/api/competition-engine/current' || pathname === '/api/competition-engine/overview';
   if (!isRoute) return null;
 
   const user = await sessionUser(request, env);
   if (!user) return error('No autorizado', 401);
+
+  if (pathname === '/api/competition-engine/overview') {
+    if (user.role !== 'participant') return error('Acceso de participante requerido',403);
+    if (request.method !== 'GET') return error('Método no permitido',405);
+    return json(await competitionOverview(env.DB,user.id,Number(url.searchParams.get('season'))));
+  }
 
   if (pathname === '/api/competition-engine/current' && request.method === 'GET') {
     if (user.role !== 'participant') return error('Acceso de participante requerido', 403);
