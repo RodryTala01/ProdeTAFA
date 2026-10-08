@@ -1,3 +1,4 @@
+import {ParticipantShield} from './AssetImage';
 import { FormEvent, useEffect, useState } from 'react';
 import PredictionHistoryBrowser from './PredictionHistoryBrowser';
 import { PasswordField } from './ui';
@@ -109,7 +110,7 @@ export default function ParticipantsAdmin() {
     <div className="admin-filter-bar"><label className="field"><span>Buscar participante</span><input type="search" placeholder="Nombre o teléfono" value={search} onChange={event => setSearch(event.target.value)}/></label><label className="field"><span>Estado</span><select value={filter} onChange={event => setFilter(event.target.value)}><option value="all">Todos</option><option value="active">Activos</option><option value="inactive">Inactivos</option></select></label><button className="button button--ghost" disabled={fetching || loading} onClick={() => void loadUsers()}>Actualizar</button></div>
     {fetching && <p role="status">Cargando participantes…</p>}
     <div className="user-list">{visible.map(entry => <div className="user-row" key={entry.id}>
-      <span className="avatar" aria-hidden="true">{entry.fullName.slice(0,2).toUpperCase()}</span><div className="user-data"><strong>{entry.fullName}</strong><span>{entry.phone}{!entry.isActive && ' · Inactivo'}</span></div>
+      <ParticipantShield userId={entry.id} name={entry.fullName} decorative/><div className="user-data"><strong>{entry.fullName}</strong><span>{entry.phone}{!entry.isActive && ' · Inactivo'}</span></div>
       <AdminMenu label={`Acciones de ${entry.fullName}`}><button onClick={() => setHistoryUser(entry)}>Ver historial</button><button disabled={loading} onClick={() => { setError(''); setResetUser(entry); setNewPassword(''); }}>Cambiar contraseña</button><button className="admin-menu-danger" disabled={loading} onClick={() => entry.isActive ? setConfirmUser(entry) : void toggleParticipant(entry)}>{entry.isActive ? 'Desactivar' : 'Reactivar'}</button></AdminMenu>
     </div>)}</div>
     {!fetching && !visible.length && <p className="empty-copy">{participants.length ? 'No hay participantes con esos filtros.' : 'Todavía no hay participantes. Creá la primera cuenta para comenzar.'}</p>}

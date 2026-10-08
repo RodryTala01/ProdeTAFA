@@ -2,7 +2,7 @@ export type HistoryRound = {
   id:number; name:string; finishedAt:string|null; lastSubmittedAt:string;
   submissionCount:number; points:number; fulls:number; partials:number; errors:number; extras:number;
 };
-export type PublicProfile = {participant:{id:string;fullName:string};rounds:HistoryRound[]};
+export type PublicProfile = {participant:{id:string;fullName:string;logoUrl?:string;shieldUrl?:string};rounds:HistoryRound[]};
 export type HistoricalPrediction = {
   matchId:number;homeScore:number|null;awayScore:number|null;extraTeamId:string|null;points:number;
   score:{basePoints:number|null;extraPoints:number|null;resultType:string|null}|null;

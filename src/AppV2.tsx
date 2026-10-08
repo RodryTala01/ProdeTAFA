@@ -1,3 +1,4 @@
+import {ParticipantShield} from './AssetImage';
 import { Brand, Icon, PasswordField } from './ui';
 import ParticipantsAdmin from './ParticipantsAdmin';
 import { AdminMenu } from './AdminUI';
@@ -110,7 +111,7 @@ function Header({ user, subtitle, onLogout }: { user: User; subtitle: string; on
   return (
     <header className="topbar">
       <div className="brand-inline"><Brand /><span className="header-context">{subtitle}</span></div>
-      <AdminMenu label={`Perfil de ${user.fullName}`} trigger={<span className="avatar">{user.fullName.slice(0,2).toUpperCase()}</span>}><span className="admin-menu-name">{user.fullName}</span><button onClick={onLogout}><Icon name="logout"/> Cerrar sesión</button></AdminMenu>
+      <AdminMenu label={`Perfil de ${user.fullName}`} trigger={<ParticipantShield userId={user.id} name={user.fullName} decorative/>}><span className="admin-menu-name">{user.fullName}</span><button onClick={onLogout}><Icon name="logout"/> Cerrar sesión</button></AdminMenu>
     </header>
   );
 }

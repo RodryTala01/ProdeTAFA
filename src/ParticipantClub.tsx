@@ -1,3 +1,4 @@
+import {ParticipantShield} from './AssetImage';
 import { competitionHref, entryMembers, participation, phaseName, type Overview } from './participant-competitions';
 import { historyHref, type PublicProfile } from './participant-profile';
 import { ParticipantState, useParticipantRead } from './ParticipantState';
@@ -18,7 +19,7 @@ export function ClubProfile({data,own}:{data:ClubData;own:boolean}) {
   // Summing existing finalized summaries only; no scoring or ranking reconstruction.
   const totals=profile.rounds.reduce((sum,r)=>({points:sum.points+r.points,fulls:sum.fulls+r.fulls,partials:sum.partials+r.partials,errors:sum.errors+r.errors}),{points:0,fulls:0,partials:0,errors:0});
   return <div className="club-profile">
-    <header className="club-heading"><span className="avatar club-avatar" aria-label="Escudo pendiente">{fullName.slice(0,2).toUpperCase()}</span><div><span className="eyebrow">{own?'MI CLUB':'PARTICIPANTE'}</span><h1>{fullName}</h1><p>{person?.league??'Sin Liga asignada en esta edición'}{standing&&<> · {standing.position}.º · <strong>{standing.points} PTS</strong></>}</p></div></header>
+    <header className="club-heading"><ParticipantShield userId={id} season={season?.seasonNumber} name={fullName} logoUrl={profile.participant.logoUrl} shieldUrl={profile.participant.shieldUrl} size="lg"/><div><span className="eyebrow">{own?'MI CLUB':'PARTICIPANTE'}</span><h1>{fullName}</h1><p>{person?.league??'Sin Liga asignada en esta edición'}{standing&&<> · {standing.position}.º · <strong>{standing.points} PTS</strong></>}</p></div></header>
     <nav className="club-links" aria-label="Recorrido del participante"><a href={historyHref(undefined,own?undefined:id)}>Historial de Fechas</a><a href={`#/club/enfrentamientos${own?'':`?user=${encodeURIComponent(id)}`}`}>Enfrentamientos</a><a href="#/competiciones">Competiciones</a>{own&&<a href="#/club/envios">Envíos y cambios</a>}<a href="#club-estadisticas" onClick={e=>{e.preventDefault();document.getElementById('club-estadisticas')?.scrollIntoView({behavior:'smooth'});}}>Estadísticas básicas</a></nav>
     <div className="club-columns"><section className="reference-section"><div className="section-heading"><h2>{season?.name??'Temporada actual'}</h2>{person&&<a href={competitionHref(`LIGA_${person.division}`,season?.seasonNumber)}>Ver Liga</a>}</div>
       {!season?<p>Todavía no hay una temporada disponible.</p>:rows.length?<ul className="club-competitions">{rows.map(c=>{

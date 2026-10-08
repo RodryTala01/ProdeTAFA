@@ -1,3 +1,4 @@
+import {ParticipantShield,CompetitionImage} from './AssetImage';
 import { useEffect, useState } from 'react';
 import CompetitionList from './CompetitionList';
 import { competitionRows, predictionState, timeRemaining, type HomeData, type HomeRound } from './participant-home';
@@ -43,10 +44,10 @@ export function LeagueSummary({ data }: { data: HomeData }) {
   </section>;
 }
 
-export default function ParticipantHome({ name, data }: { name: string; data: HomeData }) {
+export default function ParticipantHome({ name, data, userId }: { name: string; data: HomeData; userId?:string }) {
   const rows = competitionRows(data);
   return <>
-    <div className="reference-title"><div><span className="eyebrow">INICIO</span><h1>{name}<span className="accent-text">.</span></h1><p>{data.season?.division?.name ?? 'Tu próxima jugada empieza acá.'}</p></div><span className="avatar club-avatar" aria-label="Escudo pendiente">{name.slice(0, 2).toUpperCase()}</span></div>
+    <div className="reference-title"><div><span className="eyebrow">INICIO</span><h1>{name}<span className="accent-text">.</span></h1><p>{data.season?.division?.name ?? 'Tu próxima jugada empieza acá.'}</p></div><ParticipantShield name={name} userId={userId??data.league?.currentUserId} season={data.season?.seasonNumber} size="lg"/></div>
     <div className="home-layout"><div>{!data.errors.includes('No pudimos cargar la próxima Fecha.') && <NextRound round={data.round} />}<section className="reference-section"><div className="section-heading"><h2>Competiciones</h2><a className="button button--ghost" href="#/competiciones">Ver todas <Icon name="arrow" /></a></div>
       {rows.length ? <CompetitionList items={rows} /> : <p>Todavía no hay competiciones disponibles.</p>}
     </section></div><aside className="home-aside"><LeagueSummary data={data} />
@@ -60,13 +61,13 @@ export function ParticipantCompetitions({ data }: { data: HomeData }) {
   return <><div className="reference-title"><div><span className="eyebrow">{data.season?.name ?? 'TU TEMPORADA'}</span><h1>Competiciones</h1><p>Tu recorrido y las competiciones de la temporada.</p></div></div>
     {rows.length ? <ul className="competition-directory">{rows.map(row => <li key={row.id}>
       {row.code === 'LIGA_A' || row.code === 'LIGA_B' ? <><CompetitionList items={[row]} /><a className="button button--secondary" href={`#/competiciones/liga-${row.code === 'LIGA_A' ? 'a' : 'b'}`}>Consultar {row.name}</a></>
-        : <details><summary><span className="competition-emblem" aria-hidden="true">{row.monogram}</span><span><strong>{row.name}</strong><small>{row.status === 'En esta Fecha' ? row.detail : row.status}</small></span><Icon name="arrow" /></summary><div className="competition-directory__detail"><p>{row.detail}</p><p>Más adelante vas a poder consultar acá el recorrido completo de esta competición.</p></div></details>}
+        : <details><summary><CompetitionImage code={row.code} name={row.name} decorative/><span><strong>{row.name}</strong><small>{row.status === 'En esta Fecha' ? row.detail : row.status}</small></span><Icon name="arrow" /></summary><div className="competition-directory__detail"><p>{row.detail}</p><p>Más adelante vas a poder consultar acá el recorrido completo de esta competición.</p></div></details>}
     </li>)}</ul> : <section className="card panel"><p>Todavía no hay competiciones disponibles.</p><a href="#/competiciones/liga" className="button button--secondary">Consultar Liga</a></section>}
   </>;
 }
 
 export function ParticipantClub({ name, data }: { name: string; data: HomeData }) {
-  return <><div className="reference-title"><div><span className="eyebrow">MI CLUB</span><h1>{name}</h1><p>{data.season?.division?.name ?? 'Participante'}</p></div><span className="avatar club-avatar" aria-label="Escudo pendiente">{name.slice(0, 2).toUpperCase()}</span></div>
+  return <><div className="reference-title"><div><span className="eyebrow">MI CLUB</span><h1>{name}</h1><p>{data.season?.division?.name ?? 'Participante'}</p></div><ParticipantShield name={name} userId={data.league?.currentUserId} season={data.season?.seasonNumber} size="lg"/></div>
     <div className="club-layout"><section className="reference-section"><h2>Tu historia</h2><p>Volvé a tus Fechas y revisá los pronósticos que enviaste.</p><a className="button button--primary" href="#/club/historial">Ver historial <Icon name="arrow" /></a><p><a className="button button--ghost" href="#/pronosticos">Consultar pronósticos por Fecha</a></p></section><LeagueSummary data={data} /></div>
     <section className="admin-notice"><h2>Estadísticas</h2><p>Tu historia va a seguir creciendo. Por ahora, podés consultar tus puntos y aciertos en el historial de Fechas.</p></section>
   </>;
