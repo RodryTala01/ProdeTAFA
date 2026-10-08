@@ -34,6 +34,9 @@
 .history-score-label small { color:var(--text-muted); }
 .history-comparison { border-left:2px solid var(--border-strong); padding-left:var(--space-2); }
 .club-history { max-width:var(--container-reading); }
+.club-best { margin-top:var(--space-4); }
+.club-best > a, .club-title-editions a { display:block; padding-block:var(--space-2); overflow-wrap:anywhere; }
+.club-title-editions { margin-bottom:var(--space-3); }
 .club-columns > *, .club-recent a > *, .history-match-detail > div { min-width:0; }
 .club-competitions, .club-recent, .history-match-detail { overflow-wrap:anywhere; }
 .club-recent a > :last-child { flex-shrink:0; }

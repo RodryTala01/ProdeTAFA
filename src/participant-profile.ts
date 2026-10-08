@@ -2,7 +2,12 @@ export type HistoryRound = {
   id:number; name:string; finishedAt:string|null; lastSubmittedAt:string;
   submissionCount:number; points:number; fulls:number; partials:number; errors:number; extras:number;
 };
-export type PublicProfile = {participant:{id:string;fullName:string;logoUrl?:string;shieldUrl?:string};rounds:HistoryRound[]};
+export type PublicProfile = {participant:{id:string;fullName:string;logoUrl?:string;shieldUrl?:string};rounds:HistoryRound[];titles?:{code:string;name:string;seasonNumber:number}[]};
+export function historyStats(rounds:HistoryRound[]) {
+  const points=rounds.reduce((sum,r)=>sum+r.points,0);
+  const bestPoints=rounds.length?Math.max(...rounds.map(r=>r.points)):null;
+  return {average:rounds.length?points/rounds.length:null,best:rounds.filter(r=>r.points===bestPoints)};
+}
 export type HistoricalPrediction = {
   matchId:number;homeScore:number|null;awayScore:number|null;extraTeamId:string|null;points:number;
   score:{basePoints:number|null;extraPoints:number|null;resultType:string|null}|null;

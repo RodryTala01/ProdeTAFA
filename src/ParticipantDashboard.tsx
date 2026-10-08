@@ -1,3 +1,4 @@
+import ParticipantAllTime from './ParticipantAllTime';
 import {ParticipantShield} from './AssetImage';
 import { useEffect, useRef, useState } from 'react';
 import { Brand, Icon } from './ui';
@@ -57,6 +58,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
       <ParticipantNavigation route={route} />
       <section ref={content} className="participant-content" tabIndex={-1} aria-label="Contenido del participante">
         {route === 'pronosticos' ? <><div className="section-heading"><h2>Pronósticos</h2><a className="button button--ghost" href="#/club/historial">Ver historial</a></div><ParticipantRound /></>
+          : route === 'club/historicos' ? <ParticipantAllTime userId={user.id}/>
           : route.startsWith('club/historial') ? <ParticipantHistory key={route} user={user} route={route}/>
           : route.startsWith('club/enfrentamientos') ? <><a href={new URLSearchParams(route.split('?')[1]).get('user')?`#/club/participante/${encodeURIComponent(new URLSearchParams(route.split('?')[1]).get('user')!)}`:'#/club'} className="button button--ghost">Volver al perfil</a><HeadToHead/></>
           : route === 'club/envios' ? <><a href="#/club" className="button button--ghost">Volver a Mi Club</a><PredictionHistoryBrowser own/></>
