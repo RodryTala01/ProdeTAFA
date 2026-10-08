@@ -1,3 +1,4 @@
+import {footballFixtures, FootballError} from '../football-api';
 import { recalculateRoundScores } from '../scoring';
 
 type Env = {
@@ -24,7 +25,6 @@ type ApiFixture = {
     penalty: ScoreSide;
   };
 };
-type FixtureResponse = { errors?: Record<string, string> | string[]; response?: ApiFixture[] };
 
 type StoredMatch = {
   id: number;
@@ -83,11 +83,6 @@ async function sessionUser(request: Request, env: Env): Promise<SessionUser | nu
   return user ?? null;
 }
 
-function apiErrors(errors: FixtureResponse['errors']) {
-  if (!errors) return '';
-  if (Array.isArray(errors)) return errors.filter(Boolean).join(' · ');
-  return Object.entries(errors).map(([key, value]) => `${key}: ${value}`).join(' · ');
-}
 
 function hasScore(side: ScoreSide) {
   return Boolean(side && (side.home !== null || side.away !== null));
@@ -115,18 +110,7 @@ function overallWinner(item: ApiFixture) {
 }
 
 async function fetchFixturesForDate(date: string, env: Env) {
-  const endpoint = new URL('https://v3.football.api-sports.io/fixtures');
-  endpoint.searchParams.set('date', date);
-  endpoint.searchParams.set('timezone', ARGENTINA_TIMEZONE);
-
-  const response = await fetch(endpoint.toString(), {
-    headers: { 'x-apisports-key': env.FOOTBALL_API_KEY!, accept: 'application/json' },
-  });
-  const data = await response.json().catch(() => null) as FixtureResponse | null;
-  if (!response.ok || !data) throw new Error(`No se pudo consultar API-Football para ${date}`);
-  const details = apiErrors(data.errors);
-  if (details) throw new Error(`API-Football (${date}): ${details}`);
-  return data.response ?? [];
+  return footballFixtures<ApiFixture>({date,timezone:ARGENTINA_TIMEZONE},env.FOOTBALL_API_KEY!);
 }
 
 async function applyFixture(item: ApiFixture, matchId: number, env: Env) {
@@ -174,7 +158,7 @@ async function applyFixture(item: ApiFixture, matchId: number, env: Env) {
 }
 
 export async function syncRoundResults(roundId: number, env: Env, onlyDates?: string[]) {
-  if (!env.FOOTBALL_API_KEY) throw new Error('Falta configurar FOOTBALL_API_KEY');
+  if (!env.FOOTBALL_API_KEY) throw new FootballError('Falta configurar FOOTBALL_API_KEY');
 
   const rows = await env.DB.prepare(
     `SELECT id, provider_fixture_id, kickoff_at, status, result_finalized_at
@@ -184,7 +168,7 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
   ).bind(roundId).all<StoredMatch>();
 
   const matches = rows.results ?? [];
-  if (matches.length === 0) throw new Error('La fecha no tiene partidos de API-Football');
+  if (matches.length === 0) throw new FootballError('La Fecha no tiene partidos de API-Football');
 
   const localByFixture = new Map(matches.map((match) => [match.provider_fixture_id, match]));
   const requestedDates = onlyDates?.length
@@ -239,7 +223,7 @@ export async function syncEligibleRounds(env: Env) {
     try {
       await syncRoundResults(roundId, env, Array.from(dates));
     } catch (caught) {
-      console.error('Scheduled result sync failed', roundId, caught);
+      console.error('Scheduled result sync failed', roundId, caught instanceof FootballError ? caught.message : 'Error interno');
     }
   }
 }
@@ -262,7 +246,7 @@ export async function handleResults(request: Request, env: Env): Promise<Respons
     ).bind(user.id, String(roundId), JSON.stringify(result)).run();
     return json({ ok: true, ...result });
   } catch (caught) {
-    const message = caught instanceof Error ? caught.message : 'No se pudieron actualizar los resultados';
+    const message = caught instanceof FootballError ? caught.message : 'No se pudieron actualizar los resultados';
     return error(message, 502);
   }
 }
