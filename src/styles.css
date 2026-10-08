@@ -1,4 +1,8 @@
 * { box-sizing: border-box; }
+html { scroll-padding-top: calc(var(--header-height) + env(safe-area-inset-top) + 16px); }
+.grid-two > *, .home-layout > *, .topbar-actions { min-width: 0; }
+.topbar { gap: 12px; }
+.dashboard-heading, .section-heading, .section-kicker { overflow-wrap: anywhere; }
 :root { font-family: var(--font-body); color: var(--text); background: var(--bg); font-synthesis: none; text-rendering: optimizeLegibility; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--bg); }
 button, input, select, textarea { font: inherit; }

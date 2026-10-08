@@ -1,4 +1,6 @@
 /* Shared primitives. Screen styles own layout, never a second palette. */
+.button, .alert { overflow-wrap: anywhere; }
+.table-scroll, .table-wrap { min-width: 0; max-width: 100%; overflow-x: auto; }
 .card { border: 1px solid var(--border); border-radius: var(--radius-panel); background: var(--surface); }
 .button {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
@@ -62,6 +64,17 @@ tr.is-highlighted { background: var(--accent-soft); }
 .modal-backdrop { position: fixed; z-index: 60; inset: 0; display: grid; place-items: center; padding: 20px; background: var(--overlay); }
 .modal { width: min(480px, 100%); max-height: 90dvh; overflow-y: auto; padding: var(--space-5); box-shadow: var(--shadow-floating); }
 .modal-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-4); }
+.modal, .admin-modal, .resubmit-dialog {
+  overscroll-behavior-y: contain;
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-wrap: anywhere;
+}
+.modal-backdrop { padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+@media (max-width: 700px) {
+  /* Avoid input-triggered iOS zoom without disabling user zoom. */
+  input:not([type=checkbox]):not([type=radio]), select, textarea { font-size: 1rem; }
+  .modal-actions > .button { min-width: 0; white-space: normal; }
+}
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 @media (max-width: 600px) { .admin-tabs { gap: 18px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }

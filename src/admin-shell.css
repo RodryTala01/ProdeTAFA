@@ -85,6 +85,9 @@
 .admin-task-note { display:block; color:var(--warning); margin-top:6px; font-size:.75rem; }
 .admin-help,.admin-league-note p { font-size:.75rem; color:var(--text-muted); }
 .admin-shell .competitions-admin .table-wrap,.admin-shell .competitions-admin .table-scroll { overflow-x:auto; max-width:100%; }
+.admin-shell .stored-match-main, .competition-directory-row .panel-heading, .competition-workspace { min-width:0; }
+.admin-menu-items { max-height:60dvh; overflow-y:auto; overflow-wrap:anywhere; }
+.admin-modal { max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
 @media(max-width:900px) {
  .admin-shell .rounds-layout { grid-template-columns:1fr; }
  .admin-shell .rounds-sidebar { position:static; }
@@ -92,9 +95,9 @@
  .competition-directory-row { flex-wrap:wrap; }
 }
 @media(max-width:600px) {
- .admin-shell .dashboard { padding:16px 12px 32px; }
+ .admin-shell .dashboard { padding:16px 0 calc(32px + env(safe-area-inset-bottom)); }
  .admin-shell .panel { padding:12px; }
- .admin-shell .header-context { display:block; }
+ .admin-shell .header-context { display:none; }
  .admin-shell .round-header-card,.admin-shell .selected-matches,.admin-shell .fixture-search-card { padding:12px; }
  .admin-shell .fixture-card { grid-template-columns:1fr; }
  .admin-shell .fixture-actions { justify-content:flex-end; }
