@@ -1,3 +1,4 @@
+import {footballFixtures, FootballError} from './football-api';
 type Env = {
   DB: D1Database;
   FOOTBALL_API_KEY?: string;
@@ -9,10 +10,6 @@ type UserRow = {
   is_active: number;
 };
 
-type FixtureApiResponse = {
-  errors?: Record<string, string> | string[];
-  response?: ApiFixture[];
-};
 
 type ApiFixture = {
   fixture: {
@@ -132,13 +129,6 @@ function dateFromUtc(timestamp: number) {
   return new Date(timestamp).toISOString().slice(0, 10);
 }
 
-function apiErrorMessage(errors: FixtureApiResponse['errors']) {
-  if (!errors) return '';
-  if (Array.isArray(errors)) return errors.filter(Boolean).join(' · ');
-  return Object.entries(errors)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(' · ');
-}
 
 async function listRounds(env: Env) {
   const result = await env.DB.prepare(
@@ -257,28 +247,7 @@ async function getRound(env: Env, roundId: number) {
 }
 
 async function fetchFixturesForDate(date: string, env: Env) {
-  const endpoint = new URL('https://v3.football.api-sports.io/fixtures');
-  endpoint.searchParams.set('date', date);
-  endpoint.searchParams.set('timezone', 'America/Argentina/Buenos_Aires');
-
-  const response = await fetch(endpoint.toString(), {
-    headers: {
-      'x-apisports-key': env.FOOTBALL_API_KEY!,
-      accept: 'application/json',
-    },
-  });
-
-  const data = await response.json().catch(() => null) as FixtureApiResponse | null;
-  if (!response.ok || !data) {
-    throw new Error(`No se pudo consultar API-Football para ${date}`);
-  }
-
-  const details = apiErrorMessage(data.errors);
-  if (details) {
-    throw new Error(`API-Football (${date}): ${details}`);
-  }
-
-  return data.response ?? [];
+  return footballFixtures<ApiFixture>({date,timezone:'America/Argentina/Buenos_Aires'},env.FOOTBALL_API_KEY!);
 }
 
 async function searchFixtures(url: URL, env: Env) {
@@ -298,7 +267,9 @@ async function searchFixtures(url: URL, env: Env) {
   );
 
   try {
-    const dailyResults = await Promise.all(dates.map((date) => fetchFixturesForDate(date, env)));
+    const dailyResults: ApiFixture[][] = [];
+    // Free supports date, not unrestricted from/to; stop on the first provider error.
+    for (const date of dates) dailyResults.push(await fetchFixturesForDate(date, env));
     const byId = new Map<number, ApiFixture>();
     for (const day of dailyResults) {
       for (const fixture of day) byId.set(fixture.fixture.id, fixture);
@@ -316,8 +287,8 @@ async function searchFixtures(url: URL, env: Env) {
       fixtures,
     });
   } catch (caught) {
-    const message = caught instanceof Error ? caught.message : 'API-Football devolvió un error';
-    console.error(caught);
+    const message = caught instanceof FootballError ? caught.message : 'No se pudo completar la búsqueda de partidos';
+    console.error('Fixture search failed', message);
     return error(message, 502);
   }
 }

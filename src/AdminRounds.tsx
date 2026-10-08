@@ -1,3 +1,4 @@
+import {safeAdminError} from './safe-admin-error';
 import {TeamShield,CompetitionImage} from './AssetImage';
 import { Icon } from './ui';
 import { AdminConfirm, AdminMenu } from './AdminUI';
@@ -41,7 +42,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
     headers: { 'content-type': 'application/json', ...init?.headers },
   });
   const data = (await response.json().catch(() => ({}))) as T & ApiError;
-  if (!response.ok) throw new Error(response.status >= 500 ? 'No pudimos completar la operación. Reintentá en unos instantes.' : data.error || 'No pudimos completar la operación.');
+  if (!response.ok) throw new Error(safeAdminError(data?.error));
   return data;
 }
 
