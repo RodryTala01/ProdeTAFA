@@ -101,3 +101,8 @@ Revisión de navegador a 1440×960, 768×1024 y 390×844; Login, referencias y p
 - Liga compacta: estadísticas secundarias ocultas en móvil, perfil básico por enlace, zonas de referencia anteriores trasladadas al read model sin cambiar clasificación. Sin flechas de movimiento: no existe un comparador histórico fiable.
 - `/design?view=competitions-full` y `/design?view=league`: fixtures ficticios DEV-only, sin requests. Trofeos/escudos definitivos pendientes para imágenes.
 - Los cuadros muestran datos guardados; su consulta no dispara el refresh con escrituras del endpoint knockout. La confirmación deportiva sigue exclusivamente en Admin.
+
+## Etapa 6 — Mi Club, perfiles e históricos
+Mi Club reúne identidad, Liga, competiciones registradas y totales de Fechas finalizadas. Perfiles públicos reutilizan esa vista y no exponen teléfono ni datos administrativos. Las rutas de historial permiten abrir una Fecha finalizada, seleccionar participantes y comparar sus pronósticos oficiales con el propio. La puntuación y la posición vienen del backend; no se reconstruye scoring en frontend.
+
+El historial de envíos conserva su acceso separado. Enfrentamientos muestra un vacío explícito hasta disponer de un consolidado histórico fiable. Estados de carga/error y Reintentar comparten un componente liviano. Previews DEV: `/design?view=club`, `profile`, `history`, `head-to-head`. Los assets definitivos quedan para Etapa 7.

@@ -334,7 +334,7 @@ export default {
       if (response) return response;
     }
 
-    if (pathname === '/api/participant/history') {
+    if (pathname === '/api/participant/history' || pathname.startsWith('/api/participant/profiles/')) {
       const response = await handleHistory(request, env);
       if (response) return response;
     }

@@ -88,6 +88,6 @@ describe('Participante: Home y navegación', () => {
     const main = readFileSync('src/main.tsx','utf8');
     expect(main).not.toContain('PwaInstallPrompt'); expect(main).toContain('serviceWorker');
     const shell = readFileSync('src/ParticipantDashboard.tsx','utf8');
-    expect(shell).toContain('<ParticipantHistory />'); expect(shell).toContain('<PredictionHistoryBrowser own />'); expect(shell).toContain('onClick={onLogout}');
+    expect(shell).toContain('<ParticipantHistory key={route} user={user}'); expect(shell).toMatch(/<PredictionHistoryBrowser own\s*\/>/); expect(shell).toContain('onClick={onLogout}');
   });
 });

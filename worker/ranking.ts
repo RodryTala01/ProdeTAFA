@@ -20,6 +20,11 @@ type RankingRow = {
 };
 
 type RevealMatchRow = {
+  home_score_regulation: number | null;
+  away_score_regulation: number | null;
+  went_to_penalties: number;
+  winning_team_provider_id: string | null;
+  is_void: number;
   id: number;
   match_type: 'NORMAL' | 'PENALTIES_ONLY';
   home_team_provider_id: string | null;
@@ -29,6 +34,9 @@ type RevealMatchRow = {
 };
 
 type RevealPredictionRow = {
+  base_points: number | null;
+  extra_points: number | null;
+  result_type: string | null;
   user_id: string;
   match_id: number;
   predicted_home_score: number | null;
@@ -182,7 +190,9 @@ async function participantReveal(request: Request, env: Env, roundId: number) {
   const matchResult = await env.DB.prepare(
     `SELECT id, match_type,
             home_team_provider_id, home_team_name,
-            away_team_provider_id, away_team_name
+            away_team_provider_id, away_team_name,
+            home_score_regulation, away_score_regulation,
+            went_to_penalties, winning_team_provider_id, is_void
      FROM matches
      WHERE round_id = ?
      ORDER BY kickoff_at, id`,
@@ -200,7 +210,7 @@ async function participantReveal(request: Request, env: Env, roundId: number) {
     `SELECT p.user_id, p.match_id,
             p.predicted_home_score, p.predicted_away_score,
             p.predicted_extra_team_provider_id,
-            ps.total_points
+            ps.total_points, ps.base_points, ps.extra_points, ps.result_type
      FROM official_predictions p
      JOIN matches m ON m.id = p.match_id
      JOIN round_submissions rs ON rs.round_id = m.round_id AND rs.user_id = p.user_id
@@ -223,6 +233,9 @@ async function participantReveal(request: Request, env: Env, roundId: number) {
       matchType: match.match_type,
       home: { id: match.home_team_provider_id, name: match.home_team_name },
       away: { id: match.away_team_provider_id, name: match.away_team_name },
+      result: { home: match.home_score_regulation, away: match.away_score_regulation,
+        penalties: Boolean(match.went_to_penalties), winnerId: match.winning_team_provider_id,
+        isVoid: Boolean(match.is_void) },
     })),
     participants: (participantResult.results ?? []).map((participant) => {
       const predictions = predictionsByUser.get(participant.id) ?? new Map<number, RevealPredictionRow>();
@@ -234,6 +247,10 @@ async function participantReveal(request: Request, env: Env, roundId: number) {
           awayScore: prediction?.predicted_away_score ?? null,
           extraTeamId: prediction?.predicted_extra_team_provider_id ?? null,
           points: Number(prediction?.total_points ?? 0),
+          score: prediction?.total_points != null ? {
+            basePoints: prediction.base_points, extraPoints: prediction.extra_points,
+            resultType: prediction.result_type,
+          } : null,
         };
       });
       return {

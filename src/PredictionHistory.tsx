@@ -42,7 +42,7 @@ export default function PredictionHistory({ roundId, participantId = '', own = f
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'No se pudo cargar el historial');
         if (!controller.signal.aborted) setData(result);
-      }).catch((caught) => { if (!controller.signal.aborted) setError(caught.message); })
+      }).catch(() => { if (!controller.signal.aborted) setError('No pudimos cargar el historial de envíos.'); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [open, roundId, userId, cursor, revision, type, own]);
@@ -65,11 +65,11 @@ export default function PredictionHistory({ roundId, participantId = '', own = f
         </select>
       </label>
       <button className="button button--ghost" disabled={loading} onClick={() => { setCursor(null); setRevision(revision + 1); }}>Actualizar historial</button>
-      {error && <p role="alert">{error}</p>}
+      {error && <div><p role="alert">{error}</p><button className="button button--secondary" onClick={()=>setRevision(n=>n+1)}>Reintentar</button></div>}
       {loading ? <p role="status">Cargando historial…</p> : !error && (own || userId) && data && <>
         <h3>{participant?.name}</h3>
         {data.submission ? <p>Primer envío: {date(data.submission.firstAt)} · Último envío: {date(data.submission.lastAt)} · Envíos: {data.submission.count}</p> : <p>Todavía no envió esta fecha. Los borradores no generan eventos.</p>}
-        {data.events.length === 0 && <p>No hay eventos oficiales para este filtro. Los cambios de borrador no aparecen hasta Reenviar. Los envíos antiguos sin snapshot conservan sólo las fechas conocidas.</p>}
+        {data.events.length === 0 && <p>No hay eventos oficiales para este filtro. Los cambios de borrador no aparecen hasta Reenviar. Los envíos antiguos sin detalle conservan sólo las fechas conocidas.</p>}
         <ol className="prediction-timeline">
           {data.events.map((event) => {
             const after = event.after as Value;
