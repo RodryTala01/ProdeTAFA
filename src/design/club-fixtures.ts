@@ -1,0 +1,6 @@
+import {previewOverview,previewLeague} from './competition-fixtures';
+import type {ClubData} from '../ParticipantClub';
+import type {Reveal,HistoryRound} from '../participant-profile';
+export const clubRounds:HistoryRound[]=[{id:8,name:'Fecha de ejemplo',finishedAt:'2026-09-20T22:00:00Z',lastSubmittedAt:'2026-09-19T12:00:00Z',submissionCount:1,points:18,fulls:4,partials:5,errors:3,extras:1}];
+export const clubExample:ClubData={profile:{participant:{id:'demo-1',fullName:'Participante de ejemplo'},rounds:clubRounds},overview:previewOverview,league:previewLeague};
+export const historyExample:Reveal={round:{id:8,name:'Fecha de ejemplo',finishedAt:'2026-09-20T22:00:00Z'},matches:Array.from({length:12},(_,i)=>({id:i+1,matchType:i===0?'PENALTIES_ONLY':'NORMAL',home:{id:`h${i}`,name:`Local de ejemplo ${i+1}`},away:{id:`a${i}`,name:`Visitante de ejemplo ${i+1}`},result:{home:2,away:1,penalties:i===0,winnerId:i===0?'h0':null,isVoid:false}})),participants:[{id:'demo-1',fullName:'Participante de ejemplo',points:18,predictions:Array.from({length:12},(_,i)=>({matchId:i+1,homeScore:i<4?2:i<9?1:0,awayScore:i<4?1:0,extraTeamId:i===0?'h0':null,points:i===0?4:i<4?3:i<9?1:0,score:{basePoints:i<4?3:i<9?1:0,extraPoints:i===0?1:0,resultType:i<4?'FULL':i<9?'PARTIAL':'ERROR'}}))}]};

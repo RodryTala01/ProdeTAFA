@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Brand, Icon } from './ui';
 import ParticipantRound from './ParticipantRound';
 import ParticipantHistory from './ParticipantHistory';
+import ParticipantClubPage, { HeadToHead } from './ParticipantClub';
 import PredictionHistoryBrowser from './PredictionHistoryBrowser';
 import LeagueView from './LeagueView';
 import ParticipantCompetitionsPage from './ParticipantCompetitions';
-import ParticipantHome, { HomeErrors, ParticipantClub, ParticipantCompetitions } from './ParticipantHome';
+import ParticipantHome, { HomeErrors } from './ParticipantHome';
 import { emptyHome, loadHome } from './participant-home';
 import { participantRoute, participantSections, type ParticipantRoute } from './participant-navigation';
 import './participant-shell.css';
@@ -39,7 +40,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
   }, []);
   useEffect(() => {
     const controller = new AbortController();
-    if (route === 'pronosticos' || route.startsWith('competiciones') || route.includes('/')) return;
+    if (route !== 'inicio') return;
     setLoading(true);
     loadHome(controller.signal).then(next => {
       if (!controller.signal.aborted) { setData(next); setLoading(false); }
@@ -55,11 +56,14 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
       <ParticipantNavigation route={route} />
       <section ref={content} className="participant-content" tabIndex={-1} aria-label="Contenido del participante">
         {route === 'pronosticos' ? <><div className="section-heading"><h2>Pronósticos</h2><a className="button button--ghost" href="#/club/historial">Ver historial</a></div><ParticipantRound /></>
-          : route === 'club/historial' ? <><a className="button button--ghost" href="#/club">Volver a Mi Club</a><ParticipantHistory /><PredictionHistoryBrowser own /></>
+          : route.startsWith('club/historial') ? <ParticipantHistory key={route} user={user} route={route}/>
+          : route.startsWith('club/enfrentamientos') ? <><a href={new URLSearchParams(route.split('?')[1]).get('user')?`#/club/participante/${encodeURIComponent(new URLSearchParams(route.split('?')[1]).get('user')!)}`:'#/club'} className="button button--ghost">Volver al perfil</a><HeadToHead/></>
+          : route === 'club/envios' ? <><a href="#/club" className="button button--ghost">Volver a Mi Club</a><PredictionHistoryBrowser own/></>
+          : route === 'club' || route.startsWith('club/participante/') ? <ParticipantClubPage key={route} user={user} route={route}/>
           : route === 'competiciones/liga' ? <><a className="button button--ghost" href="#/competiciones">Volver a Competiciones</a><LeagueView /></>
-          : route.startsWith('competiciones') || route.startsWith('club/participante/') ? <ParticipantCompetitionsPage route={route}/>
+          : route.startsWith('competiciones') ? <ParticipantCompetitionsPage route={route}/>
           : loading ? <p className="loader" role="status">Cargando tu temporada…</p>
-          : <><HomeErrors errors={data.errors} retry={() => setRevision(n => n + 1)} />{route === 'inicio' ? <ParticipantHome name={user.fullName} data={data} /> : route === 'club' ? <ParticipantClub name={user.fullName} data={data} /> : <ParticipantCompetitions data={data} />}</>}
+          : <><HomeErrors errors={data.errors} retry={() => setRevision(n => n + 1)} /><ParticipantHome name={user.fullName} data={data} /></>}
       </section>
     </div>
   </main>;

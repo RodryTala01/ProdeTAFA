@@ -52,11 +52,18 @@ async function sessionUser(request: Request, env: Env): Promise<SessionUser | nu
 
 export async function handleHistory(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
-  if (pathname !== '/api/participant/history') return null;
+  const profile = pathname.match(/^\/api\/participant\/profiles\/([^/]+)$/);
+  if (pathname !== '/api/participant/history' && !profile) return null;
   if (request.method !== 'GET') return error('Método no permitido', 405);
 
   const user = await sessionUser(request, env);
   if (!user || user.role !== 'participant') return error('Acceso de participante requerido', 403);
+
+  const targetId = profile ? decodeURIComponent(profile[1]) : user.id;
+  const person = profile ? await env.DB.prepare(
+    "SELECT id, full_name AS fullName FROM users WHERE id = ? AND role = 'participant'",
+  ).bind(targetId).first<{id:string;fullName:string}>() : null;
+  if (profile && !person) return error('Participante no encontrado', 404);
 
   const result = await env.DB.prepare(
     `SELECT r.id, r.name, r.finished_at, rs.last_submitted_at, rs.submission_count,
@@ -73,7 +80,7 @@ export async function handleHistory(request: Request, env: Env): Promise<Respons
      WHERE rs.user_id = ?
      GROUP BY r.id, r.name, r.finished_at, rs.last_submitted_at, rs.submission_count
      ORDER BY r.id DESC`,
-  ).bind(user.id).all<{
+  ).bind(targetId).all<{
     id: number;
     name: string;
     finished_at: string | null;
@@ -87,6 +94,7 @@ export async function handleHistory(request: Request, env: Env): Promise<Respons
   }>();
 
   return json({
+    ...(profile ? { participant: person } : {}),
     rounds: (result.results ?? []).map((round) => ({
       id: round.id,
       name: round.name,

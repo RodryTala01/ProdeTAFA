@@ -351,3 +351,9 @@ Si una regla futura es ambigua, no inventar una extensión grande: mantener el c
 - Competiciones tiene rutas hash por edición; no oculta las competiciones ajenas. Usar únicamente estados persistidos y ganadores confirmados.
 - Overview público de sesión participante: sólo lectura, sin campos privados, preserva vigencia de integrantes y resultados históricos. No recalcular deportes en frontend.
 - Liga usa tabla compacta y perfil básico; zonas de referencia conservadas desde backend. Movimiento de posición pendiente de un comparador histórico explícito.
+
+### Diseño Etapa 6 — Mi Club, perfiles e historial
+- Mi Club y perfiles comparten presentación; sólo exponer identidad pública, Liga y Fechas finalizadas. Nunca teléfono, credenciales ni información Admin.
+- Historial de Fechas separado de auditoría de envíos y enfrentamientos. Consumir pronósticos oficiales y puntuación persistida; reveal sigue limitado a Fechas finalizadas.
+- Enfrentamientos sin consolidado histórico fiable muestra estado vacío, sin reconstruir estadísticas deportivas.
+- Fixtures de Club/perfil/historial exclusivamente DEV. Sin migraciones ni cambios deportivos.

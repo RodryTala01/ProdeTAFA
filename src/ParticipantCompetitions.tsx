@@ -1,11 +1,13 @@
+import { profileHref } from './participant-profile';
 import {useEffect,useState} from 'react';
 import {phaseName,competitionHref,competitionSlugs,entryMembers,entryName,participation,readCompetition,type Overview,type Season,type Competition,type Encounter} from './participant-competitions';
 import LeagueView from './LeagueView';
 import './participant-competitions.css';
 
+function EntryPeople({s,id,round}:{s:Season;id:number|null;round:number|null}) { const members=entryMembers(s,id,round);return <>{members.length?members.map((m,i)=><span key={m.userId}>{i>0?' + ':''}<a href={profileHref(m.userId,s.seasonNumber)}>{m.fullName}</a></span>):'Por definir'}</>; }
 export function SportingEncounter({s,e,user,label}:{s:Season;e:Encounter;user:string;label?:string}) {
  const mine=[e.entryAId,e.entryBId].some(id=>entryMembers(s,id,e.roundId).some(m=>m.userId===user));
- return <article className={`sport-encounter ${mine?'sport-encounter--mine':''}`}><small>{label ?? s.links.find(l=>l.roundId===e.roundId)?.name ?? 'Fecha por definir'}</small>{[e.entryAId,e.entryBId].map((id,index)=><div key={index} className={e.confirmedAt&&id!==null&&e.winnerEntryId===id?'sport-winner':''}><span>{id===null&&e.resolution==='bye'?'Libre':entryName(s,id,e.roundId)}</span><strong>{(index===0?e.scoreA:e.scoreB)??'—'}</strong>{e.confirmedAt&&id!==null&&e.winnerEntryId===id&&<small>Ganador</small>}</div>)}<small>{e.confirmedAt?'Resultado confirmado':e.status==='tied'?'Desempate TAFA pendiente':e.status==='live'?'En juego · provisional':e.status==='finished'?'Resultado pendiente de confirmación':'Pendiente'}</small></article>;
+ return <article className={`sport-encounter ${mine?'sport-encounter--mine':''}`}><small>{label ?? s.links.find(l=>l.roundId===e.roundId)?.name ?? 'Fecha por definir'}</small>{[e.entryAId,e.entryBId].map((id,index)=><div key={index} className={e.confirmedAt&&id!==null&&e.winnerEntryId===id?'sport-winner':''}><span>{id===null&&e.resolution==='bye'?'Libre':<EntryPeople s={s} id={id} round={e.roundId}/>}</span><strong>{(index===0?e.scoreA:e.scoreB)??'—'}</strong>{e.confirmedAt&&id!==null&&e.winnerEntryId===id&&<small>Ganador</small>}</div>)}<small>{e.confirmedAt?'Resultado confirmado':e.status==='tied'?'Desempate TAFA pendiente':e.status==='live'?'En juego · provisional':e.status==='finished'?'Resultado pendiente de confirmación':'Pendiente'}</small></article>;
 }
 export function CompetitionDirectory({data,league}:{data:Overview;league?:{code:string;position:number;points:number}|null}) {
  const s=data.season;if(!s)return <section className="reference-section"><h1>Competiciones</h1><p>Todavía no hay una temporada disponible.</p><p>Las competiciones aparecerán cuando comience la temporada.</p><a className="button button--ghost" href="#/competiciones/liga">Consultar Liga</a></section>;
