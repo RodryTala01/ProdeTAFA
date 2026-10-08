@@ -34,3 +34,34 @@ it('reveals existing official result and score metadata without recalculation or
  const r=await handleRanking(req('reveal/1'),env());const data=await r!.json() as any;
  expect(data.matches[0].result).toEqual({home:1,away:1,penalties:true,winnerId:'h',isVoid:false});expect(data.participants[0].predictions[0]).toMatchObject({homeScore:1,awayScore:1,points:4,score:{basePoints:3,extraPoints:1,resultType:'FULL'}});expect(JSON.stringify(data)).not.toMatch(/private|phone|password/);
 });
+
+it('all-time totals use official finalized scores, retain inactive history and share tied positions',async()=>{
+ db.exec("UPDATE users SET is_active=0 WHERE id='other'; UPDATE rounds SET status='finished' WHERE id=2; UPDATE rounds SET status='open' WHERE id=1; INSERT INTO predictions(id,user_id,match_id,predicted_home_score,predicted_away_score,predicted_extra_team_provider_id) VALUES(2,'p',1,1,1,'h'); INSERT INTO round_submissions(round_id,user_id,first_submitted_at,last_submitted_at) VALUES(1,'p','2020-01-01','2020-01-01'); UPDATE rounds SET status='finished' WHERE id=1; INSERT INTO prediction_scores(prediction_id,total_points,base_points,extra_points,result_type,is_provisional,calculated_at) VALUES(2,4,3,1,'FULL',0,'2020-01-01');");
+ const data=await (await handleHistory(req('history-ranking'),env()))!.json() as any;
+ expect(data.standings).toHaveLength(2);
+ for(const row of data.standings)expect(row).toMatchObject({position:1,points:4,roundsPlayed:1,fulls:1,partials:0});
+ expect(data.standings.map((r:any)=>r.userId)).toEqual(['other','p']);
+ expect(JSON.stringify(data)).not.toMatch(/private|password|phone/);
+});
+it('all-time excludes open/draft rounds and provisional scores, counts zero-point submissions once',async()=>{
+ db.exec("UPDATE prediction_scores SET is_provisional=1;");
+ const data=await (await handleHistory(req('history-ranking'),env()))!.json() as any;
+ expect(data.standings).toEqual([{userId:'other',fullName:'other',roundsPlayed:1,points:0,fulls:0,partials:0,position:1}]);
+ db.exec("UPDATE rounds SET status='finished' WHERE id=2; UPDATE rounds SET status='open' WHERE id=1;");
+ expect(await (await handleHistory(req('history-ranking'),env()))!.json()).toEqual({standings:[]});
+ db.exec("UPDATE rounds SET status='draft' WHERE id=1");
+ expect(await (await handleHistory(req('history-ranking'),env()))!.json()).toEqual({standings:[]});
+});
+it('all-time rejects guests, admins and writes; empty history is empty',async()=>{
+ for(const token of ['', 'admin'])expect((await handleHistory(req('history-ranking',token),env()))?.status).toBe(403);
+ expect((await handleHistory(req('history-ranking','p','POST'),env()))?.status).toBe(405);
+ db.exec('DELETE FROM round_submissions');
+ expect(await (await handleHistory(req('history-ranking'),env()))!.json()).toEqual({standings:[]});
+});
+it('palmares exposes confirmed individual championships only, linked to their real edition',async()=>{
+ db.exec("INSERT INTO tafa_seasons(id,season_number,name) VALUES(1,32,'T32'); INSERT INTO competitions(id,season_id,code,canonical_name,display_name,family) VALUES(1,1,'COPA_A','Copa A','Copa A','CUP'); INSERT INTO competition_entries(id,competition_id,entry_type,display_name) VALUES(1,1,'INDIVIDUAL','other'),(2,1,'DUO','Team'); INSERT INTO competition_entry_members(entry_id,user_id) VALUES(1,'other'),(2,'other'); INSERT INTO competition_results(competition_id,entry_id,result_code) VALUES(1,1,'CHAMPION'),(1,2,'CHAMPION');");
+ const data=await (await handleHistory(req('profiles/other'),env()))!.json() as any;
+ expect(data.titles).toEqual([{code:'COPA_A',name:'Copa A',seasonNumber:32}]);
+ db.exec("UPDATE competition_results SET result_code='RUNNER_UP' WHERE entry_id=1");
+ expect((await (await handleHistory(req('profiles/other'),env()))!.json() as any).titles).toEqual([]);
+});

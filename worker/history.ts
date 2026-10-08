@@ -53,11 +53,37 @@ async function sessionUser(request: Request, env: Env): Promise<SessionUser | nu
 export async function handleHistory(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
   const profile = pathname.match(/^\/api\/participant\/profiles\/([^/]+)$/);
-  if (pathname !== '/api/participant/history' && !profile) return null;
+  const allTime = pathname === '/api/participant/history-ranking';
+  if (pathname !== '/api/participant/history' && !profile && !allTime) return null;
   if (request.method !== 'GET') return error('Método no permitido', 405);
 
   const user = await sessionUser(request, env);
   if (!user || user.role !== 'participant') return error('Acceso de participante requerido', 403);
+
+  if (allTime) {
+    // One official score per match, independent of how many competitions use a round.
+    // Equal totals share a position; name/id only stabilize presentation.
+    const rows = await env.DB.prepare(`
+      WITH totals AS (
+        SELECT u.id AS userId, u.full_name AS fullName,
+          COUNT(DISTINCT r.id) AS roundsPlayed,
+          COALESCE(SUM(ps.total_points),0) AS points,
+          COALESCE(SUM(CASE WHEN ps.base_points=3 THEN 1 ELSE 0 END),0) AS fulls,
+          COALESCE(SUM(CASE WHEN ps.base_points=1 THEN 1 ELSE 0 END),0) AS partials
+        FROM users u
+        JOIN round_submissions rs ON rs.user_id=u.id
+        JOIN rounds r ON r.id=rs.round_id AND r.status='finished'
+        LEFT JOIN matches m ON m.round_id=r.id
+        LEFT JOIN official_predictions p ON p.user_id=u.id AND p.match_id=m.id
+        LEFT JOIN prediction_scores ps ON ps.prediction_id=p.id AND ps.is_provisional=0
+        WHERE u.role='participant'
+        GROUP BY u.id,u.full_name
+      )
+      SELECT *, RANK() OVER (ORDER BY points DESC) AS position
+      FROM totals ORDER BY points DESC, fullName COLLATE NOCASE, userId
+    `).all();
+    return json({ standings: rows.results ?? [] });
+  }
 
   const targetId = profile ? decodeURIComponent(profile[1]) : user.id;
   const person = profile ? await env.DB.prepare(
@@ -93,8 +119,20 @@ export async function handleHistory(request: Request, env: Env): Promise<Respons
     extras: number;
   }>();
 
+  // Individual titles only: IFFHS recipients are not a rule for assigning duo titles.
+  const titles = profile ? await env.DB.prepare(`
+    SELECT c.code, c.display_name AS name, s.season_number AS seasonNumber
+    FROM competition_results cr
+    JOIN competitions c ON c.id=cr.competition_id
+    JOIN tafa_seasons s ON s.id=c.season_id
+    JOIN competition_entries e ON e.id=cr.entry_id AND e.competition_id=c.id
+    WHERE cr.result_code='CHAMPION' AND cr.confirmed_at IS NOT NULL
+      AND e.entry_type='INDIVIDUAL'
+      AND EXISTS (SELECT 1 FROM competition_entry_members m WHERE m.entry_id=e.id AND m.user_id=?)
+    ORDER BY s.season_number DESC,c.sort_order,c.id
+  `).bind(targetId).all() : null;
   return json({
-    ...(profile ? { participant: person } : {}),
+    ...(profile ? { participant: person, titles: titles?.results ?? [] } : {}),
     rounds: (result.results ?? []).map((round) => ({
       id: round.id,
       name: round.name,
