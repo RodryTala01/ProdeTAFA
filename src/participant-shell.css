@@ -6,6 +6,7 @@
 .participant-nav a { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 12px; color: var(--text-muted); text-decoration: none; border-bottom: 2px solid transparent; font-weight: 600; font-size: .875rem; }
 .participant-nav a[aria-current="page"] { color: var(--accent); border-color: var(--accent); }
 .profile-menu { position: relative; }
+.profile-menu, .profile-menu summary { min-width: 0; }
 .profile-menu summary { min-height: 44px; display: flex; align-items: center; gap: 12px; cursor: pointer; list-style: none; }
 .profile-menu summary::-webkit-details-marker { display: none; }
 .profile-name { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .875rem; }
@@ -34,6 +35,13 @@
   .participant-shell input, .participant-shell button { scroll-margin-bottom: calc(220px + env(safe-area-inset-bottom)); }
   .profile-name { max-width: 120px; font-size: .75rem; }
   .profile-menu summary { gap: 8px; }
+  .participant-shell .topbar { padding-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right)); }
+  .profile-menu__items { max-width: calc(100vw - 32px); max-height: 70dvh; overflow-y: auto; }
+  .participant-nav { padding-left: max(4px, env(safe-area-inset-left)); padding-right: max(4px, env(safe-area-inset-right)); }
+  /* Focus, not device/keyboard detection: give score entry the viewport. */
+  .participant-shell:has(.score-side input:focus) .participant-nav { display: none; }
+  .participant-shell:has(.score-side input:focus) .submit-card { position: static; }
+  .participant-shell:has(.score-side input:focus) .score-side input { scroll-margin-block: 100px; }
   .club-layout { grid-template-columns: 1fr; gap: 16px; }
   .participant-shell .sports-list__row { grid-template-columns: 32px minmax(0, 1fr); }
   .participant-shell .sports-list__result { grid-column: 2; display: flex; justify-content: space-between; max-width: none; }

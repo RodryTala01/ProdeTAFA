@@ -86,6 +86,8 @@
 .prediction-changes { padding:0; list-style:none; }
 .prediction-changes li { border-bottom:1px solid var(--border); padding:14px 0; font-size:.875rem; }
 .prediction-changes li > div { display:flex; gap:20px; margin-top:8px; font-variant-numeric:tabular-nums; }
+.prediction-changes li > div { flex-wrap:wrap; }
+.prediction-competition, .participant-round-header > div { min-width:0; overflow-wrap:anywhere; }
 .prediction-changes p { margin:8px 0 0; font-size:.8125rem; }
 .resubmit-dialog .modal-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:16px; }
 @media(max-width:700px) {
@@ -99,6 +101,10 @@
  .score-side .prediction-team { flex-direction:column; align-items:flex-start; gap:4px; }
  .score-side--away .prediction-team { align-items:flex-end; }
  .prediction-team span:last-child { font-size:.75rem; max-width:100%; }
+ .prediction-team > span:last-child:not(.asset-image) { white-space:normal; overflow:visible; overflow-wrap:anywhere; }
+ .participant-shell .participant-round .prediction-card input { scroll-margin-top:calc(var(--header-height) + env(safe-area-inset-top) + 16px); }
+ .round-history-card { flex-wrap:wrap; }
+ .round-history-card select { max-width:100%; flex:1 1 180px; }
  .prediction-meta { column-gap:8px; }
  .prediction-meta > time { text-align:right; }
  .prediction-competition { font-size:.625rem; }

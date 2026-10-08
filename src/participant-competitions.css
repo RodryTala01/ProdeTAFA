@@ -14,7 +14,15 @@
 .sport-rounds h2,.sport-rounds h3 { font-size:1rem; }
 .sport-encounter { border:1px solid var(--border); border-radius:var(--radius-control); padding:12px; margin:12px 0; background:var(--surface); }
 .sport-encounter--mine { border-left:2px solid var(--accent); }
-.sport-encounter > div { display:grid; grid-template-columns:1fr auto; gap:8px; padding:10px 0; border-bottom:1px solid var(--border); }
+.sport-encounter > div { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; padding:10px 0; border-bottom:1px solid var(--border); }
+.sport-encounter a, .sport-encounter small, .sport-history, .sport-table tbody th { overflow-wrap:anywhere; }
+.sport-rounds { overscroll-behavior-x:contain; scrollbar-width:thin; scrollbar-color:var(--border-strong) var(--surface); }
+.sport-table-scroll { min-width:0; max-width:100%; }
+@media(max-width:600px) {
+  /* Leave the next round's edge visible as a horizontal-scroll affordance. */
+  .participant-competitions .sport-rounds > section, .participant-competitions .sport-rounds > div { flex-basis:min(290px, calc(100% - 28px)); }
+  .sport-table:not(.league-sport-table) { min-width:300px; }
+}
 .sport-encounter small { display:block; color:var(--text-muted); font-size:.72rem; }
 .sport-encounter .sport-winner,.sport-encounter .sport-winner small { color:var(--accent); }
 .sport-table { width:100%; border-collapse:collapse; font-size:.875rem; }
