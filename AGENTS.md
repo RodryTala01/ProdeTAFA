@@ -357,3 +357,8 @@ Si una regla futura es ambigua, no inventar una extensión grande: mantener el c
 - Historial de Fechas separado de auditoría de envíos y enfrentamientos. Consumir pronósticos oficiales y puntuación persistida; reveal sigue limitado a Fechas finalizadas.
 - Enfrentamientos sin consolidado histórico fiable muestra estado vacío, sin reconstruir estadísticas deportivas.
 - Fixtures de Club/perfil/historial exclusivamente DEV. Sin migraciones ni cambios deportivos.
+
+### Diseño Etapa 7 — assets
+- Conservar el logo TAFA original. Imágenes compartidas con proporción intacta y fallback de iniciales ante ausencia/error.
+- Registros frontend por code/ID estable y overrides por temporada. Sólo archivos suministrados o URLs reales del backend; sin generación, descargas, uploads, DB ni migraciones.
+- Ver ASSETS.md. Preview de assets exclusivamente DEV.

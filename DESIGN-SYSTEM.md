@@ -106,3 +106,6 @@ Revisión de navegador a 1440×960, 768×1024 y 390×844; Login, referencias y p
 Mi Club reúne identidad, Liga, competiciones registradas y totales de Fechas finalizadas. Perfiles públicos reutilizan esa vista y no exponen teléfono ni datos administrativos. Las rutas de historial permiten abrir una Fecha finalizada, seleccionar participantes y comparar sus pronósticos oficiales con el propio. La puntuación y la posición vienen del backend; no se reconstruye scoring en frontend.
 
 El historial de envíos conserva su acceso separado. Enfrentamientos muestra un vacío explícito hasta disponer de un consolidado histórico fiable. Estados de carga/error y Reintentar comparten un componente liviano. Previews DEV: `/design?view=club`, `profile`, `history`, `head-to-head`. Los assets definitivos quedan para Etapa 7.
+
+## Etapa 7 — Assets
+`AssetImage`, `ParticipantShield`, `TeamShield` y `CompetitionImage` unifican tamaños, proporciones, accesibilidad y fallback de carga. Registros por code/ID y edición en `competition-assets.ts`, sin inventar colores ni archivos. Ver [ASSETS.md](ASSETS.md). Revisión manual: `/design?view=assets`, sólo DEV.

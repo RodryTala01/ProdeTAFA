@@ -81,6 +81,7 @@ export function competitionRows(data: HomeData) {
         ? data.league.standings.find(row => row.userId === data.league!.currentUserId) : null;
       return {
         ...c,
+        season: season.seasonNumber,
         name: c.displayName,
         monogram: c.displayName.split(' ').map(part => part[0]).join('').slice(0, 3),
         status: contexts.length ? 'En esta Fecha' : registered ? 'Participación registrada' : 'No participa',

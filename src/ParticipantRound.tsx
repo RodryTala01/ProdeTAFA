@@ -1,3 +1,4 @@
+import {CompetitionImage} from './AssetImage';
 import { TeamIdentity as Team } from './ui';
 import ParticipantCompetitionContexts from './ParticipantCompetitionContexts';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -439,7 +440,7 @@ export default function ParticipantRound() {
           const scoreInputs = (
             <div className="score-prediction">
               <div className="score-side">
-                <Team name={match.home.name} logoUrl={match.home.logoUrl} />
+                <Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl} />
                 <input
                   ref={(element) => { homeInputs.current[match.id] = element; }}
                   type="number"
@@ -465,7 +466,7 @@ export default function ParticipantRound() {
                   onChange={(event) => updateAwayScore(match, event.target.value)}
                   aria-label={`Goles ${match.away.name}`}
                 />
-                <Team name={match.away.name} logoUrl={match.away.logoUrl} />
+                <Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl} />
               </div>
             </div>
           );
@@ -473,7 +474,7 @@ export default function ParticipantRound() {
           return (
             <article className={`prediction-card ${isLive ? 'prediction-card--live' : ''} ${collapsed ? 'prediction-card--collapsed' : ''}`} key={match.id}>
               <div className="prediction-meta">
-                <span className="prediction-competition">{match.competitionLogoUrl && <img src={match.competitionLogoUrl} alt="" loading="lazy" />}{match.competitionName || 'Competencia'}</span>
+                <span className="prediction-competition"><CompetitionImage name={match.competitionName||'Competencia'} logoUrl={match.competitionLogoUrl} size="xs" decorative/>{match.competitionName || 'Competencia'}</span>
                 <time dateTime={match.kickoffAt}>{formatKickoff(match.kickoffAt)}</time>
                 <details className="prediction-lock-time"><summary>Hora de cierre</summary><time dateTime={match.lockedAt}>{formatKickoff(match.lockedAt)}</time></details>
                 <b className={`match-countdown ${isLocked ? 'match-countdown--closed' : Date.parse(match.lockedAt) - now <= 600_000 ? 'match-countdown--soon' : ''}`}>
@@ -481,7 +482,7 @@ export default function ParticipantRound() {
                 </b>
               </div>
 
-              {isLocked ? <div className="score-prediction prediction-readonly"><Team name={match.home.name} logoUrl={match.home.logoUrl}/><div aria-label="Tu pronóstico"><strong>{draft.homeScore || '—'} – {draft.awayScore || '—'}</strong><small>Tu pronóstico</small></div><Team name={match.away.name} logoUrl={match.away.logoUrl}/></div> : scoreInputs}
+              {isLocked ? <div className="score-prediction prediction-readonly"><Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl}/><div aria-label="Tu pronóstico"><strong>{draft.homeScore || '—'} – {draft.awayScore || '—'}</strong><small>Tu pronóstico</small></div><Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl}/></div> : scoreInputs}
 
               {!collapsed && match.matchType === 'PENALTIES_ONLY' && (
                 <div className="penalty-prediction">
@@ -495,7 +496,7 @@ export default function ParticipantRound() {
                       className={`penalty-option ${draft.extraTeamId === match.home.id ? 'penalty-option--selected' : ''}`}
                       onClick={() => updatePenalty(match, match.home.id)}
                     >
-                      <Team name={match.home.name} logoUrl={match.home.logoUrl} />
+                      <Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl} />
                     </button>
                     <button
                       type="button"
@@ -504,7 +505,7 @@ export default function ParticipantRound() {
                       className={`penalty-option ${draft.extraTeamId === match.away.id ? 'penalty-option--selected' : ''}`}
                       onClick={() => updatePenalty(match, match.away.id)}
                     >
-                      <Team name={match.away.name} logoUrl={match.away.logoUrl} />
+                      <Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl} />
                     </button>
                   </div>
                   {isLocked && <span>Tu elección: {penaltyName(match, draft.extraTeamId)}</span>}

@@ -1,3 +1,4 @@
+import {TeamShield,CompetitionImage} from './AssetImage';
 import { Icon } from './ui';
 import { AdminConfirm, AdminMenu } from './AdminUI';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
@@ -62,10 +63,10 @@ function formatKickoff(value: string) {
   }).format(new Date(value));
 }
 
-function Team({ name, logoUrl }: { name: string; logoUrl: string | null }) {
+function Team({ name, logoUrl, teamId }: { name: string; logoUrl: string | null; teamId?:string|null }) {
   return (
     <div className="fixture-team">
-      {logoUrl ? <img src={logoUrl} alt="" loading="lazy" /> : <span className="team-fallback" aria-hidden="true">{name.slice(0, 2).toUpperCase()}</span>}
+      <TeamShield name={name} teamId={teamId} logoUrl={logoUrl} size="sm" decorative/>
       <strong title={name}>{name}</strong>
     </div>
   );
@@ -312,11 +313,11 @@ export default function AdminRounds() {
                         return (
                           <article className="fixture-card" key={fixture.providerFixtureId}>
                             <div className="fixture-meta">
-                              {fixture.competition.logoUrl && <img src={fixture.competition.logoUrl} alt="" loading="lazy" />}
+                              <CompetitionImage name={fixture.competition.name} logoUrl={fixture.competition.logoUrl} size="xs" decorative/>
                               <span><strong>{fixture.competition.name}</strong><small>{fixture.competition.country}{fixture.competition.round ? ` · ${fixture.competition.round}` : ''}</small></span>
                               <time dateTime={fixture.kickoffAt}>{formatKickoff(fixture.kickoffAt)}</time>
                             </div>
-                            <div className="fixture-versus"><Team name={fixture.home.name} logoUrl={fixture.home.logoUrl} /><span>VS</span><Team name={fixture.away.name} logoUrl={fixture.away.logoUrl} /></div>
+                            <div className="fixture-versus"><Team name={fixture.home.name} teamId={fixture.home.id} logoUrl={fixture.home.logoUrl} /><span>VS</span><Team name={fixture.away.name} teamId={fixture.away.id} logoUrl={fixture.away.logoUrl} /></div>
                             <div className="fixture-actions">
                               {alreadyAdded ? <span className="added-badge">✓ Ya agregado</span> : (
                                 <><button className="button button--primary" disabled={busy} onClick={() => void addFixture(fixture, 'NORMAL')}>Agregar</button><AdminMenu label={`Opciones para agregar ${fixture.home.name} vs ${fixture.away.name}`}><button disabled={busy} onClick={() => void addFixture(fixture, 'PENALTIES_ONLY')}>Agregar con Penales</button></AdminMenu></>
@@ -339,7 +340,7 @@ export default function AdminRounds() {
                     <div className="stored-match" key={match.id}>
                       <div className="stored-match-main">
                         <small>{index + 1}. {match.competitionName || 'Competencia'} · {formatKickoff(match.kickoffAt)} · {match.status}</small>
-                        <div className="stored-teams"><Team name={match.home.name} logoUrl={match.home.logoUrl} /><span>vs</span><Team name={match.away.name} logoUrl={match.away.logoUrl} /></div>
+                        <div className="stored-teams"><Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl} /><span>vs</span><Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl} /></div>
                         {match.goals.home !== null && match.goals.away !== null && <span className="penalty-badge">Resultado {match.goals.home} - {match.goals.away}</span>}
                         {match.matchType === 'PENALTIES_ONLY' && <span className="penalty-badge">PENALES</span>}
                       </div>

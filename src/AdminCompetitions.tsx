@@ -1,3 +1,4 @@
+import {ParticipantShield} from './AssetImage';
 import AdminLeague from './AdminLeague';
 import { AdminConfirm } from './AdminUI';
 import AdminSeasonTransition from './AdminSeasonTransition';
@@ -306,7 +307,7 @@ export default function AdminCompetitions() {
             <div className="user-list">
               {activeParticipants.map((participant) => (
                 <div className="user-row" key={participant.id}>
-                  <div className="avatar">{participant.fullName.slice(0, 1).toUpperCase()}</div>
+                  <ParticipantShield userId={participant.id} name={participant.fullName} decorative/>
                   <div className="user-data"><strong>{participant.fullName}</strong><span>T{selected.seasonNumber}</span></div>
                   <select
                     aria-label={`División de ${participant.fullName}`}

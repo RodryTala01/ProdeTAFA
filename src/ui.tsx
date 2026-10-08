@@ -1,3 +1,4 @@
+import {TeamShield} from './AssetImage';
 import { useId, useState, type InputHTMLAttributes } from 'react';
 
 type IconName = 'eye' | 'eye-off' | 'arrow' | 'home' | 'list' | 'trophy' | 'logout' | 'calendar' | 'check' | 'user';
@@ -24,6 +25,6 @@ export function PasswordField({ label = 'Contraseña', ...props }: InputHTMLAttr
   const [visible, setVisible] = useState(false);
   return <div className="field"><label htmlFor={id}>{label}</label><div className="password-control"><input {...props} id={id} type={visible ? 'text' : 'password'} /><button type="button" className="button button--ghost button--icon" aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={visible} aria-controls={id} onClick={() => setVisible(!visible)}><Icon name={visible ? 'eye-off' : 'eye'} /></button></div></div>;
 }
-export function TeamIdentity({ name, logoUrl }: { name: string; logoUrl?: string | null }) {
-  return <div className="prediction-team">{logoUrl ? <img src={logoUrl} alt="" loading="lazy" /> : <span className="prediction-team-fallback" aria-hidden="true">{name.slice(0, 2).toUpperCase()}</span>}<span title={name}>{name}</span></div>;
+export function TeamIdentity({ name, logoUrl, teamId }: { name: string; logoUrl?: string | null; teamId?: string | null }) {
+  return <div className="prediction-team"><TeamShield name={name} teamId={teamId} logoUrl={logoUrl} size="sm" decorative/><span title={name}>{name}</span></div>;
 }
