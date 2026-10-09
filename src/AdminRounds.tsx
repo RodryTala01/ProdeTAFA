@@ -314,7 +314,7 @@ export default function AdminRounds() {
                     <p className="fixture-results-count">{filteredFixtures.length} de {fixtures.length} partidos</p>
                     <div className="fixture-list">
                       {filteredFixtures.map((fixture) => {
-                        const alreadyAdded = addedFixtureIds.has(`${fixture.provider ?? 'promiedos'}:${fixture.providerFixtureId}`);
+                        const alreadyAdded = addedFixtureIds.has(`${fixture.provider ?? 'api-football'}:${fixture.providerFixtureId}`);
                         return (
                           <article className="fixture-card" key={fixture.providerFixtureId}>
                             <div className="fixture-meta">
