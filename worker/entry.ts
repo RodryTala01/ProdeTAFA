@@ -280,31 +280,6 @@ function shouldSyncLeagueParticipants(pathname: string, method: string) {
   return method === 'PUT' && /^\/api\/admin\/users\/[^/]+\/status$/.test(pathname);
 }
 
-async function clearResetManualResult(pathname: string, method: string, response: Response, env: Env) {
-  if (!response.ok || method !== 'PUT') return;
-  const match = pathname.match(/^\/api\/admin\/matches\/(\d+)\/manual-result\/reset$/);
-  if (!match) return;
-
-  const matchId = Number(match[1]);
-  await env.DB.prepare(
-    `UPDATE matches SET
-       provider = 'api-football',
-       status = 'NS', elapsed_minutes = NULL,
-       home_score_current = NULL, away_score_current = NULL,
-       home_score_regulation = NULL, away_score_regulation = NULL,
-       winning_team_provider_id = NULL, qualified_team_provider_id = NULL,
-       went_to_extra_time = 0, went_to_penalties = 0, is_void = 0,
-       result_finalized_at = NULL, last_synced_at = NULL,
-       updated_at = datetime('now')
-     WHERE id = ?`,
-  ).bind(matchId).run();
-
-  await env.DB.prepare(
-    `DELETE FROM prediction_scores
-     WHERE prediction_id IN (SELECT id FROM predictions WHERE match_id = ?)`,
-  ).bind(matchId).run();
-}
-
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const pathname = new URL(request.url).pathname;
@@ -340,7 +315,6 @@ export default {
     }
 
     const response = await baseWorker.fetch(request, env);
-    await clearResetManualResult(pathname, request.method, response, env);
     if (response.ok && shouldSyncLeagueParticipants(pathname, request.method)) {
       await syncOpenLeagueParticipants(env);
     }

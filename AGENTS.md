@@ -105,12 +105,15 @@ El nombre interno se conserva por compatibilidad. **No significa que el partido 
 
 ## Resultados y correcciones
 
-- Sincronizar automáticamente con API-Football y permitir actualización manual desde Admin.
+- Nuevos partidos: Promiedos (cliente aislado, X-VER descubierto desde recursos públicos ante fallo y un solo reintento). API-Football se conserva para partidos legacy.
+- Promiedos: horarios Buenos Aires convertidos explícitamente a UTC; resultado reglamentario desde etapa de 90 minutos. Ante datos ambiguos conservar estado y solicitar revisión.
+- Correcciones manuales conservan provider; auditoría existente registra activación/reset de forma atómica, sin migración.
+- Citar Promiedos en pantallas de fixtures/resultados.
 - API-Football Free: no usar `ids`; consultar `/fixtures?date=YYYY-MM-DD&timezone=America/Argentina/Buenos_Aires` y filtrar localmente por fixture ID.
 - Cron actual cada 10 minutos; consultar sólo días relevantes para no exceder cuota.
 - El admin puede corregir resultados manualmente con motivo obligatorio y auditoría.
 - Mientras una corrección manual esté activa, la API no debe pisarla.
-- `Volver a API-Football` deja el partido pendiente, limpia resultado/puntos derivados viejos y espera próxima sincronización oficial.
+- `Volver al proveedor` deja el partido pendiente, limpia resultado/puntos derivados viejos y espera próxima sincronización oficial.
 - El admin también puede editar excepcionalmente un pronóstico con motivo/auditoría.
 
 ## Ranking de fecha

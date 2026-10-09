@@ -11,6 +11,7 @@ import { changedPredictions, completionCount, completePrediction, globalSaveStat
 import './participant-round.css';
 
 type Match = {
+  provider?: string;
   id: number;
   competitionName: string | null;
   competitionLogoUrl: string | null;
@@ -408,6 +409,7 @@ export default function ParticipantRound() {
         <div><span className="eyebrow">{isFinished ? 'FECHA FINALIZADA' : 'FECHA ABIERTA'} · {round.matches.length} PARTIDOS</span><h1>{round.name}</h1><p>Horarios de Argentina · America/Argentina/Buenos_Aires</p></div>
         <div className="points-total"><span>{isFinished ? 'Puntos finales' : 'Puntos actuales'}</span><strong>{round.pointsTotal}</strong></div>
       </section>
+      {round.matches.some(m => m.provider === 'promiedos') && <p>Datos de partidos: <a href="https://www.promiedos.com.ar/">Promiedos</a></p>}
       <ParticipantCompetitionContexts key={`contexts-${round.id}`} roundId={round.id}/>
       <div className="prediction-toolbar">
         <div><strong>{complete}/{round.matches.length} completados</strong>{!isFinished && <span role="status" aria-live="polite"> · {saving}</span>}

@@ -127,7 +127,7 @@ function ResultEditor({
       });
       await onSaved('Corrección manual desactivada. La próxima actualización recuperará el resultado oficial.');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo restaurar API-Football');
+      setError(caught instanceof Error ? caught.message : 'No se pudo restaurar proveedor');
     } finally { setSaving(false); }
   }
 
@@ -169,7 +169,7 @@ function ResultEditor({
         <button className="button button--primary" disabled={saving}>{saving ? 'Guardando…' : 'Guardar corrección'}</button>
         {match.manualResult && (
           <button type="button" className="button button--secondary" disabled={saving || reason.trim().length < 3} onClick={() => void resetToApi()}>
-            Volver a API-Football
+            Volver a proveedor
           </button>
         )}
       </div>
@@ -396,7 +396,7 @@ export default function AdminCorrections({
             const action = entry.action === 'match.result_override'
               ? 'Resultado corregido'
               : entry.action === 'match.result_override_reset'
-                ? 'Resultado devuelto a API-Football'
+                ? 'Resultado devuelto a proveedor'
                 : entry.action === 'prediction.admin_override'
                   ? 'Pronóstico editado por admin'
                   : entry.action;

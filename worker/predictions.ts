@@ -15,6 +15,7 @@ type SessionUser = {
 type MatchRow = {
   id: number;
   round_id: number;
+  provider: string;
   competition_name: string | null;
   competition_logo_url: string | null;
   home_team_provider_id: string | null;
@@ -201,7 +202,7 @@ async function getParticipantRound(request: Request, env: Env) {
   if (!round) return json({ round: null });
 
   const matches = await env.DB.prepare(
-    `SELECT m.id, m.round_id, m.competition_name, m.competition_logo_url,
+    `SELECT m.id, m.round_id, m.provider, m.competition_name, m.competition_logo_url,
             m.home_team_provider_id, m.home_team_name, m.home_team_logo_url,
             m.away_team_provider_id, m.away_team_name, m.away_team_logo_url,
             m.kickoff_at, m.status, m.match_type,
@@ -254,7 +255,8 @@ async function getParticipantRound(request: Request, env: Env) {
       serverNow: new Date(now).toISOString(),
       matches: resultRows.map((match) => ({
         id: match.id,
-        competitionName: match.competition_name,
+        provider: match.provider,
+          competitionName: match.competition_name,
         competitionLogoUrl: match.competition_logo_url,
         kickoffAt: match.kickoff_at,
         lockedAt: new Date(lockTime(match.kickoff_at)).toISOString(),

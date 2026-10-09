@@ -1,4 +1,5 @@
-import {footballFixtures, FootballError} from './football-api';
+import {searchPromiedosFixtures, getPromiedosGame, promiedosFixture, PromiedosError} from './promiedos';
+import {FootballError} from './football-api';
 type Env = {
   DB: D1Database;
   FOOTBALL_API_KEY?: string;
@@ -194,7 +195,7 @@ async function getRound(env: Env, roundId: number) {
   if (!round) return error('Fecha no encontrada', 404);
 
   const matches = await env.DB.prepare(
-    `SELECT id, provider_fixture_id, competition_name, competition_logo_url,
+    `SELECT id, provider, provider_fixture_id, competition_name, competition_logo_url,
             home_team_provider_id, home_team_name, home_team_logo_url,
             away_team_provider_id, away_team_name, away_team_logo_url,
             kickoff_at, status, elapsed_minutes, match_type,
@@ -204,6 +205,7 @@ async function getRound(env: Env, roundId: number) {
      ORDER BY kickoff_at, id`,
   ).bind(roundId).all<{
     id: number;
+    provider: string;
     provider_fixture_id: string;
     competition_name: string | null;
     competition_logo_url: string | null;
@@ -231,6 +233,7 @@ async function getRound(env: Env, roundId: number) {
       createdAt: round.created_at,
       matches: (matches.results ?? []).map((match) => ({
         id: match.id,
+        provider: match.provider,
         providerFixtureId: match.provider_fixture_id,
         competitionName: match.competition_name,
         competitionLogoUrl: match.competition_logo_url,
@@ -246,10 +249,6 @@ async function getRound(env: Env, roundId: number) {
   });
 }
 
-async function fetchFixturesForDate(date: string, env: Env) {
-  return footballFixtures<ApiFixture>({date,timezone:'America/Argentina/Buenos_Aires'},env.FOOTBALL_API_KEY!);
-}
-
 async function searchFixtures(url: URL, env: Env) {
   const from = url.searchParams.get('from') ?? '';
   const to = url.searchParams.get('to') ?? '';
@@ -260,34 +259,25 @@ async function searchFixtures(url: URL, env: Env) {
   const rangeDays = Math.round((toTime - fromTime) / 86_400_000) + 1;
   if (toTime < fromTime) return error('La fecha Hasta no puede ser anterior a Desde');
   if (rangeDays > 7) return error('La búsqueda puede abarcar como máximo 7 días');
-  if (!env.FOOTBALL_API_KEY) return error('Falta configurar FOOTBALL_API_KEY', 503);
-
   const dates = Array.from({ length: rangeDays }, (_, index) =>
     dateFromUtc(fromTime + index * 86_400_000),
   );
 
   try {
-    const dailyResults: ApiFixture[][] = [];
-    // Free supports date, not unrestricted from/to; stop on the first provider error.
-    for (const date of dates) dailyResults.push(await fetchFixturesForDate(date, env));
-    const byId = new Map<number, ApiFixture>();
-    for (const day of dailyResults) {
-      for (const fixture of day) byId.set(fixture.fixture.id, fixture);
-    }
-
-    const fixtures = Array.from(byId.values())
-      .map(fixtureToPublic)
-      .sort((a, b) => a.kickoffAt.localeCompare(b.kickoffAt));
+    const counter = {count: 0};
+    const byId = new Map<string, ReturnType<typeof promiedosFixture>>();
+    for (const date of dates) for (const item of await searchPromiedosFixtures(date, counter)) byId.set(item.providerFixtureId, item);
+    const fixtures = [...byId.values()].sort((a,b) => a.kickoffAt.localeCompare(b.kickoffAt));
 
     return json({
       from,
       to,
       rangeDays,
-      requestCount: dates.length,
+      requestCount: counter.count,
       fixtures,
     });
   } catch (caught) {
-    const message = caught instanceof FootballError ? caught.message : 'No se pudo completar la búsqueda de partidos';
+    const message = caught instanceof PromiedosError || caught instanceof FootballError ? caught.message : 'No se pudo completar la búsqueda de partidos';
     console.error('Fixture search failed', message);
     return error(message, 502);
   }
@@ -302,14 +292,20 @@ async function addMatch(request: Request, env: Env, admin: UserRow, roundId: num
   if (Number(count?.total ?? 0) >= 12) return error('La fecha ya tiene 12 partidos', 409);
 
   const body = await request.json().catch(() => null) as {
-    fixture?: ReturnType<typeof fixtureToPublic>;
+    fixture?: ReturnType<typeof fixtureToPublic> & {provider?: string};
     matchType?: 'NORMAL' | 'PENALTIES_ONLY';
   } | null;
-  const fixture = body?.fixture;
+  let fixture = body?.fixture;
   if (!fixture?.providerFixtureId || !fixture.home?.name || !fixture.away?.name || !fixture.kickoffAt) {
     return error('Partido inválido');
   }
 
+  const provider = fixture.provider ?? 'api-football';
+  if (!['promiedos', 'api-football'].includes(provider)) return error('Proveedor inválido');
+  if (provider === 'promiedos') {
+    try { fixture = promiedosFixture(await getPromiedosGame(fixture.providerFixtureId)); }
+    catch (e) { return error(e instanceof PromiedosError ? e.message : 'Promiedos no disponible', 502); }
+  }
   const matchType = body?.matchType === 'PENALTIES_ONLY' ? 'PENALTIES_ONLY' : 'NORMAL';
 
   try {
@@ -321,9 +317,10 @@ async function addMatch(request: Request, env: Env, admin: UserRow, roundId: num
         away_team_provider_id, away_team_name, away_team_logo_url,
         kickoff_at, status, elapsed_minutes, match_type,
         home_score_current, away_score_current, last_synced_at
-      ) VALUES (?, 'api-football', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
     ).bind(
       roundId,
+      provider,
       fixture.providerFixtureId,
       fixture.competition?.name ?? null,
       fixture.competition?.logoUrl ?? null,
