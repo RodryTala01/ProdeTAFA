@@ -1,4 +1,5 @@
-import {getPromiedosGame, normalizePromiedosResult, PromiedosError} from '../promiedos';
+import {normalizePromiedosResult, PromiedosError} from '../promiedos';
+import {getCachedGame} from '../promiedos-cache';
 import {manualResultSql} from '../result-source';
 import {footballFixtures, FootballError} from '../football-api';
 import { recalculateRoundScores } from '../scoring';
@@ -194,7 +195,7 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
   }
   for (const m of matches.filter(m => m.provider === 'promiedos' && (!eligibleIds || eligibleIds.includes(m.id)))) {
     try {
-      const game = await getPromiedosGame(m.provider_fixture_id, counter);
+      const game = await getCachedGame(m.provider_fixture_id, env.DB);
       if (game.teams[0].id !== m.home_team_provider_id || game.teams[1].id !== m.away_team_provider_id) throw new PromiedosError('Identidad de equipos inconsistente');
       const r = normalizePromiedosResult(game);
       if (m.result_finalized_at && !r.final) throw new PromiedosError('Resultado final no confirmado');
@@ -222,8 +223,9 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
         .bind(String(m.id),snapshot,String(m.id),snapshot));
       const [result] = await env.DB.batch(statements);
       if (result.meta.changes) { updated++; if(r.final) finalized++; }
-    } catch {
-      warnings.push(`Promiedos no entregó información suficiente para ${m.home_team_name} - ${m.away_team_name}. Requiere revisión.`);
+    } catch (caught) {
+      const detail = caught instanceof PromiedosError ? caught.message : 'No se pudo leer la caché. Requiere revisión.';
+      warnings.push(`${m.home_team_name} - ${m.away_team_name}: ${detail}`);
     }
   }
   const calculated = updated ? await recalculateRoundScores(roundId, env) : 0;

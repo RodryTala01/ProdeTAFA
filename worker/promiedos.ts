@@ -9,46 +9,7 @@ export type PromiedosGame = {
   league?: { id: string; name: string; country_name?: string }; stage_round_name?: string;
 };
 const API = 'https://api.promiedos.com.ar';
-const WEB = 'https://www.promiedos.com.ar';
-let version = '1.11.7.5';
-let discovery: Promise<string> | undefined;
-let lastDiscovery = 0;
 export type RequestCounter = { count: number };
-async function read(url: string, counter: RequestCounter, headers?: HeadersInit) {
-  counter.count++;
-  let r: Response;
-  try { r = await fetch(url, { headers, signal: AbortSignal.timeout(15000), redirect: 'manual' }); }
-  catch { throw new PromiedosError('Promiedos no respondió a tiempo o no está disponible. Reintentá más tarde.'); }
-  if (!r.ok) throw new PromiedosError(`Promiedos no disponible (HTTP ${r.status}). Reintentá más tarde.`);
-  return r.text();
-}
-async function discover(counter: RequestCounter) {
-  if (discovery) return discovery;
-  if (Date.now() - lastDiscovery < 60_000) return version;
-  lastDiscovery = Date.now();
-  discovery = (async () => {
-    const html = await read(WEB, counter);
-    const path = html.match(/src="(\/_next\/static\/chunks\/pages\/_app-[a-zA-Z0-9]+\.js)"/)?.[1];
-    if (!path) throw new PromiedosError('No se pudo verificar la versión de Promiedos.');
-    const script = await read(WEB + path, counter);
-    const found = script.match(/"X-VER"\s*:\s*"(\d+(?:\.\d+){2,4})"/)?.[1];
-    if (!found) throw new PromiedosError('No se pudo verificar la versión de Promiedos.');
-    version = found;
-    return found;
-  })();
-  try { return await discovery; } finally { discovery = undefined; }
-}
-async function request<T>(path: string, parse: (value: unknown) => T, counter: RequestCounter): Promise<T> {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try { return parse(JSON.parse(await read(API + path, counter, { 'X-VER': version }))); }
-    catch (e) {
-      if (e instanceof PromiedosError && /HTTP (401|403|429)/.test(e.message)) throw e;
-      if (!attempt) { await discover(counter); continue; }
-      throw e instanceof PromiedosError ? e : new PromiedosError('Promiedos no entregó información válida. Requiere revisión.');
-    }
-  }
-  throw new PromiedosError('Promiedos no disponible.');
-}
 function assert(condition: unknown): asserts condition {
   if (!condition) throw new PromiedosError('Promiedos no entregó información suficiente o consistente. Requiere revisión.');
 }
@@ -93,19 +54,14 @@ export function promiedosFixture(g: PromiedosGame, league = g.league) {
     competition: { id: league.id, name: league.name, country: league.country_name ?? '', logoUrl: null, round: g.stage_round_name ?? null },
     home: team(g.teams[0]), away: team(g.teams[1]), goals: { home: scores[0], away: scores[1] } };
 }
-export async function searchPromiedosFixtures(date: string, counter: RequestCounter = { count: 0 }) {
-  assert(/^\d{4}-\d{2}-\d{2}$/.test(date));
-  return request('/games/' + date.split('-').reverse().join('-'), value => {
-    assert(object(value) && Array.isArray(value.leagues));
-    return value.leagues.flatMap((league: any) => {
-      assert(object(league) && Array.isArray(league.games));
-      return league.games.map((g: unknown) => promiedosFixture(parsePromiedosGame(g), league as any));
-    });
-  }, counter);
-}
-export async function getPromiedosGame(id: string, counter: RequestCounter = { count: 0 }) {
-  assert(idValid(id));
-  return request('/gamecenter/' + id, value => { assert(object(value)); return parsePromiedosGame(value.game, id); }, counter);
+export function parsePromiedosDay(value: unknown): PromiedosGame[] {
+  assert(object(value) && Array.isArray(value.leagues));
+  const games: PromiedosGame[] = value.leagues.flatMap((league: any) => {
+    assert(object(league) && idValid(league.id) && typeof league.name === 'string' && Array.isArray(league.games));
+    return league.games.map((g: unknown) => ({...parsePromiedosGame(g), league: {id: league.id, name: league.name, country_name: league.country_name}}));
+  });
+  assert(new Set(games.map(g => g.id)).size === games.length);
+  return games;
 }
 export function normalizePromiedosResult(g: PromiedosGame) {
   parsePromiedosGame(g);

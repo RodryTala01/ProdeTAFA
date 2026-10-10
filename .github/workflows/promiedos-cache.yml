@@ -1,0 +1,28 @@
+name: Refresh Promiedos cache
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promiedos-cache
+  cancel-in-progress: false
+
+jobs:
+  acquire:
+    if: vars.PROMIEDOS_CACHE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - name: Fetch provider data and upload cache only
+        run: node scripts/collect-promiedos.mjs
+        env:
+          PROMIEDOS_APP_URL: ${{ vars.PROMIEDOS_APP_URL }}
+          PROMIEDOS_INGEST_TOKEN: ${{ secrets.PROMIEDOS_INGEST_TOKEN }}

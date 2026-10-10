@@ -8,6 +8,7 @@ import { handleStandings } from './standings';
 export interface Env {
   DB: D1Database;
   FOOTBALL_API_KEY?: string;
+  PROMIEDOS_INGEST_TOKEN?: string;
 }
 
 type Role = 'admin' | 'participant';

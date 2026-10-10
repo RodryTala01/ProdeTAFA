@@ -1,4 +1,5 @@
-import {searchPromiedosFixtures, getPromiedosGame, promiedosFixture, PromiedosError} from './promiedos';
+import {promiedosFixture, PromiedosError} from './promiedos';
+import {searchCachedFixtures, getCachedFixture} from './promiedos-cache';
 import {FootballError} from './football-api';
 type Env = {
   DB: D1Database;
@@ -266,7 +267,10 @@ async function searchFixtures(url: URL, env: Env) {
   try {
     const counter = {count: 0};
     const byId = new Map<string, ReturnType<typeof promiedosFixture>>();
-    for (const date of dates) for (const item of await searchPromiedosFixtures(date, counter)) byId.set(item.providerFixtureId, item);
+    const cached = await Promise.allSettled(dates.map(date => searchCachedFixtures(date,env.DB)));
+    const missing = cached.find(r => r.status === 'rejected');
+    if (missing?.status === 'rejected') throw missing.reason;
+    for (const result of cached) if (result.status === 'fulfilled') for (const item of result.value) byId.set(item.providerFixtureId,item);
     const fixtures = [...byId.values()].sort((a,b) => a.kickoffAt.localeCompare(b.kickoffAt));
 
     return json({
@@ -303,7 +307,7 @@ async function addMatch(request: Request, env: Env, admin: UserRow, roundId: num
   const provider = fixture.provider ?? 'api-football';
   if (!['promiedos', 'api-football'].includes(provider)) return error('Proveedor inválido');
   if (provider === 'promiedos') {
-    try { fixture = promiedosFixture(await getPromiedosGame(fixture.providerFixtureId)); }
+    try { fixture = await getCachedFixture(fixture.providerFixtureId,fixture.kickoffAt,env.DB); }
     catch (e) { return error(e instanceof PromiedosError ? e.message : 'Promiedos no disponible', 502); }
   }
   const matchType = body?.matchType === 'PENALTIES_ONLY' ? 'PENALTIES_ONLY' : 'NORMAL';

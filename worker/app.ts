@@ -1,3 +1,4 @@
+import {handlePromiedosCache} from './promiedos-cache';
 import entryWorker, { mutationAllowed } from './entry';
 import type { Env } from './index';
 import { handleCompetitionEngine } from './competitions';
@@ -29,6 +30,10 @@ function jsonError(message: string, status: number) {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const pathname = new URL(request.url).pathname;
+    if (pathname.startsWith('/api/internal/promiedos-cache')) {
+      if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido',403);
+      return (await handlePromiedosCache(request,env)) ?? jsonError('Ruta no encontrada',404);
+    }
     const competitionRoute = pathname.startsWith('/api/admin/competition-engine')
       || pathname.startsWith('/api/competition-engine/');
 

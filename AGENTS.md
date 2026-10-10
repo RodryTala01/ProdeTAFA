@@ -105,7 +105,8 @@ El nombre interno se conserva por compatibilidad. **No significa que el partido 
 
 ## Resultados y correcciones
 
-- Nuevos partidos: Promiedos (cliente aislado, X-VER descubierto desde recursos públicos ante fallo y un solo reintento). API-Football se conserva para partidos legacy.
+- Nuevos partidos: Promiedos adquirido exclusivamente desde GitHub Actions y leído por el Worker desde la caché aislada 0015. El cliente de red y descubrimiento X-VER viven fuera del Worker; API-Football se conserva para partidos legacy.
+- Caché de proveedor únicamente: ingesta autenticada sin escrituras deportivas, vencimiento explícito, snapshots antiguos rechazados. Sin datos frescos, solicitar adquisición y conservar resultados. Workflow de adquisición manual hasta autorizar programación; ver PROMIEDOS-CACHE.md.
 - Promiedos: horarios Buenos Aires convertidos explícitamente a UTC; resultado reglamentario desde etapa de 90 minutos. Ante datos ambiguos conservar estado y solicitar revisión.
 - Correcciones manuales conservan provider; auditoría existente registra activación/reset de forma atómica, sin migración.
 - Citar Promiedos en pantallas de fixtures/resultados.
@@ -329,6 +330,8 @@ Patrón conceptual indicado por el usuario:
 - CI debe aplicar todas las migraciones D1 locales antes de tests/build.
 
 ## Estado de migraciones
+
+- `0015_promiedos_cache.sql`: tabla aislada para fixtures/detalles de proveedor y solicitudes de adquisición. No modifica tablas deportivas. Pendiente de aplicación productiva.
 
 - `0001_initial.sql`: núcleo del Prode.
 - `0002_league_seasons.sql`: temporadas, fechas de Liga y participantes.

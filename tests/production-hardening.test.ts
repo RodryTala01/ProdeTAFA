@@ -14,7 +14,7 @@ import { checkProductionConfig } from '../scripts/check-production-config.mjs';
 const migrationFiles = readdirSync('migrations').filter((name) => name.endsWith('.sql')).sort();
 const allSql = migrationFiles.map((name) => readFileSync(`migrations/${name}`, 'utf8')).join('\n');
 const t32Sql = migrationFiles
-  .filter((name) => name >= '0006')
+  .filter((name) => name >= '0006' && name < '0015')
   .map((name) => readFileSync(`migrations/${name}`, 'utf8'))
   .join('\n');
 
