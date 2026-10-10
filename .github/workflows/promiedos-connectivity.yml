@@ -1,0 +1,87 @@
+name: Promiedos connectivity spike
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  connectivity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe four public endpoints once (no secrets)
+        shell: python
+        run: |
+          import json
+          import os
+          import re
+          import subprocess
+          import tempfile
+          from pathlib import Path
+
+          probes = [
+              ('games', 'https://api.promiedos.com.ar/games/10-10-2026'),
+              ('egddcgb', 'https://api.promiedos.com.ar/gamecenter/egddcgb'),
+              ('eaaiife', 'https://api.promiedos.com.ar/gamecenter/eaaiife'),
+              ('www', 'https://www.promiedos.com.ar/calendario/05-10-2026'),
+          ]
+          results = []
+          for name, url in probes:
+              result = {'probe': name, 'http': None, 'seconds': None, 'bytes': 0, 'usable': False}
+              with tempfile.TemporaryDirectory() as directory:
+                  body_path = Path(directory) / 'response'
+                  command = ['curl', '--silent', '--show-error', '--max-time', '30',
+                             '--output', str(body_path), '--write-out', '%{http_code}\n%{time_total}\n%{size_download}', url]
+                  if name != 'www':
+                      command += ['--header', 'X-VER: 1.11.7.5']
+                  try:
+                      process = subprocess.run(command, capture_output=True, text=True, timeout=35)
+                      metrics = process.stdout.strip().splitlines()
+                      if len(metrics) == 3:
+                          result.update(http=int(metrics[0]) or None, seconds=float(metrics[1]), bytes=int(metrics[2]))
+                      result['curl_exit'] = process.returncode
+                      raw = body_path.read_bytes() if body_path.exists() else b''
+                      success = process.returncode == 0 and result['http'] == 200
+                      if name == 'www':
+                          result['next_data'] = bool(re.search(rb'<script\b[^>]*\bid=[\x22\x27]__NEXT_DATA__[\x22\x27]', raw))
+                          result['usable'] = success and result['next_data']
+                      else:
+                          try:
+                              data = json.loads(raw)
+                              result['json_valid'] = True
+                          except (ValueError, UnicodeError):
+                              data = None
+                              result['json_valid'] = False
+                          if name == 'games' and isinstance(data, dict):
+                              leagues = data.get('leagues')
+                              valid = isinstance(leagues, list) and all(isinstance(l, dict) and isinstance(l.get('games'), list) for l in leagues)
+                              if valid:
+                                  result['leagues'] = len(leagues)
+                                  result['matches'] = sum(len(l['games']) for l in leagues)
+                                  result['argentina_liga_profesional'] = sum(len(l['games']) for l in leagues if l.get('id') == 'hc')
+                                  result['usable'] = success and result['matches'] > 0
+                          elif isinstance(data, dict):
+                              game = data.get('game')
+                              if isinstance(game, dict):
+                                  teams = game.get('teams') or []
+                                  events = game.get('events') or []
+                                  result.update(id=game.get('id'), teams=[t.get('name') for t in teams if isinstance(t, dict)],
+                                                status=game.get('status'), scores=game.get('scores'))
+                                  result['regulation'] = [e.get('scores') for e in events if isinstance(e, dict) and e.get('name') == 'Fin de los 90 minutos']
+                                  result['penalties_stages'] = [e.get('scores') for e in events if isinstance(e, dict) and (e.get('name') == 'Penales' or e.get('is_penalties_stage') is True)]
+                                  result['penalties'] = game.get('penalties')
+                                  result['usable'] = success and game.get('id') == name and len(result['teams']) == 2 and isinstance(game.get('status'), dict)
+                  except subprocess.TimeoutExpired:
+                      result['error'] = 'Diagnostic process exceeded 35 seconds'
+                  results.append(result)
+                  print(json.dumps(result, ensure_ascii=True))
+
+          daily_ok = results[0]['usable']
+          game_ok = any(r['usable'] for r in results[1:3])
+          conclusion = 'GITHUB_OK' if daily_ok and game_ok else 'GITHUB_PARTIAL' if daily_ok else 'GITHUB_BLOCKED'
+          print('CONCLUSION: ' + conclusion)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
+              summary.write('Promiedos connectivity: **' + conclusion + '**\n\n')
+              summary.write('Runner: ubuntu-latest. Four requests, no retries, 30 s maximum each. No secrets or response artifacts.\n\n')
+              summary.write('```json\n' + json.dumps(results, ensure_ascii=True, indent=2).replace('```', '\\u0060\\u0060\\u0060') + '\n```\n')
