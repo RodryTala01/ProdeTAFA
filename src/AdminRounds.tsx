@@ -12,6 +12,7 @@ type RoundSummary = { id: number; name: string; status: string; matchCount: numb
 type TeamData = { id: string | null; name: string; logoUrl: string | null };
 type StoredMatch = {
   id: number;
+  provider?: string;
   providerFixtureId: string;
   competitionName: string | null;
   competitionLogoUrl: string | null;
@@ -24,6 +25,7 @@ type StoredMatch = {
 };
 type RoundDetail = RoundSummary & { matches: StoredMatch[] };
 type Fixture = {
+  provider?: string;
   providerFixtureId: string;
   kickoffAt: string;
   status: string;
@@ -148,11 +150,12 @@ export default function AdminRounds() {
     if (!selected) return;
     setSyncing(true); setError(''); setSuccess('');
     try {
-      const data = await api<{ updated: number; finalized: number; calculated: number; requestCount: number }>(
+      const data = await api<{ updated: number; finalized: number; calculated: number; requestCount: number; warnings?: string[] }>(
         `/api/admin/sync-round/${selected.id}`,
         { method: 'POST', body: '{}' },
       );
-      setSuccess(`Resultados actualizados: ${data.updated} partidos, ${data.finalized} finalizados y ${data.calculated} pronósticos recalculados. Se usaron ${data.requestCount} consulta${data.requestCount === 1 ? '' : 's'} a API-Football.`);
+      if (data.warnings?.length) setError(data.warnings.join(' '));
+      setSuccess(`Resultados actualizados: ${data.updated} partidos, ${data.finalized} finalizados y ${data.calculated} pronósticos recalculados. Se usaron ${data.requestCount} consulta${data.requestCount === 1 ? '' : 's'} al proveedor.`);
       setRankingRefresh((value) => value + 1);
       await loadRounds(selected.id);
     } catch (caught) {
@@ -182,7 +185,7 @@ export default function AdminRounds() {
       setFixtures([...data.fixtures].sort((a,b) => Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt)));
       setHasSearched(true);
       setSuccess(data.fixtures.length
-        ? `${data.fixtures.length} partidos encontrados. Se usaron ${data.requestCount} consultas a API-Football.`
+        ? `${data.fixtures.length} partidos encontrados. Se usaron ${data.requestCount} consultas al proveedor.`
         : `No se encontraron partidos en ese rango. Se usaron ${data.requestCount} consultas.`);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudieron buscar partidos');
@@ -229,7 +232,7 @@ export default function AdminRounds() {
     );
   }, [fixtures, searchText]);
 
-  const addedFixtureIds = new Set(selected?.matches.map((match) => match.providerFixtureId) ?? []);
+  const addedFixtureIds = new Set(selected?.matches.map((match) => `${match.provider ?? 'api-football'}:${match.providerFixtureId}`) ?? []);
   const isDraft = selected?.status === 'draft';
   const isOpen = selected?.status === 'open';
   const isFinished = selected?.status === 'finished';
@@ -297,6 +300,7 @@ export default function AdminRounds() {
             {isDraft && rounds.some(round => round.status === 'open' && round.id !== selected.id) && <p className="alert">Ya hay una Fecha abierta. Cerrala antes de publicar otra.</p>}
             {isDraft && selected.matches.length < 12 && (
               <section className="card fixture-search-card">
+                <p>Datos de partidos: <a href="https://www.promiedos.com.ar/" target="_blank" rel="noreferrer">Promiedos</a></p>
                 <div className="section-heading"><div><h2>Buscar partidos reales</h2><p>Elegí hasta 7 días. Los próximos partidos aparecen primero.</p></div></div>
                 <form className="fixture-search-form" onSubmit={searchMatches}>
                   <label><span>Desde</span><input ref={searchStart} type="date" value={searchFrom} onChange={(event) => changeSearchFrom(event.target.value)} required /></label>
@@ -310,7 +314,7 @@ export default function AdminRounds() {
                     <p className="fixture-results-count">{filteredFixtures.length} de {fixtures.length} partidos</p>
                     <div className="fixture-list">
                       {filteredFixtures.map((fixture) => {
-                        const alreadyAdded = addedFixtureIds.has(fixture.providerFixtureId);
+                        const alreadyAdded = addedFixtureIds.has(`${fixture.provider ?? 'api-football'}:${fixture.providerFixtureId}`);
                         return (
                           <article className="fixture-card" key={fixture.providerFixtureId}>
                             <div className="fixture-meta">
@@ -335,7 +339,8 @@ export default function AdminRounds() {
 
             {selected.matches.length > 0 && (
               <section className="card selected-matches">
-                <div className="section-heading"><h2>Partidos agregados</h2><span>{isDraft ? 'Ordenados por horario' : 'Resultados desde API-Football'}</span></div>
+                {selected.matches.some(m => m.provider === 'promiedos') && <p>Datos de partidos: <a href="https://www.promiedos.com.ar/">Promiedos</a></p>}
+                <div className="section-heading"><h2>Partidos agregados</h2><span>{isDraft ? 'Ordenados por horario' : 'Resultados del proveedor'}</span></div>
                 <div className="stored-match-list">
                   {selected.matches.map((match, index) => (
                     <div className="stored-match" key={match.id}>

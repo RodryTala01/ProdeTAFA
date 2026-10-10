@@ -1,3 +1,4 @@
+import {manualResultSql, originalResultProvider} from './result-source';
 import { recalculateRoundScores } from './scoring';
 import { predictionHistory } from './prediction-history';
 
@@ -15,6 +16,7 @@ type MatchRow = {
   id: number;
   round_id: number;
   provider: string;
+  manual_result?: number;
   provider_fixture_id: string;
   competition_name: string | null;
   home_team_provider_id: string | null;
@@ -118,7 +120,7 @@ function validateTeam(teamId: string | null | undefined, match: MatchRow) {
 
 async function getRoundMatches(roundId: number, env: Env) {
   const result = await env.DB.prepare(
-    `SELECT id, round_id, provider, provider_fixture_id, competition_name,
+    `SELECT id, round_id, provider, ${manualResultSql('matches')} AS manual_result, provider_fixture_id, competition_name,
             home_team_provider_id, home_team_name,
             away_team_provider_id, away_team_name,
             kickoff_at, status, match_type,
@@ -204,7 +206,7 @@ async function getCorrectionsData(request: Request, env: Env, roundId: number) {
       kickoffAt: match.kickoff_at,
       status: match.status,
       matchType: match.match_type,
-      manualResult: match.provider === 'manual',
+      manualResult: Boolean(match.manual_result),
       home: { id: match.home_team_provider_id, name: match.home_team_name },
       away: { id: match.away_team_provider_id, name: match.away_team_name },
       result: {
@@ -318,9 +320,9 @@ async function overrideResult(request: Request, env: Env, matchId: number) {
     }
   }
 
-  await env.DB.prepare(
+  const update = env.DB.prepare(
     `UPDATE matches SET
-       provider = 'manual', status = ?, elapsed_minutes = NULL,
+       status = ?, elapsed_minutes = NULL,
        home_score_current = ?, away_score_current = ?,
        home_score_regulation = ?, away_score_regulation = ?,
        winning_team_provider_id = ?, qualified_team_provider_id = ?,
@@ -339,27 +341,29 @@ async function overrideResult(request: Request, env: Env, matchId: number) {
     wentToPenalties ? 1 : 0,
     isVoid ? 1 : 0,
     matchId,
-  ).run();
+  );
 
-  const calculated = await recalculateRoundScores(match.round_id, env);
+
   const after = {
     roundId: match.round_id,
     reason,
-    provider: 'manual',
+    provider: match.provider,
     status,
     homeScore,
     awayScore,
     winningTeamId,
     wentToPenalties,
     isVoid,
-    calculated,
+
   };
 
-  await env.DB.prepare(
+  const audit = env.DB.prepare(
     `INSERT INTO audit_log
       (actor_user_id, action, entity_type, entity_id, before_json, after_json)
      VALUES (?, 'match.result_override', 'match', ?, ?, ?)`,
-  ).bind(auth.user!.id, String(matchId), JSON.stringify(before), JSON.stringify(after)).run();
+  ).bind(auth.user!.id, String(matchId), JSON.stringify(before), JSON.stringify(after));
+  await env.DB.batch([update, audit]);
+  const calculated = await recalculateRoundScores(match.round_id, env);
 
   return json({ ok: true, calculated, result: after });
 }
@@ -369,13 +373,13 @@ async function resetManualResult(request: Request, env: Env, matchId: number) {
   if (auth.response) return auth.response;
 
   const match = await env.DB.prepare(
-    `SELECT id, round_id, provider, provider_fixture_id, status,
+    `SELECT id, round_id, provider, ${manualResultSql('matches')} AS manual_result, provider_fixture_id, status,
             home_score_regulation, away_score_regulation,
             winning_team_provider_id, went_to_penalties, is_void
      FROM matches WHERE id = ? LIMIT 1`,
   ).bind(matchId).first<MatchRow>();
   if (!match) return error('Partido no encontrado', 404);
-  if (match.provider !== 'manual') return error('Este partido no tiene una corrección manual activa', 409);
+  if (!match.manual_result) return error('Este partido no tiene una corrección manual activa', 409);
 
   const body = await request.json().catch(() => null) as { reason?: string } | null;
   let reason: string;
@@ -395,25 +399,17 @@ async function resetManualResult(request: Request, env: Env, matchId: number) {
     isVoid: Boolean(match.is_void),
   };
 
-  await env.DB.prepare(
-    `UPDATE matches SET
-       provider = 'api-football',
-       result_finalized_at = NULL,
-       updated_at = datetime('now')
-     WHERE id = ?`,
-  ).bind(matchId).run();
-
-  await env.DB.prepare(
-    `INSERT INTO audit_log
-      (actor_user_id, action, entity_type, entity_id, before_json, after_json)
-     VALUES (?, 'match.result_override_reset', 'match', ?, ?, ?)`,
-  ).bind(
-    auth.user!.id,
-    String(matchId),
-    JSON.stringify(before),
-    JSON.stringify({ roundId: match.round_id, reason, provider: 'api-football' }),
-  ).run();
-
+  const provider = await originalResultProvider(env.DB, match);
+  if (!provider || !['api-football','promiedos'].includes(provider)) return error('No se pudo identificar el proveedor original. Requiere revisión.',409);
+  await env.DB.batch([
+    env.DB.prepare(`UPDATE matches SET provider=?, status='NS', elapsed_minutes=NULL,
+      home_score_current=NULL,away_score_current=NULL,home_score_regulation=NULL,away_score_regulation=NULL,
+      winning_team_provider_id=NULL,qualified_team_provider_id=NULL,went_to_extra_time=0,went_to_penalties=0,is_void=0,
+      result_finalized_at=NULL,last_synced_at=NULL,updated_at=datetime('now') WHERE id=?`).bind(provider,matchId),
+    env.DB.prepare(`DELETE FROM prediction_scores WHERE prediction_id IN (SELECT id FROM official_predictions WHERE match_id=?)`).bind(matchId),
+    env.DB.prepare(`INSERT INTO audit_log (actor_user_id,action,entity_type,entity_id,before_json,after_json)
+      VALUES (?,'match.result_override_reset','match',?,?,?)`).bind(auth.user!.id,String(matchId),JSON.stringify(before),JSON.stringify({roundId:match.round_id,reason,provider}))
+  ]);
   return json({ ok: true, message: 'Corrección manual desactivada. Actualizá resultados para recuperar el dato oficial.' });
 }
 

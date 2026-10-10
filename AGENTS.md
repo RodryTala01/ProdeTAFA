@@ -105,12 +105,16 @@ El nombre interno se conserva por compatibilidad. **No significa que el partido 
 
 ## Resultados y correcciones
 
-- Sincronizar automáticamente con API-Football y permitir actualización manual desde Admin.
+- Nuevos partidos: Promiedos adquirido exclusivamente desde GitHub Actions y leído por el Worker desde la caché aislada 0015. El cliente de red y descubrimiento X-VER viven fuera del Worker; API-Football se conserva para partidos legacy.
+- Caché de proveedor únicamente: ingesta autenticada sin escrituras deportivas, vencimiento explícito, snapshots antiguos rechazados. Sin datos frescos, solicitar adquisición y conservar resultados. Workflow de adquisición manual hasta autorizar programación; ver PROMIEDOS-CACHE.md.
+- Promiedos: horarios Buenos Aires convertidos explícitamente a UTC; resultado reglamentario desde etapa de 90 minutos. Ante datos ambiguos conservar estado y solicitar revisión.
+- Correcciones manuales conservan provider; auditoría existente registra activación/reset de forma atómica, sin migración.
+- Citar Promiedos en pantallas de fixtures/resultados.
 - API-Football Free: no usar `ids`; consultar `/fixtures?date=YYYY-MM-DD&timezone=America/Argentina/Buenos_Aires` y filtrar localmente por fixture ID.
 - Cron actual cada 10 minutos; consultar sólo días relevantes para no exceder cuota.
 - El admin puede corregir resultados manualmente con motivo obligatorio y auditoría.
 - Mientras una corrección manual esté activa, la API no debe pisarla.
-- `Volver a API-Football` deja el partido pendiente, limpia resultado/puntos derivados viejos y espera próxima sincronización oficial.
+- `Volver al proveedor` deja el partido pendiente, limpia resultado/puntos derivados viejos y espera próxima sincronización oficial.
 - El admin también puede editar excepcionalmente un pronóstico con motivo/auditoría.
 
 ## Ranking de fecha
@@ -326,6 +330,8 @@ Patrón conceptual indicado por el usuario:
 - CI debe aplicar todas las migraciones D1 locales antes de tests/build.
 
 ## Estado de migraciones
+
+- `0015_promiedos_cache.sql`: tabla aislada para fixtures/detalles de proveedor y solicitudes de adquisición. No modifica tablas deportivas. Pendiente de aplicación productiva.
 
 - `0001_initial.sql`: núcleo del Prode.
 - `0002_league_seasons.sql`: temporadas, fechas de Liga y participantes.

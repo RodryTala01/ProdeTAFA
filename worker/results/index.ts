@@ -1,3 +1,6 @@
+import {normalizePromiedosResult, PromiedosError} from '../promiedos';
+import {getCachedGame} from '../promiedos-cache';
+import {manualResultSql} from '../result-source';
 import {footballFixtures, FootballError} from '../football-api';
 import { recalculateRoundScores } from '../scoring';
 
@@ -29,6 +32,11 @@ type ApiFixture = {
 type StoredMatch = {
   id: number;
   provider_fixture_id: string;
+  provider: string;
+  home_team_provider_id: string;
+  away_team_provider_id: string;
+  home_team_name: string;
+  away_team_name: string;
   kickoff_at: string;
   status: string;
   result_finalized_at: string | null;
@@ -136,7 +144,7 @@ async function applyFixture(item: ApiFixture, matchId: number, env: Env) {
       went_to_extra_time = ?, went_to_penalties = ?, is_void = ?,
       result_finalized_at = CASE WHEN ? = 1 THEN COALESCE(result_finalized_at, datetime('now')) ELSE NULL END,
       last_synced_at = datetime('now'), updated_at = datetime('now')
-     WHERE id = ?`,
+     WHERE id = ? AND NOT ${manualResultSql('matches')}`,
   ).bind(
     item.fixture.date,
     status,
@@ -157,75 +165,90 @@ async function applyFixture(item: ApiFixture, matchId: number, env: Env) {
   return { finalized: final || isVoid };
 }
 
-export async function syncRoundResults(roundId: number, env: Env, onlyDates?: string[]) {
-  if (!env.FOOTBALL_API_KEY) throw new FootballError('Falta configurar FOOTBALL_API_KEY');
-
+export async function syncRoundResults(roundId: number, env: Env, onlyDates?: string[], eligibleIds?: number[]) {
   const rows = await env.DB.prepare(
-    `SELECT id, provider_fixture_id, kickoff_at, status, result_finalized_at
-     FROM matches
-     WHERE round_id = ? AND provider = 'api-football'
+    `SELECT id, provider_fixture_id, provider, kickoff_at, status, result_finalized_at,
+      home_team_provider_id, away_team_provider_id, home_team_name, away_team_name
+     FROM matches WHERE round_id = ? AND provider IN ('api-football','promiedos')
+       AND NOT ${manualResultSql('matches')}
      ORDER BY kickoff_at, id`,
   ).bind(roundId).all<StoredMatch>();
-
   const matches = rows.results ?? [];
-  if (matches.length === 0) throw new FootballError('La Fecha no tiene partidos de API-Football');
-
-  const localByFixture = new Map(matches.map((match) => [match.provider_fixture_id, match]));
-  const requestedDates = onlyDates?.length
-    ? Array.from(new Set(onlyDates))
-    : Array.from(new Set(matches.map((match) => calendarDateInArgentina(match.kickoff_at))));
-
-  let updated = 0;
-  let finalized = 0;
-  let requestCount = 0;
-
-  for (const date of requestedDates) {
-    const fixtures = await fetchFixturesForDate(date, env);
-    requestCount += 1;
-
-    for (const item of fixtures) {
-      const local = localByFixture.get(String(item.fixture.id));
-      if (!local) continue;
-      const applied = await applyFixture(item, local.id, env);
-      updated += 1;
-      if (applied.finalized) finalized += 1;
+  const legacy = matches.filter(m => m.provider !== 'promiedos');
+  const localByFixture = new Map(legacy.map(m => [m.provider_fixture_id, m]));
+  const requestedDates = legacy.length ? (onlyDates?.length ? [...new Set(onlyDates)] : [...new Set(legacy.map(m => calendarDateInArgentina(m.kickoff_at)))]) : [];
+  let updated = 0, finalized = 0;
+  const counter = {count: 0};
+  const warnings: string[] = [];
+  if (legacy.length && !env.FOOTBALL_API_KEY) warnings.push('API-Football legacy no está configurada.');
+  else for (const date of requestedDates) {
+    try {
+      counter.count++;
+      const fixtures = await fetchFixturesForDate(date, env);
+      for (const item of fixtures) {
+        const local = localByFixture.get(String(item.fixture.id));
+        if (!local) continue;
+        const applied = await applyFixture(item, local.id, env);
+        updated++; if (applied.finalized) finalized++;
+      }
+    } catch(e) { warnings.push(e instanceof FootballError ? e.message : 'API-Football no disponible.'); }
+  }
+  for (const m of matches.filter(m => m.provider === 'promiedos' && (!eligibleIds || eligibleIds.includes(m.id)))) {
+    try {
+      const game = await getCachedGame(m.provider_fixture_id, env.DB);
+      if (game.teams[0].id !== m.home_team_provider_id || game.teams[1].id !== m.away_team_provider_id) throw new PromiedosError('Identidad de equipos inconsistente');
+      const r = normalizePromiedosResult(game);
+      if (m.result_finalized_at && !r.final) throw new PromiedosError('Resultado final no confirmado');
+      if (LIVE_STATUSES.has(m.status) && r.status === 'NS') throw new PromiedosError('Estado regresivo no confirmado');
+      const update = env.DB.prepare(`UPDATE matches SET
+        kickoff_at = CASE WHEN julianday('now') < julianday(kickoff_at,'+1 minute') THEN ? ELSE kickoff_at END,
+        status=?, elapsed_minutes=?, home_score_current=?, away_score_current=?,
+        home_score_regulation=?, away_score_regulation=?, winning_team_provider_id=?, qualified_team_provider_id=?,
+        went_to_extra_time=?, went_to_penalties=?, is_void=0,
+        result_finalized_at=CASE WHEN ? THEN COALESCE(result_finalized_at,datetime('now')) ELSE NULL END,
+        last_synced_at=datetime('now'),updated_at=datetime('now')
+        WHERE id=? AND provider='promiedos' AND NOT ${manualResultSql('matches')}`).bind(
+        r.kickoffAt,r.status,r.elapsed,r.current?.[0]??null,r.current?.[1]??null,
+        r.regulation?.[0]??null,r.regulation?.[1]??null,r.winner,r.qualified,
+        Number(r.wentToExtra),Number(r.wentToPenalties),Number(r.final),m.id);
+      // Preserve all three final stages without adding columns or changing scoring.
+      // Repeated identical syncs do not append duplicate snapshots.
+      const snapshot = JSON.stringify({providerFixtureId:m.provider_fixture_id,regulation:r.regulation,
+        extraTime:r.extraTime,penalties:r.penalties,winner:r.winner,qualified:r.qualified});
+      const statements = [update];
+      if (r.final) statements.push(env.DB.prepare(`INSERT INTO audit_log(action,entity_type,entity_id,after_json)
+        SELECT 'match.promiedos_result','match',?,? WHERE changes()>0 AND COALESCE((
+          SELECT after_json FROM audit_log WHERE action='match.promiedos_result'
+            AND entity_type='match' AND entity_id=? ORDER BY id DESC LIMIT 1),'')<>?`)
+        .bind(String(m.id),snapshot,String(m.id),snapshot));
+      const [result] = await env.DB.batch(statements);
+      if (result.meta.changes) { updated++; if(r.final) finalized++; }
+    } catch (caught) {
+      const detail = caught instanceof PromiedosError ? caught.message : 'No se pudo leer la caché. Requiere revisión.';
+      warnings.push(`${m.home_team_name} - ${m.away_team_name}: ${detail}`);
     }
   }
-
-  const calculated = await recalculateRoundScores(roundId, env);
-  return { updated, finalized, calculated, requestCount, dates: requestedDates };
+  const calculated = updated ? await recalculateRoundScores(roundId, env) : 0;
+  return {updated, finalized, calculated, requestCount:counter.count, dates:requestedDates, warnings};
 }
 
 export async function syncEligibleRounds(env: Env) {
-  if (!env.FOOTBALL_API_KEY) return;
-
-  const eligible = await env.DB.prepare(
-    `SELECT round_id, kickoff_at
-     FROM matches
-     WHERE result_finalized_at IS NULL
-       AND round_id IN (SELECT id FROM rounds WHERE status = 'open')
-       AND (
-         status IN ('1H','HT','2H','ET','BT','P','LIVE') OR
-         (julianday(kickoff_at) <= julianday('now', '+10 minutes')
-          AND julianday(kickoff_at) >= julianday('now', '-4 hours'))
-       )
-     ORDER BY round_id, kickoff_at`,
-  ).all<{ round_id: number; kickoff_at: string }>();
-
-  const datesByRound = new Map<number, Set<string>>();
-  for (const row of eligible.results ?? []) {
-    const dates = datesByRound.get(row.round_id) ?? new Set<string>();
-    dates.add(calendarDateInArgentina(row.kickoff_at));
-    datesByRound.set(row.round_id, dates);
+  const eligible = await env.DB.prepare(`SELECT round_id, id, kickoff_at FROM matches
+    WHERE provider IN ('api-football','promiedos') AND NOT ${manualResultSql('matches')}
+      AND result_finalized_at IS NULL
+      AND round_id IN (SELECT id FROM rounds WHERE status='open')
+      AND (status IN ('1H','HT','2H','ET','BT','P','LIVE') OR
+        (julianday(kickoff_at)<=julianday('now','+10 minutes') AND julianday(kickoff_at)>=julianday('now','-4 hours')))
+    ORDER BY round_id,kickoff_at`).all<{round_id:number;id:number;kickoff_at:string}>();
+  const groups = new Map<number, {dates:Set<string>;ids:number[]}>();
+  for(const m of eligible.results??[]) {
+    const g=groups.get(m.round_id)??{dates:new Set<string>(),ids:[]};
+    g.dates.add(calendarDateInArgentina(m.kickoff_at));g.ids.push(m.id);groups.set(m.round_id,g);
   }
-
-  for (const [roundId, dates] of datesByRound) {
-    try {
-      await syncRoundResults(roundId, env, Array.from(dates));
-    } catch (caught) {
-      console.error('Scheduled result sync failed', roundId, caught instanceof FootballError ? caught.message : 'Error interno');
-    }
-  }
+  for(const [id,g] of groups) try {
+    const result = await syncRoundResults(id,env,[...g.dates],g.ids);
+    if(result.warnings.length) console.error('Scheduled result sync requires review',id,result.warnings);
+  } catch { console.error('Scheduled result sync failed',id); }
 }
 
 export async function handleResults(request: Request, env: Env): Promise<Response | null> {
