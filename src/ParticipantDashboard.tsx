@@ -49,7 +49,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
     });
     return () => controller.abort();
   }, [route, revision]);
-  return <main className="app-shell participant-shell">
+  return <main className={`app-shell participant-shell ${route === 'inicio' ? 'participant-shell--home' : ''}`}>
     <header className="topbar"><Brand /><details ref={menu} className="profile-menu" onKeyDown={event => { if (event.key === 'Escape' && menu.current) { menu.current.open = false; menu.current.querySelector('summary')?.focus(); } }}>
       <summary aria-label={`Menú de ${user.fullName}`}><span className="profile-name">{user.fullName}</span><ParticipantShield userId={user.id} name={user.fullName} decorative/></summary>
       <div className="profile-menu__items"><a href="#/club" onClick={() => { if (menu.current) menu.current.open = false; }}>Mi Club</a><button type="button" onClick={onLogout}><Icon name="logout" /> Cerrar sesión</button></div>

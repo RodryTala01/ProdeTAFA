@@ -1,8 +1,10 @@
-import {ParticipantShield,CompetitionImage} from './AssetImage';
+import {ParticipantShield,CompetitionImage,TeamShield} from './AssetImage';
 import { useEffect, useState } from 'react';
 import CompetitionList from './CompetitionList';
-import { competitionRows, predictionState, timeRemaining, type HomeData, type HomeRound } from './participant-home';
+import { competitionRows, homeCompetitions, predictionState, type HomeData, type HomeRound } from './participant-home';
 import { Icon } from './ui';
+import {competitionHref,phaseName} from './participant-competitions';
+import './participant-home.css';
 
 export function NextRound({ round }: { round: HomeRound | null }) {
   const [elapsed, setElapsed] = useState(0);
@@ -14,20 +16,16 @@ export function NextRound({ round }: { round: HomeRound | null }) {
   }, [round]);
   if (!round) return <section className="next-round"><span className="eyebrow">PRÓXIMA FECHA</span><h2>Todo al día</h2><p>Todavía no hay una próxima Fecha publicada.</p></section>;
   const now = Date.parse(round.serverNow) + elapsed;
-  const kickoff = Math.min(...round.matches.map(m => Date.parse(m.kickoffAt)));
-  const nextLock = Math.min(...round.matches.map(m => Date.parse(m.lockedAt)).filter(t => t > now));
-  const target = kickoff > now ? kickoff : nextLock;
-  const date = Number.isFinite(target) ? new Intl.DateTimeFormat('es-AR', {
-    timeZone: 'America/Argentina/Buenos_Aires', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
-  }).format(new Date(target)) : null;
-  return <section className="next-round">
-    <div className="section-kicker"><span className="eyebrow">PRÓXIMA FECHA</span><span className="status-badge status-badge--success">Abierta</span></div>
-    <h2>{round.name}</h2>
-    {date && <p>{kickoff > now ? 'Comienza' : 'Próximo cierre'}: {date} · Argentina</p>}
-    <p className="home-submission">{predictionState(round)}</p>
-    <div className="next-round__bottom"><div><small>{Number.isFinite(target) ? (kickoff > now ? 'Para el primer partido' : 'Para el próximo cierre') : 'Los partidos ya cerraron'}</small>{Number.isFinite(target) && <strong className="sport-number">{timeRemaining(target, now)}</strong>}</div>
-      <a className="button button--primary" href="#/pronosticos">{round.submitted || !Number.isFinite(nextLock) ? 'Ver pronóstico' : 'Cargar pronósticos'} <Icon name="arrow" /></a>
+  const target = Math.min(...round.matches.map(m => Date.parse(m.lockedAt)).filter(t => t > now));
+  const remaining = Math.max(0, Math.ceil((target-now)/1000));
+  const units = [Math.floor(remaining/86400),Math.floor(remaining%86400/3600),Math.floor(remaining%3600/60),remaining%60];
+  return <section className="home-hero">
+    <div className="home-hero__copy"><span className="eyebrow">PRÓXIMA</span><h1>{round.name}</h1>
+      <p className="home-submission">{predictionState(round)}</p>
+      <a className="button button--primary" href="#/pronosticos">{round.submitted || !Number.isFinite(target) ? 'Ver pronósticos' : 'Hacer mis pronósticos'} <Icon name="arrow" /></a>
     </div>
+    {Number.isFinite(target) ? <div className="home-countdown"><h2>Cierre de pronósticos</h2><p>Próximo partido · cada partido tiene su cierre</p><div className="home-clock">{units.map((value,i)=><div key={i}><strong>{String(value).padStart(2,'0')}</strong><small>{['Días','Horas','Minutos','Segundos'][i]}</small></div>)}</div><time dateTime={new Date(target).toISOString()}>{new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(target)} · Argentina</time></div>
+      : <div className="home-countdown"><h2>Pronósticos cerrados</h2><p>Podés consultar tu envío y los resultados disponibles.</p></div>}
   </section>;
 }
 
@@ -44,17 +42,41 @@ export function LeagueSummary({ data }: { data: HomeData }) {
   </section>;
 }
 
+
+function HomeHeading({title,href,label}:{title:string;href:string;label:string}) {return <div className="home-heading"><h2>{title}</h2><a href={href}>{label} <Icon name="arrow"/></a></div>;}
 export default function ParticipantHome({ name, data, userId }: { name: string; data: HomeData; userId?:string }) {
-  const rows = competitionRows(data);
-  return <>
-    <div className="reference-title"><div><span className="eyebrow">INICIO</span><h1>{name}<span className="accent-text">.</span></h1><p>{data.season?.division?.name ?? 'Tu próxima jugada empieza acá.'}</p></div><ParticipantShield name={name} userId={userId??data.league?.currentUserId} season={data.season?.seasonNumber} size="lg"/></div>
-    <div className="home-layout"><div>{!data.errors.includes('No pudimos cargar la próxima Fecha.') && <NextRound round={data.round} />}<section className="reference-section"><div className="section-heading"><h2>Competiciones</h2><a className="button button--ghost" href="#/competiciones">Ver todas <Icon name="arrow" /></a></div>
-      {rows.length ? <CompetitionList items={rows} /> : <p>Todavía no hay competiciones disponibles.</p>}
-    </section></div><aside className="home-aside"><LeagueSummary data={data} />
-      <section className="admin-notice"><h2>Avisos</h2><p>No hay avisos importantes.</p></section>
-    </aside></div>
-  </>;
+  const user=userId??data.league?.currentUserId??data.overview?.currentUserId??'';
+  const cards=homeCompetitions(data,user);
+  const mine=data.league?.standings.find(row=>row.userId===user);
+  const matches=[...(data.round?.matches??[])].filter(m=>m.home&&m.away).sort((a,b)=>Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt));
+  const results=[...(data.resultRound?.matches??[])].filter(m=>m.home&&m.away&&['FT','AET','PEN'].includes(m.status??'')&&!m.result?.isVoid&&m.result?.homeRegulation!=null&&m.result?.awayRegulation!=null).sort((a,b)=>Date.parse(b.kickoffAt)-Date.parse(a.kickoffAt)).slice(0,5);
+  return <div className="home-sports">
+    <div className="home-welcome"><span>{data.season?.name??'PRODE TAFA'}</span><span>{name}</span></div>
+    {!data.errors.includes('No pudimos cargar la próxima Fecha.')&&<NextRound round={data.round}/>}
+    <div className="home-main-grid"><section className="home-panel"><HomeHeading title="Partidos de la Fecha" href="#/pronosticos" label="Ver toda la Fecha"/>
+      {matches.length?<div className="home-fixtures">{matches.slice(0,5).map((m,i)=><article className="home-fixture" key={m.id??i}>
+        <time dateTime={m.kickoffAt}>{new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(m.kickoffAt))}</time>
+        <span className="home-team"><TeamShield name={m.home!.name} teamId={m.home!.id} logoUrl={m.home!.logoUrl} size="sm" decorative/><span>{m.home!.name}</span></span><small>VS</small>
+        <span className="home-team"><TeamShield name={m.away!.name} teamId={m.away!.id} logoUrl={m.away!.logoUrl} size="sm" decorative/><span>{m.away!.name}</span></span>
+        <a href="#/pronosticos" className="home-match-action">{m.isLocked?'Ver':'Pronosticar'}</a><small className="home-fixture-league">{m.competitionName}</small>
+      </article>)}</div>:<p className="home-empty">Los partidos aparecerán cuando haya una Fecha publicada.</p>}
+    </section><aside className="home-side"><section className="home-panel"><HomeHeading title="Tu posición" href={data.season?.division?competitionHref('LIGA_'+data.season.division.code,data.season.seasonNumber):'#/competiciones'} label="Ver Liga"/>
+      {mine?<><div className="home-position"><strong>{mine.position}°</strong><div><b>{mine.points}</b><span>Puntos</span></div><ParticipantShield name={name} userId={user} size="lg"/></div><p>{data.league?.competition.displayName} · {data.league?.provisional?'Provisional':'Puntaje definitivo'}</p></>:<p className="home-empty">Todavía no hay una posición disponible.</p>}
+    </section><section className="home-panel"><HomeHeading title="Últimos resultados" href="#/club/historial" label="Ver todos"/>
+      {results.length?<><small>{data.resultRound?.name} · resultado de 90 minutos</small><div className="home-results">{results.map((m,i)=><div key={m.id??i}><div><TeamShield name={m.home!.name} logoUrl={m.home!.logoUrl} size="sm"/><strong>{m.result!.homeRegulation} – {m.result!.awayRegulation}</strong><TeamShield name={m.away!.name} logoUrl={m.away!.logoUrl} size="sm"/></div><small>{m.home!.name} · {m.away!.name}</small></div>)}</div></>:<p className="home-empty">Todavía no hay resultados definitivos disponibles.</p>}
+    </section></aside></div>
+    <section className="home-panel"><HomeHeading title="Competiciones" href="#/competiciones" label="Ver todas"/>
+      {cards.length?<div className="home-cups">{cards.map(({competition:c,status,phase,sides,context})=><a className={'home-cup '+(c.family==='LEAGUE'?'home-cup--league':'')} href={competitionHref(c.code,data.season?.seasonNumber)} key={c.id}>
+        <CompetitionImage code={c.code} name={c.displayName} season={data.season?.seasonNumber} variant="trophy" size="lg" decorative/><h3>{c.code==='LIGA_A'?'Primera División':c.code==='LIGA_B'?'Segunda División':c.displayName}</h3>
+        {c.code===data.league?.competition.code&&mine?<p><strong>{mine.position}° puesto</strong><br/>{mine.points} pts</p>:<>
+          {sides.length===2?<div className="home-opponents">{sides.map((side,i)=><div className="home-cup-side" key={i}>{side.length?side.map(m=><span key={m.userId}><ParticipantShield userId={m.userId} name={m.fullName} season={data.season?.seasonNumber} size="sm" decorative/><small>{m.fullName}</small></span>):<small>Por definir</small>}</div>)}<b>VS</b></div>:context?.kind==='DUO_SURVIVAL'&&context.partner?<p>Con {context.partner.fullName}</p>:null}
+          <p className={status==='Eliminado'?'home-eliminated':''}>{status}</p>{phase&&<small>{phaseName(phase)}</small>}
+        </>
+      }</a>)}</div>:<p className="home-empty">Tus competiciones aparecerán cuando tengas una participación registrada.</p>}
+    </section>
+  </div>;
 }
+
 
 export function ParticipantCompetitions({ data }: { data: HomeData }) {
   const rows = competitionRows(data);

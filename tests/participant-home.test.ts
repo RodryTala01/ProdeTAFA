@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { competitionRows, emptyHome, loadHome, predictionState, timeRemaining, type HomeData, type HomeRound } from '../src/participant-home';
+import { homeCompetitions, competitionRows, emptyHome, loadHome, predictionState, timeRemaining, type HomeData, type HomeRound } from '../src/participant-home';
 import { participantRoute } from '../src/participant-navigation';
 import { ParticipantNavigation } from '../src/ParticipantDashboard';
 import ParticipantHome, { HomeErrors, NextRound, ParticipantClub, ParticipantCompetitions } from '../src/ParticipantHome';
@@ -89,5 +89,39 @@ describe('Participante: Home y navegación', () => {
     expect(main).not.toContain('PwaInstallPrompt'); expect(main).toContain('serviceWorker');
     const shell = readFileSync('src/ParticipantDashboard.tsx','utf8');
     expect(shell).toContain('<ParticipantHistory key={route} user={user}'); expect(shell).toMatch(/<PredictionHistoryBrowser own\s*\/>/); expect(shell).toContain('onClick={onLogout}');
+  });
+});
+
+
+describe('Home deportiva: participación real', () => {
+  const s = {
+    id:1, seasonNumber:33, name:'Temporada actual', status:'active',
+    competitions:['LIGA_A','LIGA_B','COPA_A','COPA_B','COPA_DUOS','PROMOCION'].map((code,i)=>({id:i+1,code,displayName:code,family:code.startsWith('LIGA')?'LEAGUE':'CUP',status:'active',divisionId:null})),
+    stages:[{id:1,competitionId:5,name:'Semifinal',code:'SF',type:'KNOCKOUT',sequence:1,status:'active'}],
+    members:[['me',10,3],['me',20,5],['partner',20,5],['rival1',30,5],['rival2',30,5]].map(([userId,entryId,competitionId])=>({userId:String(userId),entryId:Number(entryId),competitionId:Number(competitionId),fullName:String(userId),status:'active',entryType:'DUO',validFrom:1,validTo:null})),
+    people:[],links:[],results:[],history:[],segments:[],
+    encounters:[{id:1,stageId:1,roundId:7,entryAId:20,entryBId:30,scoreA:null,scoreB:null,status:'pending',winnerEntryId:null,confirmedAt:null,resolution:null,slot:'SF1'}],
+  };
+  const input:HomeData={...data,overview:{currentUserId:'me',editions:[],season:s}};
+  it('muestra sólo división propia, Copa registrada y no Promoción sin cruce',()=>{
+    expect(homeCompetitions(input,'me').map(c=>c.competition.code)).toEqual(['LIGA_B','COPA_A','COPA_DUOS']);
+  });
+  it('Dúos conserva cuatro IDs reales y la vigencia histórica de cada integrante',()=>{
+    const card=homeCompetitions(input,'me').find(c=>c.competition.code==='COPA_DUOS')!;
+    expect(card.sides.map(side=>side.map(m=>m.userId))).toEqual([['me','partner'],['rival1','rival2']]);
+    const replaced={...s,members:[...s.members.map(m=>m.userId==='partner'?{...m,validTo:7}:m),{...s.members[2],userId:'new',fullName:'new',validFrom:7}]};
+    expect(homeCompetitions({...input,overview:{...input.overview!,season:replaced}},'me').find(c=>c.competition.code==='COPA_DUOS')!.sides[0].map(m=>m.userId)).toEqual(['me','new']);
+    const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Participante',userId:'me',data:input}));
+    expect(html).toContain('rival1');expect(html).toContain('rival2');expect(html).toContain('partner');
+  });
+  it('no inventa eliminación al perder un marcador sin confirmación',()=>{
+    expect(homeCompetitions(input,'me').find(c=>c.competition.code==='COPA_A')?.status).toBe('Participando');
+    const eliminated={...s,members:s.members.map(m=>m.competitionId===3?{...m,status:'eliminated'}:m)};
+    expect(homeCompetitions({...input,overview:{...input.overview!,season:eliminated}},'me').find(c=>c.competition.code==='COPA_A')?.status).toBe('Eliminado');
+  });
+  it('el countdown usa el cierre real y no inventa un límite sin partidos',()=>{
+    const html=renderToStaticMarkup(createElement(NextRound,{round}));
+    expect(html).toContain('2030-01-02T00:01:00.000Z');
+    expect(renderToStaticMarkup(createElement(NextRound,{round:{...round,matches:[]}}))).not.toContain('home-clock');
   });
 });
