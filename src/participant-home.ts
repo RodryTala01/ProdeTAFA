@@ -11,7 +11,7 @@ export type CurrentSeason = {
 type Prediction = { homeScore: number | null; awayScore: number | null; extraTeamId: string | null };
 export type HomeRound = {
   id: number; name: string; status: string; submitted: boolean; serverNow: string;
-  matches: { id?: number; status?: string; competitionName?: string; home?: {id: string; name: string; logoUrl?: string}; away?: {id: string; name: string; logoUrl?: string}; result?: {homeRegulation: number|null; awayRegulation: number|null; isVoid: boolean}; kickoffAt: string; lockedAt: string; isLocked: boolean; prediction: Prediction; officialPrediction: Prediction }[];
+  matches: { score?: {points:number;extraPoints:number;provisional:boolean}|null; id?: number; status?: string; competitionName?: string; home?: {id: string; name: string; logoUrl?: string}; away?: {id: string; name: string; logoUrl?: string}; result?: {homeRegulation: number|null; awayRegulation: number|null; isVoid: boolean}; kickoffAt: string; lockedAt: string; isLocked: boolean; prediction: Prediction; officialPrediction: Prediction }[];
 };
 export type LeagueSummary = {
   competition: { code: string; displayName: string };
@@ -47,12 +47,6 @@ export async function loadHome(signal?: AbortSignal): Promise<HomeData> {
   }
   else data.errors.push('No pudimos cargar la próxima Fecha.');
   const tasks: Promise<void>[] = [];
-  if (data.round && !data.round.matches.some(m => ['FT','AET','PEN'].includes(m.status??'') && m.result?.homeRegulation != null && m.result?.awayRegulation != null)) tasks.push(
-    read<{rounds: {id:number;status:string}[]}>('/api/participant/rounds', signal).then(async list => {
-      const latest = (list.rounds??[]).find(r=>r.status==='finished');
-      if (latest) data.resultRound = (await read<{round:HomeRound}>(`/api/participant/round?roundId=${latest.id}`,signal)).round;
-    }).catch(()=>{data.errors.push('No pudimos cargar los últimos resultados.');}),
-  );
   if (data.season) tasks.push(read<Overview>(`/api/competition-engine/overview?season=${data.season.seasonNumber}`, signal)
     .then(value => { data.overview = value; })
     .catch(() => { data.errors.push('No pudimos cargar tus cruces.'); }));

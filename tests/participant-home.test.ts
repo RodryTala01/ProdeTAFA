@@ -125,3 +125,14 @@ describe('Home deportiva: participación real', () => {
     expect(renderToStaticMarkup(createElement(NextRound,{round:{...round,matches:[]}}))).not.toContain('home-clock');
   });
 });
+
+
+it('Últimos resultados muestra sólo la Fecha actual, pronóstico oficial y puntos persistidos',()=>{
+  const match={...round.matches[0],id:1,status:'FT',home:{id:'h',name:'Local real'},away:{id:'a',name:'Visitante real'},result:{homeRegulation:2,awayRegulation:1,isVoid:false},prediction:{homeScore:9,awayScore:9,extraTeamId:null},officialPrediction:{homeScore:2,awayScore:1,extraTeamId:null},score:{points:3,extraPoints:0,provisional:false}};
+  const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Persona',data:{...emptyHome,round:{...round,matches:[match]},resultRound:{...round,id:99,name:'Fecha anterior',matches:[{...match,home:{id:'other',name:'Otro partido anterior'}}]}}}));
+  expect(html).toContain('Tu pronóstico:');expect(html).toContain('2 – 1');expect(html).toContain('3 pts');expect(html).not.toContain('9 – 9');expect(html).not.toContain('Otro partido anterior');
+});
+it('no busca resultados de otra Fecha cuando la actual todavía no tiene finales',async()=>{
+  const fetcher=vi.fn(async(url:string)=>Response.json(url.includes('current')?{season:null}:url.includes('competition-contexts')?{contexts:[]}:{round}));vi.stubGlobal('fetch',fetcher);
+  const home=await loadHome();expect(home.resultRound?.id).toBe(round.id);expect(fetcher.mock.calls.map(c=>c[0])).not.toContain('/api/participant/rounds');
+});
