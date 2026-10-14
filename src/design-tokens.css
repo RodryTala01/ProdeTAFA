@@ -43,3 +43,6 @@
   --transition: 140ms ease;
   --shadow-floating: 0 8px 24px #0006;
 }
+
+/* Approved participant Home palette; scoped by participant-shell--home. */
+:root { --home-fluor: #d0fa16; --home-violet: #c768ff; --home-violet-solid: #45216b; }

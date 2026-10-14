@@ -13,4 +13,4 @@ Para preservar assets históricos, registrar la temporada y el ID/code en `histo
 
 No registrar rutas a archivos inexistentes. Agregar el archivo y su entrada al registro en el mismo cambio. Vista manual exclusivamente DEV: `/design?view=assets`. El logo TAFA en las muestras de participante/equipo sólo demuestra carga de imagen; no se asigna a ninguna persona/equipo.
 
-Faltan los escudos personales y los logos/trofeos propios de Liga A/B, Copa A/B, Total, Dúos, Campeones, Papa y Promoción. Se mantienen fallbacks hasta recibirlos. No se generaron ni descargaron imágenes.
+Se integraron los nueve trofeos originales suministrados y 11 escudos con UUID verificado. Ver HOME-ASSETS.md para asociaciones y archivos pendientes de identificación. Los 53 escudos sin asociación segura conservan fallback; no se adivinan identidades. El logo suministrado coincide byte a byte con public/brand/tafa.png.
