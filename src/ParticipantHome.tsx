@@ -44,6 +44,20 @@ export function LeagueSummary({ data }: { data: HomeData }) {
 
 
 function HomeHeading({title,href,label}:{title:string;href:string;label:string}) {return <div className="home-heading"><h2>{title}</h2><a href={href}>{label} <Icon name="arrow"/></a></div>;}
+const HOME_FINAL_STATUSES = new Set(['FT','AET','PEN']);
+const HOME_LIVE_STATUSES = new Set(['1H','HT','2H','ET','BT','P','LIVE']);
+function homeFixtureState(match: HomeRound['matches'][number]) {
+  const isFinal = HOME_FINAL_STATUSES.has(match.status ?? '');
+  const isLive = HOME_LIVE_STATUSES.has(match.status ?? '');
+  const started = isFinal || isLive;
+  const hasPrediction = match.officialPrediction.homeScore != null && match.officialPrediction.awayScore != null;
+  const prediction = hasPrediction ? `${match.officialPrediction.homeScore} – ${match.officialPrediction.awayScore}` : null;
+  const home = isFinal ? (match.result?.homeRegulation ?? match.result?.homeCurrent) : match.result?.homeCurrent;
+  const away = isFinal ? (match.result?.awayRegulation ?? match.result?.awayCurrent) : match.result?.awayCurrent;
+  const result = started && home != null && away != null ? `${home} – ${away}` : null;
+  const action = started || match.isLocked ? 'Ver' : hasPrediction ? 'Modificar' : 'Pronosticar';
+  return { isFinal, isLive, started, prediction, result, action };
+}
 export default function ParticipantHome({ name, data, userId }: { name: string; data: HomeData; userId?:string }) {
   const user=userId??data.league?.currentUserId??data.overview?.currentUserId??'';
   const cards=homeCompetitions(data,user);
@@ -55,12 +69,22 @@ export default function ParticipantHome({ name, data, userId }: { name: string; 
     <div className="home-welcome"><span>{data.season?.name??'PRODE TAFA'}</span><span>{name}</span></div>
     {!data.errors.includes('No pudimos cargar la próxima Fecha.')&&<NextRound round={data.round}/>}
     <div className="home-main-grid"><section className="home-panel"><HomeHeading title="Partidos de la Fecha" href="#/pronosticos" label="Ver toda la Fecha"/>
-      {matches.length?<div className="home-fixtures">{matches.slice(0,5).map((m,i)=><article className="home-fixture" key={m.id??i}>
-        <time dateTime={m.kickoffAt}>{new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(m.kickoffAt))}</time>
-        <span className="home-team"><TeamShield name={m.home!.name} teamId={m.home!.id} logoUrl={m.home!.logoUrl} size="sm" decorative/><span>{m.home!.name}</span></span><small>VS</small>
-        <span className="home-team"><TeamShield name={m.away!.name} teamId={m.away!.id} logoUrl={m.away!.logoUrl} size="sm" decorative/><span>{m.away!.name}</span></span>
-        <a href="#/pronosticos" className="home-match-action">{m.isLocked?'Ver':'Pronosticar'}</a><small className="home-fixture-league">{m.competitionName}</small>
-      </article>)}</div>:<p className="home-empty">Los partidos aparecerán cuando haya una Fecha publicada.</p>}
+      {matches.length?<div className="home-fixtures">{matches.slice(0,5).map((m,i)=>{
+        const state=homeFixtureState(m);
+        return <article className={`home-fixture ${state.isLive?'home-fixture--live':state.isFinal?'home-fixture--final':''}`} key={m.id??i}>
+          <time dateTime={m.kickoffAt}>{new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(m.kickoffAt))}</time>
+          <span className="home-team"><TeamShield name={m.home!.name} teamId={m.home!.id} logoUrl={m.home!.logoUrl} size="sm" decorative/><span>{m.home!.name}</span></span>
+          <span className="home-match-center">
+            {state.started
+              ? <><strong className="home-real-score">{state.result??'— – —'}</strong><span className={state.isLive?'home-match-status home-match-status--live':'home-match-status home-match-status--final'}>{state.isLive?'EN VIVO':'FINAL'}</span>{state.prediction&&<small>Tu pronóstico: {state.prediction}</small>}{state.isFinal&&m.score&&<small className="home-match-points">{m.score.points>0?'+':''}{m.score.points} pts</small>}</>
+              : state.prediction
+                ? <><strong className="home-prediction-score">{state.prediction}</strong><small>Tu pronóstico</small></>
+                : <span className="home-versus">VS</span>}
+          </span>
+          <span className="home-team"><TeamShield name={m.away!.name} teamId={m.away!.id} logoUrl={m.away!.logoUrl} size="sm" decorative/><span>{m.away!.name}</span></span>
+          <a href="#/pronosticos" className="home-match-action">{state.action}</a><small className="home-fixture-league">{m.competitionName}</small>
+        </article>;
+      })}</div>:<p className="home-empty">Los partidos aparecerán cuando haya una Fecha publicada.</p>}
     </section><aside className="home-side"><section className="home-panel"><HomeHeading title="Tu posición" href={data.season?.division?competitionHref('LIGA_'+data.season.division.code,data.season.seasonNumber):'#/competiciones'} label="Ver Liga"/>
       {mine?<><div className="home-position"><strong>{mine.position}°</strong><div><b>{mine.points}</b><span>Puntos</span></div><ParticipantShield name={name} userId={user} size="lg"/></div><p>{data.league?.competition.displayName} · {data.league?.provisional?'Provisional':'Puntaje definitivo'}</p></>:<p className="home-empty">Todavía no hay una posición disponible.</p>}
     </section><section className="home-panel"><HomeHeading title="Últimos resultados" href={resultRound?.status==='finished'?`#/club/historial/${resultRound.id}`:'#/pronosticos'} label="Ver Fecha"/>
