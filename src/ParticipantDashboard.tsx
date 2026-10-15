@@ -1,7 +1,7 @@
 import ParticipantAllTime from './ParticipantAllTime';
 import {ParticipantShield} from './AssetImage';
 import { useEffect, useRef, useState } from 'react';
-import { Brand, Icon } from './ui';
+import { Icon } from './ui';
 import ParticipantRound from './ParticipantRound';
 import ParticipantHistory from './ParticipantHistory';
 import ParticipantClubPage, { HeadToHead } from './ParticipantClub';
@@ -50,12 +50,11 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
     return () => controller.abort();
   }, [route, revision]);
   return <main className={`app-shell participant-shell ${route === 'inicio' ? 'participant-shell--home' : ''}`}>
-    <header className="topbar"><Brand /><details ref={menu} className="profile-menu" onKeyDown={event => { if (event.key === 'Escape' && menu.current) { menu.current.open = false; menu.current.querySelector('summary')?.focus(); } }}>
-      <summary aria-label={`Menú de ${user.fullName}`}><span className="profile-name">{user.fullName}</span><ParticipantShield userId={user.id} name={user.fullName} decorative/></summary>
+    <header className="topbar participant-header"><a className="participant-brand" href="#/inicio" aria-label="Prode TAFA · Inicio"><img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="40" height="64"/><span>Prode <strong>TAFA</strong></span></a><ParticipantNavigation route={route} /><details ref={menu} className="profile-menu" onKeyDown={event => { if (event.key === 'Escape' && menu.current) { menu.current.open = false; menu.current.querySelector('summary')?.focus(); } }}>
+      <summary aria-label={`Menú de ${user.fullName}`}><span className="profile-name">{user.fullName}</span><span className="participant-profile-avatar"><ParticipantShield userId={user.id} name={user.fullName} decorative/></span><svg className="profile-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></summary>
       <div className="profile-menu__items"><a href="#/club" onClick={() => { if (menu.current) menu.current.open = false; }}>Mi Club</a><button type="button" onClick={onLogout}><Icon name="logout" /> Cerrar sesión</button></div>
     </details></header>
     <div className={`dashboard participant-dashboard ${route === 'pronosticos' ? 'participant-dashboard--predictions' : ''}`}>
-      <ParticipantNavigation route={route} />
       <section ref={content} className="participant-content" tabIndex={-1} aria-label="Contenido del participante">
         {route === 'pronosticos' ? <><div className="section-heading"><h2>Pronósticos</h2><a className="button button--ghost" href="#/club/historial">Ver historial</a></div><ParticipantRound /></>
           : route === 'club/historicos' ? <ParticipantAllTime userId={user.id}/>

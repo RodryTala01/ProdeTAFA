@@ -47,3 +47,29 @@
   .participant-shell .sports-list__result { grid-column: 2; display: flex; justify-content: space-between; max-width: none; }
   .participant-shell .competition-emblem { width: 32px; height: 40px; }
 }
+
+/* One participant header for every route; Admin retains its own shell. */
+.participant-shell .participant-header { display:grid; grid-template-columns:minmax(180px,1fr) auto minmax(80px,1fr); gap:24px; position:sticky; top:0; background:var(--bg); border-bottom:1px solid var(--border); padding-block:8px; }
+.participant-brand { display:flex; align-items:center; gap:12px; color:var(--text); text-decoration:none; width:fit-content; white-space:nowrap; font:700 1.8rem var(--font-display); }
+.participant-brand img { width:38px; height:60px; object-fit:contain; }
+.participant-brand strong { color:var(--home-fluor); }
+.participant-header .participant-nav { margin:0; border:0; gap:4px; align-self:stretch; }
+.participant-header .participant-nav a { padding:12px 10px; }
+.participant-header .participant-nav a[aria-current="page"] { color:var(--home-fluor); border-bottom-color:var(--home-fluor); }
+.participant-header .profile-menu { justify-self:end; }
+.participant-header .profile-name { display:none; }
+.participant-profile-avatar { display:grid; place-items:center; width:44px; height:44px; border:1px solid var(--home-violet); border-radius:50%; color:var(--home-violet); flex-shrink:0; }
+.participant-profile-avatar .asset-image { width:30px; height:32px; }
+.profile-menu[open] .profile-chevron { transform:rotate(180deg); }
+.participant-header a:focus-visible,.participant-header summary:focus-visible { outline:2px solid var(--home-violet); outline-offset:3px; }
+@media(max-width:950px) {
+ .participant-shell .participant-header { grid-template-columns:minmax(0,1fr) auto; gap:12px; padding:8px max(16px,env(safe-area-inset-left)) 8px max(16px,env(safe-area-inset-right)); padding-top:max(8px,env(safe-area-inset-top)); }
+ .participant-brand { font-size:1.4rem; gap:8px; }
+ .participant-brand img { width:30px; height:48px; }
+ .participant-header .participant-nav { position:fixed; top:auto; bottom:0; left:0; right:0; z-index:40; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; padding:0 max(4px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px,env(safe-area-inset-left)); border-top:1px solid var(--border); background:var(--bg); }
+ .participant-header .participant-nav a { flex-direction:column; justify-content:center; min-width:0; min-height:var(--nav-height); padding:8px 2px; gap:5px; font-size:.6875rem; border-bottom:0; border-top:2px solid transparent; }
+ .participant-header .participant-nav a[aria-current="page"] { border-top-color:var(--home-fluor); }
+ .participant-header .participant-nav .icon { width:20px; height:20px; }
+ .participant-dashboard { padding-bottom:calc(var(--nav-height) + 32px + env(safe-area-inset-bottom)); }
+ .participant-shell .submit-card { bottom:calc(var(--nav-height) + env(safe-area-inset-bottom)); }
+}
