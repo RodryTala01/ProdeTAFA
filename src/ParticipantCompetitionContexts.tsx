@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import {PredictionContextCard} from './PredictionContextCard';
+import {readCompetition,type Overview} from './participant-competitions';
 import {
   contextLabel,
   type RoundContexts,
@@ -49,6 +51,7 @@ export default function ParticipantCompetitionContexts({
 }: {
   roundId: number;
 }) {
+  const [overview,setOverview]=useState<Overview|null>(null);
   const [data, setData] = useState<RoundContexts | null>(null),
     [error, setError] = useState(''),
     [retry, setRetry] = useState(0);
@@ -73,6 +76,25 @@ export default function ParticipantCompetitionContexts({
       });
     return () => controller.abort();
   }, [roundId, retry]);
+  useEffect(()=>{
+    if(!data)return;
+    const controller=new AbortController();
+    setOverview(null);
+    async function load(){
+      let value=await readCompetition<Overview>('/api/competition-engine/overview',controller.signal);
+      const ids=data!.contexts.map(c=>c.competition.id);
+      if(!ids.length)return;
+      if(!value.season?.competitions.some(c=>ids.includes(c.id))){
+        for(const edition of value.editions){
+          const candidate=await readCompetition<Overview>(`/api/competition-engine/overview?season=${edition.seasonNumber}`,controller.signal);
+          if(candidate.season?.competitions.some(c=>ids.includes(c.id))){value=candidate;break;}
+        }
+      }
+      if(!controller.signal.aborted)setOverview(value);
+    }
+    void load().catch(()=>{});
+    return()=>controller.abort();
+  },[data]);
   if (error)
     return (
       <section className="card panel">
@@ -88,5 +110,5 @@ export default function ParticipantCompetitionContexts({
     );
   if (!data || data.round.id !== roundId)
     return <p role="status">Cargando competiciones de esta Fecha…</p>;
-  return <CompetitionContextList contexts={data.contexts} />;
+  return <div className="prediction-context-cards">{data.contexts.length ? data.contexts.map(context=><PredictionContextCard key={context.id} context={context} overview={overview} roundId={roundId}/>) : <section className="prediction-summary"><p>Sin competiciones vinculadas a esta Fecha.</p></section>}</div>;
 }
