@@ -61,11 +61,6 @@
 .home-opponents>b { position:absolute; left:calc(50% - 12px); color:var(--home-violet); }
 .home-eliminated { text-transform:uppercase; color:var(--text-muted); }
 .home-empty { color:var(--text-muted); padding:16px 0; font-size:.875rem; }
-@media(min-width:1000px) {
- .participant-shell--home .topbar { padding-right:24px; }
- .participant-shell--home .participant-nav { position:absolute; top:8px; left:50%; transform:translateX(-50%); border:0; gap:4px; z-index:2; }
- .participant-shell--home .participant-nav a { padding:12px 10px; }
-}
 @media(max-width:900px) { .home-main-grid { grid-template-columns:1fr; } .home-cups { display:flex; overflow-x:auto; scroll-snap-type:x proximity; padding-bottom:8px; } .home-cup { flex:0 0 180px; scroll-snap-align:start; } }
 @media(max-width:700px) {
  .home-hero { grid-template-columns:1fr; padding:24px 16px; gap:24px; }
