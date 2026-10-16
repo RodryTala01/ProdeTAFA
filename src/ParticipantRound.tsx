@@ -1,3 +1,4 @@
+import {argentinaDateTime} from './match-time';
 import {CompetitionImage} from './AssetImage';
 import { TeamIdentity as Team } from './ui';
 import ParticipantCompetitionContexts from './ParticipantCompetitionContexts';
@@ -92,10 +93,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
-const kickoffFormatter = new Intl.DateTimeFormat('es-AR', {
-  timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
-});
-function formatKickoff(value: string) { return kickoffFormatter.format(new Date(value)); }
+function formatKickoff(value: string) { return argentinaDateTime(value, {weekday:'short', second:'2-digit'}); }
 
 function formatDuration(milliseconds: number) {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));

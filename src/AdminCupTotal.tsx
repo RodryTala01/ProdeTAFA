@@ -1,3 +1,4 @@
+import {argentinaDateTime} from './match-time';
 import { useEffect, useState } from 'react';
 import {
   cupApi,
@@ -583,13 +584,7 @@ export default function AdminCupTotal({
                 {seg.matches.map((m) => (
                   <li key={m.matchId}>
                     {m.home} vs {m.away} ·{' '}
-                    {new Date(
-                      m.kickoffAt.includes('T')
-                        ? m.kickoffAt
-                        : m.kickoffAt.replace(' ', 'T') + 'Z',
-                    ).toLocaleString('es-AR', {
-                      timeZone: 'America/Argentina/Buenos_Aires',
-                    })}
+                    {argentinaDateTime(m.kickoffAt)}
                   </li>
                 ))}
               </ul>
