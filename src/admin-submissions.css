@@ -1,0 +1,15 @@
+.admin-round-submissions { padding:16px; }
+.admin-round-submissions .section-heading { flex-wrap:wrap; gap:12px; }
+.submission-note { color:var(--text-muted); font-size:.75rem; }
+.submission-counts { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+.submission-counts strong { color:var(--success); }
+.submission-counts > span { color:var(--warning); }
+.submission-counts small { color:var(--text-muted); }
+.submission-lists { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+.submission-lists h3 { font-size:.9rem; }
+.submission-lists ul,.submission-inactive { list-style:none; margin:0; padding:0; }
+.submission-lists li,.submission-inactive li { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:.8125rem; overflow-wrap:anywhere; }
+.submission-lists li span,.submission-inactive li span { color:var(--text-muted); font-size:.75rem; }
+.admin-round-submissions > details { margin-top:16px; }
+.admin-round-submissions summary { cursor:pointer; min-height:44px; display:flex; align-items:center; }
+@media(max-width:700px){.submission-lists { grid-template-columns:1fr; gap:16px; }}
