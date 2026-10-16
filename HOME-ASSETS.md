@@ -71,3 +71,15 @@ Sin participante real identificado; no asignados:
 - Tomas Torcasio.png
 - Verónica Lucchesi.png
 - Yago.png
+
+
+## Escudos completos del RAR
+
+El RAR entregado el 16/10/2026 contiene 64 escudos. Todos quedaron incorporados en `public/participants/shields.webp` como atlas 8×8.
+
+Resolución:
+- si existe asset por UUID, sigue teniendo prioridad;
+- si no existe, `ParticipantShield` busca coincidencia exacta del nombre normalizado (ignora mayúsculas y tildes) contra los 64 nombres del RAR;
+- si tampoco hay coincidencia, conserva el fallback de iniciales.
+
+Esto permite mostrar escudos de participantes actuales, inactivos e históricos sin inventar UUIDs para nombres que no estaban identificados en producción.
