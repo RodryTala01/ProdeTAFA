@@ -1,3 +1,4 @@
+import {argentinaDateTime} from './match-time';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import './admin-corrections.css';
 
@@ -66,14 +67,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
-function formatDate(value: string) {
-  const normalized = /(Z|[+-]\d{2}:\d{2})$/.test(value)
-    ? value
-    : `${value.replace(' ', 'T')}Z`;
-  return new Intl.DateTimeFormat('es-AR', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-  }).format(new Date(normalized));
-}
+function formatDate(value: string) { return argentinaDateTime(value); }
 
 function teamName(match: CorrectionMatch, teamId: string | null) {
   if (teamId === match.home.id) return match.home.name;

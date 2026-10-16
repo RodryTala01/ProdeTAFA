@@ -1,3 +1,4 @@
+import {argentinaDateTime} from './match-time';
 import AdminRoundSubmissions from './AdminRoundSubmissions';
 import {safeAdminError} from './safe-admin-error';
 import {TeamShield,CompetitionImage} from './AssetImage';
@@ -61,11 +62,7 @@ function addDaysToInput(value: string, days: number) {
   return localDateInputValue(date);
 }
 
-function formatKickoff(value: string) {
-  return new Intl.DateTimeFormat('es-AR', {
-    timeZone: 'America/Argentina/Buenos_Aires', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-  }).format(new Date(value));
-}
+function formatKickoff(value: string) { return argentinaDateTime(value); }
 
 function Team({ name, logoUrl, teamId }: { name: string; logoUrl: string | null; teamId?:string|null }) {
   return (
