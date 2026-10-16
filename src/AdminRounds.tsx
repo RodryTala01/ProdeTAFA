@@ -1,3 +1,4 @@
+import AdminRoundSubmissions from './AdminRoundSubmissions';
 import {safeAdminError} from './safe-admin-error';
 import {TeamShield,CompetitionImage} from './AssetImage';
 import { Icon } from './ui';
@@ -296,6 +297,8 @@ export default function AdminRounds() {
                 <div className={`round-progress ${selected.matches.length === 12 ? 'round-progress--complete' : ''}`} aria-label={`${selected.matches.length} de 12 partidos`}><small>PARTIDOS</small><strong>{selected.matches.length}</strong><span>/ 12</span></div>
               </div>
             </section>
+
+            {!isDraft && !detailLoading && <AdminRoundSubmissions key={selected.id} roundId={selected.id}/>}
 
             {isDraft && rounds.some(round => round.status === 'open' && round.id !== selected.id) && <p className="alert">Ya hay una Fecha abierta. Cerrala antes de publicar otra.</p>}
             {isDraft && selected.matches.length < 12 && (
