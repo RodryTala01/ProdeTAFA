@@ -1,6 +1,8 @@
 import {PromiedosError, parsePromiedosGame, promiedosFixture, normalizePromiedosResult, type PromiedosGame} from './promiedos';
 import {manualResultSql} from './result-source';
 
+export class PromiedosCachePending extends PromiedosError {}
+
 type Env = {DB: D1Database; PROMIEDOS_INGEST_TOKEN?: string};
 type Kind = 'day' | 'game';
 const dateValid = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && Number.isFinite(Date.parse(s)) && new Date(s).toISOString().slice(0,10) === s;
@@ -19,7 +21,7 @@ async function read(db: D1Database, kind: Kind, key: string) {
     AND julianday(expires_at)>julianday('now')`).bind(kind,key).first<{payload_json:string}>();
   if (!row) {
     await queue(db,kind,key);
-    throw new PromiedosError('Datos de Promiedos pendientes o vencidos. Se solicitó una actualización; reintentá después de la próxima carga.');
+    throw new PromiedosCachePending('Datos de Promiedos pendientes o vencidos. Se solicitó una actualización; reintentá después de la próxima carga.');
   }
   return JSON.parse(row.payload_json);
 }
@@ -65,6 +67,8 @@ async function authenticated(request: Request, token?: string) {
 
 async function work(db:D1Database) {
   const pending = await db.prepare(`SELECT kind,cache_key FROM promiedos_cache WHERE requested_at IS NOT NULL
+    AND (kind='day' OR NOT EXISTS (SELECT 1 FROM matches WHERE provider_fixture_id=cache_key
+      AND provider IN ('promiedos','manual') AND ${manualResultSql('matches')}))
     ORDER BY requested_at LIMIT 40`).all<{kind:Kind;cache_key:string}>();
   const days=new Set<string>(), games=new Set<string>();
   for(const row of pending.results??[]) (row.kind==='day'?days:games).add(row.cache_key);
@@ -79,7 +83,7 @@ async function work(db:D1Database) {
     AND NOT ${manualResultSql('matches')} AND result_finalized_at IS NULL
     AND round_id IN (SELECT id FROM rounds WHERE status='open')
     AND (status IN ('1H','HT','2H','ET','BT','P','LIVE') OR
-      julianday(kickoff_at) BETWEEN julianday('now','-4 hours') AND julianday('now','+10 minutes'))`)
+      (status='NS' AND julianday(kickoff_at)<=julianday('now','+10 minutes')))`)
     .all<{provider_fixture_id:string}>();
   for(const row of active.results??[])games.add(row.provider_fixture_id);
   return {days:[...days].slice(0,14),games:[...new Set([...(active.results??[]).map(r=>r.provider_fixture_id),...games])].slice(0,24)};

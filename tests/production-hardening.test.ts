@@ -83,7 +83,7 @@ describe('smoke T32 read-only', () => {
 describe('preflight de configuración productiva', () => {
   const config = {
     secrets: { required: ['FOOTBALL_API_KEY'] },
-    triggers: { crons: ['*/10 * * * *'] },
+    triggers: { crons: ['*/5 * * * *'] },
   };
 
   it('consulta secreto y deployments sin ejecutar acciones de escritura', () => {
@@ -95,7 +95,7 @@ describe('preflight de configuración productiva', () => {
 
     expect(checkProductionConfig(run, config)).toEqual({
       requiredSecret: 'FOOTBALL_API_KEY',
-      requiredCron: '*/10 * * * *',
+      requiredCron: '*/5 * * * *',
       deploymentCount: 1,
     });
     expect(run.mock.calls.map(([args]) => args.slice(0, 2))).toEqual([
@@ -111,7 +111,7 @@ describe('preflight de configuración productiva', () => {
 
     expect(() => checkProductionConfig(goodRun, {
       secrets: { required: [] },
-      triggers: { crons: ['*/10 * * * *'] },
+      triggers: { crons: ['*/5 * * * *'] },
     })).toThrow(/FOOTBALL_API_KEY/);
 
     expect(() => checkProductionConfig(goodRun, {

@@ -1,3 +1,4 @@
+import {useRoundRefresh} from './round-refresh';
 import ParticipantAllTime from './ParticipantAllTime';
 import {ParticipantShield} from './AssetImage';
 import { useEffect, useRef, useState } from 'react';
@@ -24,12 +25,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
   const [revision, setRevision] = useState(0);
   const menu = useRef<HTMLDetailsElement>(null);
   const content = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const refresh = () => setRevision(n => n + 1);
-    const timer = window.setInterval(refresh, 60000);
-    window.addEventListener('focus', refresh);
-    return () => { window.clearInterval(timer); window.removeEventListener('focus', refresh); };
-  }, []);
+  useRoundRefresh(data.round?.matches, () => setRevision(n => n + 1), route === 'inicio');
   useEffect(() => {
     const change = () => {
       setRoute(participantRoute(window.location.hash));
@@ -43,7 +39,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
   useEffect(() => {
     const controller = new AbortController();
     if (route !== 'inicio') return;
-    setLoading(true);
+    if (!data.round) setLoading(true);
     loadHome(controller.signal).then(next => {
       if (!controller.signal.aborted) { setData(next); setLoading(false); }
     });

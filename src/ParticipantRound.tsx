@@ -1,3 +1,5 @@
+import {useRoundRefresh} from './round-refresh';
+import {argentinaDateTime} from './match-time';
 import {CompetitionImage} from './AssetImage';
 import { TeamIdentity as Team } from './ui';
 import ParticipantCompetitionContexts from './ParticipantCompetitionContexts';
@@ -12,6 +14,7 @@ import './participant-round.css';
 import './prediction-dashboard.css';
 
 type Match = {
+  elapsedMinutes?: number | null;
   provider?: string;
   id: number;
   competitionName: string | null;
@@ -92,10 +95,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
-const kickoffFormatter = new Intl.DateTimeFormat('es-AR', {
-  timeZone: 'America/Argentina/Buenos_Aires', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
-});
-function formatKickoff(value: string) { return kickoffFormatter.format(new Date(value)); }
+function formatKickoff(value: string) { return argentinaDateTime(value, {weekday:'short', second:'2-digit'}); }
 
 function formatDuration(milliseconds: number) {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
@@ -214,10 +214,8 @@ export default function ParticipantRound() {
 
     void bootstrap();
     const clock = setInterval(() => setNow(Date.now() + serverOffset.current), 1000);
-    const refresh = setInterval(() => void loadRound(false, selectedRoundIdRef.current), 60_000);
     return () => {
       clearInterval(clock);
-      clearInterval(refresh);
       Object.values(timers.current).forEach(clearTimeout);
     };
   }, []);
@@ -236,7 +234,7 @@ export default function ParticipantRound() {
   }
 
   function locked(match: Match) {
-    return round?.status !== 'open' || Date.now() + serverOffset.current >= new Date(match.lockedAt).getTime();
+    return match.isLocked || round?.status !== 'open' || Date.now() + serverOffset.current >= new Date(match.lockedAt).getTime();
   }
 
   function saveMatch(match: Match, draft: Draft): Promise<void> {
@@ -347,10 +345,12 @@ export default function ParticipantRound() {
 
   const openMatches = useMemo(
     () => round?.status === 'open'
-      ? round.matches.filter((match) => now < new Date(match.lockedAt).getTime())
+      ? round.matches.filter((match) => !match.isLocked && now < new Date(match.lockedAt).getTime())
       : [],
     [round, now],
   );
+
+  useRoundRefresh(round?.matches, () => { void loadRound(false, selectedRoundIdRef.current); }, !loading && !reviewing);
 
   if (loading) {
     return <section className="card participant-empty"><p>Cargando fecha…</p></section>;
@@ -528,7 +528,7 @@ export default function ParticipantRound() {
               )}
 
               <div className={`prediction-footer prediction-state--${isLive ? 'live' : match.result.isVoid ? 'void' : match.score?.resultType?.toLowerCase() ?? (isFinal && match.officialPrediction.homeScore === null ? 'error' : 'pending')}`}>
-                {isLive && <strong>EN VIVO</strong>}
+                {isLive && <strong>EN VIVO{match.elapsedMinutes != null ? ` · ${match.elapsedMinutes}′` : ''}</strong>}
                 {!isLive && !isFinal && <strong>PENDIENTE</strong>}
                 {isFinal && !match.result.isVoid && !match.score && match.officialPrediction.homeScore === null && <strong>ERROR · 0 pts</strong>}
                 <small>{isFinal || isFinished ? 'Finalizado' : isLocked ? 'Cerrado' : round.submitted && predictionChanged(match, draft) ? 'Modificado · pendiente de reenvío' : round.submitted && completePrediction(match, officialDraft(match.officialPrediction)) ? 'Enviado' : !completePrediction(match, draft) ? 'Incompleto' : saveState[match.id] === 'Guardado' ? 'Completado · guardado' : 'Completado'}</small>

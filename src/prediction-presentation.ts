@@ -1,7 +1,7 @@
 export type Draft = { homeScore: string; awayScore: string; extraTeamId: string | null };
 export type Official = { homeScore: number | null; awayScore: number | null; extraTeamId: string | null };
 export type PredictionMatch = {
-  id: number; lockedAt: string; matchType: string;
+  id: number; isLocked?: boolean; lockedAt: string; matchType: string;
   home: { id: string | null; name: string }; away: { id: string | null; name: string };
   officialPrediction: Official;
 };
@@ -21,10 +21,10 @@ export function predictionChanged(match: PredictionMatch, draft?: Draft) {
     || (match.matchType === 'PENALTIES_ONLY' && draft.extraTeamId !== before.extraTeamId);
 }
 export function changedPredictions(matches: PredictionMatch[], drafts: Record<number, Draft>, now: number) {
-  return matches.filter(m => now < Date.parse(m.lockedAt) && predictionChanged(m, drafts[m.id])).map(m => ({ match: m, before: officialDraft(m.officialPrediction), after: { ...drafts[m.id] } }));
+  return matches.filter(m => !m.isLocked && now < Date.parse(m.lockedAt) && predictionChanged(m, drafts[m.id])).map(m => ({ match: m, before: officialDraft(m.officialPrediction), after: { ...drafts[m.id] } }));
 }
 export function completionCount(matches: PredictionMatch[], drafts: Record<number, Draft>, now: number, open: boolean) {
-  return matches.filter(m => completePrediction(m, open && now < Date.parse(m.lockedAt) ? drafts[m.id] : officialDraft(m.officialPrediction))).length;
+  return matches.filter(m => completePrediction(m, open && !m.isLocked && now < Date.parse(m.lockedAt) ? drafts[m.id] : officialDraft(m.officialPrediction))).length;
 }
 export function globalSaveState(states: string[]) {
   if (states.some(s => !['Guardado', 'Guardando…'].includes(s))) return 'Error al guardar';

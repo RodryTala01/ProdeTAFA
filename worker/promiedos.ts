@@ -15,6 +15,8 @@ function assert(condition: unknown): asserts condition {
 }
 const object = (x: unknown): x is Record<string, any> => !!x && typeof x === 'object' && !Array.isArray(x);
 const idValid = (id: unknown): id is string => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(id);
+// Both /games and /gamecenter return Argentine wall time (DD-MM-YYYY HH:mm),
+// not UTC. Convert once to UTC; cache retains the original provider string.
 export function promiedosKickoff(value: string) {
   const m = /^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})$/.exec(value);
   assert(m);

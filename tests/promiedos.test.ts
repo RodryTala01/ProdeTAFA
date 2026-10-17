@@ -136,3 +136,51 @@ it('stops after one retry and does not attempt to bypass forbidden responses',as
  mocked.mockReset().mockResolvedValue(new Response('',{status:403}));
  await expect(client.getPromiedosGame('abc')).rejects.toThrow('HTTP 403');expect(mocked).toHaveBeenCalledTimes(1);
 });
+it.each([
+ ['Liverpool–Manchester City','11-10-2026 12:30','2026-10-11T15:30:00.000Z','12:30'],
+ ['Boca–Talleres','16-10-2026 21:30','2026-10-17T00:30:00.000Z','21:30'],
+])('real provider wall time %s converts exactly once',(_name,raw,utc,argentina)=>{
+ expect(promiedosKickoff(raw)).toBe(utc);
+ expect(new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(promiedosKickoff(raw)))).toBe(argentina);
+});
+it('fresh sync repairs an erroneously early kickoff after its stored lock without changing predictions',async()=>{
+ insert();db.exec("UPDATE matches SET kickoff_at='2026-10-11T12:30:00Z'");
+ const before=db.prepare('SELECT * FROM official_predictions').all();
+ respond(game({start_time:'11-10-2026 12:30'}));
+ await syncRoundResults(1,env());
+ expect(db.prepare('SELECT kickoff_at FROM matches').get()?.kickoff_at).toBe('2026-10-11T15:30:00.000Z');
+ expect(db.prepare('SELECT * FROM official_predictions').all()).toEqual(before);
+});
+it('NS to LIVE persists score/minute, LIVE to FT persists final regulation',async()=>{
+ insert();respond(game({status:{enum:2,name:'Entretiempo'},game_time:45,events:[],scores:[1,0]}));
+ await syncRoundResults(1,env());
+ expect(db.prepare('SELECT status,elapsed_minutes,home_score_current,away_score_current,result_finalized_at FROM matches').get()).toMatchObject({status:'LIVE',elapsed_minutes:45,home_score_current:1,away_score_current:0,result_finalized_at:null});
+ respond();await syncRoundResults(1,env());
+ expect(db.prepare('SELECT status,home_score_regulation,away_score_regulation FROM matches').get()).toMatchObject({status:'FT',home_score_regulation:2,away_score_regulation:1});
+});
+it('active and overdue NS stay in acquisition even with fresh cache; finalized/manual do not',async()=>{
+ insert();db.exec("UPDATE rounds SET status='open'; UPDATE matches SET status='NS',kickoff_at=datetime('now','-8 hours')");respond(game({status:{enum:1,name:'Programado'},events:[],scores:undefined}));
+ const plan=async()=>await (await handlePromiedosCache(new Request('https://local/api/internal/promiedos-cache/work',{headers:{authorization:'Bearer '+ingestionToken}}),ingestionEnv()))!.json() as any;
+ expect((await plan()).games).toEqual(['abc']);
+ for(const status of ['LIVE','HT','ET','P']){db.prepare('UPDATE matches SET status=?').run(status);expect((await plan()).games).toEqual(['abc']);}
+ db.exec("UPDATE matches SET status='FT',result_finalized_at=datetime('now')");expect((await plan()).games).toEqual([]);
+ db.exec("UPDATE promiedos_cache SET requested_at=datetime('now') WHERE kind='game'; UPDATE matches SET result_finalized_at=NULL; INSERT INTO audit_log(action,entity_type,entity_id) VALUES ('match.result_override','match','1')");expect((await plan()).games).toEqual([]);
+});
+it('groups repeated expired-cache warnings and preserves scores',async()=>{
+ insert();db.exec("UPDATE matches SET status='LIVE',home_score_current=1,away_score_current=0");
+ db.exec("INSERT INTO matches(round_id,provider,provider_fixture_id,home_team_name,away_team_name,kickoff_at) VALUES(1,'promiedos','second','Dos','Tres',datetime('now'))");
+ const before=db.prepare('SELECT * FROM matches').all();
+ const result=await syncRoundResults(1,env());expect(result.warnings).toHaveLength(1);expect(result.warnings[0]).toContain('2 partidos');expect(result.updated).toBe(0);
+ expect(db.prepare('SELECT * FROM matches').all()).toEqual(before);
+ expect(db.prepare("SELECT count(*) n FROM promiedos_cache WHERE kind='game' AND requested_at IS NOT NULL").get()?.n).toBe(2);
+ respond();expect((await syncRoundResults(1,env())).updated).toBe(1);
+});
+it('explicit historical refresh can repair a finalized kickoff without re-enabling automatic live acquisition',async()=>{
+ insert();db.exec("UPDATE rounds SET status='open'; UPDATE matches SET status='FT',result_finalized_at=datetime('now')");
+ const request=()=>new Request('https://local/api/internal/promiedos-cache/work',{headers:{authorization:'Bearer '+ingestionToken}});
+ expect(await (await handlePromiedosCache(request(),ingestionEnv()))!.json()).toMatchObject({games:[]});
+ await syncRoundResults(1,env());
+ expect(await (await handlePromiedosCache(request(),ingestionEnv()))!.json()).toMatchObject({games:['abc']});
+ await ingest([entry()]);await syncRoundResults(1,env());
+ expect(await (await handlePromiedosCache(request(),ingestionEnv()))!.json()).toMatchObject({games:[]});
+});

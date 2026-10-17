@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 
 const REQUIRED_SECRET = 'FOOTBALL_API_KEY';
-const REQUIRED_CRON = '*/10 * * * *';
+const REQUIRED_CRON = '*/5 * * * *';
 
 function defaultRun(args) {
   return execFileSync(

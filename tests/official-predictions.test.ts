@@ -226,3 +226,13 @@ describe('compatibilidad y consistencia', () => {
     expect(points()).toBe(1);
   });
 });
+it('started status rejects saves after a kickoff correction and cannot publish drafts through a future timestamp',async()=>{
+ await ready();await submit();const snapshot=official();
+ db.exec("UPDATE matches SET status='LIVE',provider='promiedos' WHERE id=1");
+ expect((await save(8,8))?.status).toBe(409);
+ expect((await submit())?.status).toBe(409);
+ expect(official()).toEqual(snapshot);
+ const response=await call('participant/round?roundId=1');
+ const body=await response!.json() as any;
+ expect(body.round.matches[0].isLocked).toBe(true);
+});

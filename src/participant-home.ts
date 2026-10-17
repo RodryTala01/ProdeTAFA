@@ -11,7 +11,7 @@ export type CurrentSeason = {
 type Prediction = { homeScore: number | null; awayScore: number | null; extraTeamId: string | null };
 export type HomeRound = {
   id: number; name: string; status: string; submitted: boolean; serverNow: string;
-  matches: { score?: {points:number;extraPoints:number;provisional:boolean}|null; id?: number; status?: string; competitionName?: string; home?: {id: string; name: string; logoUrl?: string}; away?: {id: string; name: string; logoUrl?: string}; result?: {homeCurrent?: number|null; awayCurrent?: number|null; homeRegulation: number|null; awayRegulation: number|null; isVoid: boolean}; kickoffAt: string; lockedAt: string; isLocked: boolean; prediction: Prediction; officialPrediction: Prediction }[];
+  matches: { elapsedMinutes?: number|null; score?: {points:number;extraPoints:number;provisional:boolean}|null; id?: number; status?: string; competitionName?: string; home?: {id: string; name: string; logoUrl?: string}; away?: {id: string; name: string; logoUrl?: string}; result?: {homeCurrent?: number|null; awayCurrent?: number|null; homeRegulation: number|null; awayRegulation: number|null; isVoid: boolean}; kickoffAt: string; lockedAt: string; isLocked: boolean; prediction: Prediction; officialPrediction: Prediction }[];
 };
 export type LeagueSummary = {
   competition: { code: string; displayName: string };

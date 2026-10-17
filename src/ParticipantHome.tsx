@@ -1,3 +1,4 @@
+import {argentinaDateTime} from './match-time';
 import {ParticipantShield,CompetitionImage,TeamShield} from './AssetImage';
 import { useEffect, useState } from 'react';
 import CompetitionList from './CompetitionList';
@@ -72,11 +73,11 @@ export default function ParticipantHome({ name, data, userId }: { name: string; 
       {matches.length?<div className="home-fixtures">{matches.slice(0,5).map((m,i)=>{
         const state=homeFixtureState(m);
         return <article className={`home-fixture ${state.isLive?'home-fixture--live':state.isFinal?'home-fixture--final':''}`} key={m.id??i}>
-          <time dateTime={m.kickoffAt}>{new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(m.kickoffAt))}</time>
+          <time dateTime={m.kickoffAt}>{argentinaDateTime(m.kickoffAt,{month:'short'})}</time>
           <span className="home-team"><TeamShield name={m.home!.name} teamId={m.home!.id} logoUrl={m.home!.logoUrl} size="sm" decorative/><span>{m.home!.name}</span></span>
           <span className="home-match-center">
             {state.started
-              ? <><strong className="home-real-score">{state.result??'— – —'}</strong><span className={state.isLive?'home-match-status home-match-status--live':'home-match-status home-match-status--final'}>{state.isLive?'EN VIVO':'FINAL'}</span>{state.prediction&&<small>Tu pronóstico: {state.prediction}</small>}{state.isFinal&&m.score&&<small className="home-match-points">{m.score.points>0?'+':''}{m.score.points} pts</small>}</>
+              ? <><strong className="home-real-score">{state.result??'— – —'}</strong><span className={state.isLive?'home-match-status home-match-status--live':'home-match-status home-match-status--final'}>{state.isLive?`EN VIVO${m.elapsedMinutes!=null?' · '+m.elapsedMinutes+'′':''}`:'FINAL'}</span>{state.prediction&&<small>Tu pronóstico: {state.prediction}</small>}{state.isFinal&&m.score&&<small className="home-match-points">{m.score.points>0?'+':''}{m.score.points} pts</small>}</>
               : state.prediction
                 ? <><strong className="home-prediction-score">{state.prediction}</strong><small>Tu pronóstico</small></>
                 : <span className="home-versus">VS</span>}

@@ -23,11 +23,10 @@ game details, and refuses older timestamps and regressive game states. A failed
 acquisition never clears a valid cache record. The normal sync path alone applies
 results and existing scoring; ingestion cannot write sporting tables.
 
-## Acquisition workflow (not activated)
+## Acquisition workflow
 
-`.github/workflows/promiedos-cache.yml` is a separate **manual-only** workflow,
-gated by repository variable `PROMIEDOS_CACHE_ENABLED=true`. No schedule has been
-added. The diagnostic workflow from PR #17 is unchanged and is not an ingestion job.
+`.github/workflows/promiedos-cache.yml` is a workflow with workflow_dispatch and a */5 * * * * schedule,
+gated by repository variable `PROMIEDOS_CACHE_ENABLED=true`. Scheduling is authorized for the live-sync fix. The diagnostic workflow from PR #17 is unchanged and is not an ingestion job.
 
 Before any production activation, separately authorize/apply migration 0015 and
 deploy the reviewed Worker. Configure a new random token (at least 32 characters)
@@ -47,10 +46,17 @@ Actions fetches each item, discovers X-VER only after invalid provider payloads
 Transport failures do not trigger discovery loops. Logs contain counts/IDs only;
 there are no response artifacts. Requests have timeouts and no protection bypasses.
 
-The Cloudflare Cron remains `*/10 * * * *`, now consuming cached Promiedos data.
-Automatic acquisition is **pending explicit scheduling approval**: until then,
-manual workflow runs refresh cache, and stale data fails closed. This PR is not
-ready for unattended production use without enabling acquisition.
+Cloudflare consumes cached results through syncEligibleRounds() every five
+minutes (*/5 * * * *). Acquisition also runs every five minutes, even while a
+game cache entry remains within its 30-minute TTL. Started open-round games stay
+eligible until finalized; overdue NS games are retried without a four-hour cutoff
+so an erroneous old kickoff cannot permanently strand them. Manual overrides and
+finalized games are excluded. The day TTL remains six hours.
+
+These independent schedulers do not provide a strict five-minute end-to-end SLA:
+GitHub can delay scheduled jobs, and upload/consume cycles may be out of phase.
+The Worker never falls back to a direct Promiedos request. This change is prepared
+in a PR; production activation follows merge/deploy authorization.
 
 ## Verification and rollback
 
@@ -63,3 +69,31 @@ Production migration and deployment are intentionally not run during development
 Disable the workflow flag or remove the dedicated token to stop ingestion; existing
 cached data simply expires. Keep the isolated table on rollback. No sporting rows
 are deleted or rewritten by disabling the cache.
+
+## Kickoff diagnosis and repair
+
+Read-only checks of both /games and /gamecenter returned:
+- ehecaec, Liverpool-Manchester City: 11-10-2026 12:30 -> 2026-10-11T15:30:00.000Z.
+- egddcfg, Boca-Talleres: 16-10-2026 21:30 -> 2026-10-17T00:30:00.000Z.
+
+start_time is Argentine wall time without an offset. promiedosKickoff() already
+resolves America/Argentina/Buenos_Aires explicitly; do not add offsets. The old
+sync guard prevented repair once the incorrect stored kickoff had closed. Fresh,
+identity-validated cache now corrects historical as well as future kickoffs through
+normal sync, preserving predictions and result audit snapshots.
+
+Promiedos started/final statuses also block prediction writes regardless of a
+future kickoff. If a started status contradicts a still-open timestamp, submission
+fails closed before the existing snapshot triggers can promote that draft. It
+requires a fresh sync/review; no migration or trigger rewrite is needed.
+
+The production SELECT could not be completed: Cloudflare returned account access
+error 7403. The exact origin of the previously stored wrong values is therefore
+not established, and no production sporting data was rewritten during this fix.
+
+Home and Pronosticos share live-only 60-second refresh, focus refresh and a
+wake-up at the next kickoff. Relevant NS games awaiting their first live update
+are checked every five minutes for four hours; idle/final rounds are not polled.
+Refresh keeps the page and edited drafts mounted. Repeated cache-pending warnings
+are grouped; other provider warnings retain their match context. Cache ingestion
+itself still writes only provider storage.

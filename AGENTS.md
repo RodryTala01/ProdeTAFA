@@ -106,12 +106,12 @@ El nombre interno se conserva por compatibilidad. **No significa que el partido 
 ## Resultados y correcciones
 
 - Nuevos partidos: Promiedos adquirido exclusivamente desde GitHub Actions y leído por el Worker desde la caché aislada 0015. El cliente de red y descubrimiento X-VER viven fuera del Worker; API-Football se conserva para partidos legacy.
-- Caché de proveedor únicamente: ingesta autenticada sin escrituras deportivas, vencimiento explícito, snapshots antiguos rechazados. Sin datos frescos, solicitar adquisición y conservar resultados. Workflow de adquisición manual hasta autorizar programación; ver PROMIEDOS-CACHE.md.
+- Caché de proveedor únicamente: ingesta autenticada sin escrituras deportivas, vencimiento explícito, snapshots antiguos rechazados. Sin datos frescos, solicitar adquisición y conservar resultados. Adquisición autorizada cada 5 minutos por GitHub Actions, conservando workflow_dispatch; ver PROMIEDOS-CACHE.md.
 - Promiedos: horarios Buenos Aires convertidos explícitamente a UTC; resultado reglamentario desde etapa de 90 minutos. Ante datos ambiguos conservar estado y solicitar revisión.
 - Correcciones manuales conservan provider; auditoría existente registra activación/reset de forma atómica, sin migración.
 - Citar Promiedos en pantallas de fixtures/resultados.
 - API-Football Free: no usar `ids`; consultar `/fixtures?date=YYYY-MM-DD&timezone=America/Argentina/Buenos_Aires` y filtrar localmente por fixture ID.
-- Cron actual cada 10 minutos; consultar sólo días relevantes para no exceder cuota.
+- Cron actual cada 5 minutos; consultar sólo días relevantes para no exceder cuota.
 - El admin puede corregir resultados manualmente con motivo obligatorio y auditoría.
 - Mientras una corrección manual esté activa, la API no debe pisarla.
 - `Volver al proveedor` deja el partido pendiente, limpia resultado/puntos derivados viejos y espera próxima sincronización oficial.

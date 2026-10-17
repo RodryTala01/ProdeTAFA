@@ -1,5 +1,5 @@
 import {normalizePromiedosResult, PromiedosError} from '../promiedos';
-import {getCachedGame} from '../promiedos-cache';
+import {getCachedGame, PromiedosCachePending} from '../promiedos-cache';
 import {manualResultSql} from '../result-source';
 import {footballFixtures, FootballError} from '../football-api';
 import { recalculateRoundScores } from '../scoring';
@@ -180,6 +180,7 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
   let updated = 0, finalized = 0;
   const counter = {count: 0};
   const warnings: string[] = [];
+  let pendingCache = 0;
   if (legacy.length && !env.FOOTBALL_API_KEY) warnings.push('API-Football legacy no está configurada.');
   else for (const date of requestedDates) {
     try {
@@ -200,8 +201,10 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
       const r = normalizePromiedosResult(game);
       if (m.result_finalized_at && !r.final) throw new PromiedosError('Resultado final no confirmado');
       if (LIVE_STATUSES.has(m.status) && r.status === 'NS') throw new PromiedosError('Estado regresivo no confirmado');
+      // Fresh provider kickoffs can repair existing matches, including history.
+      // Prediction writes also check started status so a time repair cannot reopen play.
       const update = env.DB.prepare(`UPDATE matches SET
-        kickoff_at = CASE WHEN julianday('now') < julianday(kickoff_at,'+1 minute') THEN ? ELSE kickoff_at END,
+        kickoff_at = ?,
         status=?, elapsed_minutes=?, home_score_current=?, away_score_current=?,
         home_score_regulation=?, away_score_regulation=?, winning_team_provider_id=?, qualified_team_provider_id=?,
         went_to_extra_time=?, went_to_penalties=?, is_void=0,
@@ -224,10 +227,12 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
       const [result] = await env.DB.batch(statements);
       if (result.meta.changes) { updated++; if(r.final) finalized++; }
     } catch (caught) {
+      if (caught instanceof PromiedosCachePending) { pendingCache++; continue; }
       const detail = caught instanceof PromiedosError ? caught.message : 'No se pudo leer la caché. Requiere revisión.';
       warnings.push(`${m.home_team_name} - ${m.away_team_name}: ${detail}`);
     }
   }
+  if (pendingCache) warnings.unshift(`Promiedos todavía no tiene datos actualizados para ${pendingCache} partido${pendingCache === 1 ? '' : 's'}. Se solicitó una actualización automática.`);
   const calculated = updated ? await recalculateRoundScores(roundId, env) : 0;
   return {updated, finalized, calculated, requestCount:counter.count, dates:requestedDates, warnings};
 }
@@ -238,7 +243,7 @@ export async function syncEligibleRounds(env: Env) {
       AND result_finalized_at IS NULL
       AND round_id IN (SELECT id FROM rounds WHERE status='open')
       AND (status IN ('1H','HT','2H','ET','BT','P','LIVE') OR
-        (julianday(kickoff_at)<=julianday('now','+10 minutes') AND julianday(kickoff_at)>=julianday('now','-4 hours')))
+        (julianday(kickoff_at)<=julianday('now','+10 minutes') AND (provider='promiedos' AND status='NS' OR julianday(kickoff_at)>=julianday('now','-4 hours'))))
     ORDER BY round_id,kickoff_at`).all<{round_id:number;id:number;kickoff_at:string}>();
   const groups = new Map<number, {dates:Set<string>;ids:number[]}>();
   for(const m of eligible.results??[]) {
