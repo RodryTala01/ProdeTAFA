@@ -25,6 +25,7 @@ type MatchRow = {
   away_team_name: string;
   away_team_logo_url: string | null;
   kickoff_at: string;
+  elapsed_minutes: number | null;
   status: string;
   match_type: 'NORMAL' | 'PENALTIES_ONLY';
   home_score_current: number | null;
@@ -99,8 +100,9 @@ function lockTime(kickoffAt: string) {
   return new Date(kickoffAt).getTime() + 60_000;
 }
 
-function isLocked(kickoffAt: string) {
-  return Date.now() >= lockTime(kickoffAt);
+const STARTED_STATUSES = new Set(['1H','HT','2H','ET','BT','P','LIVE','FT','AET','PEN']);
+function isLocked(kickoffAt: string, status?: string, provider?: string) {
+  return provider === 'promiedos' && STARTED_STATUSES.has(status ?? '') || Date.now() >= lockTime(kickoffAt);
 }
 
 function nullableScore(value: unknown) {
@@ -205,7 +207,7 @@ async function getParticipantRound(request: Request, env: Env) {
     `SELECT m.id, m.round_id, m.provider, m.competition_name, m.competition_logo_url,
             m.home_team_provider_id, m.home_team_name, m.home_team_logo_url,
             m.away_team_provider_id, m.away_team_name, m.away_team_logo_url,
-            m.kickoff_at, m.status, m.match_type,
+            m.kickoff_at, m.status, m.elapsed_minutes, m.match_type,
             m.home_score_current, m.away_score_current,
             m.home_score_regulation, m.away_score_regulation,
             m.winning_team_provider_id, m.went_to_penalties, m.is_void,
@@ -260,8 +262,9 @@ async function getParticipantRound(request: Request, env: Env) {
         competitionLogoUrl: match.competition_logo_url,
         kickoffAt: match.kickoff_at,
         lockedAt: new Date(lockTime(match.kickoff_at)).toISOString(),
-        isLocked: round.status === 'finished' || now >= lockTime(match.kickoff_at),
+        isLocked: round.status === 'finished' || isLocked(match.kickoff_at, match.status, match.provider),
         status: match.status,
+        elapsedMinutes: match.elapsed_minutes,
         matchType: match.match_type,
         home: {
           id: match.home_team_provider_id,
@@ -274,9 +277,9 @@ async function getParticipantRound(request: Request, env: Env) {
           logoUrl: match.away_team_logo_url,
         },
         prediction: {
-          homeScore: round.status === 'finished' || now >= new Date(match.kickoff_at).getTime() + 60_000 ? match.official_home_score : match.predicted_home_score,
-          awayScore: round.status === 'finished' || now >= new Date(match.kickoff_at).getTime() + 60_000 ? match.official_away_score : match.predicted_away_score,
-          extraTeamId: round.status === 'finished' || now >= new Date(match.kickoff_at).getTime() + 60_000 ? match.official_extra_team : match.predicted_extra_team_provider_id,
+          homeScore: round.status === 'finished' || isLocked(match.kickoff_at, match.status, match.provider) ? match.official_home_score : match.predicted_home_score,
+          awayScore: round.status === 'finished' || isLocked(match.kickoff_at, match.status, match.provider) ? match.official_away_score : match.predicted_away_score,
+          extraTeamId: round.status === 'finished' || isLocked(match.kickoff_at, match.status, match.provider) ? match.official_extra_team : match.predicted_extra_team_provider_id,
         },
         officialPrediction: {
           homeScore: match.official_home_score,
@@ -309,7 +312,7 @@ async function savePrediction(request: Request, env: Env, matchId: number) {
   if (!user || user.role !== 'participant') return error('Acceso de participante requerido', 403);
 
   const match = await env.DB.prepare(
-    `SELECT m.id, m.round_id, m.kickoff_at, m.match_type,
+    `SELECT m.id, m.round_id, m.provider, m.kickoff_at, m.status, m.match_type,
             m.home_team_provider_id, m.away_team_provider_id, r.status AS round_status
      FROM matches m
      JOIN rounds r ON r.id = m.round_id
@@ -319,6 +322,8 @@ async function savePrediction(request: Request, env: Env, matchId: number) {
     id: number;
     round_id: number;
     kickoff_at: string;
+    status: string;
+    provider: string;
     match_type: 'NORMAL' | 'PENALTIES_ONLY';
     home_team_provider_id: string | null;
     away_team_provider_id: string | null;
@@ -326,7 +331,7 @@ async function savePrediction(request: Request, env: Env, matchId: number) {
   }>();
 
   if (!match || match.round_status !== 'open') return error('El partido no pertenece a una fecha abierta', 404);
-  if (isLocked(match.kickoff_at)) return error('Este partido ya cerró', 409);
+  if (isLocked(match.kickoff_at, match.status, match.provider)) return error('Este partido ya cerró', 409);
 
   const body = await request.json().catch(() => null) as {
     homeScore?: number | null;
@@ -359,7 +364,7 @@ async function savePrediction(request: Request, env: Env, matchId: number) {
        predicted_extra_team_provider_id, updated_at
      ) SELECT ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now')
        WHERE EXISTS (SELECT 1 FROM matches m JOIN rounds r ON r.id=m.round_id
-         WHERE m.id=? AND r.status='open' AND julianday(m.kickoff_at)+1.0/1440 > julianday('now'))
+         WHERE m.id=? AND r.status='open' AND (m.provider<>'promiedos' OR m.status NOT IN ('1H','HT','2H','ET','BT','P','LIVE','FT','AET','PEN')) AND julianday(m.kickoff_at)+1.0/1440 > julianday('now'))
      ON CONFLICT(user_id, match_id) DO UPDATE SET
        predicted_home_score = excluded.predicted_home_score,
        predicted_away_score = excluded.predicted_away_score,
@@ -382,7 +387,7 @@ async function submitRound(request: Request, env: Env, roundId: number) {
   if (!round || round.status !== 'open') return error('La fecha no está abierta', 409);
 
   const rows = await env.DB.prepare(
-    `SELECT m.id, m.kickoff_at, m.match_type,
+    `SELECT m.id, m.provider, m.kickoff_at, m.status, m.match_type,
             p.predicted_home_score, p.predicted_away_score,
             p.predicted_extra_team_provider_id
      FROM matches m
@@ -392,6 +397,8 @@ async function submitRound(request: Request, env: Env, roundId: number) {
   ).bind(user.id, roundId).all<{
     id: number;
     kickoff_at: string;
+    status: string;
+    provider: string;
     match_type: 'NORMAL' | 'PENALTIES_ONLY';
     predicted_home_score: number | null;
     predicted_away_score: number | null;
@@ -401,7 +408,7 @@ async function submitRound(request: Request, env: Env, roundId: number) {
   const missing: number[] = [];
   let openCount = 0;
   for (const match of rows.results ?? []) {
-    if (isLocked(match.kickoff_at)) continue;
+    if (isLocked(match.kickoff_at, match.status, match.provider)) continue;
     openCount += 1;
 
     const hasScore = match.predicted_home_score !== null && match.predicted_away_score !== null;
@@ -418,14 +425,18 @@ async function submitRound(request: Request, env: Env, roundId: number) {
   if (openCount === 0) return error('No quedan partidos abiertos para enviar', 409);
 
   try {
-    await env.DB.prepare(
+    const saved = await env.DB.prepare(
     `INSERT INTO round_submissions (
        round_id, user_id, first_submitted_at, last_submitted_at, submission_count
-     ) VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'), 1)
+     ) SELECT ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'), 1
+       WHERE NOT EXISTS (SELECT 1 FROM matches WHERE round_id=? AND provider='promiedos'
+         AND status IN ('1H','HT','2H','ET','BT','P','LIVE','FT','AET','PEN')
+         AND julianday(kickoff_at)+1.0/1440 > julianday('now'))
      ON CONFLICT(round_id, user_id) DO UPDATE SET
        last_submitted_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'),
        submission_count = submission_count + 1`,
-  ).bind(roundId, user.id).run();
+  ).bind(roundId, user.id, roundId).run();
+    if (!saved.meta.changes) return error('Hay un partido iniciado con horario pendiente de revisión. Actualizá la Fecha antes de reenviar.', 409);
   } catch (caught) {
     const message = caught instanceof Error ? caught.message : '';
     if (['La fecha no está abierta', 'No quedan partidos abiertos', 'Faltan completar'].some((text) => message.includes(text))) {

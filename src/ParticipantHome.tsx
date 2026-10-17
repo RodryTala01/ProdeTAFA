@@ -77,7 +77,7 @@ export default function ParticipantHome({ name, data, userId }: { name: string; 
           <span className="home-team"><TeamShield name={m.home!.name} teamId={m.home!.id} logoUrl={m.home!.logoUrl} size="sm" decorative/><span>{m.home!.name}</span></span>
           <span className="home-match-center">
             {state.started
-              ? <><strong className="home-real-score">{state.result??'— – —'}</strong><span className={state.isLive?'home-match-status home-match-status--live':'home-match-status home-match-status--final'}>{state.isLive?'EN VIVO':'FINAL'}</span>{state.prediction&&<small>Tu pronóstico: {state.prediction}</small>}{state.isFinal&&m.score&&<small className="home-match-points">{m.score.points>0?'+':''}{m.score.points} pts</small>}</>
+              ? <><strong className="home-real-score">{state.result??'— – —'}</strong><span className={state.isLive?'home-match-status home-match-status--live':'home-match-status home-match-status--final'}>{state.isLive?`EN VIVO${m.elapsedMinutes!=null?' · '+m.elapsedMinutes+'′':''}`:'FINAL'}</span>{state.prediction&&<small>Tu pronóstico: {state.prediction}</small>}{state.isFinal&&m.score&&<small className="home-match-points">{m.score.points>0?'+':''}{m.score.points} pts</small>}</>
               : state.prediction
                 ? <><strong className="home-prediction-score">{state.prediction}</strong><small>Tu pronóstico</small></>
                 : <span className="home-versus">VS</span>}
