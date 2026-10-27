@@ -26,8 +26,9 @@ describe('Centro de temporada',()=>{
    expect(info.structurallyPrepared).toBe(true);
    expect(info.label).toMatch(/Revisar sorteo y cupos/);
    const html=renderToStaticMarkup(createElement(AdminSeasonCenter,{season:filled,onSelectFamily:noop,onSelectCompetition:noop,onManageSeason:noop}));
-   expect(html).toContain('6 de 6 con etapas y Fechas vinculadas');
-   expect(html).toContain('todavía requieren revisar cupos, sorteos y cruces');
+   expect(html).toContain('estructura y armado verificados');
+   expect(html).toContain('El progreso combina estructura y confirmaciones deportivas');
+   expect(html).not.toContain('6 de 6 con estructura y armado verificados');
  });
  it('shows missing steps and picks the first incomplete family',()=>{
    expect(familyReadiness(season,setupFamilies[0]).label).toBe('Faltan etapas');
