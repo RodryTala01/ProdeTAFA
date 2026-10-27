@@ -4,11 +4,14 @@ import { handleResults, syncEligibleRounds } from './results';
 import { handleRanking } from './ranking';
 import { handleAdminCorrections } from './admin-corrections';
 import { handleStandings } from './standings';
+import { getPromiedosWorkPlan } from './promiedos-cache';
+import { dispatchPromiedosRefresh } from './promiedos-dispatch';
 
 export interface Env {
   DB: D1Database;
   FOOTBALL_API_KEY?: string;
   PROMIEDOS_INGEST_TOKEN?: string;
+  GITHUB_ACTIONS_TOKEN?: string;
 }
 
 type Role = 'admin' | 'participant';
@@ -480,6 +483,17 @@ export default {
   },
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
-    ctx.waitUntil(syncEligibleRounds(env));
+    ctx.waitUntil((async () => {
+      await syncEligibleRounds(env);
+      try {
+        const plan = await getPromiedosWorkPlan(env.DB);
+        const result = await dispatchPromiedosRefresh(plan, env.GITHUB_ACTIONS_TOKEN);
+        if (result.dispatched) {
+          console.log('Promiedos acquisition dispatched', { days: plan.days.length, games: plan.games.length });
+        }
+      } catch (caught) {
+        console.error('Promiedos acquisition dispatch failed', caught instanceof Error ? caught.message : 'Error desconocido');
+      }
+    })());
   },
 } satisfies ExportedHandler<Env>;

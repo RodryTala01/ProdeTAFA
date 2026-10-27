@@ -11,7 +11,7 @@
     "crons": ["*/5 * * * *"]
   },
   "secrets": {
-    "required": ["FOOTBALL_API_KEY"]
+    "required": ["FOOTBALL_API_KEY", "PROMIEDOS_INGEST_TOKEN", "GITHUB_ACTIONS_TOKEN"]
   },
   "d1_databases": [
     {

@@ -65,7 +65,7 @@ async function authenticated(request: Request, token?: string) {
   let diff=0;for(let i=0;i<a.length;i++)diff|=a[i]^b[i];return diff===0;
 }
 
-async function work(db:D1Database) {
+export async function getPromiedosWorkPlan(db:D1Database) {
   const pending = await db.prepare(`SELECT kind,cache_key FROM promiedos_cache WHERE requested_at IS NOT NULL
     AND (kind='day' OR NOT EXISTS (SELECT 1 FROM matches WHERE provider_fixture_id=cache_key
       AND provider IN ('promiedos','manual') AND ${manualResultSql('matches')}))
@@ -93,7 +93,7 @@ export async function handlePromiedosCache(request: Request, env: Env): Promise<
   const path=new URL(request.url).pathname;
   if (!path.startsWith('/api/internal/promiedos-cache')) return null;
   if (!await authenticated(request,env.PROMIEDOS_INGEST_TOKEN)) return json({error:'Acceso no autorizado'},401);
-  if (path==='/api/internal/promiedos-cache/work' && request.method==='GET') return json(await work(env.DB));
+  if (path==='/api/internal/promiedos-cache/work' && request.method==='GET') return json(await getPromiedosWorkPlan(env.DB));
   if (path!=='/api/internal/promiedos-cache' || request.method!=='POST') return json({error:'Ruta o método no permitido'},405);
   try {
     const reader=request.body?.getReader();if(!reader)return json({error:'Cuerpo requerido'},400);

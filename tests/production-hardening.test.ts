@@ -82,19 +82,19 @@ describe('smoke T32 read-only', () => {
 
 describe('preflight de configuración productiva', () => {
   const config = {
-    secrets: { required: ['FOOTBALL_API_KEY'] },
+    secrets: { required: ['FOOTBALL_API_KEY','PROMIEDOS_INGEST_TOKEN','GITHUB_ACTIONS_TOKEN'] },
     triggers: { crons: ['*/5 * * * *'] },
   };
 
   it('consulta secreto y deployments sin ejecutar acciones de escritura', () => {
     const run = vi.fn((args: string[]) => {
-      if (args[0] === 'secret') return JSON.stringify([{ name: 'FOOTBALL_API_KEY', type: 'secret_text' }]);
+      if (args[0] === 'secret') return JSON.stringify([{ name: 'FOOTBALL_API_KEY', type: 'secret_text' },{ name: 'PROMIEDOS_INGEST_TOKEN', type: 'secret_text' },{ name: 'GITHUB_ACTIONS_TOKEN', type: 'secret_text' }]);
       if (args[0] === 'deployments') return JSON.stringify([{ id: 'deployment-1' }]);
       throw new Error(`comando inesperado: ${args.join(' ')}`);
     });
 
     expect(checkProductionConfig(run, config)).toEqual({
-      requiredSecret: 'FOOTBALL_API_KEY',
+      requiredSecrets: ['FOOTBALL_API_KEY','PROMIEDOS_INGEST_TOKEN','GITHUB_ACTIONS_TOKEN'],
       requiredCron: '*/5 * * * *',
       deploymentCount: 1,
     });
@@ -106,7 +106,7 @@ describe('preflight de configuración productiva', () => {
 
   it('bloquea secreto, cron o deployment faltantes', () => {
     const goodRun = (args: string[]) => args[0] === 'secret'
-      ? JSON.stringify([{ name: 'FOOTBALL_API_KEY' }])
+      ? JSON.stringify([{ name: 'FOOTBALL_API_KEY' },{ name: 'PROMIEDOS_INGEST_TOKEN' },{ name: 'GITHUB_ACTIONS_TOKEN' }])
       : JSON.stringify([{ id: 'deployment-1' }]);
 
     expect(() => checkProductionConfig(goodRun, {
@@ -115,12 +115,12 @@ describe('preflight de configuración productiva', () => {
     })).toThrow(/FOOTBALL_API_KEY/);
 
     expect(() => checkProductionConfig(goodRun, {
-      secrets: { required: ['FOOTBALL_API_KEY'] },
+      secrets: { required: ['FOOTBALL_API_KEY','PROMIEDOS_INGEST_TOKEN','GITHUB_ACTIONS_TOKEN'] },
       triggers: { crons: [] },
     })).toThrow(/Cron/);
 
     expect(() => checkProductionConfig(
-      (args) => args[0] === 'secret' ? JSON.stringify([{ name: 'FOOTBALL_API_KEY' }]) : '[]',
+      (args) => args[0] === 'secret' ? JSON.stringify([{ name: 'FOOTBALL_API_KEY' },{ name: 'PROMIEDOS_INGEST_TOKEN' },{ name: 'GITHUB_ACTIONS_TOKEN' }]) : '[]',
       config,
     )).toThrow(/deployment/);
   });

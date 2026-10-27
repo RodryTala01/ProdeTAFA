@@ -106,7 +106,7 @@ El nombre interno se conserva por compatibilidad. **No significa que el partido 
 ## Resultados y correcciones
 
 - Nuevos partidos: Promiedos adquirido exclusivamente desde GitHub Actions y leído por el Worker desde la caché aislada 0015. El cliente de red y descubrimiento X-VER viven fuera del Worker; API-Football se conserva para partidos legacy.
-- Caché de proveedor únicamente: ingesta autenticada sin escrituras deportivas, vencimiento explícito, snapshots antiguos rechazados. Sin datos frescos, solicitar adquisición y conservar resultados. Adquisición autorizada cada 5 minutos por GitHub Actions, conservando workflow_dispatch; ver PROMIEDOS-CACHE.md.
+- Caché de proveedor únicamente: ingesta autenticada sin escrituras deportivas, vencimiento explícito, snapshots antiguos rechazados. Sin datos frescos, solicitar adquisición y conservar resultados. El Cron de Cloudflare cada 5 minutos dispara `workflow_dispatch` de GitHub Actions sólo cuando hay trabajo Promiedos; GitHub Actions realiza la adquisición y el Worker nunca consulta Promiedos directamente. Ver PROMIEDOS-CACHE.md.
 - Promiedos: horarios Buenos Aires convertidos explícitamente a UTC; resultado reglamentario desde etapa de 90 minutos. Ante datos ambiguos conservar estado y solicitar revisión.
 - Correcciones manuales conservan provider; auditoría existente registra activación/reset de forma atómica, sin migración.
 - Citar Promiedos en pantallas de fixtures/resultados.
