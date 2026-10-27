@@ -15,8 +15,10 @@ function assert(condition: unknown): asserts condition {
 }
 const object = (x: unknown): x is Record<string, any> => !!x && typeof x === 'object' && !Array.isArray(x);
 const idValid = (id: unknown): id is string => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(id);
-// Both /games and /gamecenter return Argentine wall time (DD-MM-YYYY HH:mm),
-// not UTC. Convert once to UTC; cache retains the original provider string.
+// Both /games and /gamecenter expose UTC-5 wall time (DD-MM-YYYY HH:mm).
+// Observed against fixtures in Argentina and Germany on 2026-10-27.
+// Convert once to UTC; the UI then renders America/Argentina/Buenos_Aires.
+// Cache retains the original provider string.
 export function promiedosKickoff(value: string) {
   const m = /^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})$/.exec(value);
   assert(m);
@@ -25,7 +27,7 @@ export function promiedosKickoff(value: string) {
   const check = new Date(wall);
   assert(check.getUTCFullYear() === +y && check.getUTCMonth() === +mo - 1 && check.getUTCDate() === +d && +h < 24 && +mi < 60);
   // Resolve the named zone, including historical offsets; never use host timezone.
-  const format = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  const format = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
   const parts = Object.fromEntries(format.formatToParts(check).map(p => [p.type, p.value]));
   const offset = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute) - wall;
   const result = new Date(wall - offset);

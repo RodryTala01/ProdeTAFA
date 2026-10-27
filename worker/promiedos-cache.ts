@@ -38,7 +38,9 @@ export async function getCachedGame(id: string, db: D1Database) {
 // Adding a fixture uses the selected day's cached list, not gamecenter.
 export async function getCachedFixture(id: string, kickoff: string, db: D1Database) {
   if (!Number.isFinite(Date.parse(kickoff))) throw new PromiedosError('Horario inválido');
-  const date = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(kickoff));
+  // The cached /games day key follows the provider's UTC-5 calendar day.
+  // After midnight in Argentina the provider may still be on the previous day.
+  const date = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(kickoff));
   const fixtures = await searchCachedFixtures(date,db);
   const found = fixtures.find(g=>g.providerFixtureId===id);
   if (!found) throw new PromiedosError('El partido no está en la caché de esa fecha. Actualizá la búsqueda.');
