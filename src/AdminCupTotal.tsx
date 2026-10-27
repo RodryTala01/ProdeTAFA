@@ -78,6 +78,7 @@ export default function AdminCupTotal({
   const ko = competition.stages
     .filter((s) => s.stageType === 'KNOCKOUT')
     .sort((a, b) => a.sequence - b.sequence);
+  const [drawPreview,setDrawPreview]=useState<null|{randomSeed:number;groupSizes:number[];groups:Array<{code:string;name:string;userIds:string[];participants:Array<{userId:string;fullName:string}>}>}>(null);
   const [tab, setTab] = useState('Resumen'),
     [ctx, setCtx] = useState<Context | null>(null),
     [groups, setGroups] = useState<Group[]>([]),
@@ -184,6 +185,13 @@ export default function AdminCupTotal({
     pots.push(seeds.slice(cursor, cursor + width));
     cursor += width;
   }
+  async function previewGroups() {
+    await run(async()=>{
+      const groupSizes=groups.map(g=>g.userIds.length);
+      const d=await cupApi<{randomSeed:number;groups:NonNullable<typeof drawPreview>['groups']}>(`${cupAdmin}/stages/${stage.id}/total/groups/draw`,'POST',{preview:true,groupSizes});
+      setDrawPreview({...d,groupSizes});
+    });
+  }
   async function saveGroups() {
     await run(async () => {
       const d = await cupApi<{ randomSeed?: number }>(
@@ -191,9 +199,10 @@ export default function AdminCupTotal({
         'POST',
         mode === 'MANUAL'
           ? { groups }
-          : { groupSizes: groups.map((g) => g.userIds.length) },
+          : { groupSizes:drawPreview?.groupSizes??groups.map(g=>g.userIds.length),randomSeed:drawPreview?.randomSeed,expectedGroups:drawPreview?.groups.map(g=>({code:g.code,userIds:g.userIds})) },
       );
       await load();
+      setDrawPreview(null);
       setMessage(
         `Grupos guardados · ${mode === 'MANUAL' ? 'Manual' : 'Automático'}${d.randomSeed == null ? '' : ` · Semilla ${d.randomSeed}`}`,
       );
@@ -368,7 +377,7 @@ export default function AdminCupTotal({
               className="button button--primary"
               disabled={groupLocked}
               aria-pressed={mode === 'MANUAL'}
-              onClick={() => setMode('MANUAL')}
+              onClick={() => {setMode('MANUAL');setDrawPreview(null);}}
             >
               Armar manualmente
             </button>
@@ -376,7 +385,7 @@ export default function AdminCupTotal({
               className="button button--secondary"
               disabled={groupLocked}
               aria-pressed={mode === 'AUTOMATIC'}
-              onClick={() => setMode('AUTOMATIC')}
+              onClick={() => {setMode('AUTOMATIC');setDrawPreview(null);}}
             >
               Sorteo automático
             </button>
@@ -480,18 +489,15 @@ export default function AdminCupTotal({
               bombos antes de ejecutarlo.
             </p>
           )}
-          <button
-            className="button button--primary"
-            disabled={
-              groupLocked ||
-              !people.length ||
-              (mode === 'MANUAL' && selected.some((v) => !v))
-            }
-            onClick={() => void saveGroups()}
-          >
-            {mode === 'MANUAL'
-              ? 'Guardar grupos manuales'
-              : 'Ejecutar sorteo de grupos'}
+          {mode==='AUTOMATIC'&&<>
+            <button className="button button--secondary" disabled={groupLocked||!people.length} onClick={()=>void previewGroups()}>{drawPreview?'Repetir sorteo · Nueva vista previa':'Generar vista previa del sorteo'}</button>
+            {drawPreview&&<section className="asc-draw-preview" aria-label="Vista previa del sorteo de Copa Total">
+              <h4>Propuesta sin guardar · Semilla {drawPreview.randomSeed}</h4><p>Esta distribución se puede repetir. Confirmar guardará los grupos mostrados.</p>
+              <div className="cup-grid">{drawPreview.groups.map(g=><article key={g.code}><strong>{g.name}</strong><ol>{g.participants.map(p=><li key={p.userId}>{p.fullName}</li>)}</ol></article>)}</div>
+            </section>}
+          </>}
+          <button className="button button--primary" disabled={groupLocked||!people.length||(mode==='MANUAL'&&selected.some(v=>!v))||(mode==='AUTOMATIC'&&!drawPreview)} onClick={()=>void saveGroups()}>
+            {mode==='MANUAL'?'Guardar grupos manuales':'Confirmar los grupos de esta vista previa'}
           </button>
         </>
       )}
