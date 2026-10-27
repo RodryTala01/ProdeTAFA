@@ -4,7 +4,7 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {normalizePromiedosResult,promiedosKickoff,type PromiedosGame} from '../worker/promiedos';
 import {getPromiedosGame} from '../scripts/promiedos-client';
-import {handlePromiedosCache,searchCachedFixtures} from '../worker/promiedos-cache';
+import {handlePromiedosCache,searchCachedFixtures,repairCachedKickoffTimes} from '../worker/promiedos-cache';
 import {handleAdminRounds} from '../worker/rounds';
 import {syncRoundResults,syncEligibleRounds} from '../worker/results';
 import {handleAdminCorrections} from '../worker/admin-corrections';
@@ -162,6 +162,17 @@ it('fresh sync repairs an erroneously early kickoff after its stored lock withou
  await syncRoundResults(1,env());
  expect(db.prepare('SELECT kickoff_at FROM matches').get()?.kickoff_at).toBe('2026-10-11T17:30:00.000Z');
  expect(db.prepare('SELECT * FROM official_predictions').all()).toEqual(before);
+});
+it('scheduled repair corrects an old kickoff before the game, without touching predictions or results',async()=>{
+ insert();db.exec("UPDATE rounds SET status='open'");cache('day','2026-10-10',[game()]);
+ const before=db.prepare('SELECT * FROM official_predictions').all();
+ expect(await repairCachedKickoffTimes(env().DB)).toBe(1);
+ expect(db.prepare('SELECT kickoff_at,status,result_finalized_at FROM matches').get()).toMatchObject({kickoff_at:'2026-10-10T20:45:00.000Z',status:'NS',result_finalized_at:null});
+ expect(db.prepare('SELECT * FROM official_predictions').all()).toEqual(before);
+ expect(await repairCachedKickoffTimes(env().DB)).toBe(0);
+ db.exec("UPDATE matches SET kickoff_at='2026-10-10T18:45:00Z',status='LIVE'");
+ expect(await repairCachedKickoffTimes(env().DB)).toBe(0);
+ expect(db.prepare('SELECT kickoff_at FROM matches').get()?.kickoff_at).toBe('2026-10-10T18:45:00Z');
 });
 it('NS to LIVE persists score/minute, LIVE to FT persists final regulation',async()=>{
  insert();respond(game({status:{enum:2,name:'Entretiempo'},game_time:45,events:[],scores:[1,0]}));
