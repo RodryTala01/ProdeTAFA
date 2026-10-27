@@ -64,3 +64,12 @@
  .asc-step-nav button { flex:0 0 85px; }
  .asc-guide-title { align-items:start; flex-direction:column; }
 }
+
+/* Draft sports previews are intentionally distinct from confirmed groups. */
+.asc-draw-preview { border:1px solid var(--warning); border-radius:var(--radius-panel); padding:16px; background:var(--surface-raised); margin:14px 0; }
+.asc-draw-preview h4 { margin:0 0 8px; color:var(--warning); }
+.asc-draw-preview p { color:var(--text-muted); font-size:.82rem; }
+.asc-draw-preview .cup-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px; }
+.asc-draw-preview .cup-grid article { padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm); }
+.asc-draw-preview li { padding:3px 0;overflow-wrap:anywhere;font-size:.8rem; }
+.asc-draw-preview ol { padding-left:22px; }

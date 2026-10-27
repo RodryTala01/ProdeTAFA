@@ -108,7 +108,10 @@ export async function totalGroupContext(env: Env, stageId: number) {
 async function drawGroups(request:Request,env:Env,user:SessionUser,stageId:number) {
   const context=await totalGroupContext(env,stageId);
   if(!context)return error('Etapa de Copa Total no encontrada',404);
-  const body=await request.json().catch(()=>null) as {groupSizes?:number[]}|null;
+  const body=await request.json().catch(()=>null) as {groupSizes?:number[];preview?:boolean;randomSeed?:number;expectedGroups?:Array<{code:string;userIds:string[]}>}|null;
+  if ([context.stage.season_status,context.stage.competition_status].some(s=>['finished','archived'].includes(s))||context.stage.status!=='draft'||context.fixtureCount>0)return error('Los grupos ya están bloqueados',409);
+  if(body?.randomSeed!==undefined&&(!Number.isInteger(body.randomSeed)||body.randomSeed<0||body.randomSeed>0xffffffff))return error('Semilla de sorteo inválida');
+  if(body?.randomSeed!==undefined&&!body.preview&&!Array.isArray(body.expectedGroups))return error('Revisá la vista previa antes de confirmar',409);
   const sizes=body?.groupSizes;
   if(!Array.isArray(sizes)||!sizes.length||sizes.some(n=>!Number.isInteger(n)||n<3||n>5)||sizes.reduce((a,b)=>a+b,0)!==context.eligible.length) return error('Las plazas deben incluir a todos en grupos de 3 a 5');
   const rankingResponse=await handleIffhs(new Request(new URL(`/api/competition-engine/iffhs/ranking?throughSeason=${context.stage.season_number-1}`,request.url),{headers:request.headers}),env);
@@ -118,7 +121,7 @@ async function drawGroups(request:Request,env:Env,user:SessionUser,stageId:numbe
   const ordered=[...context.eligible].sort((a,b)=>(rank.get(a.userId)??Infinity)-(rank.get(b.userId)??Infinity)).map(p=>p.userId);
   const champion=context.defendingChampionUserId;
   const seedOrder=champion?[champion,...ordered.filter(id=>id!==champion)]:ordered;
-  const randomSeed=crypto.getRandomValues(new Uint32Array(1))[0];let state=randomSeed;
+  const randomSeed=body?.randomSeed??crypto.getRandomValues(new Uint32Array(1))[0];let state=randomSeed;
   const random=()=>{state+=0x6d2b79f5;let v=state;v=Math.imul(v^(v>>>15),v|1);v^=v+Math.imul(v^(v>>>7),v|61);return ((v^(v>>>14))>>>0)/4294967296;};
   const shuffle=<T,>(items:T[])=>{const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;};
   const groups=sizes.map((_,i)=>({code:String.fromCharCode(65+i),name:`Grupo ${String.fromCharCode(65+i)}`,userIds:[] as string[]}));
@@ -129,6 +132,8 @@ async function drawGroups(request:Request,env:Env,user:SessionUser,stageId:numbe
     if(pot===0&&champion){groups[0].userIds.push(champion);users=users.filter(id=>id!==champion);available.splice(available.indexOf(0),1);}
     const targets=shuffle(available);shuffle(users).forEach((id,i)=>groups[targets[i]].userIds.push(id));
   }
+  if(body?.preview)return json({ok:true,preview:true,stageId,randomSeed,groups:groups.map(g=>({...g,participants:g.userIds.map(userId=>({userId,fullName:context.eligible.find(p=>p.userId===userId)?.fullName??'Participante'}))}))});
+  if(body?.expectedGroups&&JSON.stringify(body.expectedGroups.map(g=>({code:g.code,userIds:g.userIds})))!==JSON.stringify(groups.map(g=>({code:g.code,userIds:g.userIds}))))return error('La propuesta ya no coincide con la vista previa. Generá otra.',409);
   return configureGroups(new Request(request.url,{method:'POST',headers:request.headers,body:JSON.stringify({groups})}),env,user,stageId,{randomSeed,rankingUserIds:ordered,effectiveSeedOrder:seedOrder,defendingChampionUserId:champion});
 }
 

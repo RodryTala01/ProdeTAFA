@@ -18,6 +18,9 @@ type DrawBody = {
   rankingUserIds?: string[];
   defendingChampionUserId?: string | null;
   groupCount?: number;
+  preview?: boolean;
+  randomSeed?: number;
+  expectedGroups?: Array<{code:string;userIds:string[]}>;
 };
 
 const SESSION_COOKIE = 'prode_session';
@@ -219,9 +222,11 @@ async function drawGroups(request: Request, env: Env, user: SessionUser, stageId
     ? [defendingChampionUserId, ...ranking.filter((userId) => userId !== defendingChampionUserId)]
     : [...ranking];
 
+  if (body?.randomSeed !== undefined && (!Number.isInteger(body.randomSeed) || body.randomSeed < 0 || body.randomSeed > 0xffffffff)) return error('Semilla de sorteo inválida');
+  if (body?.randomSeed !== undefined && !body.preview && !Array.isArray(body.expectedGroups)) return error('Revisá la vista previa antes de confirmar el sorteo',409);
   const randomSeedBytes = new Uint32Array(1);
   crypto.getRandomValues(randomSeedBytes);
-  const randomSeed = Number(randomSeedBytes[0]);
+  const randomSeed = body?.randomSeed ?? Number(randomSeedBytes[0]);
   const random = mulberry32(randomSeed);
 
   const groups: Array<{ code: string; name: string; userIds: string[]; pots: number[] }> = Array.from(
@@ -255,6 +260,9 @@ async function drawGroups(request: Request, env: Env, user: SessionUser, stageId
     });
   }
 
+  const resultGroups=groups.map(group=>({...group,participants:group.userIds.map((userId,index)=>({userId,fullName:participants.find(p=>p.user_id===userId)?.full_name,pot:group.pots[index]}))}));
+  if (body?.preview) return json({ok:true,preview:true,stageId,competitionCode:stage.competition_code,randomSeed,groupCount,defendingChampionUserId,effectiveSeedOrder:seedOrder,groups:resultGroups});
+  if (body?.expectedGroups && JSON.stringify(body.expectedGroups.map(g=>({code:g.code,userIds:g.userIds}))) !== JSON.stringify(groups.map(g=>({code:g.code,userIds:g.userIds})))) return error('El sorteo ya no coincide con la vista previa. Generá una nueva antes de confirmar.',409);
   let entryByUser: Map<string, number>;
   try {
     entryByUser = await ensureEntries(env, stage.competition_id, participants, seedOrder);
@@ -262,7 +270,6 @@ async function drawGroups(request: Request, env: Env, user: SessionUser, stageId
     return error(caught instanceof Error ? caught.message : 'No se pudieron crear las entradas de Copa', 500);
   }
 
-  const resultGroups=groups.map(group=>({...group,participants:group.userIds.map((userId,index)=>({userId,fullName:participants.find(p=>p.user_id===userId)?.full_name,pot:group.pots[index]}))}));
   const configured=await configureGroups(new Request(request.url,{method:'POST',headers:request.headers,
      body:JSON.stringify({groups,defendingChampionUserId,reason:body.reason})}),env,user,stageId,{
       randomSeed,groupCount,defendingChampionUserId,rankingUserIds:ranking,effectiveSeedOrder:seedOrder,

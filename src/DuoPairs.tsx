@@ -12,6 +12,7 @@ export default function DuoPairs({
   disabled: boolean;
   onChanged: () => Promise<void>;
 }) {
+  const [drawPreview,setDrawPreview]=useState<null|{randomSeed:number;pairs:Array<{displayName:string;members:Array<{userId:string;fullName:string}>}>}>(null);
   const [mode, setMode] = useState('MANUAL'),
     [pairs, setPairs] = useState<string[][]>(
       Array.from({ length: Math.floor(context.eligible.length / 2) }, () => [
@@ -22,6 +23,14 @@ export default function DuoPairs({
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [message, setMessage] = useState('');
+  async function previewPairs() {
+    setBusy(true);setError('');
+    try {
+      const d=await cupApi<NonNullable<typeof drawPreview>>(`${cupAdmin}/competitions/${c.id}/duos/draw`,'POST',{preview:true});
+      setDrawPreview(d);
+    } catch(e){setError((e as Error).message);}
+    finally{setBusy(false);}
+  }
   async function save() {
     setBusy(true);
     setError('');
@@ -29,11 +38,12 @@ export default function DuoPairs({
       const d = await cupApi<{ randomSeed?: number }>(
         `${cupAdmin}/competitions/${c.id}/duos/${mode === 'MANUAL' ? 'pairs' : 'draw'}`,
         'POST',
-        mode === 'MANUAL' ? { pairs } : {},
+        mode === 'MANUAL' ? { pairs } : {randomSeed:drawPreview?.randomSeed,expectedPairs:drawPreview?.pairs.map(p=>p.members.map(m=>m.userId))},
       );
       setMessage(
         `Parejas guardadas · ${mode === 'MANUAL' ? 'Manual' : `Automático · Semilla ${d.randomSeed}`}`,
       );
+      setDrawPreview(null);
       await onChanged();
     } catch (e) {
       setError((e as Error).message);
@@ -52,14 +62,14 @@ export default function DuoPairs({
             <button
               className="button button--primary"
               aria-pressed={mode === 'MANUAL'}
-              onClick={() => setMode('MANUAL')}
+              onClick={() => {setMode('MANUAL');setDrawPreview(null);}}
             >
               Armar parejas manualmente
             </button>
             <button
               className="button button--secondary"
               aria-pressed={mode === 'AUTOMATIC'}
-              onClick={() => setMode('AUTOMATIC')}
+              onClick={() => {setMode('AUTOMATIC');setDrawPreview(null);}}
             >
               Sortear automáticamente
             </button>
@@ -125,19 +135,16 @@ export default function DuoPairs({
               </ul>
             </>
           )}
-          <button
-            className="button button--primary"
-            disabled={
-              locked ||
-              odd ||
-              context.eligible.length < 2 ||
-              (mode === 'MANUAL' && pairs.flat().some((v) => !v))
-            }
-            onClick={() => void save()}
-          >
-            {mode === 'MANUAL'
-              ? 'Guardar parejas manuales'
-              : 'Ejecutar sorteo de parejas'}
+          {mode==='AUTOMATIC'&&<>
+            <button className="button button--secondary" disabled={locked||odd||context.eligible.length<2} onClick={()=>void previewPairs()}>{drawPreview?'Repetir sorteo · Otra propuesta':'Generar vista previa de parejas'}</button>
+            {drawPreview&&<section className="asc-draw-preview" aria-label="Vista previa de parejas de Copa Dúos">
+              <h4>Propuesta sin guardar · Semilla {drawPreview.randomSeed}</h4>
+              <p>Las parejas no se crean hasta confirmar este sorteo.</p>
+              <div className="cup-grid">{drawPreview.pairs.map((p,i)=><article key={i}><strong>{p.displayName}</strong><p>{p.members.map(m=>m.fullName).join(' + ')}</p></article>)}</div>
+            </section>}
+          </>}
+          <button className="button button--primary" disabled={locked||odd||context.eligible.length<2||(mode==='MANUAL'&&pairs.flat().some(v=>!v))||(mode==='AUTOMATIC'&&!drawPreview)} onClick={()=>void save()}>
+            {mode==='MANUAL'?'Guardar parejas manuales':'Confirmar estas parejas'}
           </button>
         </>
       )}

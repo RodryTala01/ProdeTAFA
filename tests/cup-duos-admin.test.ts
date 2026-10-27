@@ -195,6 +195,24 @@ describe('Copa Dúos Admin real D1', () => {
       (await call(`${base}/competitions/1/duos/draw`, 'POST', {})).status,
     ).toBe(409);
   });
+  it('previsualiza parejas sin escribir y rechaza confirmación distinta',async()=>{
+    const path=`${base}/competitions/1/duos/draw`;
+    const pre=await call(path,'POST',{preview:true});
+    expect(pre.status).toBe(200);
+    const d=await pre.json() as any;
+    expect(d.pairs).toHaveLength(8);
+    expect(scalar('SELECT COUNT(*) FROM competition_entries')).toBe(0);
+    expect(scalar('SELECT COUNT(*) FROM audit_log')).toBe(0);
+    const expected=d.pairs.map((p:any)=>p.members.map((m:any)=>m.userId));
+    const bad=expected.map((ids:string[])=>[...ids]);
+    bad[0][0]='P999';
+    expect((await call(path,'POST',{randomSeed:d.randomSeed,expectedPairs:bad})).status).toBe(409);
+    expect(scalar('SELECT COUNT(*) FROM competition_entries')).toBe(0);
+    const commit=await call(path,'POST',{randomSeed:d.randomSeed,expectedPairs:expected});
+    expect(commit.status).toBe(200);
+    const actual=await commit.json() as any;
+    expect(actual.pairs.map((p:any)=>p.members.map((m:any)=>m.userId))).toEqual(expected);
+  });
   it('automático conserva seed y no permite rearmar', async () => {
     const r = await call(`${base}/competitions/1/duos/draw`, 'POST', {});
     const d: any = await r.json();
