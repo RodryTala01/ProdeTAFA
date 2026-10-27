@@ -331,14 +331,15 @@ export default function AdminCompetitions() {
               </div>
             </div>
 
-            {selectedCompetitionId === null && <details className="admin-disclosure"><summary>Resultados de temporada · IFFHS · Transición</summary><AdminSeasonTransition key={`transition-${selected.id}`} seasonId={selected.id} seasonNumber={selected.seasonNumber} existingTarget={data?.seasons.find(s=>s.seasonNumber===selected.seasonNumber+1)??null} onOpenTarget={async id=>{setSelectedCompetitionId(null);await load(id);}}/>
-            <AdminIffhs key={selected.id} seasonNumber={selected.seasonNumber} competitions={selected.competitions} participants={data?.participants??[]}/></details>}
+            {selectedCompetitionId === null && <section className="admin-season-close"><h2>Cierre de temporada · T{selected.seasonNumber}</h2><p>Resultados de temporada, ranking IFFHS y transición a la próxima edición.</p><details className="admin-disclosure"><summary>Abrir herramientas de cierre de temporada</summary><AdminSeasonTransition key={`transition-${selected.id}`} seasonId={selected.id} seasonNumber={selected.seasonNumber} existingTarget={data?.seasons.find(s=>s.seasonNumber===selected.seasonNumber+1)??null} onOpenTarget={async id=>{setSelectedCompetitionId(null);await load(id);}}/>
+            <AdminIffhs key={selected.id} seasonNumber={selected.seasonNumber} competitions={selected.competitions} participants={data?.participants??[]}/></details></section>}
             {selected.competitions.length === 0 && <p>Esta temporada todavía no tiene competiciones.</p>}
             <div className={selectedCompetitionId === null ? "competition-directory" : "form-stack"}>
               {selected.competitions.filter((competition) => selectedCompetitionId === null || competition.id === selectedCompetitionId).map((competition) => (
                 <div className={selectedCompetitionId === null ? "competition-directory-row" : "competition-workspace"} key={competition.id}>
                   <div className="panel-heading">
                     <div>
+                      {selectedCompetitionId !== null && <p className="eyebrow" aria-label="Ubicación actual">T{selected.seasonNumber} › {competition.displayName} › Administración</p>}
                       <span className="eyebrow">{familyLabel(competition.family)}{competition.divisionCode ? ` · DIVISIÓN ${competition.divisionCode}` : ''}</span>
                       <h2>{competition.displayName}</h2>
                       <p>{competition.stages.filter(stage => ['active','open','in_progress'].includes(stage.status)).map(stage => stage.name).join(' · ') || `${competition.stages.length} etapas`} · {competition.roundLinks.length} Fechas vinculadas</p>
@@ -351,7 +352,8 @@ export default function AdminCompetitions() {
                     <button className="button button--secondary" onClick={() => setSelectedCompetitionId(competition.id)}>Administrar {competition.displayName}</button>
                   ) : <>
                   <button className="button button--ghost" onClick={() => setSelectedCompetitionId(null)}>Volver a competiciones</button>
-                  <p>{selected.name} · {competition.displayName}</p>
+                  <p className="admin-help">T{selected.seasonNumber} › {competition.displayName} · Elegí la herramienta que necesitás.</p>
+                  <h3>Fixture y desarrollo deportivo</h3>
                   {competition.family === 'LEAGUE' && <div className="admin-league-note"><p>Administrá las Fechas y configuración de {competition.displayName} aquí. La Liga anterior mantiene su administración independiente.</p><button className="button button--ghost" onClick={() => setLegacyLeague(true)}>Abrir administración de Liga anterior</button></div>}
                   {competition.family !== 'LEAGUE' && !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION'].includes(competition.code) && <p className="competition-pending">Configuración deportiva específica pendiente. El armado de grupos, parejas y cruces tendrá opciones asistida y manual, con validaciones y auditoría.</p>}
                   {['COPA_A','COPA_B'].includes(competition.code) && competition.stages.some(s=>s.stageType==='ACCUMULATIVE_GROUPS') && <AdminCupAb key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
@@ -360,8 +362,8 @@ export default function AdminCompetitions() {
                   {competition.code==='COPA_CAMPEONES' && <AdminCupChampions key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='COPA_PAPA' && <AdminCupPapa key={competition.id} competition={competition} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='PROMOCION' && <AdminPromotion key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
-                  {competition.code!=='PROMOCION' && <AdminResults key={`results-${competition.id}`} competition={competition} seasonNumber={selected.seasonNumber} archived={selected.status==='archived'}/>}
-                  <details open={!competition.stages.some(s=>['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS','SURVIVAL_TABLE'].includes(s.stageType)) || !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION'].includes(competition.code)}><summary>Configuración general · Stages · Fechas</summary><p className="admin-help">Stage: etapa interna de la competición. Los vínculos indican qué Fecha alimenta cada etapa.</p>
+                  {competition.code!=='PROMOCION' && <section><h3>Resultados de la competición</h3><AdminResults key={`results-${competition.id}`} competition={competition} seasonNumber={selected.seasonNumber} archived={selected.status==='archived'}/></section>}
+                  <details open={!competition.stages.some(s=>['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS','SURVIVAL_TABLE'].includes(s.stageType)) || !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION'].includes(competition.code)}><summary>Configuración y vínculos de Fechas</summary><p className="admin-help">Configurá las etapas internas y las Fechas que alimentan cada etapa.</p>
                   <CompetitionConfigPanel
                     key={competition.id}
                     competition={competition}

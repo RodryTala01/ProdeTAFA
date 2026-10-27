@@ -51,15 +51,13 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 function localDateInputValue(date = new Date()) {
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
-  return local.toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat('en-CA', {timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
 }
 
 function addDaysToInput(value: string, days: number) {
   const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-  date.setDate(date.getDate() + days);
-  return localDateInputValue(date);
+  const date = new Date(Date.UTC(year, month - 1, day + days));
+  return date.toISOString().slice(0, 10);
 }
 
 function formatKickoff(value: string) { return argentinaDateTime(value); }
@@ -94,6 +92,7 @@ export default function AdminRounds() {
   const [rankingRefresh, setRankingRefresh] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [syncNotice, setSyncNotice] = useState('');
 
   async function loadRound(id: number) {
     const version = ++detailVersion.current;
@@ -146,14 +145,19 @@ export default function AdminRounds() {
 
   async function syncResults() {
     if (!selected) return;
-    setSyncing(true); setError(''); setSuccess('');
+    setSyncing(true); setError(''); setSuccess(''); setSyncNotice('');
     try {
       const data = await api<{ updated: number; finalized: number; calculated: number; requestCount: number; warnings?: string[] }>(
         `/api/admin/sync-round/${selected.id}`,
         { method: 'POST', body: '{}' },
       );
-      if (data.warnings?.length) setError(data.warnings.join(' '));
-      setSuccess(`Resultados actualizados: ${data.updated} partidos, ${data.finalized} finalizados y ${data.calculated} pronósticos recalculados. Se usaron ${data.requestCount} consulta${data.requestCount === 1 ? '' : 's'} al proveedor.`);
+      if (data.warnings?.length && data.updated === 0 && data.finalized === 0 && data.calculated === 0) {
+        setSyncNotice(`Esperando Promiedos: ${data.warnings.join(' ')}`);
+      } else {
+        if (data.warnings?.length) setError(data.warnings.join(' '));
+        if (data.updated || data.finalized || data.calculated) setSuccess(`Resultados actualizados: ${data.updated} partidos, ${data.finalized} finalizados y ${data.calculated} pronósticos recalculados.`);
+        else setSyncNotice('No hubo resultados nuevos para aplicar.');
+      }
       setRankingRefresh((value) => value + 1);
       await loadRounds(selected.id);
     } catch (caught) {
@@ -262,6 +266,7 @@ export default function AdminRounds() {
 
       <section className="round-main">
         {error && <div role="alert" className="alert alert--error">{error}</div>}
+        {syncNotice && <div role="status" className="alert">{syncNotice}</div>}
         {success && <div role="status" className="alert alert--success">{success}</div>}
 
         {detailLoading && <p role="status">Cargando Fecha…</p>}
