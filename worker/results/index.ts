@@ -1,5 +1,5 @@
 import {normalizePromiedosResult, PromiedosError} from '../promiedos';
-import {getCachedGame, PromiedosCachePending} from '../promiedos-cache';
+import {getCachedGame, PromiedosCachePending, repairCachedKickoffTimes} from '../promiedos-cache';
 import {manualResultSql} from '../result-source';
 import {footballFixtures, FootballError} from '../football-api';
 import { recalculateRoundScores } from '../scoring';
@@ -238,6 +238,10 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
 }
 
 export async function syncEligibleRounds(env: Env) {
+  // Correct old kickoff timestamps from existing day cache before the usual
+  // near-start sync eligibility check. This does not fetch Promiedos remotely.
+  try { await repairCachedKickoffTimes(env.DB); }
+  catch { console.error('Scheduled kickoff repair failed; stored times preserved'); }
   const eligible = await env.DB.prepare(`SELECT round_id, id, kickoff_at FROM matches
     WHERE provider IN ('api-football','promiedos') AND NOT ${manualResultSql('matches')}
       AND result_finalized_at IS NULL
