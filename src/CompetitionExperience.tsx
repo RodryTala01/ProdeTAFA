@@ -3,7 +3,7 @@ import {useState} from 'react';
 import {CompetitionImage} from './AssetImage';
 import {competitionHref,entryMembers,entryName,participation,phaseName,type Overview,type Season,type Competition,type Encounter} from './participant-competitions';
 
-const families=[['LIGA_A','LIGA_B'],['COPA_A','COPA_B'],['COPA_TOTAL'],['COPA_DUOS'],['COPA_CAMPEONES'],['COPA_PAPA']];
+const families=[['COPA_TOTAL'],['COPA_A','COPA_B'],['COPA_CAMPEONES'],['COPA_PAPA'],['COPA_DUOS'],['LIGA_A','LIGA_B']];
 const labels:Record<string,string>={LIGA_A:'Liga',LIGA_B:'Liga',COPA_A:'Copa A',COPA_B:'Copa B',COPA_TOTAL:'Copa Total',COPA_DUOS:'Copa Dúos',COPA_CAMPEONES:'Copa Campeones',COPA_PAPA:'Copa Papa'};
 const tones:Record<string,string>={LIGA_A:'league',LIGA_B:'league',COPA_A:'division',COPA_B:'division',COPA_TOTAL:'total',COPA_DUOS:'duos',COPA_CAMPEONES:'champions',COPA_PAPA:'papa'};
 
@@ -61,7 +61,7 @@ export function CompetitionFrame({s,c,user,children}:{s:Season;c:Competition;use
    <a className="cx-sidebar-back" href="#/competiciones">← Todas las competencias</a>
    <div className="cx-nav-scroller"><div className="cx-sidebar-group"><span className="cx-sidebar-label">LIGA</span>{shown.filter(item=>item.family==='LEAGUE').map(item=><CompetitionNavItem key={item.id} s={s} c={item} active={c.id===item.id}/>)}</div>
    <div className="cx-sidebar-group"><span className="cx-sidebar-label">COPAS</span>{shown.filter(item=>item.family!=='LEAGUE').map(item=><CompetitionNavItem key={item.id} s={s} c={item} active={c.id===item.id}/>)}</div></div>
- </aside><main className="cx-detail"><div className="cx-breadcrumb"><a href="#/competiciones">Competencias</a><span aria-hidden="true">/</span><span>{labels[c.code]??c.displayName}</span></div>{children}</main></div>;
+ </aside><div className="cx-detail"><div className="cx-breadcrumb"><a href="#/competiciones">Competencias</a><span aria-hidden="true">/</span><span>{labels[c.code]??c.displayName}</span></div>{children}</div></div>;
 }
 function CompetitionNavItem({s,c,active}:{s:Season;c:Competition;active:boolean}) {
  return <a className={'cx-nav-item'+(active?' cx-nav-item--active':'')} aria-current={active?'page':undefined} href={competitionHref(c.code,s.seasonNumber)}>
