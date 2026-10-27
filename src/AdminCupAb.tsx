@@ -70,6 +70,7 @@ export default function AdminCupAb({
   const [groups, setGroups] = useState<Group[]>([]),
     [count, setCount] = useState(4),
     [champion, setChampion] = useState("");
+  const [drawPreview,setDrawPreview]=useState<null|{randomSeed:number;groupCount:number;rankingUserIds:string[];defendingChampionUserId:string|null;groups:Array<{code:string;name:string;userIds:string[];participants:Array<{userId:string;fullName:string;pot:number}>}>}>(null);
   const [mode, setMode] = useState<"MANUAL" | "AUTOMATIC">("MANUAL"),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
@@ -160,6 +161,14 @@ export default function AdminCupAb({
     ...reference.filter((p) => p.userId !== champion),
   ];
   const selected = groups.flatMap((g) => g.userIds);
+  async function previewAutomatic() {
+    await run(async()=>{
+      const d=await cupApi<NonNullable<typeof drawPreview>>(`${cupAdmin}/stages/${stage.id}/groups/draw`,'POST',{
+        preview:true,rankingUserIds:reference.map(p=>p.userId),groupCount:count,defendingChampionUserId:champion||null,
+      });
+      setDrawPreview(d);
+    });
+  }
   async function save() {
     await run(async () => {
       const result = await cupApi<{ randomSeed?: number }>(
@@ -168,13 +177,16 @@ export default function AdminCupAb({
         mode === "MANUAL"
           ? { groups, defendingChampionUserId: champion || null, reason }
           : {
-              rankingUserIds: reference.map((p) => p.userId),
-              groupCount: count,
-              defendingChampionUserId: champion || null,
+              rankingUserIds: drawPreview?.rankingUserIds??reference.map((p) => p.userId),
+              groupCount: drawPreview?.groupCount??count,
+              defendingChampionUserId: drawPreview?.defendingChampionUserId??champion||null,
+              randomSeed:drawPreview?.randomSeed,
+              expectedGroups:drawPreview?.groups.map(g=>({code:g.code,userIds:g.userIds})),
               reason,
             },
       );
       await load();
+      setDrawPreview(null);
       setMessage(
         `Grupos guardados · ${mode === "MANUAL" ? "Manual" : "Automático"}${result.randomSeed == null ? "" : ` · Semilla ${result.randomSeed}`}`,
       );
@@ -316,7 +328,7 @@ export default function AdminCupAb({
               className="button button--primary"
               disabled={groupLocked}
               aria-pressed={mode === "MANUAL"}
-              onClick={() => setMode("MANUAL")}
+              onClick={() => {setMode("MANUAL");setDrawPreview(null);}}
             >
               Armar manualmente
             </button>
@@ -324,7 +336,7 @@ export default function AdminCupAb({
               className="button button--secondary"
               disabled={groupLocked}
               aria-pressed={mode === "AUTOMATIC"}
-              onClick={() => setMode("AUTOMATIC")}
+              onClick={() => {setMode("AUTOMATIC");setDrawPreview(null);}}
             >
               Sorteo automático
             </button>
@@ -474,18 +486,18 @@ export default function AdminCupAb({
               onChange={(e) => setReason(e.target.value)}
             />
           </label>
+          {mode==='AUTOMATIC'&&<>
+            <button className="button button--secondary" disabled={groupLocked||!eligible.length} onClick={()=>void previewAutomatic()}>{drawPreview?'Repetir sorteo · Nueva vista previa':'Generar vista previa del sorteo'}</button>
+            {drawPreview&&<section className="asc-draw-preview" aria-label="Vista previa del sorteo de Copa A/B">
+              <h4>Propuesta sin guardar · Semilla {drawPreview.randomSeed}</h4><p>Revisá los grupos. Confirmar guardará exactamente esta propuesta.</p>
+              <div className="cup-grid">{drawPreview.groups.map(g=><article key={g.code}><strong>{g.name}</strong><ol>{g.participants.map(p=><li key={p.userId}>{p.fullName} <small>· Bombo {p.pot}</small></li>)}</ol></article>)}</div>
+            </section>}
+          </>}
           <button
             className="button button--primary"
-            disabled={
-              groupLocked ||
-              !eligible.length ||
-              (mode === "MANUAL" && selected.some((v) => !v))
-            }
-            onClick={() => void save()}
-          >
-            {mode === "MANUAL"
-              ? "Guardar grupos manuales"
-              : "Ejecutar sorteo de grupos"}
+            disabled={groupLocked||!eligible.length||(mode==='MANUAL'&&selected.some(v=>!v))||(mode==='AUTOMATIC'&&!drawPreview)}
+            onClick={() => void save()}>
+            {mode === "MANUAL"?"Guardar grupos manuales":"Confirmar los grupos de esta vista previa"}
           </button>
           <h3>Tabla {table?.provisional ? "provisional" : "final"}</h3>
           <button
