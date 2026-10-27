@@ -240,6 +240,27 @@ describe("Copa A/B: endpoints reales con SQLite", () => {
       ).toBe(0);
     },
   );
+  it("previsualiza sin escribir y confirma exactamente los grupos aprobados",async()=>{
+    const args={rankingUserIds:people(),groupCount:4,defendingChampionUserId:'A16'};
+    const pre=await call(`${base}/stages/1/groups/draw`,'POST',{...args,preview:true});
+    expect(pre.status).toBe(200);
+    const d=await pre.json() as any;
+    expect(d.preview).toBe(true);
+    expect(d.groups[0].userIds[0]).toBe('A16');
+    expect(db.prepare('SELECT COUNT(*) n FROM competition_groups').get()?.n).toBe(0);
+    expect(db.prepare('SELECT COUNT(*) n FROM competition_entries').get()?.n).toBe(0);
+    expect(db.prepare('SELECT COUNT(*) n FROM audit_log').get()?.n).toBe(0);
+    const expected=d.groups.map((g:any)=>({code:g.code,userIds:g.userIds}));
+    const wrong=expected.map((g:any)=>({...g,userIds:[...g.userIds]}));
+    wrong[0].userIds[0]='A00';
+    expect((await call(`${base}/stages/1/groups/draw`,'POST',{...args,randomSeed:d.randomSeed,expectedGroups:wrong})).status).toBe(409);
+    expect(db.prepare('SELECT COUNT(*) n FROM competition_groups').get()?.n).toBe(0);
+    const saved=await call(`${base}/stages/1/groups/draw`,'POST',{...args,randomSeed:d.randomSeed,expectedGroups:expected});
+    expect(saved.status).toBe(200);
+    const result=await saved.json() as any;
+    expect(result.groups.map((g:any)=>g.userIds)).toEqual(d.groups.map((g:any)=>g.userIds));
+    expect(db.prepare('SELECT COUNT(*) n FROM audit_log WHERE action=\'competition.groups_drawn\'').get()?.n).toBe(1);
+  });
   it("mantiene sorteo por bombos y semilla auditada", async () => {
     const r = await call(`${base}/stages/1/groups/draw`, "POST", {
       rankingUserIds: people(),
