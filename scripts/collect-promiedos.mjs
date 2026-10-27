@@ -1,5 +1,6 @@
 import {build} from 'esbuild';
-import {mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,writeFile,appendFile,rm} from 'node:fs/promises';
+import {collectProviderCache,acquisitionExitCode} from './promiedos-collection-outcome.mjs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -24,21 +25,45 @@ try {
   const {getPromiedosDay,getPromiedosGame}=await import(pathToFileURL(modulePath).href);
   const plan=await app('/work');
   if(!Array.isArray(plan.days)||!Array.isArray(plan.games)||plan.days.length>14||plan.games.length>24)throw new Error('Invalid acquisition plan');
-  let uploaded=0,failed=0;const counter={count:0};const gameKeys=[];
-  for(const [kind,keys] of [['day',plan.days],['game',plan.games]]) for(const key of keys) {
-    try {
-      const payload=kind==='day'?await getPromiedosDay(key,counter):await getPromiedosGame(key,counter);
-      await app('',{entries:[{kind,key,fetchedAt:new Date().toISOString(),payload}]});
-      uploaded++;
-      if(kind==='game')gameKeys.push(key);
-    }catch{failed++;console.error('Provider cache item failed',kind,key);}
+  const counter={count:0};
+  const report=await collectProviderCache(plan,{
+    getDay:getPromiedosDay,getGame:getPromiedosGame,
+    upload:entry=>app('',{entries:[entry]}),
+    apply:games=>app('/apply',{games}),
+  },counter);
+  for(const failure of report.providerFailures){
+    const message='Promiedos no disponible · '+failure.kind+' '+failure.key+': '+failure.error;
+    console.warn(message);
+    // A provider failure is a warning, not a failed TAFA workflow.
+    // GitHub sends no failure email for a transient rejected game.
+    console.log('::warning title=Promiedos no disponible::'+message);
   }
-  // The authenticated callback applies freshly uploaded game results immediately,
-  // rather than waiting for Cloudflare's next five-minute scheduled pass.
-  if(gameKeys.length){
-    try {const applied=await app('/apply',{games:gameKeys});console.log('Applied fresh games',applied);}
-    catch(error){failed++;console.error('Fresh results could not be applied',error);}
+  for(const failure of report.internalFailures){
+    console.error('TAFA cache pipeline failed',failure);
   }
-  console.log(JSON.stringify({uploaded,failed,providerRequests:counter.count}));
-  if(failed)process.exitCode=1;
+  if(report.applied!==undefined)console.log('Applied fresh games',report.applied);
+  const status=report.internalFailures.length?'internal-error':report.providerFailures.length?'provider-warning':'ok';
+  const summary={
+    status,uploaded:report.uploaded,
+    providerFailed:report.providerFailures.length,
+    internalFailed:report.internalFailures.length,
+    providerRequests:counter.count,
+  };
+  console.log(JSON.stringify(summary));
+  if(process.env.GITHUB_STEP_SUMMARY){
+    const details=[
+      '### Promiedos · adquisición de datos',
+      '',
+      '| Estado | Adquiridos | Advertencias del proveedor | Errores internos |',
+      '| --- | ---: | ---: | ---: |',
+      '| '+status+' | '+summary.uploaded+' | '+summary.providerFailed+' | '+summary.internalFailed+' |',
+      '',
+      report.providerFailures.length
+        ? 'Los datos no disponibles se volverán a consultar. Los resultados guardados no se modificaron.'
+        : 'Sin advertencias del proveedor.',
+      '',
+    ].join('\n');
+    await appendFile(process.env.GITHUB_STEP_SUMMARY,details);
+  }
+  if(acquisitionExitCode(report))process.exitCode=1;
 }finally{await rm(dir,{recursive:true,force:true});}
