@@ -59,8 +59,8 @@ export function CompetitionFrame({s,c,user,children}:{s:Season;c:Competition;use
  return <div className="cx-layout"><aside className="cx-sidebar" aria-label="Elegir competencia">
    <div className="cx-sidebar-title">COMPETENCIAS <small>T{s.seasonNumber}</small></div>
    <a className="cx-sidebar-back" href="#/competiciones">← Todas las competencias</a>
-   <div className="cx-sidebar-group"><span className="cx-sidebar-label">LIGA</span>{shown.filter(item=>item.family==='LEAGUE').map(item=><CompetitionNavItem key={item.id} s={s} c={item} active={c.id===item.id}/>)}</div>
-   <div className="cx-sidebar-group"><span className="cx-sidebar-label">COPAS</span>{shown.filter(item=>item.family!=='LEAGUE').map(item=><CompetitionNavItem key={item.id} s={s} c={item} active={c.id===item.id}/>)}</div>
+   <div className="cx-nav-scroller"><div className="cx-sidebar-group"><span className="cx-sidebar-label">LIGA</span>{shown.filter(item=>item.family==='LEAGUE').map(item=><CompetitionNavItem key={item.id} s={s} c={item} active={c.id===item.id}/>)}</div>
+   <div className="cx-sidebar-group"><span className="cx-sidebar-label">COPAS</span>{shown.filter(item=>item.family!=='LEAGUE').map(item=><CompetitionNavItem key={item.id} s={s} c={item} active={c.id===item.id}/>)}</div></div>
  </aside><main className="cx-detail"><div className="cx-breadcrumb"><a href="#/competiciones">Competencias</a><span aria-hidden="true">/</span><span>{labels[c.code]??c.displayName}</span></div>{children}</main></div>;
 }
 function CompetitionNavItem({s,c,active}:{s:Season;c:Competition;active:boolean}) {
