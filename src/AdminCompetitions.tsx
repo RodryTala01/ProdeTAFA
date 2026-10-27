@@ -13,6 +13,7 @@ import AdminCupAb from './AdminCupAb';
 import AdminCupTotal from './AdminCupTotal';
 import CompetitionConfigPanel from './CompetitionConfigPanel';
 import { initialSeasonId, isCompetitionClosed, stageTypeLabel, statusLabel } from './competition-presentation';
+import {AdminSeasonCenter,AdminFamilyOverview,CompetitionSetupHeader,AdminSetupParticipants,AdminSetupReview,setupFamilies,type SetupStep} from './AdminSeasonCenter';
 import './admin-competitions.css';
 
 type Division = {
@@ -120,6 +121,9 @@ export default function AdminCompetitions() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<number | null>(null);
+  const [selectedFamilyKey, setSelectedFamilyKey] = useState<string | null>(null);
+  const [setupStep, setSetupStep] = useState<SetupStep>('resumen');
+  const [showDivisions, setShowDivisions] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -238,6 +242,7 @@ export default function AdminCompetitions() {
     } finally { setLoading(false); }
   }
 
+  const currentFamily = setupFamilies.find(f=>f.key===selectedFamilyKey)??null;
   const hasT32 = data?.seasons.some((season) => season.seasonNumber === 32) ?? false;
   const activeParticipants = data?.participants.filter((participant) => participant.isActive) ?? [];
   const availableRounds = data?.rounds ?? [];
@@ -271,7 +276,7 @@ export default function AdminCompetitions() {
         <section className="card panel">
           <label className="field">
             <span>Temporada TAFA</span>
-            <select aria-label="Temporada TAFA" value={selectedSeasonId ?? ''} disabled={loading || fetching} onChange={(event) => { setSelectedSeasonId(Number(event.target.value)); setSelectedCompetitionId(null); setError(''); setSuccess(''); }}>
+            <select aria-label="Temporada TAFA" value={selectedSeasonId ?? ''} disabled={loading || fetching} onChange={(event) => { setSelectedSeasonId(Number(event.target.value)); setSelectedCompetitionId(null); setSelectedFamilyKey(null); setShowDivisions(false); setSetupStep('resumen'); setError(''); setSuccess(''); }}>
               {data.seasons.map((season) => (
                 <option key={season.id} value={season.id}>T{season.seasonNumber} · {season.name} · {statusLabel(season.status)}</option>
               ))}
@@ -282,7 +287,7 @@ export default function AdminCompetitions() {
 
       {selected && (
         <>
-          {selectedCompetitionId === null && <div className="admin-season-summary">
+          {selectedCompetitionId === null && selectedFamilyKey === null && <div className="admin-season-summary">
             <div className="card stat-card"><span>Temporada</span><strong>T{selected.seasonNumber}</strong></div>
             <div className="card stat-card"><span>Estado</span><strong>{statusLabel(selected.status)}</strong></div>
             {selected.divisions.map((division) => (
@@ -290,7 +295,7 @@ export default function AdminCompetitions() {
             ))}
           </div>}
 
-          {selectedCompetitionId === null && <details className="card panel panel--wide">
+          {(selectedCompetitionId === null || showDivisions) && <details className="card panel panel--wide" open={showDivisions} onToggle={event=>setShowDivisions(event.currentTarget.open)}>
             <summary>Administrar temporada y divisiones</summary>
             <div className="panel-heading">
               <div>
@@ -331,12 +336,14 @@ export default function AdminCompetitions() {
               </div>
             </div>
 
-            {selectedCompetitionId === null && <section className="admin-season-close"><h2>Cierre de temporada · T{selected.seasonNumber}</h2><p>Resultados de temporada, ranking IFFHS y transición a la próxima edición.</p><details className="admin-disclosure"><summary>Abrir herramientas de cierre de temporada</summary><AdminSeasonTransition key={`transition-${selected.id}`} seasonId={selected.id} seasonNumber={selected.seasonNumber} existingTarget={data?.seasons.find(s=>s.seasonNumber===selected.seasonNumber+1)??null} onOpenTarget={async id=>{setSelectedCompetitionId(null);await load(id);}}/>
+            {selectedCompetitionId === null && selectedFamilyKey === null && <section className="admin-season-close"><h2>Cierre de temporada · T{selected.seasonNumber}</h2><p>Resultados de temporada, ranking IFFHS y transición a la próxima edición.</p><details className="admin-disclosure"><summary>Abrir herramientas de cierre de temporada</summary><AdminSeasonTransition key={`transition-${selected.id}`} seasonId={selected.id} seasonNumber={selected.seasonNumber} existingTarget={data?.seasons.find(s=>s.seasonNumber===selected.seasonNumber+1)??null} onOpenTarget={async id=>{setSelectedCompetitionId(null);await load(id);}}/>
             <AdminIffhs key={selected.id} seasonNumber={selected.seasonNumber} competitions={selected.competitions} participants={data?.participants??[]}/></details></section>}
             {selected.competitions.length === 0 && <p>Esta temporada todavía no tiene competiciones.</p>}
-            <div className={selectedCompetitionId === null ? "competition-directory" : "form-stack"}>
-              {selected.competitions.filter((competition) => selectedCompetitionId === null || competition.id === selectedCompetitionId).map((competition) => (
-                <div className={selectedCompetitionId === null ? "competition-directory-row" : "competition-workspace"} key={competition.id}>
+            {selectedCompetitionId === null && selectedFamilyKey === null && <AdminSeasonCenter season={selected} onSelectFamily={key=>{setSelectedFamilyKey(key);setSetupStep('resumen');setSelectedCompetitionId(null);}} onSelectCompetition={(competition)=>{setSelectedCompetitionId(competition.id);setSetupStep('resumen');}} onManageSeason={()=>{setShowDivisions(true);}}/>}
+            {selectedCompetitionId === null && currentFamily && <AdminFamilyOverview season={selected} family={currentFamily} onBack={()=>setSelectedFamilyKey(null)} onSelectCompetition={(competition)=>{setSelectedCompetitionId(competition.id);setSetupStep('resumen');setShowDivisions(false);}}/>}
+            <div className="form-stack">
+              {selected.competitions.filter((competition) => selectedCompetitionId !== null && competition.id === selectedCompetitionId).map((competition) => (
+                <div className="competition-workspace" key={competition.id}><CompetitionSetupHeader season={selected} competition={competition} step={setupStep} onStep={setSetupStep} onBack={()=>{setSelectedCompetitionId(null);setShowDivisions(false);}}/>
                   <div className="panel-heading">
                     <div>
                       {selectedCompetitionId !== null && <p className="eyebrow" aria-label="Ubicación actual">T{selected.seasonNumber} › {competition.displayName} › Administración</p>}
@@ -348,10 +355,12 @@ export default function AdminCompetitions() {
                     <span className="user-chip">{statusLabel(competition.status)}</span>
                   </div>
 
-                  {selectedCompetitionId !== competition.id ? (
-                    <button className="button button--secondary" onClick={() => setSelectedCompetitionId(competition.id)}>Administrar {competition.displayName}</button>
-                  ) : <>
-                  <button className="button button--ghost" onClick={() => setSelectedCompetitionId(null)}>Volver a competiciones</button>
+                  <>
+                  {setupStep==='resumen' && <section className="asc-wizard-content"><h3>Preparar {competition.displayName}</h3><p>Esta edición ya forma parte de la temporada. Revisá los participantes, prepará el sorteo o los cruces y vinculá las Fechas necesarias. Ninguna acción deportiva se confirma automáticamente.</p><p><strong>{competition.stages.length} etapas</strong> · <strong>{competition.roundLinks.length} Fechas vinculadas</strong> · {statusLabel(competition.status)}</p><button className="button button--primary" type="button" onClick={()=>setSetupStep('participantes')}>Empezar con los participantes →</button></section>}
+                  {setupStep==='participantes' && <AdminSetupParticipants season={selected} competition={competition} onEditDivisions={()=>setShowDivisions(true)}/>}
+                  {setupStep==='revision' && <AdminSetupReview season={selected} competition={competition} onStep={setSetupStep}/>}
+                  {setupStep==='armado' && <>
+                  <button className="button button--ghost" onClick={() => {setSelectedCompetitionId(null);setShowDivisions(false);}}>Volver a competiciones</button>
                   <p className="admin-help">T{selected.seasonNumber} › {competition.displayName} · Elegí la herramienta que necesitás.</p>
                   <h3>Fixture y desarrollo deportivo</h3>
                   {competition.family === 'LEAGUE' && <div className="admin-league-note"><p>Administrá las Fechas y configuración de {competition.displayName} aquí. La Liga anterior mantiene su administración independiente.</p><button className="button button--ghost" onClick={() => setLegacyLeague(true)}>Abrir administración de Liga anterior</button></div>}
@@ -363,7 +372,8 @@ export default function AdminCompetitions() {
                   {competition.code==='COPA_PAPA' && <AdminCupPapa key={competition.id} competition={competition} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='PROMOCION' && <AdminPromotion key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code!=='PROMOCION' && <section><h3>Resultados de la competición</h3><AdminResults key={`results-${competition.id}`} competition={competition} seasonNumber={selected.seasonNumber} archived={selected.status==='archived'}/></section>}
-                  <details open={!competition.stages.some(s=>['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS','SURVIVAL_TABLE'].includes(s.stageType)) || !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION'].includes(competition.code)}><summary>Configuración y vínculos de Fechas</summary><p className="admin-help">Configurá las etapas internas y las Fechas que alimentan cada etapa.</p>
+                  </>}
+                   {setupStep==='fechas' && <details open><summary>Configuración y vínculos de Fechas</summary><p className="admin-help">Configurá las etapas internas y las Fechas que alimentan cada etapa.</p>
                   <CompetitionConfigPanel
                     key={competition.id}
                     competition={competition}
@@ -408,7 +418,7 @@ export default function AdminCompetitions() {
                       ))}
                     </div>
                   )}
-                  </details>
+                  </details>}
                   </>}
                 </div>
               ))}
