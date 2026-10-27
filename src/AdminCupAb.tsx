@@ -179,7 +179,7 @@ export default function AdminCupAb({
           : {
               rankingUserIds: drawPreview?.rankingUserIds??reference.map((p) => p.userId),
               groupCount: drawPreview?.groupCount??count,
-              defendingChampionUserId: drawPreview?.defendingChampionUserId??champion||null,
+              defendingChampionUserId: drawPreview?.defendingChampionUserId??(champion||null),
               randomSeed:drawPreview?.randomSeed,
               expectedGroups:drawPreview?.groups.map(g=>({code:g.code,userIds:g.userIds})),
               reason,
