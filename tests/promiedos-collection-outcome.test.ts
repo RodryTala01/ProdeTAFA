@@ -58,6 +58,6 @@ describe('Promiedos provider outage handling',()=>{
    expect(acquisitionExitCode(report)).toBe(1);
  });
  it('sanitizes provider-controlled messages in GitHub warnings',()=>{
-   expect(safeError(new Error('HTTP 403\n::error::%payload'))).toBe('HTTP 403  ::error:: payload');
+   expect(safeError(new Error('HTTP 403\n::error::%payload'))).toBe('HTTP 403 ::error:: payload');
  });
 });
