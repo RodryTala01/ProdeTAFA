@@ -125,7 +125,7 @@ async function ensureDuoRound(env: Env, roundLinkId: number) {
   return { ok: true as const, context };
 }
 
-async function drawDuos(env: Env, user: SessionUser, competitionId: number) {
+async function drawDuos(request: Request, env: Env, user: SessionUser, competitionId: number) {
   const competition = await competitionInfo(env, competitionId);
   if (!competition) return error('Competición no encontrada', 404);
   if (competition.code !== 'COPA_DUOS') return error('Esta acción corresponde únicamente a Copa Dúos', 409);
@@ -150,11 +150,18 @@ async function drawDuos(env: Env, user: SessionUser, competitionId: number) {
     return error('La cantidad de participantes es impar. Resolvé primero quién queda fuera o cómo se completa el último dúo.', 409);
   }
 
+  const body=await request.json().catch(()=>({})) as {preview?:boolean;randomSeed?:number;expectedPairs?:string[][]};
+  if(body.randomSeed!==undefined&&(!Number.isInteger(body.randomSeed)||body.randomSeed<0||body.randomSeed>0xffffffff))return error('Semilla inválida');
+  if(body.randomSeed!==undefined&&!body.preview&&!Array.isArray(body.expectedPairs))return error('Revisá la vista previa antes de confirmar parejas',409);
   const seedBytes = new Uint32Array(1);
   crypto.getRandomValues(seedBytes);
-  const randomSeed = Number(seedBytes[0]);
+  const randomSeed = body.randomSeed??Number(seedBytes[0]);
   const ordered = shuffled(participants, mulberry32(randomSeed));
-  return persistPairs(env,user,competitionId,Array.from({length:ordered.length/2},(_,i)=>[ordered[i*2],ordered[i*2+1]]),'AUTOMATIC',randomSeed);
+  const pairs=Array.from({length:ordered.length/2},(_,i)=>[ordered[i*2],ordered[i*2+1]]);
+  const members=pairs.map(pair=>pair.map(p=>p.user_id));
+  if(body.preview)return json({ok:true,preview:true,competitionId,randomSeed,pairs:pairs.map((pair,i)=>({displayName:'Dúo '+(i+1),members:pair.map(p=>({userId:p.user_id,fullName:p.full_name}))}))});
+  if(body.expectedPairs&&JSON.stringify(body.expectedPairs)!==JSON.stringify(members))return error('Las parejas no coinciden con la vista previa. Generá otra.',409);
+  return persistPairs(env,user,competitionId,pairs,'AUTOMATIC',randomSeed);
 }
 
 async function persistPairs(env:Env,user:SessionUser,competitionId:number,pairs:Array<Array<{user_id:string;full_name:string}>>,mode:string,randomSeed?:number) {
@@ -845,7 +852,7 @@ export async function handleCompetitionDuos(request: Request, env: Env): Promise
     if (!user) return error('No autorizado', 401);
     if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
     if (request.method !== 'POST') return error('Método no permitido', 405);
-    return drawDuos(env, user, Number(drawMatch[1]));
+    return drawDuos(request, env, user, Number(drawMatch[1]));
   }
 
   const settingsMatch = pathname.match(/^\/api\/admin\/competition-engine\/round-links\/(\d+)\/duos\/settings$/);
