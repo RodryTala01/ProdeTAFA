@@ -414,7 +414,7 @@ export default function AdminCompetitions() {
                   )}
                   </details>}
                   {setupStep==='fechas'&&<button className="button button--primary" type="button" onClick={()=>setSetupStep('revision')}>Siguiente: Revisión final →</button>}
-                  </>}
+                  </>
                 </div>
               ))}
             </div>
