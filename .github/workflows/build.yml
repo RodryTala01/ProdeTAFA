@@ -1,5 +1,8 @@
 name: Build
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main, dev/t32-competition-engine]
@@ -40,3 +43,28 @@ jobs:
         run: npm install
       - name: T32 isolated E2E
         run: npm run test:e2e:ci
+
+  deploy-production:
+    name: Deploy production after checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build, t32-e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: prode-tafa-production
+      cancel-in-progress: false
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify schema and publish Worker
+        run: npm run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
