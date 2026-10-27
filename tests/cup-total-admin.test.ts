@@ -263,6 +263,25 @@ describe('Copa Total Admin: DB y endpoints reales', () => {
     expect(a.configurationMode).toBe('MANUAL');
     expect(a).not.toHaveProperty('randomSeed');
   });
+  it('previsualiza Copa Total sin crear entradas y confirma el mismo reparto',async()=>{
+    const sizes=Array(8).fill(4);
+    const pre=await call(`${base}/stages/1/total/groups/draw`,'POST',{groupSizes:sizes,preview:true});
+    expect(pre.status).toBe(200);
+    const d=await pre.json() as any;
+    expect(d.groups).toHaveLength(8);
+    expect(db.prepare('SELECT COUNT(*) n FROM competition_groups').get()?.n).toBe(0);
+    expect(db.prepare('SELECT COUNT(*) n FROM competition_entries').get()?.n).toBe(0);
+    expect(db.prepare('SELECT COUNT(*) n FROM audit_log').get()?.n).toBe(0);
+    const expected=d.groups.map((g:any)=>({code:g.code,userIds:g.userIds}));
+    const wrong=expected.map((g:any)=>({code:g.code,userIds:[...g.userIds]}));
+    wrong[0].userIds[0]='P99';
+    expect((await call(`${base}/stages/1/total/groups/draw`,'POST',{groupSizes:sizes,randomSeed:d.randomSeed,expectedGroups:wrong})).status).toBe(409);
+    expect(db.prepare('SELECT COUNT(*) n FROM competition_groups').get()?.n).toBe(0);
+    const saved=await call(`${base}/stages/1/total/groups/draw`,'POST',{groupSizes:sizes,randomSeed:d.randomSeed,expectedGroups:expected});
+    expect(saved.status).toBe(200);
+    const actual=await saved.json() as any;
+    expect(actual.groups.map((g:any)=>g.userIds)).toEqual(d.groups.map((g:any)=>g.userIds));
+  });
   it('sorteo usa IFFHS y campeón Total A1, audita semilla', async () => {
     db.exec(
       `INSERT INTO tafa_seasons(id,season_number,name) VALUES(2,31,'T31');INSERT INTO competitions(id,season_id,code,canonical_name,display_name,family) VALUES(2,2,'COPA_TOTAL','Total','Total','CUP');INSERT INTO competition_entries(id,competition_id,entry_type,display_name) VALUES(100,2,'INDIVIDUAL','P32');INSERT INTO competition_entry_members(entry_id,user_id) VALUES(100,'P32');INSERT INTO competition_results(competition_id,entry_id,result_code) VALUES(2,100,'CHAMPION');`,
