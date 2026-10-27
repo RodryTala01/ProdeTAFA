@@ -1,4 +1,5 @@
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
+import {loadSportsProgress,type SportsProgress} from './competition-sports-readiness';
 import {CompetitionImage} from './AssetImage';
 import {ParticipantShield} from './AssetImage';
 import './admin-season-center.css';
@@ -41,23 +42,42 @@ export function firstPendingFamily(season:SetupSeason) {
  return setupFamilies.find(f=>!familyReadiness(season,f).structurallyPrepared)??setupFamilies[0];
 }
 export function AdminSeasonCenter({season,onSelectFamily,onSelectCompetition,onManageSeason}:{season:SetupSeason;onSelectFamily:(key:string)=>void;onSelectCompetition:(c:SetupCompetition)=>void;onManageSeason:()=>void}) {
- const count=setupFamilies.filter(f=>familyReadiness(season,f).structurallyPrepared).length;
- const next=firstPendingFamily(season);
+ const [sport,setSport]=useState<SportsProgress>({});
+ const [checking,setChecking]=useState(true);
+ const [revision,setRevision]=useState(0);
+ useEffect(()=>{
+   let current=true;
+   setChecking(true);
+   setSport({});
+   loadSportsProgress(season).then(data=>{if(current)setSport(data);}).finally(()=>{if(current)setChecking(false);});
+   return ()=>{current=false;};
+ },[season,revision]);
+ const familySport=(f:SetupFamily)=>{
+   if(f.key==='liga')return {ok:true,label:'Liga sin sorteo inicial',detail:'Las divisiones y las Fechas se revisan por separado.'};
+   const codes=f.codes.filter(code=>code!=='PROMOCION');
+   const states=codes.map(code=>sport[code]);
+   if(checking||states.some(s=>!s))return {ok:false,label:'Consultando estado deportivo',detail:'Leyendo datos confirmados del servidor.'};
+   if(states.some(s=>s.state==='error'))return {ok:false,label:'Estado sin verificar',detail:'No se pudieron consultar todas las competencias.'};
+   return {ok:states.every(s=>s.state==='confirmed'),label:states.every(s=>s.state==='confirmed')?'Armado confirmado':'Armado pendiente',detail:states.map((s,i)=>codes[i].replace('COPA_','Copa ')+': '+s.detail).join(' · ')};
+ };
+ const count=setupFamilies.filter(f=>familyReadiness(season,f).structurallyPrepared&&familySport(f).ok).length;
+ const next=setupFamilies.find(f=>!familyReadiness(season,f).structurallyPrepared||!familySport(f).ok)??setupFamilies[0];
  return <section className="asc-center" aria-label="Preparación de la temporada">
    <div className="asc-topline"><div><span className="eyebrow">CENTRO DE TEMPORADA</span><h2>T{season.seasonNumber} · Preparación</h2><p>Revisá las seis competencias y completá cada paso sin perderte entre formularios.</p></div><span className="asc-season-state">{season.status==='active'?'Temporada activa':season.status==='draft'?'En borrador':'Edición histórica'}</span></div>
-   <div className="asc-progress"><div className="asc-progress-label"><strong>Estructura de competiciones</strong><span>{count} de 6 con etapas y Fechas vinculadas</span></div><progress max={6} value={count} aria-label="Estructuras de competencias preparadas"/><p>Las estructuras configuradas todavía requieren revisar cupos, sorteos y cruces antes de publicar.</p><button className="button button--primary" type="button" onClick={()=>onSelectFamily(next.key)}>Continuar preparación →</button></div>
+   <div className="asc-progress"><div className="asc-progress-label"><strong>Estructura de competiciones</strong><span>{count} de 6 con estructura y armado verificados</span></div><progress max={6} value={count} aria-label="Estructuras de competencias preparadas"/><p>El progreso combina estructura y confirmaciones deportivas; los resultados y la activación se revisan por separado.</p><div className="topbar-actions"><button className="button button--primary" type="button" onClick={()=>onSelectFamily(next.key)}>Continuar preparación →</button><button className="button button--secondary" type="button" disabled={checking} onClick={()=>setRevision(x=>x+1)}>Actualizar estados</button></div></div>
    <div className="asc-cards">{setupFamilies.map(f=>{
-     const info=familyReadiness(season,f),competition=season.competitions.find(c=>c.code===f.primary),available=familyCompetitions(season,f);
+     const info=familyReadiness(season,f),sportInfo=familySport(f),competition=season.competitions.find(c=>c.code===f.primary),available=familyCompetitions(season,f);
      const people=f.key==='liga'||f.key==='ab'?season.members.length:undefined;
      return <article className={'asc-card asc-card--'+f.key} key={f.key}>
        <div className="asc-card-header"><div className="asc-card-icon"><CompetitionImage code={competition?.code??f.primary} name={f.title} size="lg" season={season.seasonNumber} decorative/></div><div><h3>{f.title}</h3><p>{f.description}</p></div></div>
-       <span className={'asc-state'+(info.structurallyPrepared?' asc-state--progress':'')}>{info.label}</span>
+       <span className={'asc-state'+(info.structurallyPrepared&&sportInfo.ok?' asc-state--progress':'')}>{info.structurallyPrepared?sportInfo.label:info.label}</span>
        <ul className="asc-steps">
          <li className={info.created===info.required?'asc-done':''}>{info.created===info.required?'✓':'○'} Competiciones creadas ({info.created}/{info.required})</li>
          <li className={info.stages===info.required?'asc-done':''}>{info.stages===info.required?'✓':'○'} Etapas configuradas ({info.stages}/{info.required})</li>
          <li className={info.dates===info.required?'asc-done':''}>{info.dates===info.required?'✓':'○'} Fechas vinculadas ({info.dates}/{info.required})</li>
-         <li>◇ Sorteos, cupos y resultados: revisar</li>
+         <li className={sportInfo.ok?'asc-done':''}>{sportInfo.ok?'✓':'○'} {sportInfo.label}</li>
        </ul>
+       <small>{sportInfo.detail}</small>
        {typeof people==='number'&&<small>{people} asignaciones a divisiones en la temporada</small>}
        {f.key==='liga'&&available.some(c=>c.code==='PROMOCION')&&<small>Promoción se administrará en la fase final de Liga.</small>}
        <button className="button button--secondary" type="button" onClick={()=>onSelectFamily(f.key)}>Revisar y configurar →</button>
