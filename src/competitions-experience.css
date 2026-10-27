@@ -13,7 +13,7 @@
 .cx-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
 .cx-card { --cx-card-accent:var(--warning); position:relative; display:flex; flex-direction:column; min-width:0; min-height:267px; border:1px solid var(--border); border-radius:6px; color:var(--text); text-decoration:none; overflow:hidden; background:var(--surface); transition:border-color .15s ease,transform .15s ease,background .15s ease; }
 .cx-card--league { --cx-card-accent:var(--success); }
-.cx-card--division { --cx-card-accent:var(--warning); }
+.cx-card--division { --cx-card-accent:var(--danger); }
 .cx-card--total { --cx-card-accent:var(--warning); }
 .cx-card--duos { --cx-card-accent:var(--info); }
 .cx-card--champions { --cx-card-accent:var(--warning); }
@@ -156,3 +156,8 @@
  .cx-detail .reference-section { padding:12px; }
 }
 @media(prefers-reduced-motion:reduce) { .cx-card { transition:none; } .cx-card:hover { transform:none; } }
+
+/* Season selector remains usable, but stays out of the six-card grid. */
+.participant-competitions > .sport-edition { width:max-content; max-width:100%; display:flex; align-items:center; gap:10px; margin:4px 0 14px auto; font-size:.75rem; }
+.participant-competitions > .sport-edition select { min-width:140px; max-width:240px; }
+@media(max-width:580px){ .participant-competitions > .sport-edition { width:100%; justify-content:flex-end; } }
