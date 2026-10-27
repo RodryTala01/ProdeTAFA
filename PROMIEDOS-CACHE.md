@@ -97,3 +97,12 @@ are checked every five minutes for four hours; idle/final rounds are not polled.
 Refresh keeps the page and edited drafts mounted. Repeated cache-pending warnings
 are grouped; other provider warnings retain their match context. Cache ingestion
 itself still writes only provider storage.
+
+
+## Disparo confiable desde Cloudflare
+
+El scheduler de GitHub Actions no se usa como reloj primario porque su ejecución puede demorarse bajo carga. El Cron de Cloudflare sigue en `*/5 * * * *` y, después de intentar aplicar cualquier caché fresca, calcula el mismo plan de trabajo de Promiedos. Si hay días vencidos/solicitados o partidos activos, el Worker dispara `promiedos-cache.yml` mediante `workflow_dispatch`.
+
+Cloudflare no consulta Promiedos: sólo llama a la API de GitHub Actions. La adquisición sigue siendo GitHub Actions -> Promiedos -> endpoint interno autenticado -> D1. El workflow conserva `workflow_dispatch` y ya no depende de `schedule`.
+
+Producción requiere el secreto Cloudflare `GITHUB_ACTIONS_TOKEN`, idealmente un fine-grained PAT limitado al repositorio `RodryTala01/ProdeTAFA` con permiso repository Actions: write. El token nunca se envía al frontend ni se registra en logs.
