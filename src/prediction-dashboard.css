@@ -1,5 +1,5 @@
 .participant-shell .participant-dashboard--predictions { max-width:var(--container-wide,1440px); }
-.prediction-dashboard { --prediction-columns:110px minmax(80px,.85fr) minmax(130px,1.35fr) 118px 100px minmax(95px,1fr); }
+.prediction-dashboard { --prediction-columns:105px minmax(75px,.7fr) minmax(330px,3fr) minmax(90px,.8fr); }
 .prediction-dashboard h2 { font:700 1.15rem var(--font-display); margin:0 0 16px; }
 .prediction-dashboard .participant-round-header { padding:24px 0; display:grid; grid-template-columns:1.2fr 1fr 1fr; border-bottom:1px solid var(--border); }
 .prediction-dashboard h1 { font:900 clamp(1.7rem,3vw,3rem)/1.1 var(--font-display); }
@@ -24,30 +24,36 @@
 .prediction-sidebar p,.prediction-sidebar small { font-size:.75rem; }
 .prediction-dashboard .prediction-columns { grid-template-columns:var(--prediction-columns); gap:10px; font-size:.6rem; }
 .prediction-dashboard .prediction-columns > :last-child { text-align:left; }
-.prediction-dashboard .prediction-columns > :nth-child(4) { color:var(--home-violet); }
-.prediction-dashboard .prediction-columns > :nth-child(5) { color:var(--home-fluor); }
+.prediction-dashboard .prediction-columns > :nth-child(3) { color:var(--home-violet); text-align:center; }
 .prediction-dashboard .prediction-card { display:grid; grid-template-columns:var(--prediction-columns); gap:10px; align-items:center; padding:12px 0; }
 .prediction-date { font-size:.65rem; display:grid; gap:6px; color:var(--text-muted); }
 .prediction-date b { color:var(--text); }
 .prediction-dashboard .prediction-competition { font-size:.65rem; text-transform:none; overflow-wrap:anywhere; }
 .prediction-teams { display:grid; gap:8px; min-width:0; }
+.prediction-matchup { display:grid; grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr); align-items:start; gap:10px; min-width:0; }
+.prediction-home,.prediction-away { min-width:0; display:grid; gap:5px; }
+.prediction-home > small,.prediction-away > small { color:var(--text-muted); font-size:.56rem; letter-spacing:.07em; }
+.prediction-away { text-align:right; }
+.prediction-away .prediction-team { justify-content:flex-end; }
+.prediction-center { display:grid; justify-items:center; gap:6px; }
+.prediction-center .prediction-value { width:100%; }
 .prediction-dashboard .prediction-team span:last-child { font-size:.75rem; white-space:normal; overflow-wrap:anywhere; }
 .prediction-value > small { display:none; }
 .prediction-dashboard .score-prediction { grid-template-columns:1fr 10px 1fr; gap:4px; }
 .prediction-dashboard .score-side input { width:44px; height:44px; min-height:44px; border-color:var(--home-violet); border-radius:4px; font-size:1.4rem; }
 .prediction-dashboard .prediction-readonly { display:grid; text-align:center; gap:4px; }
 .prediction-dashboard .prediction-readonly strong { font-size:1.4rem; }
-.prediction-dashboard .match-result { grid-column:5; grid-row:1; margin:0; display:grid; text-align:center; gap:6px; color:var(--text); }
+.prediction-dashboard .match-result { margin:0; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:5px; text-align:center; color:var(--text-muted); }
 .prediction-dashboard .match-result > span { font-size:.55rem; color:var(--text-muted); }
-.prediction-dashboard .match-result > strong { font-size:1rem; font-weight:500; }
-.prediction-dashboard .prediction-footer { grid-column:6; grid-row:1; margin:0; display:grid; gap:8px; font-size:.7rem; }
+.prediction-dashboard .match-result > strong { font-size:.8rem; font-weight:600; color:var(--home-fluor); }
+.prediction-dashboard .prediction-footer { grid-column:4; grid-row:1; margin:0; display:grid; gap:8px; font-size:.7rem; }
 .prediction-state--full { color:var(--home-fluor); }
 .prediction-state--partial { color:var(--warning); }
 .prediction-state--error,.prediction-state--miss,.prediction-state--live { color:var(--danger); }
 .prediction-dashboard .prediction-card--live { background:var(--surface-raised); border-left:2px solid var(--danger); }
 .prediction-dashboard .score-earned { font-size:.7rem; }
-.prediction-dashboard .penalty-prediction { grid-column:3/7; margin:0; }
-.prediction-dashboard .prediction-expand,.prediction-dashboard .prediction-detail,.prediction-close { grid-column:3/7; margin:0; }
+.prediction-dashboard .penalty-prediction { grid-column:3/5; margin:0; }
+.prediction-dashboard .prediction-expand,.prediction-dashboard .prediction-detail,.prediction-close { grid-column:3/5; margin:0; }
 .prediction-dashboard .prediction-expand { min-height:28px; text-align:left; }
 .prediction-close { color:var(--text-muted); font-size:.65rem; }
 .prediction-dashboard .submit-card { flex-direction:column-reverse; align-items:stretch; bottom:calc(var(--bottom-nav-height,64px) + env(safe-area-inset-bottom) + 12px); }
@@ -59,7 +65,7 @@
 .prediction-context-title { margin-bottom:12px; font-weight:700; }
 @media(max-width:1200px) {
  .prediction-layout { grid-template-columns:minmax(0,1fr) 240px; gap:12px; }
- .prediction-dashboard { --prediction-columns:85px minmax(65px,.7fr) minmax(110px,1fr) 105px 80px 85px; }
+ .prediction-dashboard { --prediction-columns:85px minmax(65px,.6fr) minmax(300px,3fr) 85px; }
  .prediction-fixtures { padding:12px; }
 }
 @media(max-width:1200px) {
@@ -80,16 +86,19 @@
  .prediction-dashboard .prediction-card { grid-template-columns:1fr 1fr; gap:12px; }
  .prediction-date { grid-column:1; grid-row:1; }
  .prediction-dashboard .prediction-competition { grid-column:2; grid-row:1; display:flex; }
- .prediction-teams { grid-column:1/-1; grid-row:2; grid-template-columns:1fr 1fr; }
- .prediction-value { grid-column:1; grid-row:3; }
+ .prediction-matchup { grid-column:1/-1; grid-row:2; grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr); }
  .prediction-value > small { display:block; color:var(--home-violet); font-size:.65rem; margin-bottom:8px; }
  .prediction-dashboard .score-prediction { width:112px; }
- .prediction-dashboard .match-result { grid-column:2; grid-row:3; text-align:left; }
  .prediction-dashboard .prediction-footer { grid-column:1/-1; grid-row:auto; display:flex; }
  .prediction-dashboard .penalty-prediction,.prediction-dashboard .prediction-expand,.prediction-dashboard .prediction-detail,.prediction-close { grid-column:1/-1; }
  .prediction-dashboard .prediction-readonly { text-align:left; }
  .prediction-sidebar { grid-template-columns:1fr; }
  .prediction-dashboard .prediction-lock-time { display:block; }
+}
+@media(max-width:420px) {
+ .prediction-matchup { grid-template-columns:minmax(0,1fr) 104px minmax(0,1fr); gap:5px; }
+ .prediction-dashboard .score-side input { width:39px; }
+ .prediction-dashboard .prediction-team span:last-child { font-size:.65rem; }
 }
 
 .prediction-context-cards { display:grid; gap:16px; }

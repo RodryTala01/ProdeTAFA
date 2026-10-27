@@ -24,13 +24,20 @@ try {
   const {getPromiedosDay,getPromiedosGame}=await import(pathToFileURL(modulePath).href);
   const plan=await app('/work');
   if(!Array.isArray(plan.days)||!Array.isArray(plan.games)||plan.days.length>14||plan.games.length>24)throw new Error('Invalid acquisition plan');
-  let uploaded=0,failed=0;const counter={count:0};
+  let uploaded=0,failed=0;const counter={count:0};const gameKeys=[];
   for(const [kind,keys] of [['day',plan.days],['game',plan.games]]) for(const key of keys) {
     try {
       const payload=kind==='day'?await getPromiedosDay(key,counter):await getPromiedosGame(key,counter);
       await app('',{entries:[{kind,key,fetchedAt:new Date().toISOString(),payload}]});
       uploaded++;
+      if(kind==='game')gameKeys.push(key);
     }catch{failed++;console.error('Provider cache item failed',kind,key);}
+  }
+  // The authenticated callback applies freshly uploaded game results immediately,
+  // rather than waiting for Cloudflare's next five-minute scheduled pass.
+  if(gameKeys.length){
+    try {const applied=await app('/apply',{games:gameKeys});console.log('Applied fresh games',applied);}
+    catch(error){failed++;console.error('Fresh results could not be applied',error);}
   }
   console.log(JSON.stringify({uploaded,failed,providerRequests:counter.count}));
   if(failed)process.exitCode=1;

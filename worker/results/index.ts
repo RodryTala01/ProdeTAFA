@@ -174,7 +174,7 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
      ORDER BY kickoff_at, id`,
   ).bind(roundId).all<StoredMatch>();
   const matches = rows.results ?? [];
-  const legacy = matches.filter(m => m.provider !== 'promiedos');
+  const legacy = matches.filter(m => m.provider !== 'promiedos' && (!eligibleIds || eligibleIds.includes(m.id)));
   const localByFixture = new Map(legacy.map(m => [m.provider_fixture_id, m]));
   const requestedDates = legacy.length ? (onlyDates?.length ? [...new Set(onlyDates)] : [...new Set(legacy.map(m => calendarDateInArgentina(m.kickoff_at)))]) : [];
   let updated = 0, finalized = 0;

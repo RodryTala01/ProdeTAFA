@@ -52,6 +52,17 @@ const ingestionToken='local-test-token-never-production-123456';
 const ingestionEnv=()=>({...env(),PROMIEDOS_INGEST_TOKEN:ingestionToken});
 const ingest=(entries:unknown[],token=ingestionToken)=>handlePromiedosCache(new Request('https://local/api/internal/promiedos-cache',{
  method:'POST',headers:{authorization:'Bearer '+token},body:JSON.stringify({entries})}),ingestionEnv());
+it('applies fresh provider cache immediately with a scoped authenticated callback',async()=>{
+ insert();db.exec("UPDATE rounds SET status='open'");
+ const apply=(token:string,games:unknown)=>handlePromiedosCache(new Request('https://local/api/internal/promiedos-cache/apply',{
+  method:'POST',headers:{authorization:'Bearer '+token},body:JSON.stringify({games})}),ingestionEnv());
+ expect((await apply('bad-token',['abc']))?.status).toBe(401);
+ expect((await apply(ingestionToken,['not valid!']))?.status).toBe(400);
+ expect(db.prepare('SELECT status FROM matches WHERE id=1').get()).toMatchObject({status:'NS'});
+ cache('game','abc',game());
+ expect(await (await apply(ingestionToken,['abc']))!.json()).toMatchObject({ok:true,updated:1});
+ expect(db.prepare('SELECT status,home_score_regulation FROM matches WHERE id=1').get()).toMatchObject({status:'FT',home_score_regulation:2});
+});
 const entry=(kind='game',key='abc',payload:unknown=game(),fetchedAt=new Date().toISOString())=>({kind,key,payload,fetchedAt});
 it('ingestion requires a dedicated token and only writes provider cache',async()=>{
  insert();const before=db.prepare('SELECT * FROM matches').get();

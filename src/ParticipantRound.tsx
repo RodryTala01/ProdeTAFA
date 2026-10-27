@@ -95,7 +95,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
-function formatKickoff(value: string) { return argentinaDateTime(value, {weekday:'short', second:'2-digit'}); }
+function formatKickoff(value: string) { return argentinaDateTime(value, {weekday:'short'}); }
 
 function formatDuration(milliseconds: number) {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
@@ -425,7 +425,7 @@ export default function ParticipantRound() {
         </div>
         <label className="compact-switch"><input type="checkbox" checked={compact} onChange={event => { setCompact(event.target.checked); try { localStorage.setItem('tafa.predictions.compact', String(event.target.checked)); } catch { /* Optional preference. */ } }}/>Vista compacta</label>
       </div>
-      <div className="prediction-layout"><section className="prediction-fixtures"><h2>PARTIDOS · {round.name}</h2><div className="prediction-columns" aria-hidden="true"><span># / FECHA Y HORA</span><span>COMPETICIÓN</span><span>LOCAL / VISITANTE</span><span>MI PRONÓSTICO</span><span>RESULTADO REAL</span><span>ESTADO</span></div>
+      <div className="prediction-layout"><section className="prediction-fixtures"><h2>PARTIDOS · {round.name}</h2><div className="prediction-columns" aria-hidden="true"><span># / FECHA Y HORA</span><span>COMPETICIÓN</span><span>LOCAL · PRONÓSTICO · VISITANTE</span><span>ESTADO</span></div>
       <div className="prediction-list">
         {round.matches.map((match, index) => {
           const isLocked = locked(match);
@@ -482,8 +482,16 @@ export default function ParticipantRound() {
             <article className={`prediction-card ${isLive ? 'prediction-card--live' : ''} ${collapsed ? 'prediction-card--collapsed' : ''}`} key={match.id}>
               <div className="prediction-date"><b>{index+1}</b><time dateTime={match.kickoffAt}>{formatKickoff(match.kickoffAt)}</time><details className="prediction-lock-time"><summary>Hora de cierre</summary>{formatKickoff(match.lockedAt)}</details></div>
               <span className="prediction-competition"><CompetitionImage name={match.competitionName||'Competencia'} logoUrl={match.competitionLogoUrl} size="xs" decorative/>{match.competitionName || 'Competencia'}</span>
-              <div className="prediction-teams"><Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl}/><Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl}/></div>
-              <div className="prediction-value"><small>MI PRONÓSTICO</small>{isLocked ? <div className="prediction-readonly" aria-label="Tu pronóstico"><strong>{draft.homeScore || '—'} – {draft.awayScore || '—'}</strong><small aria-label="Bloqueado"><svg width="12" height="14" viewBox="0 0 16 18" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2" y="8" width="12" height="8" rx="1"/><path d="M5 8V5a3 3 0 016 0v3"/></svg> Cerrado</small></div> : scoreInputs}</div>
+              <div className="prediction-matchup">
+                <div className="prediction-home"><small>LOCAL</small><Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl}/></div>
+                <div className="prediction-center">
+                  <div className="prediction-value"><small>MI PRONÓSTICO</small>{isLocked ? <div className="prediction-readonly" aria-label="Tu pronóstico"><strong>{draft.homeScore || '—'} – {draft.awayScore || '—'}</strong><small aria-label="Bloqueado"><svg width="12" height="14" viewBox="0 0 16 18" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2" y="8" width="12" height="8" rx="1"/><path d="M5 8V5a3 3 0 016 0v3"/></svg> Cerrado</small></div> : scoreInputs}</div>
+                  <div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
+                    {match.result.isVoid ? <small>Partido anulado · no suma puntos</small> : <><span>RESULTADO REAL{isFinal ? ' · 90′' : ''}</span><strong>{resultHome ?? '–'} - {resultAway ?? '–'}</strong>{isFinal && match.result.wentToPenalties && penaltyWinner && <small>Penales: {penaltyWinner}</small>}</>}
+                  </div>
+                </div>
+                <div className="prediction-away"><small>VISITANTE</small><Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl}/></div>
+              </div>
               {!collapsed && match.matchType === 'PENALTIES_ONLY' && (
                 <div className="penalty-prediction">
                   <p><strong>SI HAY PENALES</strong></p>
@@ -513,19 +521,6 @@ export default function ParticipantRound() {
                 </div>
               )}
 
-              {(
-                <div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
-                  {match.result.isVoid ? (
-                    <strong>Partido anulado · no suma ni resta puntos</strong>
-                  ) : (
-                    <>
-                      <span>RESULTADO REAL{isFinal ? ' · 90′' : ''}</span>
-                      <strong>{resultHome ?? '-'} - {resultAway ?? '-'}</strong>
-                      {isFinal && match.result.wentToPenalties && penaltyWinner && <small>Ganó por penales: {penaltyWinner}</small>}
-                    </>
-                  )}
-                </div>
-              )}
 
               <div className={`prediction-footer prediction-state--${isLive ? 'live' : match.result.isVoid ? 'void' : match.score?.resultType?.toLowerCase() ?? (isFinal && match.officialPrediction.homeScore === null ? 'error' : 'pending')}`}>
                 {isLive && <strong>EN VIVO{match.elapsedMinutes != null ? ` · ${match.elapsedMinutes}′` : ''}</strong>}

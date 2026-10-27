@@ -94,6 +94,22 @@ export async function handlePromiedosCache(request: Request, env: Env): Promise<
   if (!path.startsWith('/api/internal/promiedos-cache')) return null;
   if (!await authenticated(request,env.PROMIEDOS_INGEST_TOKEN)) return json({error:'Acceso no autorizado'},401);
   if (path==='/api/internal/promiedos-cache/work' && request.method==='GET') return json(await getPromiedosWorkPlan(env.DB));
+  if (path==='/api/internal/promiedos-cache/apply' && request.method==='POST') {
+    try {
+      const body=await request.json() as {games?:unknown};
+      if(!Array.isArray(body.games)||body.games.length>24||body.games.some(key=>typeof key!=='string'||!keyValid('game',key)))return json({error:'Identificadores inválidos'},400);
+      const ids=[...new Set(body.games as string[])];
+      if(!ids.length)return json({ok:true,updated:0,calculated:0});
+      const placeholders=ids.map(()=>'?').join(',');
+      const rows=await env.DB.prepare(`SELECT id,round_id FROM matches WHERE provider='promiedos' AND provider_fixture_id IN (${placeholders})`).bind(...ids).all<{id:number;round_id:number}>();
+      const groups=new Map<number,number[]>();
+      for(const match of rows.results??[])groups.set(match.round_id,[...(groups.get(match.round_id)??[]),match.id]);
+      const {syncRoundResults}=await import('./results/index');
+      let updated=0,calculated=0;const warnings:string[]=[];
+      for(const [roundId,matchIds] of groups){const result=await syncRoundResults(roundId,env,[],matchIds);updated+=result.updated;calculated+=result.calculated;warnings.push(...result.warnings);}
+      return json({ok:true,updated,calculated,warnings});
+    }catch{return json({error:'No se pudieron aplicar los datos adquiridos'},500);}
+  }
   if (path!=='/api/internal/promiedos-cache' || request.method!=='POST') return json({error:'Ruta o método no permitido'},405);
   try {
     const reader=request.body?.getReader();if(!reader)return json({error:'Cuerpo requerido'},400);
