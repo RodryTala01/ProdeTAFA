@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 
-const REQUIRED_SECRET = 'FOOTBALL_API_KEY';
+const REQUIRED_SECRETS = ['FOOTBALL_API_KEY','PROMIEDOS_INGEST_TOKEN','GITHUB_ACTIONS_TOKEN'];
 const REQUIRED_CRON = '*/5 * * * *';
 
 function defaultRun(args) {
@@ -27,8 +27,11 @@ export function checkProductionConfig(
   config = JSON.parse(readFileSync('wrangler.jsonc', 'utf8')),
 ) {
   const declaredSecrets = config?.secrets?.required;
-  if (!Array.isArray(declaredSecrets) || !declaredSecrets.includes(REQUIRED_SECRET)) {
-    throw new Error(`wrangler.jsonc no declara ${REQUIRED_SECRET} como secreto obligatorio.`);
+  if (!Array.isArray(declaredSecrets)) {
+    throw new Error('wrangler.jsonc no declara secretos obligatorios.');
+  }
+  for (const secret of REQUIRED_SECRETS) {
+    if (!declaredSecrets.includes(secret)) throw new Error(`wrangler.jsonc no declara ${secret} como secreto obligatorio.`);
   }
 
   const crons = config?.triggers?.crons;
@@ -40,8 +43,9 @@ export function checkProductionConfig(
     run(['secret', 'list', '--format', 'json', '--config', 'wrangler.jsonc']),
     'secret list',
   );
-  if (!Array.isArray(secrets) || !secrets.some((item) => item?.name === REQUIRED_SECRET)) {
-    throw new Error(`Producción no informa el secreto ${REQUIRED_SECRET}.`);
+  if (!Array.isArray(secrets)) throw new Error('Producción no devolvió una lista de secretos válida.');
+  for (const secret of REQUIRED_SECRETS) {
+    if (!secrets.some((item) => item?.name === secret)) throw new Error(`Producción no informa el secreto ${secret}.`);
   }
 
   const deployments = parseJson(
@@ -53,7 +57,7 @@ export function checkProductionConfig(
   }
 
   return {
-    requiredSecret: REQUIRED_SECRET,
+    requiredSecrets: REQUIRED_SECRETS,
     requiredCron: REQUIRED_CRON,
     deploymentCount: deployments.length,
   };
@@ -62,7 +66,7 @@ export function checkProductionConfig(
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const result = checkProductionConfig();
-    console.log(`Configuración productiva read-only OK: secreto ${result.requiredSecret}, Cron ${result.requiredCron}, deployments visibles ${result.deploymentCount}.`);
+    console.log(`Configuración productiva read-only OK: secretos ${result.requiredSecrets.join(', ')}, Cron ${result.requiredCron}, deployments visibles ${result.deploymentCount}.`);
     console.log('Nota: la presencia efectiva del Cron remoto debe confirmarse también en Cloudflare Dashboard.');
   } catch (error) {
     console.error(error instanceof Error && !('status' in error)
