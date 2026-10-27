@@ -24,7 +24,7 @@ function latestEncounter(s:Season,c:Competition,user:string):Encounter|null {
 }
 function currentPhase(s:Season,c:Competition) {
  const stages=s.stages.filter(st=>st.competitionId===c.id);
- const active=stages.find(st=>st.status==='active')??stages.findLast(st=>st.status==='finished')??stages[0];
+ const active=stages.find(st=>st.status==='active')??[...stages].reverse().find(st=>st.status==='finished')??stages[0];
  return active?phaseName(active.name):({draft:'Por comenzar',active:'En curso',finished:'Finalizada',archived:'Histórica'}[c.status]??'Sin configurar');
 }
 export function CompetitionDirectoryView({data,league}:{data:Overview;league?:{code:string;position:number;points:number}|null}) {
