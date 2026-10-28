@@ -14,9 +14,9 @@ afterEach(()=>vi.unstubAllGlobals());
 it('Mi Club shows real summary fields and separates history and encounters',()=>{const html=render(ClubProfile,{data:clubExample,own:true});expect(html).toContain('Participante de ejemplo');expect(html).toContain('18');expect(html).toContain('#/club/historial');expect(html).toContain('#/club/enfrentamientos');expect(html).toContain('Fechas');});
 it('Mi Club lists a promotion participant only under Liga · Fecha 6',()=>{
   const s=clubExample.overview.season!;
-  const promoted={id:987,code:'PROMOCION',displayName:'Promoción',family:'PROMOTION',status:'active',divisionId:null};
-  const member={entryId:987,competitionId:987,status:'active',entryType:'INDIVIDUAL',userId:'demo-1',fullName:'Participante de ejemplo',validFrom:null,validTo:null};
-  const data={...clubExample,overview:{...clubExample.overview,season:{...s,competitions:[...s.competitions,promoted],members:[...s.members,member]}}};
+  const promoted=s.competitions.find(c=>c.code==='PROMOCION')??{id:987,code:'PROMOCION',displayName:'Promoción',family:'PROMOTION',status:'active',divisionId:null};
+  const member={entryId:987,competitionId:promoted.id,status:'active',entryType:'INDIVIDUAL',userId:'demo-1',fullName:'Participante de ejemplo',validFrom:null,validTo:null};
+  const data={...clubExample,overview:{...clubExample.overview,season:{...s,competitions:s.competitions.some(c=>c.code==='PROMOCION')?s.competitions:[...s.competitions,promoted],members:[...s.members,member]}}};
   const html=render(ClubProfile,{data,own:true});
   expect(html).toContain('Liga · Fecha 6 · Promoción');
   expect(html).not.toContain('>Promoción</strong>');
