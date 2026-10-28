@@ -1,5 +1,6 @@
 // Network acquisition runs only in GitHub Actions, never in the Worker.
 import {PromiedosError, parsePromiedosGame, parsePromiedosDay, promiedosFixture} from '../worker/promiedos';
+export {safeDailyLiveGame} from '../worker/promiedos';
 const API = 'https://api.promiedos.com.ar';
 const WEB = 'https://www.promiedos.com.ar';
 let version = '1.11.7.5';
