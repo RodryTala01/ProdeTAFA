@@ -6,6 +6,7 @@ export type Encounter = {id:number;stageId:number;roundId:number|null;entryAId:n
 export type Overview = {currentUserId:string;editions:{seasonNumber:number;name:string;status:string}[];season:null|{
  id:number;seasonNumber:number;name:string;status:string;competitions:Competition[];stages:Stage[];
  links:{id:number;competitionId:number;stageId:number;roundId:number;name:string;status:string;sequence:number}[];
+ duoEntries?:{entryId:number;displayName:string}[];
  members:Member[];people:{userId:string;fullName:string;divisionId:number;division:string;league:string}[];
  encounters:Encounter[];results:{competitionId:number;entryId:number;resultCode:string;position:number|null;stageName:string|null}[];
  history:{code:string;competitionId:number;seasonNumber:number;seasonName:string;resultCode:string;name:string}[];
@@ -15,7 +16,15 @@ export type Overview = {currentUserId:string;editions:{seasonNumber:number;name:
 export type Season = NonNullable<Overview['season']>;
 export function competitionHref(code:string,season?:number) { return `#/competiciones/${competitionSlugs[code] ?? code.toLowerCase()}${season ? `?season=${season}` : ''}`; }
 export function entryMembers(s:Season,id:number|null,round:number|null) { return s.members.filter(m=>m.entryId===id && (round===null ? m.validTo===null : (m.validFrom===null||m.validFrom<=round)&&(m.validTo===null||m.validTo>round))); }
-export function entryName(s:Season,id:number|null,round:number|null) { return entryMembers(s,id,round).map(m=>m.fullName).join(' + ') || 'Por definir'; }
+export function duoDisplayName(s:Season,id:number|null) {
+ const raw=s.duoEntries?.find(e=>e.entryId===id)?.displayName;
+ return raw?.split(' · ')[0]??null;
+}
+export function entryName(s:Season,id:number|null,round:number|null) {
+ const people=entryMembers(s,id,round).map(m=>m.fullName).join(' + ');
+ const duo=duoDisplayName(s,id);
+ return duo?duo+' · '+(people||'Participantes por definir'):(people||'Por definir');
+}
 export function participation(s:Season,c:Competition,user:string) {
  const mine=s.members.filter(m=>m.competitionId===c.id&&m.userId===user);
  const result=s.results.find(r=>r.competitionId===c.id&&mine.some(m=>m.entryId===r.entryId));
