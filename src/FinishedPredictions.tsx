@@ -1,3 +1,4 @@
+import {ParticipantShield} from './AssetImage';
 import { useState } from 'react';
 import './finished-predictions.css';
 
@@ -92,7 +93,7 @@ export default function FinishedPredictions({ roundId }: { roundId: number }) {
           {data && data.participants.map((participant) => (
             <article className="reveal-participant" key={participant.id}>
               <div className="reveal-participant-heading">
-                <strong>{participant.fullName}</strong>
+                <span className="participant-shield-name"><ParticipantShield userId={participant.id} name={participant.fullName} size="sm" decorative/><strong>{participant.fullName}</strong></span>
                 <span>{participant.points} pt{participant.points === 1 ? '' : 's'}</span>
               </div>
               <div className="reveal-prediction-list">

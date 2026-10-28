@@ -83,3 +83,14 @@ Resolución:
 - si tampoco hay coincidencia, conserva el fallback de iniciales.
 
 Esto permite mostrar escudos de participantes actuales, inactivos e históricos sin inventar UUIDs para nombres que no estaban identificados en producción.
+
+## Verified participant IDs (2026-10-28)
+
+Read-only production directory: 28 participants, all with a supplied shield.
+All 28 IDs are now registered in participantSpriteKeys. Existing 11 direct PNGs
+retain priority; the remaining 17 resolve their atlas position by stable ID, even
+after a display-name change. No ambiguous or unmatched current participants.
+The other 36 supplied shield names have no current participant ID and remain
+available through the existing name fallback; no identities were invented.
+
+The Fecha ranking and Admin submission lists now use ParticipantShield too.

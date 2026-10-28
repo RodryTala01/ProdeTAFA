@@ -13,4 +13,4 @@ Para preservar assets históricos, registrar la temporada y el ID/code en `histo
 
 No registrar rutas a archivos inexistentes. Agregar el archivo y su entrada al registro en el mismo cambio. Vista manual exclusivamente DEV: `/design?view=assets`. El logo TAFA en las muestras de participante/equipo sólo demuestra carga de imagen; no se asigna a ninguna persona/equipo.
 
-Se integraron los nueve trofeos originales suministrados y 11 escudos con UUID verificado. Ver HOME-ASSETS.md para asociaciones y archivos pendientes de identificación. Los 53 escudos sin asociación segura conservan fallback; no se adivinan identidades. El logo suministrado coincide byte a byte con public/brand/tafa.png.
+Los nueve trofeos y 64 escudos suministrados están incorporados. Los 28 participantes actuales tienen su escudo verificado por UUID: 11 PNGs individuales y 17 posiciones del atlas. Ver HOME-ASSETS.md y participantSpriteKeys; un cambio de nombre no cambia el escudo. Los restantes 36 assets no se asocian a identidades inventadas.

@@ -17,3 +17,19 @@ describe('escudos completos de participantes',()=>{
     expect(participantSprite('Participante inexistente')).toBeUndefined();
   });
 });
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {participantSpriteKeys} from '../src/competition-assets';
+import {ParticipantShield} from '../src/AssetImage';
+it('todos los IDs verificados conservan su asset aunque cambie el nombre',()=>{
+ expect(Object.keys(participantSpriteKeys)).toHaveLength(28);
+ for(const [id,key] of Object.entries(participantSpriteKeys)){
+  expect(participantSpriteAssets[key]).toBeDefined();
+  expect(participantSprite('Nombre cambiado',id)).toEqual(participantSpriteAssets[key]);
+ }
+});
+it('ParticipantShield utiliza el ID para los escudos del atlas',()=>{
+ const html=renderToStaticMarkup(createElement(ParticipantShield,{userId:'4ba8b09f-fc1e-46a3-804f-e155ab002845',name:'Nombre actualizado'}));
+ expect(html).toContain('asset-image__sprite');expect(html).toContain('85.71428571428571% 0%');
+ expect(participantSprite('Sin escudo','id-desconocido')).toBeUndefined();
+});

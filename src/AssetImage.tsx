@@ -28,7 +28,7 @@ function ParticipantSprite({name,position,size='md',decorative=false}:{name:stri
 }
 export function ParticipantShield({name,userId,season,logoUrl,shieldUrl,...props}:{name:string;userId?:string;season?:number;logoUrl?:string|null;shieldUrl?:string|null;size?:AssetSize;decorative?:boolean}) {
   const direct=shieldUrl||logoUrl||participantAsset(userId,season);
-  const sprite=!direct?participantSprite(name):undefined;
+  const sprite=!direct?participantSprite(name,userId):undefined;
   return direct
     ? <AssetImage {...props} name={`Escudo de ${name}`} fallback={initials(name)} src={direct}/>
     : sprite
