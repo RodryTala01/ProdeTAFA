@@ -12,6 +12,16 @@ import {LeagueTable} from '../src/LeagueView';
 const render=(component:any,props:any)=>renderToStaticMarkup(createElement(component,props));
 afterEach(()=>vi.unstubAllGlobals());
 it('Mi Club shows real summary fields and separates history and encounters',()=>{const html=render(ClubProfile,{data:clubExample,own:true});expect(html).toContain('Participante de ejemplo');expect(html).toContain('18');expect(html).toContain('#/club/historial');expect(html).toContain('#/club/enfrentamientos');expect(html).toContain('Fechas');});
+it('Mi Club lists a promotion participant only under Liga · Fecha 6',()=>{
+  const s=clubExample.overview.season!;
+  const promoted=s.competitions.find(c=>c.code==='PROMOCION')??{id:987,code:'PROMOCION',displayName:'Promoción',family:'PROMOTION',status:'active',divisionId:null};
+  const member={entryId:987,competitionId:promoted.id,status:'active',entryType:'INDIVIDUAL',userId:'demo-1',fullName:'Participante de ejemplo',validFrom:null,validTo:null};
+  const data={...clubExample,overview:{...clubExample.overview,season:{...s,competitions:s.competitions.some(c=>c.code==='PROMOCION')?s.competitions:[...s.competitions,promoted],members:[...s.members,member]}}};
+  const html=render(ClubProfile,{data,own:true});
+  expect(html).toContain('Liga · Fecha 6 · Promoción');
+  expect(html).not.toContain('>Promoción</strong>');
+  expect(html).toContain('#/competiciones/liga-a?season=99');
+});
 it('Mi Club explains no season or finished history without fake zero tables',()=>{const data={...clubExample,overview:{...clubExample.overview,season:null},profile:{...clubExample.profile,rounds:[]},league:null};const html=render(ClubProfile,{data,own:true});expect(html).toContain('Todavía no hay una temporada disponible.');expect(html).toContain('Todavía no jugaste ninguna Fecha finalizada.');expect(html).not.toContain('<dd>0</dd>');});
 it('another participant profile has public identity and links to their finalized history',()=>{const data={...clubExample,profile:{...clubExample.profile,participant:{id:'other',fullName:'Otra persona',phone:'private-phone',password:'private-pass'}}};const html=render(ClubProfile,{data,own:false});expect(html).toContain('Otra persona');expect(html).toContain('user=other');expect(html).not.toMatch(/private-phone|private-pass|Envíos y cambios/);});
 it('history list handles empty and loaded rounds with a reading link',()=>{expect(render(HistoryList,{rounds:[]})).toContain('Todavía no jugaste');const html=render(HistoryList,{rounds:clubExample.profile.rounds});expect(html).toContain('#/club/historial/8');expect(html).toContain('4 plenos');expect(html).not.toContain('<input');});

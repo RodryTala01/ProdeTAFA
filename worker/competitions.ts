@@ -1,3 +1,4 @@
+import {promotionLeagueStatus} from './promotion-league-phase';
 import { competitionOverview } from './competition-overview';
 type Env = {
   DB: D1Database;
@@ -346,6 +347,12 @@ async function createSeason(request: Request, env: Env, user: SessionUser) {
     ).bind(seasonNumber),
   );
 
+  statements.push(env.DB.prepare(
+    `INSERT INTO competition_stages(competition_id,code,name,stage_type,sequence)
+     SELECT c.id,'PROMO','Fecha 6 · Promoción','KNOCKOUT',1
+     FROM competitions c JOIN tafa_seasons s ON s.id=c.season_id
+     WHERE s.season_number=? AND c.code='PROMOCION'`
+    ).bind(seasonNumber));
   await env.DB.batch(statements);
 
   const created = await env.DB.prepare('SELECT id FROM tafa_seasons WHERE season_number = ? LIMIT 1')
@@ -480,9 +487,26 @@ async function linkRound(request: Request, env: Env, user: SessionUser, competit
   ).bind(stageId, competitionId).first<{ id: number }>();
   if (!stage) return error('La etapa no pertenece a esta competición', 409);
 
-  const round = await env.DB.prepare('SELECT id, category FROM rounds WHERE id = ? LIMIT 1')
+  if(competition.family==='PROMOTION'){
+    const ready=await promotionLeagueStatus(env.DB,competition.season_id);
+    if(!ready.ready)return error(ready.reason,409);
+    const previously=await env.DB.prepare(
+      `SELECT l.id FROM competition_round_links l JOIN competitions c ON c.id=l.competition_id
+        WHERE c.season_id=? AND c.code='PROMOCION' AND l.purpose='NORMAL' LIMIT 1`
+    ).bind(competition.season_id).first();
+    if(previously)return error('La Fecha 6 de Promoción ya está vinculada.',409);
+    const repeated=await env.DB.prepare(
+      `SELECT l.id FROM competition_round_links l JOIN competitions c ON c.id=l.competition_id
+        WHERE c.season_id=? AND c.code IN ('LIGA_A','LIGA_B') AND l.round_id=? LIMIT 1`
+    ).bind(competition.season_id,roundId).first();
+    if(repeated)return error('La Fecha 6 debe ser distinta de las cinco Fechas regulares.',409);
+  }
+    const round = await env.DB.prepare('SELECT id, category FROM rounds WHERE id = ? LIMIT 1')
     .bind(roundId).first<{ id: number; category: string }>();
   if (!round) return error('Fecha no encontrada', 404);
+  if(competition.family==='PROMOTION'&&round.category!=='AMISTOSO'&&round.category!=='LIGA')
+    return error('La Fecha 6 de Promoción debe ser una Fecha de Liga, no una copa.',409);
+
 
   let sequence = Number(body?.sequence);
   if (!Number.isInteger(sequence) || sequence <= 0) {
@@ -500,7 +524,7 @@ async function linkRound(request: Request, env: Env, user: SessionUser, competit
   ).bind(competitionId, stageId, roundId, sequence, purpose, body?.label?.trim() || null).run();
 
   if (round.category === 'AMISTOSO') {
-    const category = purpose === 'TIEBREAK' ? 'DESEMPATE' : competition.family === 'LEAGUE' ? 'LIGA' : 'COPA';
+    const category = purpose === 'TIEBREAK' ? 'DESEMPATE' : ['LEAGUE','PROMOTION'].includes(competition.family) ? 'LIGA' : 'COPA';
     await env.DB.prepare(`UPDATE rounds SET category = ?, updated_at = datetime('now') WHERE id = ?`)
       .bind(category, roundId).run();
   }
@@ -524,7 +548,11 @@ async function unlinkRound(env: Env, user: SessionUser, competitionId: number, l
   ).bind(linkId, competitionId).first<{ id: number; round_id: number; season_id: number }>();
   if (!link) return error('Vínculo no encontrado', 404);
 
-  await env.DB.prepare('DELETE FROM competition_round_links WHERE id = ?').bind(linkId).run();
+  const linkedMatches=await env.DB.prepare(
+    'SELECT id FROM competition_encounters WHERE round_link_id=? LIMIT 1'
+  ).bind(linkId).first();
+  if(linkedMatches)return error('No se puede desvincular una Fecha que ya tiene cruces confirmados o pendientes.',409);
+    await env.DB.prepare('DELETE FROM competition_round_links WHERE id = ?').bind(linkId).run();
   await audit(env, user.id, 'competition.round_unlinked', 'competition', String(competitionId), {
     linkId,
     roundId: link.round_id,

@@ -1,3 +1,4 @@
+import {promotionLeagueStatus} from './promotion-league-phase';
 import type { Env } from './index';
 
 type SessionUser = { id: string; role: 'admin' | 'participant'; is_active: number };
@@ -124,6 +125,8 @@ async function prefill(env: Env, user: SessionUser, competitionId: number) {
   const competition = await promotionCompetition(env, competitionId);
   if (!competition || competition.code !== 'PROMOCION') return error('Promoción no encontrada', 404);
   if([competition.status,competition.season_status].some(s=>['finished','archived'].includes(s)))return error('La competición o temporada ya está cerrada',409);
+  const regular=await promotionLeagueStatus(env.DB,competition.season_id);
+  if(!regular.ready)return error(regular.reason,409);
 
   const encounters = await env.DB.prepare(
     `SELECT COUNT(*) AS total FROM competition_encounters ce
@@ -194,6 +197,8 @@ async function confirmSlots(request: Request, env: Env, user: SessionUser, compe
   const competition = await promotionCompetition(env, competitionId);
   if (!competition || competition.code !== 'PROMOCION') return error('Promoción no encontrada', 404);
   if([competition.status,competition.season_status].some(s=>['finished','archived'].includes(s)))return error('La competición o temporada ya está cerrada',409);
+  const regular=await promotionLeagueStatus(env.DB,competition.season_id);
+  if(!regular.ready)return error(regular.reason,409);
   if(await hasMatches(env,competitionId))return error('Los cupos están bloqueados después de crear los cruces',409);
   const body = await request.json().catch(() => null) as {
     slots?: Array<{ slotCode?: string; userId?: string; reason?: string | null }>;
@@ -258,6 +263,8 @@ async function buildMatches(request: Request, env: Env, user: SessionUser, compe
   const competition = await promotionCompetition(env, competitionId);
   if (!competition || competition.code !== 'PROMOCION') return error('Promoción no encontrada', 404);
   if([competition.status,competition.season_status].some(s=>['finished','archived'].includes(s)))return error('La competición o temporada ya está cerrada',409);
+  const regular=await promotionLeagueStatus(env.DB,competition.season_id);
+  if(!regular.ready)return error(regular.reason,409);
   if(await hasMatches(env,competitionId))return error('Los dos cruces de Promoción ya fueron creados',409);
   const slots = await readSlots(env, competitionId);
   const byCode = new Map(slots.map((slot) => [slot.slotCode, slot]));
@@ -386,7 +393,19 @@ export async function handleCompetitionPromotion(request: Request, env: Env): Pr
     const user = await sessionUser(request, env);
     if (!user) return error('No autorizado', 401);
     if (request.method !== 'GET') return error('Método no permitido', 405);
-    return json({ competitionId: Number(publicSlots[1]), slots: await readSlots(env, Number(publicSlots[1])), movements: await readMovements(env,Number(publicSlots[1])) });
+    const competition=await promotionCompetition(env,Number(publicSlots[1]));
+    if(!competition||competition.code!=='PROMOCION')return error('Fase de Liga no encontrada',404);
+    const [regular,links,matchCount,movements]=await Promise.all([
+      promotionLeagueStatus(env.DB,competition.season_id),
+      env.DB.prepare("SELECT l.round_id AS roundId,r.name AS name,r.status AS status FROM competition_round_links l JOIN rounds r ON r.id=l.round_id WHERE l.competition_id=? AND l.purpose='NORMAL' ORDER BY l.id").bind(competition.id).all(),
+      env.DB.prepare("SELECT COUNT(*) AS total FROM competition_encounters e JOIN competition_stages s ON s.id=e.stage_id WHERE s.competition_id=?").bind(competition.id).first<{total:number}>(),
+      readMovements(env,competition.id)
+    ]);
+    return json({
+      competitionId:competition.id,
+      leaguePhase:{...regular,rounds:links.results??[],encounters:Number(matchCount?.total??0),movements:Number(movements.length)},
+      slots:await readSlots(env,competition.id),movements
+    });
   }
 
   const prefillMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/promotion\/prefill$/);

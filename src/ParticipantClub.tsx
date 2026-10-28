@@ -16,7 +16,9 @@ export function ClubProfile({data,own}:{data:ClubData;own:boolean}) {
   const season=overview.season;
   const person=season?.people.find(p=>p.userId===id);
   const standing=league?.standings.find(p=>p.userId===id);
-  const rows=season?.competitions.filter(c=>season.members.some(m=>m.competitionId===c.id&&m.userId===id))??[];
+  const promotion=season?.competitions.find(c=>c.code==='PROMOCION');
+  const inPromotion=!!promotion&&!!season?.members.some(m=>m.competitionId===promotion.id&&m.userId===id);
+  const rows=season?.competitions.filter(c=>c.code!=='PROMOCION'&&season.members.some(m=>m.competitionId===c.id&&m.userId===id))??[];
   // Summing existing finalized summaries only; no scoring or ranking reconstruction.
   const totals=profile.rounds.reduce((sum,r)=>({points:sum.points+r.points,fulls:sum.fulls+r.fulls,partials:sum.partials+r.partials,errors:sum.errors+r.errors}),{points:0,fulls:0,partials:0,errors:0});
   return <div className="club-profile">
@@ -27,7 +29,8 @@ export function ClubProfile({data,own}:{data:ClubData;own:boolean}) {
         const encounters=season.encounters.filter(e=>season.stages.some(st=>st.id===e.stageId&&st.competitionId===c.id)&&[e.entryAId,e.entryBId].some(entry=>entryMembers(season,entry,e.roundId).some(m=>m.userId===id)));
         const latest=encounters.at(-1);
         return <li key={c.id}><a href={competitionHref(c.code,season.seasonNumber)}><strong>{c.displayName}</strong><span>{participation(season,c,id)}{latest&&<> · {phaseName(season.stages.find(st=>st.id===latest.stageId)?.name)}</>}</span></a></li>;
-      })}</ul>:<p>Todavía no hay competiciones disponibles para este participante.</p>}
+      })}</ul>:inPromotion?null:<p>Todavía no hay competiciones disponibles para este participante.</p>}
+      {season&&inPromotion&&person&&<p className="sport-footnote"><a href={competitionHref('LIGA_'+person.division,season.seasonNumber)}>Liga · Fecha 6 · Promoción</a> · Cruces de ascenso y permanencia dentro de Liga</p>}
     </section><section className="reference-section" id="club-estadisticas"><h2>Recorrido en Fechas</h2><p className="sport-footnote">Sólo Fechas finalizadas con envío. Todas las temporadas cargadas.</p>{profile.rounds.length?<dl className="club-numbers">{[[profile.rounds.length,'Fechas'],[totals.points,'Puntos'],[totals.fulls,'Plenos'],[totals.partials,'Parciales'],[totals.errors,'Errores'],[stats.average?.toLocaleString('es-AR',{maximumFractionDigits:2})??'—','Promedio / Fecha']].map(([value,label])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>:<p>{own?'Todavía no jugaste ninguna Fecha finalizada.':'Todavía no hay Fechas finalizadas de este participante.'}</p>}<a href={historyHref(undefined,own?undefined:id)}>Ver detalle por Fecha</a>{stats.best.length>0&&<div className="club-best"><h3>Mejor Fecha · {stats.best[0].points} PTS</h3><p className="sport-footnote">{stats.best.length>1?`${stats.best.length} Fechas comparten el máximo.`:"Mayor puntaje en una Fecha finalizada."}</p>{stats.best.map(r=><a key={r.id} href={historyHref(r.id,own?undefined:id)}>{r.name}</a>)}</div>}</section></div>
     <section className="reference-section"><h2>Palmarés individual</h2><p className="sport-footnote">Títulos confirmados registrados. Los títulos de Dúos se consultan por equipo en Competiciones.</p>{profile.titles?.length?<ul className="club-competitions">{[...new Set(profile.titles.map(t=>t.code))].map(code=>{const titles=profile.titles!.filter(t=>t.code===code);return <li key={code}><strong>{titles.length}× {titles[0].name}</strong><div className="club-title-editions">{titles.map(t=><a key={t.seasonNumber} href={competitionHref(t.code,t.seasonNumber)}>{t.name} · Temporada {t.seasonNumber}</a>)}</div></li>;})}</ul>:<p>Todavía no hay títulos individuales confirmados registrados.</p>}</section><section className="reference-section"><h2>Últimas Fechas</h2>{profile.rounds.length?<ul className="club-recent">{profile.rounds.slice(0,3).map(r=><li key={r.id}><a href={historyHref(r.id,own?undefined:id)}>{r.name}<strong>{r.points} PTS</strong></a></li>)}</ul>:<p>Todavía no hay historial público disponible.</p>}</section>
   </div>;

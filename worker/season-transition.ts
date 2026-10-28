@@ -433,6 +433,12 @@ async function createTargetSeason(env: Env, seasonNumber: number) {
        WHERE s.season_number=? AND c.code IN ('LIGA_A','LIGA_B')`,
     ).bind(seasonNumber),
   );
+  statements.push(env.DB.prepare(
+    `INSERT INTO competition_stages(competition_id,code,name,stage_type,sequence)
+     SELECT c.id,'PROMO','Fecha 6 · Promoción','KNOCKOUT',1
+     FROM competitions c JOIN tafa_seasons s ON s.id=c.season_id
+     WHERE s.season_number=? AND c.code='PROMOCION'`
+    ).bind(seasonNumber));
   await env.DB.batch(statements);
   return env.DB.prepare(`SELECT id FROM tafa_seasons WHERE season_number=? LIMIT 1`)
     .bind(seasonNumber).first<{ id: number }>();
