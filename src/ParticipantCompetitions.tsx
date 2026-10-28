@@ -4,6 +4,7 @@ import {useEffect,useState} from 'react';
 import {phaseName,competitionHref,competitionSlugs,entryMembers,entryName,duoDisplayName,participation,readCompetition,type Overview,type Season,type Competition,type Encounter} from './participant-competitions';
 import LeagueView from './LeagueView';
 import DuoNameEditor from './DuoNameEditor';
+import LeaguePromotion from './LeaguePromotion';
 import {CompetitionDirectoryView,CompetitionFrame} from './CompetitionExperience';
 import './competitions-experience.css';
 import './participant-competitions.css';
@@ -70,7 +71,7 @@ export default function ParticipantCompetitionsPage({route,preview}:{route:strin
  const personId=path.startsWith('club/participante/')?path.slice('club/participante/'.length):null;
  const person=s?.people.find(p=>encodeURIComponent(p.userId)===personId)??legacyPerson;
  return <div className="participant-competitions">{data.editions.length>0&&<label className="field sport-edition"><span>Edición</span><select value={s?.seasonNumber??''} onChange={e=>{window.location.hash=`#/${path}?season=${e.target.value}`;}}><option value="" disabled>Elegí una temporada</option>{data.editions.map(e=><option key={e.seasonNumber} value={e.seasonNumber}>T{e.seasonNumber} · {e.name}</option>)}</select></label>}
- {personId?<section className="reference-section"><ParticipantShield userId={person?.userId} name={person?.fullName??'Participante'} decorative/><h1>{person?.fullName??'Participante no disponible en esta edición'}</h1><p>{person?.league}</p><a className="button" href={person?.division?competitionHref(`LIGA_${person.division}`,s?.seasonNumber):'#/competiciones/liga'}>Volver a Liga</a></section>:!s||!slug?<CompetitionDirectory data={data} league={league}/>:c?.family==='LEAGUE'?<CompetitionFrame s={s} c={c} user={data.currentUserId}><LeagueView key={c.code+'-'+s.seasonNumber} initialLeagueCode={c.code as 'LIGA_A'|'LIGA_B'} seasonNumber={s.seasonNumber}/><CompetitionHistory s={s} c={c}/></CompetitionFrame>:c?<CompetitionFrame s={s} c={c} user={data.currentUserId}><CompetitionBody key={c.id} s={s} c={c} user={data.currentUserId}/></CompetitionFrame>:<p>Esta competición no está disponible en esta edición.</p>}
+ {personId?<section className="reference-section"><ParticipantShield userId={person?.userId} name={person?.fullName??'Participante'} decorative/><h1>{person?.fullName??'Participante no disponible en esta edición'}</h1><p>{person?.league}</p><a className="button" href={person?.division?competitionHref(`LIGA_${person.division}`,s?.seasonNumber):'#/competiciones/liga'}>Volver a Liga</a></section>:!s||!slug?<CompetitionDirectory data={data} league={league}/>:c?.family==='LEAGUE'?<CompetitionFrame s={s} c={c} user={data.currentUserId}><LeagueView key={c.code+'-'+s.seasonNumber} initialLeagueCode={c.code as 'LIGA_A'|'LIGA_B'} seasonNumber={s.seasonNumber}/><LeaguePromotion season={s} user={data.currentUserId}/><CompetitionHistory s={s} c={c}/></CompetitionFrame>:c?.code==='PROMOCION'?<LeaguePromotion season={s} user={data.currentUserId}/>:c?<CompetitionFrame s={s} c={c} user={data.currentUserId}><CompetitionBody key={c.id} s={s} c={c} user={data.currentUserId}/></CompetitionFrame>:<p>Esta competición no está disponible en esta edición.</p>}
  </div>;
 }
 
