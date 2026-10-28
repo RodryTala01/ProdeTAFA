@@ -67,6 +67,20 @@ export function parsePromiedosDay(value: unknown): PromiedosGame[] {
   assert(new Set(games.map(g => g.id)).size === games.length);
   return games;
 }
+// A /games listing is not authoritative for final scores, extra time or penalties.
+// Use it only as a short-lived 90-minute live-score backup when gamecenter fails.
+export function safeDailyLiveGame(value: unknown, expectedId: string): PromiedosGame | null {
+  try {
+    const game=parsePromiedosGame(value,expectedId);
+    if(game.status.enum!==2 || /extra|suplement|penal|pr[oó]rroga|suspend|aplaz/i.test(game.status.name)) return null;
+    if(game.game_time!==undefined && (!Number.isInteger(game.game_time)||game.game_time<0||game.game_time>105)) return null;
+    if(game.penalties!==undefined || game.to_qualify!==undefined) return null;
+    if(game.events?.some(e=>/fin de los 90|suplement|penal/i.test(e.name)||e.is_penalties_stage)) return null;
+    const normalized=normalizePromiedosResult(game);
+    if(normalized.final||normalized.wentToExtra||normalized.wentToPenalties||normalized.status!=='LIVE'||!normalized.current) return null;
+    return game;
+  } catch { return null; }
+}
 export function normalizePromiedosResult(g: PromiedosGame) {
   parsePromiedosGame(g);
   const final = g.status.enum === 3;

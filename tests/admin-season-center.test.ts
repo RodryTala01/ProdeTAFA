@@ -38,8 +38,9 @@ describe('Centro de temporada',()=>{
    const html=renderToStaticMarkup(createElement(AdminFamilyOverview,{season,family:setupFamilies[0],onBack:noop,onSelectCompetition:noop}));
    expect(html).toContain('LIGA A');
    expect(html).toContain('LIGA B');
-   expect(html).toContain('PROMOCION');
-   expect(html).toContain('Fase final de Liga');
+   expect(html).toContain('Fecha 6 · Promoción');
+   expect(html).not.toContain('<h3>PROMOCION</h3>');
+   expect(html).toContain('Liga A o B');
  });
  it('does not falsely confirm a draw in the review',()=>{
    const html=renderToStaticMarkup(createElement(AdminSetupReview,{season,competition:season.competitions[2],onStep:noop}));

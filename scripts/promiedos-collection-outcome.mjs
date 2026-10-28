@@ -1,15 +1,23 @@
 // Only failures in our own cache upload/apply pipeline fail GitHub Actions.
 // Unavailable provider responses remain visible warnings so a single unreachable
 // external game cannot generate a failed workflow email every five minutes.
-export async function collectProviderCache(plan, {getDay,getGame,upload,apply,now=()=>new Date().toISOString()},counter) {
-  const report={uploaded:0,providerFailures:[],internalFailures:[],gameKeys:[]};
+export async function collectProviderCache(plan, {getDay,getGame,upload,apply,fallbackGame,now=()=>new Date().toISOString()},counter) {
+  const report={uploaded:0,providerFailures:[],internalFailures:[],gameKeys:[],fallbacks:[]};
   for(const [kind,keys] of [['day',plan.days],['game',plan.games]]) for(const key of keys){
     let payload;
     try {
       payload=kind==='day'?await getDay(key,counter):await getGame(key,counter);
     }catch(error){
-      report.providerFailures.push({kind,key,error:safeError(error)});
-      continue;
+      if(kind==='game' && typeof fallbackGame==='function'){
+        try{
+          const backup=await fallbackGame(key,error);
+          if(backup) { payload=backup; report.fallbacks.push(key); }
+        }catch{/* An incomplete or ambiguous daily record is not an alternative final score. */}
+      }
+      if(!payload){
+        report.providerFailures.push({kind,key,error:safeError(error)});
+        continue;
+      }
     }
     try{
       await upload({kind,key,fetchedAt:now(),payload});

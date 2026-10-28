@@ -157,6 +157,29 @@ beforeEach(() => {
 });
 afterEach(() => db.close());
 describe('Copa Dúos Admin real D1', () => {
+  it('capitán decide el nombre, el compañero no; ambos siguen visibles y se audita',async()=>{
+    await manual();
+    for(const id of ['P1','P2']){
+      db.prepare("INSERT INTO sessions(id,user_id,token_hash,expires_at) VALUES (?,?,?,'2099-01-01')").run(id,id,createHash('sha256').update(id).digest('hex'));
+    }
+    const url='competition-engine/competitions/1/duos/my-team';
+    const original=await (await call(url,'GET',undefined,'P1')).json() as any;
+    expect(original.team).toMatchObject({nickname:'Dúo 1',captainUserId:'P1',canRename:true});
+    const mate=await (await call(url,'GET',undefined,'P2')).json() as any;
+    expect(mate.team.canRename).toBe(false);
+    expect((await call(url,'PUT',{name:'No puedo'},'P2')).status).toBe(403);
+    expect((await call(url,'PUT',{name:'<script>alert</script>'},'P1')).status).toBe(400);
+    const renamed=await call(url,'PUT',{name:'Los Biscochotes'},'P1');
+    expect(renamed.status).toBe(200);
+    const now=await (await call(url,'GET',undefined,'P2')).json() as any;
+    expect(now.team.nickname).toBe('Los Biscochotes');
+    expect(now.team.members.map((m:any)=>m.fullName)).toEqual(['P1','P2']);
+    expect(String(scalar("SELECT display_name FROM competition_entries WHERE id=1"))).toContain('Los Biscochotes · P1 + P2');
+    expect((await table()).rows.find((row:any)=>row.entryId===1).displayName).toContain('Los Biscochotes');
+    expect(scalar("SELECT COUNT(*) FROM audit_log WHERE action='competition.duos_named'")).toBe(1);
+    db.exec("UPDATE tafa_seasons SET status='finished'");
+    expect((await call(url,'PUT',{name:'Nuevo nombre'},'P1')).status).toBe(409);
+  });
   it('manual usa todos los A+B y audita sin semilla', async () => {
     expect((await manual()).status).toBe(200);
     expect(scalar('SELECT COUNT(*) FROM competition_entries')).toBe(8);

@@ -125,14 +125,21 @@ export async function getPromiedosWorkPlan(db:D1Database) {
     const fresh=await db.prepare(`SELECT 1 AS ok FROM promiedos_cache WHERE kind='day' AND cache_key=? AND julianday(expires_at)>julianday('now')`).bind(date).first();
     if(!fresh)days.add(date);
   }
-  const active=await db.prepare(`SELECT provider_fixture_id FROM matches WHERE provider='promiedos'
+  const active=await db.prepare(`SELECT provider_fixture_id,kickoff_at FROM matches WHERE provider='promiedos'
     AND NOT ${manualResultSql('matches')} AND result_finalized_at IS NULL
     AND round_id IN (SELECT id FROM rounds WHERE status='open')
     AND (status IN ('1H','HT','2H','ET','BT','P','LIVE') OR
       (status='NS' AND julianday(kickoff_at)<=julianday('now','+10 minutes')))`)
-    .all<{provider_fixture_id:string}>();
+    .all<{provider_fixture_id:string;kickoff_at:string}>();
   for(const row of active.results??[])games.add(row.provider_fixture_id);
-  return {days:[...days].slice(0,14),games:[...new Set([...(active.results??[]).map(r=>r.provider_fixture_id),...games])].slice(0,24)};
+  const gameDays:Record<string,string>={};
+  const bogota=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'});
+  for(const row of active.results??[]) {
+    const value=row.kickoff_at.trim().replace(' ','T');
+    const at=new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)?value:value+'Z');
+    if(Number.isFinite(at.getTime())) gameDays[row.provider_fixture_id]=bogota.format(at);
+  }
+  return {days:[...days].slice(0,14),games:[...new Set([...(active.results??[]).map(r=>r.provider_fixture_id),...games])].slice(0,24),gameDays};
 }
 
 export async function handlePromiedosCache(request: Request, env: Env): Promise<Response|null> {

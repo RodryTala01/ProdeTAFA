@@ -39,7 +39,7 @@ export function LeagueSummary({ data }: { data: HomeData }) {
   const mine = data.league?.standings.find(row => row.userId === data.league?.currentUserId);
   return <section className="reference-section"><div className="section-heading"><h2>{data.league?.competition.displayName ?? data.season?.division?.name ?? 'Tu Liga'}</h2></div>
     {mine ? <><div className="league-snapshot"><strong className="sport-number">{mine.position}<span>.º</span></strong><div><strong>{mine.points} <small>PTS</small></strong><p>Tu posición actual</p></div></div>{data.league?.provisional && <p>Puntaje provisional</p>}</> : <p>{data.season?.division ? 'Todavía no hay una posición disponible.' : 'Todavía no tenés una división asignada en una temporada activa.'}</p>}
-    <a className="button button--secondary" href="#/competiciones/liga">Ver Liga <Icon name="arrow" /></a>
+    <a className="button button--secondary" href={data.season?.division?competitionHref('LIGA_'+data.season.division.code,data.season.seasonNumber):'#/competiciones'}>Ver Liga <Icon name="arrow" /></a>
   </section>;
 }
 
@@ -110,7 +110,7 @@ export function ParticipantCompetitions({ data }: { data: HomeData }) {
     {rows.length ? <ul className="competition-directory">{rows.map(row => <li key={row.id}>
       {row.code === 'LIGA_A' || row.code === 'LIGA_B' ? <><CompetitionList items={[row]} /><a className="button button--secondary" href={`#/competiciones/liga-${row.code === 'LIGA_A' ? 'a' : 'b'}`}>Consultar {row.name}</a></>
         : <details><summary><CompetitionImage code={row.code} name={row.name} decorative/><span><strong>{row.name}</strong><small>{row.status === 'En esta Fecha' ? row.detail : row.status}</small></span><Icon name="arrow" /></summary><div className="competition-directory__detail"><p>{row.detail}</p><p>Más adelante vas a poder consultar acá el recorrido completo de esta competición.</p></div></details>}
-    </li>)}</ul> : <section className="card panel"><p>Todavía no hay competiciones disponibles.</p><a href="#/competiciones/liga" className="button button--secondary">Consultar Liga</a></section>}
+    </li>)}</ul> : <section className="card panel"><p>Todavía no hay competiciones disponibles.</p><a href="#/competiciones" className="button button--secondary">Consultar Liga</a></section>}
   </>;
 }
 

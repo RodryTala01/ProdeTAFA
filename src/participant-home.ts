@@ -81,6 +81,7 @@ export function competitionRows(data: HomeData) {
   if (!season) return [];
   const ownLeague = `LIGA_${season.division?.code}`;
   return [...(season.competitionCatalog ?? season.competitions)]
+    .filter(c=>c.code!=='PROMOCION')
     .sort((a,b) => Number(b.code === ownLeague) - Number(a.code === ownLeague))
     .map(c => {
       const contexts = data.contexts.filter(ctx => ctx.competition.id === c.id);
@@ -128,7 +129,7 @@ export function homeCompetitions(data: HomeData, user: string) {
     if (c.code.startsWith('LIGA_') && c.code !== `LIGA_${division}`) return [];
     if (['COPA_A','COPA_B'].includes(c.code) && c.code !== ownCup) return [];
     if (!c.code.startsWith('LIGA_') && !members.length && !contexts.length) return [];
-    if (c.code === 'PROMOCION' && (!encounter || ['finished','archived'].includes(c.status))) return [];
+    if (c.code === 'PROMOCION') return []; // Fecha 6 lives inside Liga, not as another cup.
     return [{competition:c, status:participation(s,c,user), encounter,
       phase: contexts[0]?.stage?.name ?? stages.find(st=>st.id===(encounter??encounters[0])?.stageId)?.name,
       sides: encounter ? [entryMembers(s,encounter.entryAId,encounter.roundId),entryMembers(s,encounter.entryBId,encounter.roundId)] : [],

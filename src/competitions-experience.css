@@ -161,3 +161,21 @@
 .participant-competitions > .sport-edition { width:max-content; max-width:100%; display:flex; align-items:center; gap:10px; margin:4px 0 14px auto; font-size:.75rem; }
 .participant-competitions > .sport-edition select { min-width:140px; max-width:240px; }
 @media(max-width:580px){ .participant-competitions > .sport-edition { width:100%; justify-content:flex-end; } }
+
+/* Participant clarity: duo label stays above both individual names. */
+.duo-team-title { display:inline-block; font-weight:800; color:var(--accent); }
+.duo-name-box { display:grid; gap:10px; }
+.duo-name-box h2 { margin:0; }
+.duo-name-box p { margin:0; }
+.duo-name-form { display:flex; align-items:end; gap:12px; flex-wrap:wrap; }
+.duo-name-form .field { flex:1 1 220px; min-width:0; }
+.duo-name-form input { width:100%; }
+.league-promotion { margin-top:16px; }
+.league-promotion .cx-knockout { margin:12px 0 0; }
+.league-promotion .cx-knockout-column { flex-basis:min(310px,86vw); }
+@media(max-width:580px) {
+  .duo-name-form { display:grid; }
+  .duo-name-form .field { width:100%; }
+  .duo-name-form .button { width:100%; }
+  .league-promotion .cx-knockout-column { flex-basis:85vw; }
+}
