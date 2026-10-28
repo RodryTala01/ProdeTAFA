@@ -22,12 +22,27 @@ const dir=await mkdtemp(join(tmpdir(),'promiedos-client-'));
 try {
   const output=await build({entryPoints:['scripts/promiedos-client.ts'],bundle:true,write:false,format:'esm',platform:'node'});
   const modulePath=join(dir,'client.mjs');await writeFile(modulePath,output.outputFiles[0].text);
-  const {getPromiedosDay,getPromiedosGame}=await import(pathToFileURL(modulePath).href);
+  const {getPromiedosDay,getPromiedosGame,safeDailyLiveGame}=await import(pathToFileURL(modulePath).href);
   const plan=await app('/work');
   if(!Array.isArray(plan.days)||!Array.isArray(plan.games)||plan.days.length>14||plan.games.length>24)throw new Error('Invalid acquisition plan');
   const counter={count:0};
+  const days=new Map();
+  const getDay=async(date,counter)=>{
+    if(days.has(date))return days.get(date);
+    const fetched=await getPromiedosDay(date,counter);
+    days.set(date,fetched);
+    return fetched;
+  };
   const report=await collectProviderCache(plan,{
-    getDay:getPromiedosDay,getGame:getPromiedosGame,
+    getDay,getGame:getPromiedosGame,
+    fallbackGame:async id=>{
+      const date=plan.gameDays?.[id];
+      if(typeof date!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return null;
+      const games=await getDay(date,counter);
+      const matches=games.filter(g=>g.id===id);
+      if(matches.length!==1)return null;
+      return safeDailyLiveGame(matches[0],id);
+    },
     upload:entry=>app('',{entries:[entry]}),
     apply:games=>app('/apply',{games}),
   },counter);
@@ -47,9 +62,10 @@ try {
     status,uploaded:report.uploaded,
     providerFailed:report.providerFailures.length,
     internalFailed:report.internalFailures.length,
-    providerRequests:counter.count,
+    providerRequests:counter.count,liveFallbacks:report.fallbacks.length,
   };
   console.log(JSON.stringify(summary));
+  if(report.fallbacks.length)console.log('Daily-list live fallback accepted for',report.fallbacks);
   if(process.env.GITHUB_STEP_SUMMARY){
     const details=[
       '### Promiedos · adquisición de datos',
