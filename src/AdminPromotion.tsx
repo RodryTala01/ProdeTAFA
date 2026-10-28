@@ -75,7 +75,8 @@ export default function AdminPromotion({
       setBusy(false);
     }
   }
-  const started = !!data?.encounters.length,
+  const unlocked=!!data?.leaguePhase.ready;
+    const started = !!data?.encounters.length,
     dirty =
       !!data &&
       JSON.stringify(choices) !== JSON.stringify(promotionChoices(data.slots));
@@ -103,7 +104,13 @@ export default function AdminPromotion({
       className="form-stack cup-ab"
       aria-label="Administración deportiva Promoción"
     >
-      <h3>{c.displayName}</h3>
+      <h3>Fecha 6 · Promoción de Liga A/B</h3>
+      {data?.leaguePhase&&<section className="asc-wizard-content" role="status">
+        <strong>{data.leaguePhase.ready?'Fase final habilitada':'Pendiente de Liga A/B'}</strong>
+        <p>{data.leaguePhase.reason}</p>
+        <p>{data.leaguePhase.regularRounds.map(r=>`${r.code==='LIGA_A'?'Liga A':'Liga B'}: ${r.finished}/5 Fechas finalizadas · ${r.positions}/${r.participants} posiciones confirmadas`).join(' · ')}</p>
+        {data.leaguePhase.rounds.length===1&&<p>Fecha 6 vinculada: {data.leaguePhase.rounds[0].name}.</p>}
+      </section>}
       <nav className="cup-tabs" aria-label="Secciones Promoción">
         {['Cupos', 'Cruces', 'Movimientos'].map((t) => (
           <button
@@ -141,7 +148,7 @@ export default function AdminPromotion({
               </p>
               <button
                 className="button button--secondary"
-                disabled={locked || started || dirty}
+                disabled={locked || !unlocked || started || dirty}
                 onClick={() =>
                   void run(
                     () => cupApi(base + '/prefill', 'POST', {}),
@@ -171,6 +178,7 @@ export default function AdminPromotion({
                 className="button button--primary"
                 disabled={
                   locked ||
+                  !unlocked ||
                   started ||
                   promotionErrors(data.slots, choices, eligible).length > 0
                 }
@@ -214,7 +222,7 @@ export default function AdminPromotion({
                     Etapa eliminatoria
                     <select
                       value={stage}
-                      disabled={locked || !confirmed || dirty}
+                      disabled={locked || !unlocked || !confirmed || dirty}
                       onChange={(e) => {
                         setStage(e.target.value);
                         setLink('');
@@ -232,7 +240,7 @@ export default function AdminPromotion({
                     Fecha compartida para ambos cruces
                     <select
                       value={link}
-                      disabled={locked || !stage || dirty}
+                      disabled={locked || !unlocked || !stage || dirty}
                       onChange={(e) => setLink(e.target.value)}
                     >
                       <option value="">Elegir Fecha vinculada</option>
@@ -251,6 +259,7 @@ export default function AdminPromotion({
                     className="button button--primary"
                     disabled={
                       locked ||
+                      !unlocked ||
                       !confirmed ||
                       dirty ||
                       !stages.some((s) => s.id === Number(stage)) ||
