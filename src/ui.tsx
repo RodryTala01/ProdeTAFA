@@ -1,7 +1,7 @@
 import {TeamShield} from './AssetImage';
 import { useId, useState, type InputHTMLAttributes } from 'react';
 
-type IconName = 'eye' | 'eye-off' | 'arrow' | 'home' | 'list' | 'trophy' | 'logout' | 'calendar' | 'check' | 'user';
+type IconName = 'eye' | 'eye-off' | 'arrow' | 'home' | 'list' | 'trophy' | 'shield' | 'logout' | 'calendar' | 'check' | 'user';
 const paths: Record<IconName, string> = {
   user: 'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0 M4 21v-2a8 8 0 0 1 16 0v2',
   eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
@@ -10,6 +10,7 @@ const paths: Record<IconName, string> = {
   home: 'm3 10 9-7 9 7 M5 9v12h14V9 M9 21v-8h6v8',
   list: 'M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01',
   trophy: 'M7 3h10v6a5 5 0 0 1-10 0V3Z M7 5H3v3a4 4 0 0 0 4 4 M17 5h4v3a4 4 0 0 1-4 4 M12 14v6 M8 21h8',
+  shield: 'M12 2 4 5v7c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V5L12 2Z',
   logout: 'M10 3H4v18h6 M9 12h12 m-4-4 4 4-4 4',
   calendar: 'M5 5h14v16H5V5Z M8 2v6 M16 2v6 M5 11h14',
   check: 'm5 12 4 4L19 6',
