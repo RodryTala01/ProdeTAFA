@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { handleCompetitionPromotion } from '../worker/competition-promotion';
 import { handleCompetitionKnockout } from '../worker/competition-knockout';
+import {handleCompetitionEngine} from '../worker/competitions';
 
 let db: DatabaseSync;
 
@@ -43,7 +44,7 @@ async function call(path: string, method = 'GET', body?: object) {
     headers: { cookie: 'prode_session=admin', 'content-type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
-  for (const handler of [handleCompetitionPromotion, handleCompetitionKnockout]) {
+  for (const handler of [handleCompetitionPromotion, handleCompetitionKnockout,handleCompetitionEngine]) {
     const response = await handler(request, env());
     if (response) return response;
   }
@@ -136,6 +137,25 @@ describe('Promocion backend funcional', () => {
     const incomplete=await call('admin/competition-engine/competitions/100/promotion/prefill','POST',{});
     expect(incomplete.status).toBe(409);
     expect((await incomplete.json() as any).error).toMatch(/posición final/i);
+  });
+  it('vincula una única Fecha 6 distinta de las regulares, y la clasifica como Liga',async()=>{
+    const unlink=await call('admin/competition-engine/competitions/100/rounds/400','DELETE');
+    expect(unlink.status).toBe(200);
+    const reused=await call('admin/competition-engine/competitions/100/rounds','POST',{stageId:200,roundId:311,purpose:'NORMAL'});
+    expect(reused.status).toBe(409);
+    db.exec("UPDATE rounds SET category='AMISTOSO' WHERE id=300");
+    const linked=await call('admin/competition-engine/competitions/100/rounds','POST',{stageId:200,roundId:300,purpose:'NORMAL'});
+    expect(linked.status).toBe(200);
+    expect((db.prepare('SELECT category FROM rounds WHERE id=300').get() as any).category).toBe('LIGA');
+    expect((await call('admin/competition-engine/competitions/100/rounds','POST',{stageId:200,roundId:300})).status).toBe(409);
+    expect((db.prepare("SELECT COUNT(*) n FROM competition_round_links WHERE competition_id=100 AND purpose='NORMAL'").get() as any).n).toBe(1);
+  });
+  it('no permite desvincular la Fecha 6 después de generar sus cruces',async()=>{
+    const pref=await call('admin/competition-engine/competitions/100/promotion/prefill','POST',{});
+    const slots=(await pref.json() as any).slots;
+    expect((await call('admin/competition-engine/competitions/100/promotion/slots','PUT',{slots:slots.map((s:any)=>({slotCode:s.slotCode,userId:s.proposedUser.id}))})).status).toBe(200);
+    expect((await call('admin/competition-engine/competitions/100/promotion/matches','POST',{stageId:200,roundLinkId:400})).status).toBe(200);
+    expect((await call('admin/competition-engine/competitions/100/rounds/400','DELETE')).status).toBe(409);
   });
   it('la consulta de Promoción informa el estado real de la Fecha 6',async()=>{
     const data=await (await call('competition-engine/competitions/100/promotion/slots')).json() as any;
