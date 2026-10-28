@@ -166,6 +166,11 @@ describe('Transicion de temporada funcional', () => {
 
     const season = db.prepare('SELECT id,status FROM tafa_seasons WHERE season_number=33').get() as any;
     expect(season.status).toBe('draft');
+    const promotionStage=db.prepare(
+      "SELECT cs.code,cs.name,cs.stage_type FROM competition_stages cs JOIN competitions c ON c.id=cs.competition_id WHERE c.season_id=? AND c.code='PROMOCION'"
+    ).get(season.id) as any;
+    expect(promotionStage).toMatchObject({code:'PROMO',name:'Fecha 6 · Promoción',stage_type:'KNOCKOUT'});
+
 
     const counts = db.prepare(
       `SELECT sd.code,COUNT(*) total
