@@ -3,7 +3,6 @@ import {entryMembers,entryName,phaseName,type Season} from './participant-compet
 
 export default function LeaguePromotion({season,user}:{season:Season;user:string}){
  const promotion=season.competitions.find(c=>c.code==='PROMOCION');
- if(!promotion)return null;
  const [phase,setPhase]=useState<null|{ready:boolean;reason:string;rounds:Array<{roundId:number;name:string;status:string}>;encounters:number;movements:number}>(null);
  const [error,setError]=useState('');
  useEffect(()=>{
@@ -15,6 +14,7 @@ export default function LeaguePromotion({season,user}:{season:Season;user:string
     .catch(()=>{if(!controller.signal.aborted)setError('No pudimos verificar la preparación de la Fecha 6.');});
   return ()=>controller.abort();
  },[promotion?.id,season.seasonNumber]);
+ if(!promotion)return null;
  const stages=season.stages.filter(st=>st.competitionId===promotion.id);
  const games=season.encounters.filter(e=>stages.some(st=>st.id===e.stageId));
  const mine=season.members.some(m=>m.competitionId===promotion.id&&m.userId===user);
