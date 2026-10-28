@@ -10,6 +10,7 @@ import PredictionHistoryBrowser from './PredictionHistoryBrowser';
 import LeagueView from './LeagueView';
 import ParticipantCompetitionsPage from './ParticipantCompetitions';
 import ParticipantHome, { HomeErrors } from './ParticipantHome';
+import MiEquipo from './MiEquipo';
 import { emptyHome, loadHome } from './participant-home';
 import { participantRoute, participantSections, type ParticipantRoute } from './participant-navigation';
 import './participant-shell.css';
@@ -48,11 +49,12 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
   return <main className={`app-shell participant-shell ${route === 'inicio' ? 'participant-shell--home' : ''}`}>
     <header className="topbar participant-header"><a className="participant-brand" href="#/inicio" aria-label="Prode TAFA · Inicio"><img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="40" height="64"/><span>Prode <strong>TAFA</strong></span></a><ParticipantNavigation route={route} /><details ref={menu} className="profile-menu" onKeyDown={event => { if (event.key === 'Escape' && menu.current) { menu.current.open = false; menu.current.querySelector('summary')?.focus(); } }}>
       <summary aria-label={`Menú de ${user.fullName}`}><span className="profile-name">{user.fullName}</span><span className="participant-profile-avatar"><ParticipantShield userId={user.id} name={user.fullName} decorative/></span><svg className="profile-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></summary>
-      <div className="profile-menu__items"><a href="#/club" onClick={() => { if (menu.current) menu.current.open = false; }}>Mi Club</a><button type="button" onClick={onLogout}><Icon name="logout" /> Cerrar sesión</button></div>
+      <div className="profile-menu__items"><a href="#/club" onClick={() => { if (menu.current) menu.current.open = false; }}>Mi Club</a><a href="#/equipo" onClick={() => { if (menu.current) menu.current.open = false; }}>Mi Equipo</a><button type="button" onClick={onLogout}><Icon name="logout" /> Cerrar sesión</button></div>
     </details></header>
     <div className={`dashboard participant-dashboard ${route === 'pronosticos' ? 'participant-dashboard--predictions' : ''}`}>
       <section ref={content} className="participant-content" tabIndex={-1} aria-label="Contenido del participante">
         {route === 'pronosticos' ? <><div className="section-heading"><a className="button button--ghost" href="#/club/historial">Ver historial</a></div><ParticipantRound /></>
+          : (route === 'equipo' || route.startsWith('equipo/')) ? <MiEquipo route={route} userId={user.id}/>
           : route === 'club/historicos' ? <ParticipantAllTime userId={user.id}/>
           : route.startsWith('club/historial') ? <ParticipantHistory key={route} user={user} route={route}/>
           : route.startsWith('club/enfrentamientos') ? <><a href={new URLSearchParams(route.split('?')[1]).get('user')?`#/club/participante/${encodeURIComponent(new URLSearchParams(route.split('?')[1]).get('user')!)}`:'#/club'} className="button button--ghost">Volver al perfil</a><HeadToHead/></>
