@@ -838,8 +838,68 @@ async function createSurvivalTie(env:Env,user:SessionUser,roundLinkId:number){
  return json(await evaluateTiebreak(env,created.id));
 }
 
+
+/** Captain = first original member of a pair; no second captain can rename it.
+ * Historical entries keep their original order without needing a D1 migration. */
+async function ownDuo(env:Env,competitionId:number,userId:string){
+ const competition=await competitionInfo(env,competitionId);
+ if(!competition||competition.code!=='COPA_DUOS')return null;
+ const member=await env.DB.prepare(\`SELECT e.id,e.display_name,e.source_json
+   FROM competition_entries e JOIN competition_entry_members m ON m.entry_id=e.id
+   WHERE e.competition_id=? AND e.entry_type='DUO' AND m.user_id=?
+     AND m.valid_to_round_id IS NULL ORDER BY e.id LIMIT 1\`)
+   .bind(competitionId,userId).first<{id:number;display_name:string;source_json:string}>();
+ if(!member)return {competition,team:null};
+ const originals=await env.DB.prepare(\`SELECT m.user_id AS userId,u.full_name AS fullName,
+       m.valid_to_round_id AS validTo
+   FROM competition_entry_members m JOIN users u ON u.id=m.user_id
+   WHERE m.entry_id=? ORDER BY m.id\`).bind(member.id).all<{userId:string;fullName:string;validTo:number|null}>();
+ const active=(originals.results??[]).filter(m=>m.validTo===null);
+ const source=JSON.parse(member.source_json||'{}') as Record<string,unknown>;
+ const originalCaptain=typeof source.captainUserId==='string'?source.captainUserId:originals.results?.[0]?.userId;
+ const captainUserId=active.some(m=>m.userId===originalCaptain)?originalCaptain:active[0]?.userId;
+ const nickname=typeof source.nickname==='string'?source.nickname:member.display_name.split(' · ')[0];
+ return {competition,team:{entryId:member.id,nickname,captainUserId,canRename:captainUserId===userId,
+  members:active.map(m=>({userId:m.userId,fullName:m.fullName}))}};
+}
+async function changeDuoName(request:Request,env:Env,user:SessionUser,competitionId:number){
+ if(request.method!=='PUT')return error('Método no permitido',405);
+ const own=await ownDuo(env,competitionId,user.id);
+ if(!own)return error('Copa Dúos no encontrada',404);
+ if(!own.team)return error('No integrás un dúo en esta edición',403);
+ if(!own.team.canRename)return error('Solo el capitán puede elegir el nombre del dúo',403);
+ if(['finished','archived'].includes(own.competition.status)||['finished','archived'].includes(own.competition.season_status))return error('La temporada está cerrada',409);
+ const body=await request.json().catch(()=>null) as {name?:unknown}|null;
+ if(typeof body?.name!=='string')return error('Indicá un nombre para el dúo');
+ const name=body.name.trim().replace(/\s+/g,' ');
+ if(name.length<3||name.length>32||/[<>\u0000-\u001f\u007f]/.test(name))return error('El nombre debe tener entre 3 y 32 caracteres, sin símbolos de control ni etiquetas');
+ const current=await env.DB.prepare("SELECT source_json,display_name FROM competition_entries WHERE id=?").bind(own.team.entryId).first<{source_json:string;display_name:string}>();
+ if(!current)return error('Dúo no encontrado',404);
+ const source=JSON.parse(current.source_json||'{}') as Record<string,unknown>;
+ const previous=own.team.nickname;
+ const fullName=name+' · '+own.team.members.map(m=>m.fullName).join(' + ');
+ await env.DB.batch([
+  env.DB.prepare("UPDATE competition_entries SET display_name=?,source_json=?,updated_at=datetime('now') WHERE id=?")
+   .bind(fullName,JSON.stringify({...source,nickname:name,captainUserId:own.team.captainUserId}),own.team.entryId),
+  env.DB.prepare("INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json) VALUES (?,'competition.duos_named','competition_entry',?,?,?)")
+   .bind(user.id,String(own.team.entryId),JSON.stringify({nickname:previous}),JSON.stringify({nickname:name,captainUserId:own.team.captainUserId}))
+ ]);
+ return json({ok:true,entryId:own.team.entryId,nickname:name});
+}
+
 export async function handleCompetitionDuos(request: Request, env: Env): Promise<Response | null> {
   const pathname = new URL(request.url).pathname;
+  const teamNameMatch=pathname.match(/^\/api\/competition-engine\/competitions\/(\d+)\/duos\/my-team$/);
+  if(teamNameMatch){
+    const user=await sessionUser(request,env);
+    if(!user)return error('No autorizado',401);
+    const competitionId=Number(teamNameMatch[1]);
+    if(request.method==='PUT')return changeDuoName(request,env,user,competitionId);
+    if(request.method!=='GET')return error('Método no permitido',405);
+    const result=await ownDuo(env,competitionId,user.id);
+    return result?json({competitionId,team:result.team}):error('Copa Dúos no encontrada',404);
+  }
+
 
   const survivalTieMatch=pathname.match(/^\/api\/admin\/competition-engine\/round-links\/(\d+)\/duos\/tiebreak$/);
   if(survivalTieMatch){const user=await sessionUser(request,env);if(!user)return error('No autorizado',401);if(user.role!=='admin')return error('Acceso de administrador requerido',403);if(request.method!=='POST')return error('Método no permitido',405);return createSurvivalTie(env,user,Number(survivalTieMatch[1]));}
