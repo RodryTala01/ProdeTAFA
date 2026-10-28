@@ -504,6 +504,9 @@ async function linkRound(request: Request, env: Env, user: SessionUser, competit
     const round = await env.DB.prepare('SELECT id, category FROM rounds WHERE id = ? LIMIT 1')
     .bind(roundId).first<{ id: number; category: string }>();
   if (!round) return error('Fecha no encontrada', 404);
+  if(competition.family==='PROMOTION'&&round.category!=='AMISTOSO'&&round.category!=='LIGA')
+    return error('La Fecha 6 de Promoción debe ser una Fecha de Liga, no una copa.',409);
+
 
   let sequence = Number(body?.sequence);
   if (!Number.isInteger(sequence) || sequence <= 0) {
