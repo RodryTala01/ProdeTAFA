@@ -1,7 +1,7 @@
 import {useEffect,useState,type FormEvent} from 'react';
 
 type Team={entryId:number;nickname:string;captainUserId:string;canRename:boolean;members:Array<{userId:string;fullName:string}>};
-export default function DuoNameEditor({competitionId,season}:{competitionId:number;season:number}){
+export default function DuoNameEditor({competitionId,season,onSaved}:{competitionId:number;season:number;onSaved?:()=>void}){
  const [team,setTeam]=useState<Team|null>(null),[name,setName]=useState(''),[loading,setLoading]=useState(true);
  const [error,setError]=useState(''),[success,setSuccess]=useState(''),[saving,setSaving]=useState(false);
  useEffect(()=>{
@@ -23,6 +23,7 @@ export default function DuoNameEditor({competitionId,season}:{competitionId:numb
    if(!r.ok)throw Error(d.error??'No se pudo cambiar el nombre');
    setTeam({...team,nickname:d.nickname});setName(d.nickname);
    setSuccess('Nombre actualizado. Los integrantes siguen visibles en las tablas.');
+   onSaved?.();
   }catch(e){setError(e instanceof Error?e.message:'No se pudo guardar el nombre');}
   finally{setSaving(false);}
  }
