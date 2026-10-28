@@ -37,7 +37,7 @@ try {
     getDay,getGame:getPromiedosGame,
     fallbackGame:async id=>{
       const date=plan.gameDays?.[id];
-      if(typeof date!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return null;
+      if(typeof date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(date))return null;
       const games=await getDay(date,counter);
       const matches=games.filter(g=>g.id===id);
       if(matches.length!==1)return null;
