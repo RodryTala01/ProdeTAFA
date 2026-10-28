@@ -94,6 +94,16 @@ beforeEach(() => {
        VALUES (400,100,200,300,1,'NORMAL');`,
   );
 
+  // Five real regular dates are linked to both leagues and finalized.
+  db.exec("INSERT INTO competition_stages(id,competition_id,code,name,stage_type,sequence) VALUES (11,1,'LEAGUE','Liga','LEAGUE_TABLE',1),(12,2,'LEAGUE','Liga','LEAGUE_TABLE',1)");
+  for(let index=1;index<=5;index++){
+    const id=310+index;
+    db.prepare("INSERT INTO rounds(id,name,status,category) VALUES(?,?,'finished','LIGA')").run(id,'Fecha '+index);
+    for(const [offset,competitionId,stageId] of [[0,1,11],[100,2,12]]){
+      db.prepare("INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence,purpose) VALUES(?,?,?,?,?,'NORMAL')")
+        .run(500+offset+index,competitionId,stageId,id,index);
+    }
+  }
   for (let i = 1; i <= 10; i++) {
     const id = 'P' + String(i).padStart(2, '0');
     db.prepare(
@@ -114,6 +124,26 @@ describe('Promocion backend funcional', () => {
   it('bloquea todas las mutaciones en competición cerrada',async()=>{
     db.exec("UPDATE competitions SET status='finished' WHERE id=100");
     for(const [path,method] of [['prefill','POST'],['slots','PUT'],['matches','POST'],['stages/200/finalize','POST']])expect((await call('admin/competition-engine/competitions/100/promotion/'+path,method,{})).status).toBe(409);
+  });
+  it('Fecha 6 requiere ambas Ligas cerradas y posiciones confirmadas, sin modificar cupos',async()=>{
+    db.prepare("UPDATE rounds SET status='open' WHERE id=311").run();
+    const denied=await call('admin/competition-engine/competitions/100/promotion/prefill','POST',{});
+    expect(denied.status).toBe(409);
+    expect((await denied.json() as any).error).toMatch(/cinco Fechas/i);
+    expect((db.prepare("SELECT COUNT(*) n FROM competition_qualification_slots WHERE competition_id=100").get() as any).n).toBe(0);
+    db.prepare("UPDATE rounds SET status='finished' WHERE id=311").run();
+    db.prepare("DELETE FROM competition_results WHERE competition_id=2 AND final_position=4").run();
+    const incomplete=await call('admin/competition-engine/competitions/100/promotion/prefill','POST',{});
+    expect(incomplete.status).toBe(409);
+    expect((await incomplete.json() as any).error).toMatch(/posición final/i);
+  });
+  it('la consulta de Promoción informa el estado real de la Fecha 6',async()=>{
+    const data=await (await call('competition-engine/competitions/100/promotion/slots')).json() as any;
+    expect(data.leaguePhase.ready).toBe(true);
+    expect(data.leaguePhase.regularRounds).toHaveLength(2);
+    expect(data.leaguePhase.regularRounds.map((row:any)=>[row.linked,row.finished])).toEqual([[5,5],[5,5]]);
+    expect(data.leaguePhase.rounds.map((row:any)=>row.name)).toEqual(['Fecha Promocion']);
+    expect(data.leaguePhase.encounters).toBe(0);
   });
   it('propone los dos cupos de A desde abajo y B2/B3', async () => {
     const response = await call('admin/competition-engine/competitions/100/promotion/prefill', 'POST', {});
