@@ -15,6 +15,11 @@ export type PromotionChoice = {
   userId: string;
   reason: string;
 };
+export type LeaguePromotionPhase={
+ ready:boolean;reason:string;
+ regularRounds:Array<{code:string;linked:number;finished:number;participants:number;positions:number}>;
+ rounds:Array<{roundId:number;name:string;status:string}>;encounters:number;movements:number;
+};
 export type PromotionMovement = {
   id: number;
   userId: string;
@@ -87,7 +92,7 @@ export function promotionPreview(encounters: Encounter[]) {
 }
 export async function loadPromotion(c: CupCompetition) {
   const [slots, ...stages] = await Promise.all([
-    cupApi<{ slots: PromotionSlot[]; movements: PromotionMovement[] }>(
+    cupApi<{ slots: PromotionSlot[]; movements: PromotionMovement[];leaguePhase:LeaguePromotionPhase }>(
       `/api/competition-engine/competitions/${c.id}/promotion/slots`,
     ),
     ...c.stages
