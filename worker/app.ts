@@ -19,6 +19,7 @@ import { handleCompetitionPapa } from './competition-papa';
 import { handleCompetitionPromotion } from './competition-promotion';
 import { handleIffhs } from './iffhs';
 import { handleSeasonTransition } from './season-transition';
+import {handleTeamPage} from './team-page';
 
 function jsonError(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
