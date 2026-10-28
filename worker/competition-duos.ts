@@ -844,16 +844,16 @@ async function createSurvivalTie(env:Env,user:SessionUser,roundLinkId:number){
 async function ownDuo(env:Env,competitionId:number,userId:string){
  const competition=await competitionInfo(env,competitionId);
  if(!competition||competition.code!=='COPA_DUOS')return null;
- const member=await env.DB.prepare(\`SELECT e.id,e.display_name,e.source_json
+ const member=await env.DB.prepare(`SELECT e.id,e.display_name,e.source_json
    FROM competition_entries e JOIN competition_entry_members m ON m.entry_id=e.id
    WHERE e.competition_id=? AND e.entry_type='DUO' AND m.user_id=?
-     AND m.valid_to_round_id IS NULL ORDER BY e.id LIMIT 1\`)
+     AND m.valid_to_round_id IS NULL ORDER BY e.id LIMIT 1`)
    .bind(competitionId,userId).first<{id:number;display_name:string;source_json:string}>();
  if(!member)return {competition,team:null};
- const originals=await env.DB.prepare(\`SELECT m.user_id AS userId,u.full_name AS fullName,
+ const originals=await env.DB.prepare(`SELECT m.user_id AS userId,u.full_name AS fullName,
        m.valid_to_round_id AS validTo
    FROM competition_entry_members m JOIN users u ON u.id=m.user_id
-   WHERE m.entry_id=? ORDER BY m.id\`).bind(member.id).all<{userId:string;fullName:string;validTo:number|null}>();
+   WHERE m.entry_id=? ORDER BY m.id`).bind(member.id).all<{userId:string;fullName:string;validTo:number|null}>();
  const active=(originals.results??[]).filter(m=>m.validTo===null);
  const source=JSON.parse(member.source_json||'{}') as Record<string,unknown>;
  const originalCaptain=typeof source.captainUserId==='string'?source.captainUserId:originals.results?.[0]?.userId;
