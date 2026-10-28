@@ -90,8 +90,8 @@ export function AdminSeasonCenter({season,onSelectFamily,onSelectCompetition,onM
 export function AdminFamilyOverview({season,family,onBack,onSelectCompetition}:{season:SetupSeason;family:SetupFamily;onBack:()=>void;onSelectCompetition:(c:SetupCompetition)=>void}) {
  const competitions=familyCompetitions(season,family);
  return <section className="asc-family"><button className="button button--ghost" type="button" onClick={onBack}>← Centro de temporada</button><header><span className="eyebrow">T{season.seasonNumber} · PREPARACIÓN GUIADA</span><h2>{family.title}</h2><p>{family.description}</p></header>
- <p>Elegí qué edición querés completar. El asistente conserva la configuración deportiva y las validaciones existentes.</p>
- <div className="asc-family-list">{family.codes.map(code=>{
+ <p>Elegí qué edición querés completar. El asistente conserva la configuración deportiva y las validaciones existentes.</p>{family.key==='liga'&&<p><strong>Fecha 6 · Promoción:</strong> se administra desde la etapa «Sorteo y fases» de Liga A o B, no como competencia aparte.</p>}
+ <div className="asc-family-list">{family.codes.filter(code=>code!=='PROMOCION').map(code=>{
    const c=season.competitions.find(item=>item.code===code);const optional=family.optional?.includes(code);
    return <article key={code} className="asc-family-row"><div className="asc-family-icon"><CompetitionImage code={code} name={c?.displayName??code} size="md" season={season.seasonNumber} decorative/></div><div><h3>{c?.displayName??code.replaceAll('_',' ')}</h3><p>{optional?'Fase final de Liga · se prepara cuando correspondan las posiciones definitivas':c?'Etapas: '+c.stages.length+' · Fechas vinculadas: '+c.roundLinks.length:'No se encontró la edición; revisar la plantilla de temporada.'}</p></div>{c?<button className="button button--secondary" type="button" onClick={()=>onSelectCompetition(c)}>Configurar →</button>:<span className="asc-state">Sin crear</span>}</article>;
  })}</div>
