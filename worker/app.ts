@@ -34,6 +34,11 @@ export default {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido',403);
       return (await handlePromiedosCache(request,env)) ?? jsonError('Ruta no encontrada',404);
     }
+    if(/^\/api\/(participant|admin)\/teams\//.test(pathname)){
+      if(!mutationAllowed(request))return jsonError('Origen de solicitud no permitido',403);
+      const teamResponse=await handleTeamPage(request,env);
+      return teamResponse??jsonError('Equipo no encontrado',404);
+    }
     const competitionRoute = pathname.startsWith('/api/admin/competition-engine')
       || pathname.startsWith('/api/competition-engine/');
 
