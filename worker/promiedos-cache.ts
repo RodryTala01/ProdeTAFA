@@ -136,7 +136,7 @@ export async function getPromiedosWorkPlan(db:D1Database) {
   const bogota=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'});
   for(const row of active.results??[]) {
     const value=row.kickoff_at.trim().replace(' ','T');
-    const at=new Date(/(?:Z|[+-]\\d{2}:?\\d{2})$/i.test(value)?value:value+'Z');
+    const at=new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)?value:value+'Z');
     if(Number.isFinite(at.getTime())) gameDays[row.provider_fixture_id]=bogota.format(at);
   }
   return {days:[...days].slice(0,14),games:[...new Set([...(active.results??[]).map(r=>r.provider_fixture_id),...games])].slice(0,24),gameDays};
