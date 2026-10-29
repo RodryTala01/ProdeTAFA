@@ -8,9 +8,35 @@ import {HistoryList,HistoricalMatchRow,HistoryDetail} from '../src/ParticipantHi
 import {ParticipantState} from '../src/ParticipantState';
 import {clubExample,historyExample} from '../src/design/club-fixtures';
 import {participantRoute} from '../src/participant-navigation';
+import type {TeamPageData} from '../src/MiEquipo';
 import {LeagueTable} from '../src/LeagueView';
 const render=(component:any,props:any)=>renderToStaticMarkup(createElement(component,props));
 afterEach(()=>vi.unstubAllGlobals());
+const teamFixture:TeamPageData={
+ identity:{id:'demo-1',participantName:'Participante de ejemplo',teamName:'Mi Club Original',shieldUrl:null,foundedSeason:20},
+ division:{name:'Liga A',seasonNumber:33},stats:{dates:8,points:125,fulls:17,partials:70,errors:9,extras:4,predictions:96},
+ titles:[{code:'COPA_TOTAL',name:'Copa Total',seasonNumber:31}],
+ rankings:{general:{current:7,best:{position:2,seasonNumber:30}},iffhs:{current:4,best:{position:1,seasonNumber:31},throughSeason:33}},
+ encounters:[],
+};
+it('unifica la identidad, rankings e historial de Mi Equipo con el recorrido del Mi Club existente',()=>{
+ const html=render(ClubProfile,{data:clubExample,own:true,team:teamFixture});
+ expect(html).toContain('Mi Club Original');
+ expect(html).toContain('TABLA GENERAL');
+ expect(html).toContain('RANKING IFFHS');
+ expect(html).toContain('HISTORIAL DE ENFRENTAMIENTOS');
+ expect(html).toContain('id="club-detalles"');
+ expect(html).toContain('Historial de Fechas');
+ expect(html).toContain('Últimas Fechas');
+ expect(html).toContain('Envíos y cambios');
+ expect(html).not.toContain('href="#/equipo"');
+ expect(html).not.toContain('>Palmarés individual</h2>');
+ expect(html).not.toContain('>Mi Equipo</a>');
+});
+it('rutas anteriores de Mi Equipo llegan al mismo Mi Club, también para otros participantes',()=>{
+ expect(participantRoute('#/equipo')).toBe('club');
+ expect(participantRoute('#/equipo/demo-1')).toBe('club/participante/demo-1');
+});
 it('Mi Club shows real summary fields and separates history and encounters',()=>{const html=render(ClubProfile,{data:clubExample,own:true});expect(html).toContain('Participante de ejemplo');expect(html).toContain('18');expect(html).toContain('#/club/historial');expect(html).toContain('#/club/enfrentamientos');expect(html).toContain('Fechas');});
 it('Mi Club lists a promotion participant only under Liga · Fecha 6',()=>{
   const s=clubExample.overview.season!;
@@ -32,7 +58,7 @@ it('league links navigate to profiles and historical routes survive refresh',()=
 it('history uses one participant selector and no editable prediction inputs',()=>{const html=render(HistoryDetail,{data:historyExample,participantId:'demo-1',currentUserId:'demo-1',onSelect:()=>{}});expect(html.match(/<select/g)).toHaveLength(1);expect(html).not.toMatch(/<input|Enviar pronóstico/);});
 it('human error includes a working retry that recovers the profile',async()=>{
  Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});let fail=true;
- vi.stubGlobal('fetch',vi.fn(async (url:string)=>{if(fail)throw Error('SQLITE private detail');return Response.json(url.includes('/profiles/')?clubExample.profile:url.includes('/overview')?{...clubExample.overview,season:null}:clubExample.league);}));
+ vi.stubGlobal('fetch',vi.fn(async (url:string)=>{if(fail)throw Error('SQLITE private detail');return Response.json(url.includes('/profiles/')?clubExample.profile:url.includes('/teams/')?teamFixture:url.includes('/overview')?{...clubExample.overview,season:null}:clubExample.league);}));
  const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
  try {await act(async()=>{root.render(createElement(ParticipantClubPage,{user:{id:'demo-1',fullName:'Participante'},route:'club'}));});expect(host.textContent).toContain('No pudimos cargar');expect(host.textContent).not.toContain('SQLITE');fail=false;await act(async()=>{Array.from(host.querySelectorAll('button')).find(b=>b.textContent==='Reintentar')!.click();});expect(host.textContent).toContain('Participante de ejemplo');expect(host.querySelector('[role="alert"]')).toBeNull();}finally{await act(async()=>root.unmount());host.remove();}
 });
