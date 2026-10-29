@@ -183,7 +183,16 @@ async function teamRead(db:D1Database,id:string){
     ownPoints:a===id?m.pointsA:m.pointsB,rivalPoints:a===id?m.pointsB:m.pointsA,plenos:a===id?m.plenosA:m.plenosB,
     scoreBasis:m.scoreBasis,resolution:null}];
  }));
- const historicMovements=archives.flatMap(({data})=>data.movements.filter(m=>archivedUserKey(data,m.participantKey)===id).map(m=>({...m,seasonNumber:data.season.number})));
+ const historicalSeasons=archives.flatMap(({data})=>data.participants.filter(p=>p.userId===id).map(p=>({
+   seasonNumber:data.season.number,seasonName:data.season.name,kind:data.season.kind,name:p.name,division:p.division,
+   statistics:data.statistics.find(s=>s.participantKey===p.key)??null,
+   standings:data.standings.filter(s=>s.participantKey===p.key).map(s=>({...s,competitionName:data.competitions.find(c=>c.code===s.competitionCode)?.name??s.competitionCode})),
+   rounds:data.rounds.filter(s=>s.participantKey===p.key),
+   results:data.results.filter(s=>s.participantKey===p.key).map(s=>({...s,competitionName:data.competitions.find(c=>c.code===s.competitionCode)?.name??s.competitionCode})),
+   movements:data.movements.filter(s=>s.participantKey===p.key),
+   iffhs:data.iffhs.find(s=>s.participantKey===p.key)??null,
+ }))).sort((a,b)=>b.seasonNumber-a.seasonNumber);
+  const historicMovements=archives.flatMap(({data})=>data.movements.filter(m=>archivedUserKey(data,m.participantKey)===id).map(m=>({...m,seasonNumber:data.season.number})));
  const historicDivisions=archives.flatMap(({data})=>data.participants.filter(p=>p.userId===id&&p.division).map(p=>({name:'Liga '+p.division,seasonNumber:data.season.number}))).sort((a,b)=>b.seasonNumber-a.seasonNumber);
  const latestDivision=await db.prepare(`SELECT d.name AS name,s.season_number AS seasonNumber FROM season_division_members m
  JOIN tafa_seasons s ON s.id=m.season_id JOIN season_divisions d ON d.id=m.division_id
@@ -193,7 +202,7 @@ async function teamRead(db:D1Database,id:string){
  return {identity:{...identity,foundedSeason:founding,teamName:identity.teamName??'Equipo de '+identity.participantName},division,
    stats:combinedStats,titles:[...(titles.results??[]),...historicTitles],
    rankings:{general:{current:generalEntry?Number(generalEntry.position):null,best:generalBest},iffhs:iffhsRank},
-   encounters:[...(encounters.results??[]),...historicMatches],historicalMovements:historicMovements};
+   encounters:[...(encounters.results??[]),...historicMatches],historicalMovements:historicMovements,historicalSeasons};
 
 }
 export async function handleTeamPage(request:Request,env:Env):Promise<Response|null>{
