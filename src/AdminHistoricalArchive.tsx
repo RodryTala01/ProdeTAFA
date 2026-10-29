@@ -1,6 +1,6 @@
 import {useEffect,useState,type ChangeEvent} from 'react';
-import type {ArchivePayload} from '../worker/historical-archive';
-import {archiveTables} from '../worker/historical-archive';
+import type {ArchivePayload} from './historical-schema';
+import {archiveTables} from './historical-schema';
 import {createHistoricalTemplate,parseHistoricalWorkbook,downloadArchiveBlob} from './historical-xlsx';
 import './admin-historical.css';
 
