@@ -16,11 +16,12 @@ async function api<T>(path:string,method='GET',payload?:unknown):Promise<T>{
 export default function AdminHistoricalArchive(){
  const [seasonNumber,setSeasonNumber]=useState(1),[name,setName]=useState(''),[payload,setPayload]=useState<ArchivePayload|null>(null);
  const [preview,setPreview]=useState<Preview|null>(null),[entries,setEntries]=useState<Entry[]>([]);
+ const [users,setUsers]=useState<Array<{id:string;fullName:string}>>([]);
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [confirm,setConfirm]=useState(false),[revert,setRevert]=useState<Entry|null>(null),[reason,setReason]=useState('');
  const [details,setDetails]=useState<{entry:Entry;data:ArchivePayload}|null>(null);
  async function reload(){const data=await api<{imports:Entry[]}>('/api/admin/historical-imports');setEntries(data.imports);}
- useEffect(()=>{void reload().catch(()=>setError('No pudimos consultar el historial de importaciones.'));},[]);
+ useEffect(()=>{void reload().catch(()=>setError('No pudimos consultar el historial de importaciones.'));void api<{users:Array<{id:string;fullName:string}>}>('/api/admin/users').then(x=>setUsers(x.users)).catch(()=>{});},[]);
  async function upload(event:ChangeEvent<HTMLInputElement>){
   const file=event.target.files?.[0];if(!file)return;
   setError('');setNotice('');setPreview(null);setPayload(null);setName(file.name);setConfirm(false);setBusy(true);
@@ -60,7 +61,7 @@ export default function AdminHistoricalArchive(){
   finally{setBusy(false);}
  }
  function getTemplate(){
-  downloadArchiveBlob(createHistoricalTemplate(seasonNumber),'TAFA_Plantilla_Archivo_T'+seasonNumber+'.xlsx');
+  downloadArchiveBlob(createHistoricalTemplate(seasonNumber,undefined,users),'TAFA_Plantilla_Archivo_T'+seasonNumber+'.xlsx');
  }
  const active=entries.filter(e=>e.status==='active').length;
  return <section className="history-admin">
@@ -99,7 +100,7 @@ export default function AdminHistoricalArchive(){
    </div>
    {details&&<section className="card panel history-details"><div className="panel-heading"><div><h2>Respaldo T{details.entry.seasonNumber} · Carga #{details.entry.id}</h2><p>El respaldo conserva exactamente las hojas de esta importación.</p></div><button className="button button--ghost" onClick={()=>setDetails(null)}>Cerrar</button></div>
       <div className="history-counts">{archiveTables.map(k=><div key={k}><strong>{details.entry.counts[k]??0}</strong><span>{label[k]}</span></div>)}</div>
-      <button className="button button--secondary" onClick={()=>downloadArchiveBlob(createHistoricalTemplate(details.entry.seasonNumber,details.data),'TAFA_Respaldo_T'+details.entry.seasonNumber+'_Importacion_'+details.entry.id+'.xlsx')}>Descargar respaldo Excel</button>
+      <button className="button button--secondary" onClick={()=>downloadArchiveBlob(createHistoricalTemplate(details.entry.seasonNumber,details.data,users),'TAFA_Respaldo_T'+details.entry.seasonNumber+'_Importacion_'+details.entry.id+'.xlsx')}>Descargar respaldo Excel</button>
       <button className="button button--ghost" onClick={()=>downloadArchiveBlob(new Blob([JSON.stringify(details.data,null,2)],{type:'application/json'}),'TAFA_Archivo_T'+details.entry.seasonNumber+'_'+details.entry.id+'.json')}>Descargar respaldo JSON</button>
    </section>}
    {revert&&<div className="modal-backdrop"><section className="modal card history-revert" role="dialog" aria-modal="true" aria-label="Revertir importación histórica">
