@@ -45,7 +45,7 @@ try {
       data?.officialPredictionsReady !== true ||
       data?.triggerSchemaReady !== true ||
       data?.migrationLedgerReady !== true ||
-      data?.minimumMigration !== '0015_promiedos_cache.sql' ||
+      data?.minimumMigration !== '0016_team_profiles.sql' ||
       data?.singleOpenRoundReady !== true ||
       missingTables === null || missingTables.length !== 0 ||
       missingColumns === null || missingColumns.length !== 0 ||

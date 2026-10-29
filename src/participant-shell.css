@@ -27,7 +27,7 @@
 .participant-shell .status-badge { white-space: normal; text-align: right; }
 @media (max-width: 700px) {
   .participant-dashboard { padding-bottom: calc(var(--nav-height) + 32px + env(safe-area-inset-bottom)); }
-  .participant-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0 4px env(safe-area-inset-bottom); background: var(--surface); border: 0; border-top: 1px solid var(--border); }
+  .participant-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0 4px env(safe-area-inset-bottom); background: var(--surface); border: 0; border-top: 1px solid var(--border); }
   .participant-nav a { min-width: 0; min-height: var(--nav-height); flex-direction: column; justify-content: center; gap: 5px; padding: 8px 2px; font-size: .6875rem; border-bottom: 0; border-top: 2px solid transparent; }
   .participant-nav a[aria-current="page"] { border-top-color: var(--accent); }
   .participant-nav .icon { width: 20px; height: 20px; }
@@ -66,7 +66,7 @@
  .participant-shell .participant-header { grid-template-columns:minmax(0,1fr) auto; gap:12px; padding:8px max(16px,env(safe-area-inset-left)) 8px max(16px,env(safe-area-inset-right)); padding-top:max(8px,env(safe-area-inset-top)); }
  .participant-brand { font-size:1.4rem; gap:8px; }
  .participant-brand img { width:30px; height:48px; }
- .participant-header .participant-nav { position:fixed; top:auto; bottom:0; left:0; right:0; z-index:40; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; padding:0 max(4px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px,env(safe-area-inset-left)); border-top:1px solid var(--border); background:var(--bg); }
+ .participant-header .participant-nav { position:fixed; top:auto; bottom:0; left:0; right:0; z-index:40; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:0; padding:0 max(4px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px,env(safe-area-inset-left)); border-top:1px solid var(--border); background:var(--bg); }
  .participant-header .participant-nav a { flex-direction:column; justify-content:center; min-width:0; min-height:var(--nav-height); padding:8px 2px; gap:5px; font-size:.6875rem; border-bottom:0; border-top:2px solid transparent; }
  .participant-header .participant-nav a[aria-current="page"] { border-top-color:var(--home-fluor); }
  .participant-header .participant-nav .icon { width:20px; height:20px; }

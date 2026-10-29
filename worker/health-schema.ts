@@ -49,6 +49,7 @@ export const T32_PRODUCTION_TABLES = [
 
 export const REQUIRED_PRODUCTION_TABLES = [
   'promiedos_cache',
+  'team_profiles',
   ...CORE_PRODUCTION_TABLES,
   ...T32_PRODUCTION_TABLES,
 ] as const;
@@ -97,6 +98,7 @@ export const REQUIRED_PRODUCTION_COLUMNS = {
   "season_transition_plans": ["id","source_season_id","target_season_number","status","issues_json","created_by_user_id","confirmed_by_user_id","applied_by_user_id","created_at","updated_at","confirmed_at","applied_at"],
   "sessions": ["id","user_id","token_hash","expires_at","created_at"],
   "tafa_seasons": ["id","season_number","name","status","created_at","updated_at","started_at","finished_at"],
+  "team_profiles": ["user_id","team_name","shield_url","updated_by","updated_at"],
   "users": ["id","full_name","phone_normalized","password_hash","role","is_active","created_at","updated_at"],
 } as const;
 
@@ -115,6 +117,6 @@ export const REQUIRED_PRODUCTION_TRIGGERS = [
   'invalidate_official_score_update',
 ] as const;
 
-export const MINIMUM_PRODUCTION_MIGRATION = '0015_promiedos_cache.sql';
+export const MINIMUM_PRODUCTION_MIGRATION = '0016_team_profiles.sql';
 
-export const REQUIRED_PRODUCTION_MIGRATIONS = ["0001_initial.sql","0002_league_seasons.sql","0003_league_entry_slot.sql","0004_prediction_history.sql","0005_official_predictions.sql","0006_competition_engine.sql","0007_iffhs.sql","0008_competition_results.sql","0009_stage_qualifiers.sql","0010_duos_survival.sql","0011_competition_qualification_slots.sql","0012_champions_bracket_nodes.sql","0013_season_transition_plan.sql","0014_duos_admin.sql","0015_promiedos_cache.sql"] as const;
+export const REQUIRED_PRODUCTION_MIGRATIONS = ["0001_initial.sql","0002_league_seasons.sql","0003_league_entry_slot.sql","0004_prediction_history.sql","0005_official_predictions.sql","0006_competition_engine.sql","0007_iffhs.sql","0008_competition_results.sql","0009_stage_qualifiers.sql","0010_duos_survival.sql","0011_competition_qualification_slots.sql","0012_champions_bracket_nodes.sql","0013_season_transition_plan.sql","0014_duos_admin.sql","0015_promiedos_cache.sql","0016_team_profiles.sql"] as const;
