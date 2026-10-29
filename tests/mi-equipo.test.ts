@@ -64,6 +64,15 @@ describe('Rankings históricos sin inventar resultados',()=>{
  });
  it('uses rolling 5-season IFFHS windows, preserving best snapshot',()=>{
   const result=iffhsPositions([{userId:'A',seasonNumber:30,points:100},{userId:'B',seasonNumber:30,points:200},{userId:'A',seasonNumber:31,points:200},{userId:'B',seasonNumber:31,points:0}], 'A');
-  expect(result).toEqual({current:1,best:{position:1,seasonNumber:31},throughSeason:31});
+  expect(result).toEqual({current:1,best:{position:1,seasonNumber:31},throughSeason:31,missingSeasons:[29,28,27]});
  });
+});
+
+it('General historical uses fulls and the existing tie-breaks, not points-only ranks',()=>{
+ const rows=[{userId:'A',seasonNumber:31,points:10,fulls:1},{userId:'B',seasonNumber:31,points:10,fulls:2}];
+ expect(rankedPositions(rows,'A')).toEqual({position:2,seasonNumber:31});
+});
+it('IFFHS does not retain a stale position after leaving the five-season window',()=>{
+ expect(iffhsPositions([{userId:'A',seasonNumber:25,points:500},{userId:'B',seasonNumber:32,points:100}],'A',['A','B']).current).toBe(2);
+ expect(iffhsPositions([{userId:'A',seasonNumber:25,points:500},{userId:'B',seasonNumber:32,points:100}],'A').current).toBeNull();
 });

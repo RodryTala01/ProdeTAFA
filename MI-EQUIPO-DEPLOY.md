@@ -15,8 +15,33 @@ No incorporar `db:migrate:remote` al workflow `deploy`. Si la migración falla, 
 ## Qué se verá
 
 - Mi Club continúa funcionando y Mi Equipo es una pestaña pública separada.
-- El administrador edita identidad desde **Administración → Participantes → Mi Equipo**.
+- El administrador edita identidad desde **Administración → Participantes → Acciones → Editar Mi Equipo**.
 - El escudo debe estar previamente publicado como recurso interno `/teams/archivo.png` o `/participants/archivo.png`. La interfaz no permite subir imágenes directamente.
 - Hasta que se asigne un nombre oficial al club, se mostrará `Equipo de [participante]`, sin inventar un palmarés.
 - El historial agrupa **solo cruces directos confirmados** y el botón + expande la fila con detalles.
 - General/IFFHS indican mejor ranking por temporada cuando la evidencia permite calcularlo; para períodos sin vinculación histórica completa se muestra «—».
+
+## Revision del PR40
+
+Correcciones: editor conectado a ParticipantsAdmin (AppV2), no a App legacy;
+identidad y escudo del rival; plenos restringidos al segmento; conteo de envios
+officiales independiente de la presencia de scores; desempates de Tabla General;
+IFFHS sin conservar una posicion fuera de la ventana; membresias historicas de
+Duos y atribucion conservadora del titulo segun integrantes del cruce final.
+No se usan destinatarios IFFHS como sustituto de integrantes campeones.
+
+La consulta remota read-only del 28/10/2026 confirma ledger 0001-0015 y ausencia
+de team_profiles. La unica migracion pendiente es 0016. Crea una tabla vacia con
+user_id como PK/FK a users, team_name, shield_url opcional, updated_by opcional y
+updated_at. No ALTER, UPDATE, DELETE, triggers ni copia de datos deportivos.
+
+Operacion propuesta tras autorizacion explicita:
+node node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --remote --config wrangler.jsonc
+
+Revalidar antes que la unica pendiente siga siendo 0016_team_profiles.sql; si hay
+otra, detenerse. Wrangler registra 0016 en d1_migrations. Verificar tabla, columnas,
+foreign_key_check y ledger en lectura. No editar manualmente el ledger. Un rollback
+de Worker conserva esta tabla aditiva; no borrar la tabla como rollback.
+
+Visual PC/390x844: pendiente, el navegador local esta deshabilitado en Work.
+La navegacion de cinco secciones y expansion/cierre tienen tests de componente.

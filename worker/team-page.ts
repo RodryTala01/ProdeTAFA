@@ -1,51 +1,62 @@
 import type {Env} from './index';
 
 type Who={id:string;role:string};
-type RivalRow={id:number;seasonNumber:number;competitionCode:string;competitionName:string;stageName:string;roundName:string|null;opponentId:string;opponentName:string;ownPoints:number;rivalPoints:number;plenos:number|null};
-const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json; charset=utf-8'}});
+type RivalRow={id:number;seasonNumber:number;competitionCode:string;competitionName:string;stageName:string;roundName:string|null;opponentId:string;opponentName:string;opponentParticipantName:string;opponentShieldUrl:string|null;scoreBasis:string;resolution:string|null;ownPoints:number;rivalPoints:number;plenos:number|null};
+const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});
 const fail=(message:string,status=400)=>json({error:message},status);
 async function session(request:Request,db:D1Database):Promise<Who|null>{
  const cookie=request.headers.get('cookie')?.split(';').map(x=>x.trim()).find(x=>x.startsWith('prode_session='));
  if(!cookie)return null;
- const token=decodeURIComponent(cookie.slice('prode_session='.length));
+ let token:string;try{token=decodeURIComponent(cookie.slice('prode_session='.length));}catch{return null;}
  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token));
  const hash=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
  return await db.prepare(`SELECT u.id,u.role FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND julianday(s.expires_at)>julianday('now') AND u.is_active=1 LIMIT 1`).bind(hash).first<Who>();
 }
-type Scored={userId:string;seasonNumber:number;points:number};
-export function rankedPositions(rows:Scored[], target:string){
+type Scored={userId:string;seasonNumber:number;points:number;fulls?:number;partials?:number;errors?:number;extras?:number;fullName?:string};
+// Same General tie-breaks as /api/standings/overall (including deterministic names).
+const asciiKey=(value:string)=>value.replace(/[A-Z]/g,c=>c.toLowerCase());
+function generalOrder(a:Scored,b:Scored){
+ for(const [key,direction] of [['points',-1],['fulls',-1],['partials',-1],['errors',1],['extras',-1]] as const){
+  const difference=((a[key]??0)-(b[key]??0))*direction;if(difference)return difference;
+ }
+ const x=asciiKey(a.fullName??a.userId),y=asciiKey(b.fullName??b.userId);
+ return x<y?-1:x>y?1:a.userId<b.userId?-1:a.userId>b.userId?1:0;
+}
+export function rankedPositions(rows:Scored[],target:string){
  const seasons=[...new Set(rows.map(r=>r.seasonNumber))].sort((a,b)=>a-b);
- const cumulative=new Map<string,number>();let best:{position:number;seasonNumber:number}|null=null;
+ const cumulative=new Map<string,Scored>();let best:{position:number;seasonNumber:number}|null=null;
  for(const number of seasons){
-  const present=new Set<string>();
-  for(const r of rows.filter(x=>x.seasonNumber===number)){
-   cumulative.set(r.userId,(cumulative.get(r.userId)??0)+r.points);
-   present.add(r.userId);
+  for(const row of rows.filter(r=>r.seasonNumber===number)){
+   const total=cumulative.get(row.userId)??{...row,points:0,fulls:0,partials:0,errors:0,extras:0};
+   for(const key of ['points','fulls','partials','errors','extras'] as const)total[key]=(total[key]??0)+(row[key]??0);
+   cumulative.set(row.userId,total);
   }
   if(!cumulative.has(target))continue;
-  const points=[...cumulative.values()].sort((a,b)=>b-a);
-  const position=1+points.filter(v=>v>(cumulative.get(target)??0)).length;
+  const position=[...cumulative.values()].sort(generalOrder).findIndex(row=>row.userId===target)+1;
   if(!best||position<best.position)best={position,seasonNumber:number};
  }
  return best;
 }
-export function iffhsPositions(rows:Scored[],target:string){
+export function iffhsPositions(rows:Scored[],target:string,participants:string[]=[]){
  const seasons=[...new Set(rows.map(r=>r.seasonNumber))].sort((a,b)=>a-b);
- let current:number|null=null, best:{position:number;seasonNumber:number}|null=null;
+ let current:number|null=null,best:{position:number;seasonNumber:number}|null=null;
  for(const number of seasons){
   const points=new Map<string,number>();
-  for(const r of rows.filter(x=>x.seasonNumber>=number-4&&x.seasonNumber<=number))
-   points.set(r.userId,(points.get(r.userId)??0)+r.points);
+  for(const row of rows.filter(r=>r.seasonNumber>=number-4&&r.seasonNumber<=number))points.set(row.userId,(points.get(row.userId)??0)+row.points);
+  const represented=points.has(target);
+  if(number===seasons.at(-1))for(const user of participants)if(!points.has(user))points.set(user,0);
   if(!points.has(target))continue;
-  const position=1+[...points.values()].filter(v=>v>points.get(target)!).length;
-  current=position;
-  if(!best||position<best.position)best={position,seasonNumber:number};
+  const position=1+[...points.values()].filter(value=>value>points.get(target)!).length;
+  if(number===seasons.at(-1))current=position;
+  if(represented&&(!best||position<best.position))best={position,seasonNumber:number};
  }
- return {current,best,throughSeason:seasons.at(-1)??null};
+ const throughSeason=seasons.at(-1)??null;
+ const missingSeasons=throughSeason?Array.from({length:Math.min(5,throughSeason)},(_,i)=>throughSeason-i).filter(n=>!seasons.includes(n)):[];
+ return {current,best,throughSeason,missingSeasons};
 }
 async function teamRead(db:D1Database,id:string){
  const identity=await db.prepare(`SELECT u.id,u.full_name AS participantName,p.team_name AS teamName,p.shield_url AS shieldUrl,
- (SELECT MIN(s.season_number) FROM tafa_seasons s JOIN season_division_members m ON m.season_id=s.id WHERE m.user_id=u.id) AS foundedSeason
+ (SELECT MIN(s.season_number) FROM tafa_seasons s JOIN season_division_members m ON m.season_id=s.id WHERE m.user_id=u.id AND s.status<>'draft') AS foundedSeason
  FROM users u LEFT JOIN team_profiles p ON p.user_id=u.id WHERE u.id=? AND u.role='participant'`).bind(id).first<{id:string;participantName:string;teamName:string|null;shieldUrl:string|null;foundedSeason:number|null}>();
  if(!identity)return null;
  const stat=await db.prepare(`SELECT COUNT(DISTINCT rs.round_id) AS dates,
@@ -53,7 +64,7 @@ async function teamRead(db:D1Database,id:string){
  COALESCE(SUM(CASE WHEN ps.base_points=3 THEN 1 ELSE 0 END),0) AS fulls,
  COALESCE(SUM(CASE WHEN ps.base_points=1 THEN 1 ELSE 0 END),0) AS partials,
  COALESCE(SUM(CASE WHEN ps.base_points=0 AND ps.result_type<>'VOID' THEN 1 ELSE 0 END),0) AS errors,
- COALESCE(SUM(ps.extra_points),0) AS extras, COUNT(DISTINCT CASE WHEN ps.prediction_id IS NOT NULL THEN op.id END) AS predictions
+ COALESCE(SUM(ps.extra_points),0) AS extras, COUNT(DISTINCT op.id) AS predictions
  FROM round_submissions rs JOIN rounds r ON r.id=rs.round_id AND r.status='finished'
  LEFT JOIN matches m ON m.round_id=r.id
  LEFT JOIN official_predictions op ON op.user_id=rs.user_id AND op.match_id=m.id
@@ -63,47 +74,62 @@ async function teamRead(db:D1Database,id:string){
  FROM competition_results cr JOIN competition_entries e ON e.id=cr.entry_id
  JOIN competitions c ON c.id=cr.competition_id JOIN tafa_seasons s ON s.id=c.season_id
  WHERE cr.result_code='CHAMPION' AND cr.confirmed_at IS NOT NULL AND EXISTS (
- SELECT 1 FROM competition_entry_members m WHERE m.entry_id=e.id AND m.user_id=?)
- GROUP BY c.id,c.code,c.display_name,s.season_number
- ORDER BY s.season_number DESC,c.sort_order`).bind(id).all();
+ SELECT 1 FROM competition_entry_members m WHERE m.entry_id=e.id AND m.user_id=?
+ AND (e.entry_type<>'DUO' OR
+   (SELECT COUNT(DISTINCT user_id) FROM competition_entry_members WHERE entry_id=e.id)<=2 OR
+   EXISTS (SELECT 1 FROM competition_encounters win
+     JOIN competition_stages ws ON ws.id=win.stage_id JOIN competition_round_links wl ON wl.id=win.round_link_id
+     WHERE ws.competition_id=c.id AND win.winner_entry_id=e.id AND win.admin_confirmed_at IS NOT NULL
+       AND win.status='finished' AND ws.sequence=(SELECT MAX(last_stage.sequence) FROM competition_encounters last_win
+         JOIN competition_stages last_stage ON last_stage.id=last_win.stage_id WHERE last_stage.competition_id=c.id
+         AND last_win.winner_entry_id=e.id AND last_win.admin_confirmed_at IS NOT NULL AND last_win.status='finished')
+       AND (m.valid_from_round_id IS NULL OR m.valid_from_round_id<=wl.round_id)
+       AND (m.valid_to_round_id IS NULL OR m.valid_to_round_id>wl.round_id))))
+ GROUP BY c.id,c.code,c.display_name,s.season_number ORDER BY s.season_number DESC,c.sort_order`).bind(id).all();
  const general=await db.prepare(`WITH totals AS (
- SELECT u.id,COALESCE(SUM(ps.total_points),0) AS points
+ SELECT u.id,u.full_name,COALESCE(SUM(ps.total_points),0) AS points,
+ SUM(CASE WHEN ps.base_points=3 THEN 1 ELSE 0 END) AS fulls,SUM(CASE WHEN ps.base_points=1 THEN 1 ELSE 0 END) AS partials,
+ SUM(CASE WHEN ps.base_points=0 AND ps.result_type<>'VOID' THEN 1 ELSE 0 END) AS errors,COALESCE(SUM(ps.extra_points),0) AS extras
  FROM users u JOIN round_submissions rs ON rs.user_id=u.id JOIN rounds r ON r.id=rs.round_id AND r.status='finished'
  LEFT JOIN matches m ON m.round_id=r.id LEFT JOIN official_predictions op ON op.user_id=u.id AND op.match_id=m.id
  LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id AND ps.is_provisional=0
  WHERE u.role='participant' GROUP BY u.id
- ) SELECT id,points,RANK() OVER(ORDER BY points DESC) AS position FROM totals`).all<{id:string;points:number;position:number}>();
+ ) SELECT id,points,ROW_NUMBER() OVER(ORDER BY points DESC,fulls DESC,partials DESC,errors ASC,extras DESC,full_name COLLATE NOCASE,id) AS position FROM totals`).all<{id:string;points:number;position:number}>();
  const seasonal=await db.prepare(`WITH period AS(
  SELECT l.round_id, MIN(s.season_number) AS seasonNumber
  FROM competition_round_links l JOIN competitions c ON c.id=l.competition_id
  JOIN tafa_seasons s ON s.id=c.season_id JOIN rounds r ON r.id=l.round_id AND r.status='finished'
- GROUP BY l.round_id
- ) SELECT rs.user_id AS userId,period.seasonNumber AS seasonNumber,COALESCE(SUM(ps.total_points),0) AS points
- FROM round_submissions rs JOIN period ON period.round_id=rs.round_id
+ GROUP BY l.round_id HAVING COUNT(DISTINCT s.season_number)=1
+ ) SELECT rs.user_id AS userId,period.seasonNumber AS seasonNumber,u.full_name AS fullName,COALESCE(SUM(ps.total_points),0) AS points,
+ SUM(CASE WHEN ps.base_points=3 THEN 1 ELSE 0 END) AS fulls,SUM(CASE WHEN ps.base_points=1 THEN 1 ELSE 0 END) AS partials,
+ SUM(CASE WHEN ps.base_points=0 AND ps.result_type<>'VOID' THEN 1 ELSE 0 END) AS errors,COALESCE(SUM(ps.extra_points),0) AS extras
+ FROM round_submissions rs JOIN users u ON u.id=rs.user_id AND u.role='participant' JOIN period ON period.round_id=rs.round_id
  LEFT JOIN matches m ON m.round_id=rs.round_id LEFT JOIN official_predictions op ON op.user_id=rs.user_id AND op.match_id=m.id
  LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id AND ps.is_provisional=0
  GROUP BY rs.user_id,period.seasonNumber`).all<Scored>();
  const iffhs=await db.prepare(`SELECT season_number AS seasonNumber,user_id AS userId,total_points_scaled AS points FROM iffhs_season_totals ORDER BY season_number`).all<Scored>();
  const generalEntry=(general.results??[]).find(r=>r.id===id);
  // Older rounds with no linked TAFA season cannot be assigned to a seasonal snapshot.
- const linkedCoverage=await db.prepare(`SELECT COUNT(*) AS total, COUNT(CASE WHEN EXISTS(SELECT 1 FROM competition_round_links l JOIN competitions c ON c.id=l.competition_id JOIN tafa_seasons s ON s.id=c.season_id WHERE l.round_id=r.id) THEN 1 END) AS linked
+ const linkedCoverage=await db.prepare(`SELECT COUNT(*) AS total, COUNT(CASE WHEN (SELECT COUNT(DISTINCT s.season_number) FROM competition_round_links l JOIN competitions c ON c.id=l.competition_id JOIN tafa_seasons s ON s.id=c.season_id WHERE l.round_id=r.id)=1 THEN 1 END) AS linked
  FROM rounds r WHERE r.status='finished'`).first<{total:number;linked:number}>();
  const generalBest=Number(linkedCoverage?.total??0)===Number(linkedCoverage?.linked??-1)?rankedPositions(seasonal.results??[],id):null;
- const iffhsRank=iffhsPositions(iffhs.results??[],id);
+ const people=await db.prepare("SELECT id FROM users WHERE role='participant'").all<{id:string}>();
+ const iffhsRank=iffhsPositions(iffhs.results??[],id,(people.results??[]).map(p=>p.id));
  const encounters=await db.prepare(`SELECT e.id,s.season_number AS seasonNumber,c.code AS competitionCode,c.display_name AS competitionName,
- st.name AS stageName,r.name AS roundName,enemy.user_id AS opponentId,u.full_name AS opponentName,
+ st.name AS stageName,r.name AS roundName,enemy.user_id AS opponentId,COALESCE(tp.team_name,'Equipo de '||u.full_name) AS opponentName,u.full_name AS opponentParticipantName,tp.shield_url AS opponentShieldUrl,ea.entry_type AS scoreBasis,e.resolution,
  CASE WHEN mine.entry_id=e.entry_a_id THEN e.score_a ELSE e.score_b END AS ownPoints,
  CASE WHEN mine.entry_id=e.entry_a_id THEN e.score_b ELSE e.score_a END AS rivalPoints,
- (SELECT COUNT(*) FROM official_predictions op JOIN matches mm ON mm.id=op.match_id JOIN prediction_scores ps ON ps.prediction_id=op.id
- WHERE e.round_link_id IS NOT NULL AND mm.round_id=l.round_id AND op.user_id=mine.user_id AND ps.base_points=3 AND ps.is_provisional=0) AS plenos
- FROM competition_encounters e JOIN competition_stages st ON st.id=e.stage_id
+ (SELECT CASE WHEN COUNT(ps.prediction_id)=0 THEN NULL ELSE SUM(CASE WHEN ps.base_points=3 THEN 1 ELSE 0 END) END FROM official_predictions op JOIN matches mm ON mm.id=op.match_id JOIN prediction_scores ps ON ps.prediction_id=op.id
+ WHERE e.round_link_id IS NOT NULL AND mm.round_id=l.round_id AND op.user_id=mine.user_id AND ps.is_provisional=0 AND (e.segment_id IS NULL OR EXISTS(SELECT 1 FROM competition_round_segment_matches sm WHERE sm.segment_id=e.segment_id AND sm.match_id=mm.id))) AS plenos
+ FROM competition_encounters e JOIN competition_entries ea ON ea.id=e.entry_a_id JOIN competition_stages st ON st.id=e.stage_id
  JOIN competitions c ON c.id=st.competition_id JOIN tafa_seasons s ON s.id=c.season_id
  JOIN competition_entry_members mine ON mine.entry_id IN(e.entry_a_id,e.entry_b_id) AND mine.user_id=?
  LEFT JOIN competition_round_links l ON l.id=e.round_link_id LEFT JOIN rounds r ON r.id=l.round_id
  JOIN competition_entry_members enemy ON enemy.entry_id=CASE WHEN mine.entry_id=e.entry_a_id THEN e.entry_b_id ELSE e.entry_a_id END
- JOIN users u ON u.id=enemy.user_id
+ JOIN users u ON u.id=enemy.user_id LEFT JOIN team_profiles tp ON tp.user_id=u.id
  WHERE e.admin_confirmed_at IS NOT NULL AND e.status='finished' AND e.score_a IS NOT NULL AND e.score_b IS NOT NULL
  AND enemy.user_id<>mine.user_id
+ AND (ea.entry_type<>'DUO' OR l.round_id IS NOT NULL)
  AND (l.round_id IS NULL OR ((mine.valid_from_round_id IS NULL OR mine.valid_from_round_id<=l.round_id) AND (mine.valid_to_round_id IS NULL OR mine.valid_to_round_id>l.round_id)
  AND (enemy.valid_from_round_id IS NULL OR enemy.valid_from_round_id<=l.round_id) AND (enemy.valid_to_round_id IS NULL OR enemy.valid_to_round_id>l.round_id)))
  GROUP BY e.id,enemy.user_id
@@ -123,7 +149,7 @@ export async function handleTeamPage(request:Request,env:Env):Promise<Response|n
  if(!publicMatch&&!adminMatch)return null;
  const who=await session(request,env.DB);
  if(!who)return fail('No autorizado',401);
- const id=decodeURIComponent((publicMatch??adminMatch)![1]);
+ let id:string;try{id=decodeURIComponent((publicMatch??adminMatch)![1]);}catch{return fail('Identificador de equipo inválido');}
  if(publicMatch){
   if(request.method!=='GET')return fail('Método no permitido',405);
   const team=await teamRead(env.DB,id);

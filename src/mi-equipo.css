@@ -38,3 +38,9 @@
 .equipo-detail-inner h3{margin:0 0 8px;font-size:.92rem}
 .equipo-detail table th,.equipo-detail table td{font-size:.76rem;padding:8px 7px;border-bottom:1px solid var(--border);text-align:left}
 @media(max-width:650px){.equipo-header{padding-top:10px}.equipo-shield{height:89px}.equipo-shield .asset-image,.equipo-shield .participant-sprite{width:75px;height:86px}.equipo-titles{gap:6px}.equipo-trophy{width:86px;font-size:.7rem}.equipo-points dl{gap:5px}.equipo-points dl>div{flex:1 1 29%;min-width:75px}.equipo-points dd{font-size:1.1rem}.equipo-rankings{gap:7px}.equipo-ranking{padding:12px 6px}.equipo-ranking small{font-size:.69rem}.equipo-table th,.equipo-table td{padding:8px 6px}.equipo-history>h2{font-size:.87rem}.equipo-detail-inner{padding:10px}}
+
+.equipo-rival{display:flex;align-items:center;gap:8px}.equipo-rival>span:last-child{min-width:0;overflow-wrap:anywhere}
+.equipo-table button{min-width:44px;min-height:44px}
+.equipo-shield .asset-image{transform:scale(1.5)}
+.equipo-stats-note,.equipo-rank-note{color:var(--text-muted);font-size:.75rem;text-align:center}
+@media(max-width:650px){.equipo-shield .asset-image{transform:scale(1.2)}.equipo-page{min-width:0}.equipo-header h1{overflow-wrap:anywhere}.equipo-table tbody>tr:not(.equipo-detail)>th{min-width:140px}}

@@ -153,9 +153,6 @@ function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
 
 function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
   const [section, setSection] = useState<'rounds' | 'participants'>('rounds');
-  const [teamUser,setTeamUser]=useState<User|null>(null);
-  const [teamName,setTeamName]=useState('');
-  const [teamShield,setTeamShield]=useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -222,28 +219,7 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
     }
   }
 
-  async function editTeam(entry: User) {
-    setError('');setSuccess('');
-    try {
-      const data=await api<{identity:{teamName:string;shieldUrl:string|null}}>(
-        '/api/participant/teams/'+encodeURIComponent(entry.id));
-      setTeamName(data.identity.teamName);setTeamShield(data.identity.shieldUrl??'');
-      setTeamUser(entry);
-    } catch { setError('No pudimos cargar la identidad de este equipo.'); }
-  }
-  async function saveTeam(event:FormEvent){
-    event.preventDefault();if(!teamUser)return;
-    setLoading(true);setError('');setSuccess('');
-    try{
-      await api('/api/admin/teams/'+encodeURIComponent(teamUser.id),{
-        method:'PUT',body:JSON.stringify({teamName,shieldUrl:teamShield})
-      });
-      setSuccess('Nombre y escudo de '+teamUser.fullName+' guardados.');
-      setTeamUser(null);
-    } catch(caught) { setError(caught instanceof Error?caught.message:'No pudimos guardar el equipo'); }
-    finally{setLoading(false);}
-  }
-    async function toggleParticipant(entry: User) {
+  async function toggleParticipant(entry: User) {
     if (entry.role !== 'participant') return;
     setLoading(true);
     setError('');
@@ -341,7 +317,6 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
                       </div>
                       {entry.role === 'participant' && (
                         <div className="topbar-actions">
-                          <button className="button button--secondary" onClick={() => void editTeam(entry)}>Mi Equipo</button>
                           <button className="button button--secondary" onClick={() => { setResetUser(entry); setNewPassword(''); }}>
                             Cambiar clave
                           </button>
@@ -359,22 +334,6 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
         )}
       </section>
 
-      {teamUser&&<div className="modal-backdrop" onMouseDown={()=>setTeamUser(null)}>
-        <section className="modal card" onMouseDown={e=>e.stopPropagation()}>
-          <span className="eyebrow">IDENTIDAD DEL EQUIPO · SOLO ADMIN</span>
-          <h2>{teamUser.fullName}</h2>
-          <p>El nombre es independiente del participante. Los escudos deben estar publicados en los recursos de TAFA.</p>
-          <form className="form-stack" onSubmit={saveTeam}>
-            <Field label="Nombre del equipo" value={teamName} onChange={setTeamName} placeholder="Nombre del club"/>
-            <Field label="Ruta del escudo" value={teamShield} onChange={setTeamShield} placeholder="/teams/escudo.png"/>
-            <p className="sport-footnote">Solo rutas internas /teams/ o /participants/. Si no cargás una imagen, se usa el escudo actual del participante.</p>
-            <div className="modal-actions">
-              <button type="button" className="button button--ghost" onClick={()=>setTeamUser(null)}>Cancelar</button>
-              <button type="submit" className="button button--primary" disabled={loading||teamName.trim().length<3}>Guardar equipo</button>
-            </div>
-          </form>
-        </section>
-      </div>}
       {resetUser && (
         <div className="modal-backdrop" onMouseDown={() => setResetUser(null)}>
           <section className="modal card" onMouseDown={(event) => event.stopPropagation()}>
