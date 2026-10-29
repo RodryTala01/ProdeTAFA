@@ -16,11 +16,11 @@ const team:TeamPageData={identity:{id:'A',participantName:'Ana',teamName:'Equipo
 };
 const html=(component:any,props:any)=>renderToStaticMarkup(createElement(component,props));
 describe('Mi Equipo minimalista',()=>{
- it('preserves Mi Club and enables the independent public team route',()=>{
+ it('unifies Mi Equipo under Mi Club and retains compatible legacy links',()=>{
   expect(participantSections.some(x=>x.id==='club')).toBe(true);
-  expect(participantSections.some(x=>x.id==='equipo')).toBe(true);
-  expect(participantRoute('#/equipo')).toBe('equipo');
-  expect(participantRoute('#/equipo/B')).toBe('equipo/B');
+  expect(participantSections.some(x=>x.id==='equipo')).toBe(false);
+  expect(participantRoute('#/equipo')).toBe('club');
+  expect(participantRoute('#/equipo/B')).toBe('club/participante/B');
  });
  it('renders only confirmed trophy examples, official Prode metrics and both rankings',()=>{
   const page=html(MiEquipoProfile,{data:team});
