@@ -1,5 +1,5 @@
-import type {ArchivePayload} from '../worker/historical-archive';
-import {archiveTables,archiveColumns} from '../worker/historical-archive';
+import type {ArchivePayload} from './historical-schema';
+import {archiveTables,archiveColumns} from './historical-schema';
 
 const names:{[K in keyof ArchivePayload]?:string}={
  participants:'Participantes',competitions:'Competiciones',statistics:'Estadisticas',standings:'Tablas',
