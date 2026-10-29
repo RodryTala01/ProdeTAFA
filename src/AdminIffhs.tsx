@@ -31,6 +31,8 @@ export const sourceLabel = (source: string | null) =>
     ? 'Calculado'
     : source === 'imported'
       ? 'Importado'
+      : source === 'archive'
+        ? 'Archivo histórico'
       : 'Sin datos';
 const componentLabels: Record<string, string> = {
   TITLE: 'Título', RUNNER_UP: 'Subcampeonato', POSITION: 'Posición final',

@@ -20,6 +20,7 @@ import { handleCompetitionPromotion } from './competition-promotion';
 import { handleIffhs } from './iffhs';
 import { handleSeasonTransition } from './season-transition';
 import {handleTeamPage} from './team-page';
+import {handleHistoricalArchive} from './historical-archive';
 
 function jsonError(message: string, status: number) {
   return new Response(JSON.stringify({ error: message }), {
@@ -34,6 +35,10 @@ export default {
     if (pathname.startsWith('/api/internal/promiedos-cache')) {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido',403);
       return (await handlePromiedosCache(request,env)) ?? jsonError('Ruta no encontrada',404);
+    }
+    if(pathname.startsWith('/api/admin/historical-imports')||pathname.startsWith('/api/participant/historical-archive/')){
+      if(!mutationAllowed(request))return jsonError('Origen de solicitud no permitido',403);
+      return (await handleHistoricalArchive(request,env))??jsonError('Archivo no encontrado',404);
     }
     if(/^\/api\/(participant|admin)\/teams\//.test(pathname)){
       if(!mutationAllowed(request))return jsonError('Origen de solicitud no permitido',403);

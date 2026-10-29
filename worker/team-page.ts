@@ -1,4 +1,5 @@
 import type {Env} from './index';
+import {activeHistoricalArchives,archivedUserKey,historicalStats} from './historical-archive';
 
 type Who={id:string;role:string};
 type RivalRow={id:number;seasonNumber:number;competitionCode:string;competitionName:string;stageName:string;roundName:string|null;opponentId:string;opponentName:string;opponentParticipantName:string;opponentShieldUrl:string|null;scoreBasis:string;resolution:string|null;ownPoints:number;rivalPoints:number;plenos:number|null};
@@ -59,6 +60,10 @@ async function teamRead(db:D1Database,id:string){
  (SELECT MIN(s.season_number) FROM tafa_seasons s JOIN season_division_members m ON m.season_id=s.id WHERE m.user_id=u.id AND s.status<>'draft') AS foundedSeason
  FROM users u LEFT JOIN team_profiles p ON p.user_id=u.id WHERE u.id=? AND u.role='participant'`).bind(id).first<{id:string;participantName:string;teamName:string|null;shieldUrl:string|null;foundedSeason:number|null}>();
  if(!identity)return null;
+ const archives=await activeHistoricalArchives(db);
+ const archiveTotals=historicalStats(archives);
+ const archiveUser=archiveTotals.get(id);
+ const archiveSeasonNumbers=archives.filter(a=>a.data.participants.some(p=>p.userId===id)).map(a=>a.seasonNumber);
  const stat=await db.prepare(`SELECT COUNT(DISTINCT rs.round_id) AS dates,
  COALESCE(SUM(ps.total_points),0) AS points,
  COALESCE(SUM(CASE WHEN ps.base_points=3 THEN 1 ELSE 0 END),0) AS fulls,
@@ -70,6 +75,19 @@ async function teamRead(db:D1Database,id:string){
  LEFT JOIN official_predictions op ON op.user_id=rs.user_id AND op.match_id=m.id
  LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id AND ps.is_provisional=0
  WHERE rs.user_id=?`).bind(id).first();
+ const combinedStats={
+    dates:Number(stat?.dates??0)+(archiveUser?.dates??0),
+    points:Number(stat?.points??0)+(archiveUser?.points??0),
+    fulls:Number(stat?.fulls??0)+(archiveUser?.fulls??0),
+    partials:Number(stat?.partials??0)+(archiveUser?.partials??0),
+    errors:Number(stat?.errors??0)+(archiveUser?.errors??0),
+    extras:Number(stat?.extras??0)+(archiveUser?.extras??0),
+    predictions:Number(stat?.predictions??0)+(archiveUser?.predictions??0),
+ };
+ const historicTitles=archives.flatMap(({data})=>data.results.filter(r=>r.resultCode==='CHAMPION'&&archivedUserKey(data,r.participantKey)===id).map(row=>{
+   const competition=data.competitions.find(c=>c.code===row.competitionCode);
+   return {code:row.competitionCode,name:competition?.name??row.competitionCode,seasonNumber:data.season.number};
+ }));
  const titles=await db.prepare(`SELECT c.code,c.display_name AS name,s.season_number AS seasonNumber
  FROM competition_results cr JOIN competition_entries e ON e.id=cr.entry_id
  JOIN competitions c ON c.id=cr.competition_id JOIN tafa_seasons s ON s.id=c.season_id
@@ -94,7 +112,15 @@ async function teamRead(db:D1Database,id:string){
  LEFT JOIN matches m ON m.round_id=r.id LEFT JOIN official_predictions op ON op.user_id=u.id AND op.match_id=m.id
  LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id AND ps.is_provisional=0
  WHERE u.role='participant' GROUP BY u.id
- ) SELECT id,points,ROW_NUMBER() OVER(ORDER BY points DESC,fulls DESC,partials DESC,errors ASC,extras DESC,full_name COLLATE NOCASE,id) AS position FROM totals`).all<{id:string;points:number;position:number}>();
+ ) SELECT id,full_name AS fullName,points,fulls,partials,errors,extras,ROW_NUMBER() OVER(ORDER BY points DESC,fulls DESC,partials DESC,errors ASC,extras DESC,full_name COLLATE NOCASE,id) AS position FROM totals`).all<{id:string;fullName:string;points:number;fulls:number;partials:number;errors:number;extras:number;position:number}>();
+ const generalMap=new Map<string,Scored>();
+ for(const row of general.results??[])generalMap.set(row.id,{userId:row.id,seasonNumber:0,fullName:row.fullName,points:Number(row.points),fulls:Number(row.fulls??0),partials:Number(row.partials??0),errors:Number(row.errors??0),extras:Number(row.extras??0)});
+ for(const [uid,arch] of archiveTotals){
+   const existing=generalMap.get(uid)??{userId:uid,seasonNumber:0,fullName:arch.fullName,points:0,fulls:0,partials:0,errors:0,extras:0};
+   existing.points+=arch.points;existing.fulls=(existing.fulls??0)+arch.fulls;existing.partials=(existing.partials??0)+arch.partials;existing.errors=(existing.errors??0)+arch.errors;existing.extras=(existing.extras??0)+arch.extras;
+   generalMap.set(uid,existing);
+ }
+ const combinedGeneral=[...generalMap.values()].sort(generalOrder);
  const seasonal=await db.prepare(`WITH period AS(
  SELECT l.round_id, MIN(s.season_number) AS seasonNumber
  FROM competition_round_links l JOIN competitions c ON c.id=l.competition_id
@@ -108,13 +134,25 @@ async function teamRead(db:D1Database,id:string){
  LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id AND ps.is_provisional=0
  GROUP BY rs.user_id,period.seasonNumber`).all<Scored>();
  const iffhs=await db.prepare(`SELECT season_number AS seasonNumber,user_id AS userId,total_points_scaled AS points FROM iffhs_season_totals ORDER BY season_number`).all<Scored>();
- const generalEntry=(general.results??[]).find(r=>r.id===id);
+ const iffhsRows=[...(iffhs.results??[])];
+ const iffhsAlready=new Set(iffhsRows.map(x=>x.seasonNumber+':'+x.userId));
+ for(const {data} of archives)for(const r of data.iffhs){
+   const uid=archivedUserKey(data,r.participantKey),key=data.season.number+':'+uid;
+   if(!iffhsAlready.has(key)){iffhsRows.push({userId:uid,seasonNumber:data.season.number,points:Math.round(r.points*100)});iffhsAlready.add(key);}
+ }
+ const currentPosition=combinedGeneral.findIndex(r=>r.userId===id);
+ const generalEntry=currentPosition>=0?{position:currentPosition+1}:null;
  // Older rounds with no linked TAFA season cannot be assigned to a seasonal snapshot.
  const linkedCoverage=await db.prepare(`SELECT COUNT(*) AS total, COUNT(CASE WHEN (SELECT COUNT(DISTINCT s.season_number) FROM competition_round_links l JOIN competitions c ON c.id=l.competition_id JOIN tafa_seasons s ON s.id=c.season_id WHERE l.round_id=r.id)=1 THEN 1 END) AS linked
  FROM rounds r WHERE r.status='finished'`).first<{total:number;linked:number}>();
- const generalBest=Number(linkedCoverage?.total??0)===Number(linkedCoverage?.linked??-1)?rankedPositions(seasonal.results??[],id):null;
+ const historicalSeasonal:Scored[]=archives.flatMap(({data})=>data.statistics.map(s=>({
+   userId:archivedUserKey(data,s.participantKey),seasonNumber:data.season.number,points:s.points,fulls:s.fulls??0,partials:s.partials??0,errors:s.errors??0,extras:s.extras??0,
+   fullName:data.participants.find(p=>p.key===s.participantKey)?.name??s.participantKey,
+ })));
+ const generalBest=Number(linkedCoverage?.total??0)===Number(linkedCoverage?.linked??-1)
+   ?rankedPositions([...historicalSeasonal,...(seasonal.results??[])],id):null;
  const people=await db.prepare("SELECT id FROM users WHERE role='participant'").all<{id:string}>();
- const iffhsRank=iffhsPositions(iffhs.results??[],id,(people.results??[]).map(p=>p.id));
+ const iffhsRank=iffhsPositions(iffhsRows,id,[...(people.results??[]).map(p=>p.id),...archiveTotals.keys()]);
  const encounters=await db.prepare(`SELECT e.id,s.season_number AS seasonNumber,c.code AS competitionCode,c.display_name AS competitionName,
  st.name AS stageName,r.name AS roundName,enemy.user_id AS opponentId,COALESCE(tp.team_name,'Equipo de '||u.full_name) AS opponentName,u.full_name AS opponentParticipantName,tp.shield_url AS opponentShieldUrl,ea.entry_type AS scoreBasis,e.resolution,
  CASE WHEN mine.entry_id=e.entry_a_id THEN e.score_a ELSE e.score_b END AS ownPoints,
@@ -134,13 +172,38 @@ async function teamRead(db:D1Database,id:string){
  AND (enemy.valid_from_round_id IS NULL OR enemy.valid_from_round_id<=l.round_id) AND (enemy.valid_to_round_id IS NULL OR enemy.valid_to_round_id>l.round_id)))
  GROUP BY e.id,enemy.user_id
  ORDER BY s.season_number DESC,e.id DESC`).bind(id).all<RivalRow>();
+ const historicMatches=archives.flatMap(({data})=>data.matches.flatMap((m,index)=>{
+   const a=archivedUserKey(data,m.aKey),b=archivedUserKey(data,m.bKey);
+   if(a!==id&&b!==id)return [];
+   const other=a===id?m.bKey:m.aKey,otherId=a===id?b:a;
+   const person=data.participants.find(p=>p.key===other);
+   return [{id:-100000*data.season.number-index-1,seasonNumber:data.season.number,competitionCode:m.competitionCode,
+    competitionName:data.competitions.find(c=>c.code===m.competitionCode)?.name??m.competitionCode,stageName:m.stage,roundName:m.round,
+    opponentId:otherId,opponentName:person?.name??other,opponentParticipantName:person?.name??other,opponentShieldUrl:null,
+    ownPoints:a===id?m.pointsA:m.pointsB,rivalPoints:a===id?m.pointsB:m.pointsA,plenos:a===id?m.plenosA:m.plenosB,
+    scoreBasis:m.scoreBasis,resolution:null}];
+ }));
+ const historicalSeasons=archives.flatMap(({data})=>data.participants.filter(p=>p.userId===id).map(p=>({
+   seasonNumber:data.season.number,seasonName:data.season.name,kind:data.season.kind,name:p.name,division:p.division,
+   statistics:data.statistics.find(s=>s.participantKey===p.key)??null,
+   standings:data.standings.filter(s=>s.participantKey===p.key).map(s=>({...s,competitionName:data.competitions.find(c=>c.code===s.competitionCode)?.name??s.competitionCode})),
+   rounds:data.rounds.filter(s=>s.participantKey===p.key),
+   results:data.results.filter(s=>s.participantKey===p.key).map(s=>({...s,competitionName:data.competitions.find(c=>c.code===s.competitionCode)?.name??s.competitionCode})),
+   movements:data.movements.filter(s=>s.participantKey===p.key),
+   iffhs:data.iffhs.find(s=>s.participantKey===p.key)??null,
+ }))).sort((a,b)=>b.seasonNumber-a.seasonNumber);
+  const historicMovements=archives.flatMap(({data})=>data.movements.filter(m=>archivedUserKey(data,m.participantKey)===id).map(m=>({...m,seasonNumber:data.season.number})));
+ const historicDivisions=archives.flatMap(({data})=>data.participants.filter(p=>p.userId===id&&p.division).map(p=>({name:'Liga '+p.division,seasonNumber:data.season.number}))).sort((a,b)=>b.seasonNumber-a.seasonNumber);
  const latestDivision=await db.prepare(`SELECT d.name AS name,s.season_number AS seasonNumber FROM season_division_members m
  JOIN tafa_seasons s ON s.id=m.season_id JOIN season_divisions d ON d.id=m.division_id
  WHERE m.user_id=? AND s.status<>'draft' ORDER BY s.season_number DESC LIMIT 1`).bind(id).first();
- return {identity:{...identity,teamName:identity.teamName??'Equipo de '+identity.participantName},division:latestDivision,
-   stats:stat,titles:titles.results??[],
+ const founding=[identity.foundedSeason,...archiveSeasonNumbers].filter(x=>x!=null).map(Number).sort((a,b)=>a-b)[0]??null;
+ const division=latestDivision&&Number((latestDivision as {seasonNumber:number}).seasonNumber)>=(historicDivisions[0]?.seasonNumber??0)?latestDivision:historicDivisions[0]??latestDivision;
+ return {identity:{...identity,foundedSeason:founding,teamName:identity.teamName??'Equipo de '+identity.participantName},division,
+   stats:combinedStats,titles:[...(titles.results??[]),...historicTitles],
    rankings:{general:{current:generalEntry?Number(generalEntry.position):null,best:generalBest},iffhs:iffhsRank},
-   encounters:encounters.results??[]};
+   encounters:[...(encounters.results??[]),...historicMatches],historicalMovements:historicMovements,historicalSeasons};
+
 }
 export async function handleTeamPage(request:Request,env:Env):Promise<Response|null>{
  const pathname=new URL(request.url).pathname;

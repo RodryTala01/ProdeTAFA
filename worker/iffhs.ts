@@ -1,4 +1,5 @@
 import type { Env } from './index';
+import {activeHistoricalArchives,archivedUserKey} from './historical-archive';
 import { calculateIffhsSeason } from './iffhs-calculator';
 
 type SessionUser = {
@@ -80,6 +81,11 @@ async function ranking(request: Request, env: Env) {
   if (!user) return error('No autorizado', 401);
 
   const url = new URL(request.url);
+  const archives=await activeHistoricalArchives(env.DB);
+  const archiveIffhs=archives.flatMap(({data})=>data.iffhs.map(row=>({
+    seasonNumber:data.season.number,userId:archivedUserKey(data,row.participantKey),
+    name:data.participants.find(p=>p.key===row.participantKey)?.name??row.participantKey,points:Math.round(row.points*100),
+  })));
   const requestedThroughSeason = Number(url.searchParams.get('throughSeason'));
   let throughSeason = Number.isInteger(requestedThroughSeason) && requestedThroughSeason > 0
     ? requestedThroughSeason
@@ -89,7 +95,7 @@ async function ranking(request: Request, env: Env) {
     const latest = await env.DB.prepare(
       `SELECT MAX(season_number) AS season_number FROM iffhs_season_totals`,
     ).first<{ season_number: number | null }>();
-    throughSeason = Number(latest?.season_number ?? 0);
+    throughSeason = Math.max(Number(latest?.season_number ?? 0),...archiveIffhs.map(x=>x.seasonNumber),0);
   }
 
   if (!throughSeason) {
@@ -111,6 +117,7 @@ async function ranking(request: Request, env: Env) {
      ORDER BY season_number`,
   ).bind(firstSeason, throughSeason).all<{ season_number: number }>();
   const availableSeasons = new Set((availableSeasonsResult.results ?? []).map((row) => Number(row.season_number)));
+  for(const r of archiveIffhs)if(r.seasonNumber>=firstSeason&&r.seasonNumber<=throughSeason)availableSeasons.add(r.seasonNumber);
   const missingSeasons = includedSeasons.filter((seasonNumber) => !availableSeasons.has(seasonNumber));
 
   const totalsResult = await env.DB.prepare(
@@ -141,6 +148,8 @@ async function ranking(request: Request, env: Env) {
     source: string;
   }>();
 
+  const existingIffhs=new Set((breakdownResult.results??[]).map(r=>r.season_number+':'+r.user_id));
+  const archiveBreakdown=archiveIffhs.filter(x=>x.seasonNumber>=firstSeason&&x.seasonNumber<=throughSeason&&!existingIffhs.has(x.seasonNumber+':'+x.userId));
   const breakdownByUser = new Map<string, Array<{ seasonNumber: number; points: number; source: string }>>();
   for (const row of breakdownResult.results ?? []) {
     const list = breakdownByUser.get(row.user_id) ?? [];
@@ -152,9 +161,20 @@ async function ranking(request: Request, env: Env) {
     breakdownByUser.set(row.user_id, list);
   }
 
+  for(const x of archiveBreakdown){
+    const list=breakdownByUser.get(x.userId)??[];
+    list.push({seasonNumber:x.seasonNumber,points:fromScaled(x.points),source:'archive'});
+    breakdownByUser.set(x.userId,list);
+  }
+  const userTotals=new Map<string,{user_id:string;full_name:string;total_points_scaled:number}>();
+  for(const row of totalsResult.results??[])userTotals.set(row.user_id,{...row,total_points_scaled:Number(row.total_points_scaled)});
+  for(const x of archiveBreakdown){
+    const row=userTotals.get(x.userId)??{user_id:x.userId,full_name:x.name,total_points_scaled:0};
+    row.total_points_scaled+=x.points;userTotals.set(x.userId,row);
+  }
   let previousPoints: number | null = null;
   let previousPosition = 0;
-  const rows = (totalsResult.results ?? []).map((row, index) => {
+  const rows = [...userTotals.values()].sort((a,b)=>b.total_points_scaled-a.total_points_scaled||a.full_name.localeCompare(b.full_name,'es')).map((row, index) => {
     const scaledPoints = Number(row.total_points_scaled ?? 0);
     const position = previousPoints !== null && scaledPoints === previousPoints
       ? previousPosition
