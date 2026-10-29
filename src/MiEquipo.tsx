@@ -34,7 +34,7 @@ function Ranking({name,info}:{name:string;info:{current:number|null;best:{positi
 export function TeamHistory({matches}:{matches:TeamMatch[]}){
  const [expanded,setExpanded]=useState<string[]>([]);
  const rivals=useMemo(()=>groupOfficialRivals(matches),[matches]);
- return <section className="equipo-history" aria-label="Historial de enfrentamientos oficiales">
+ return <section className="equipo-history" id="club-historiales" aria-label="Historial de enfrentamientos oficiales">
    <h2>HISTORIAL DE ENFRENTAMIENTOS</h2>
    <p>Solo cruces directos oficiales confirmados. DIF = diferencia de puntos; CR = cruces; RIV = puntos del rival.</p>
    {rivals.length===0?<p>Todavía no hay enfrentamientos oficiales confirmados para este equipo.</p>:
@@ -43,7 +43,7 @@ export function TeamHistory({matches}:{matches:TeamMatch[]}){
     <tbody>{rivals.map(r=>{
       const open=expanded.includes(r.id);
       return <Fragment key={r.id}><tr>
-       <th scope="row"><a className="equipo-rival" href={'#/equipo/'+encodeURIComponent(r.id)}><ParticipantShield userId={r.id} name={r.participantName??r.name} shieldUrl={r.shieldUrl} size="sm" decorative/><span>{r.name}</span></a></th>
+       <th scope="row"><a className="equipo-rival" href={'#/club/participante/'+encodeURIComponent(r.id)}><ParticipantShield userId={r.id} name={r.participantName??r.name} shieldUrl={r.shieldUrl} size="sm" decorative/><span>{r.name}</span></a></th>
        <td className={r.difference>0?'equipo-positive':r.difference<0?'equipo-negative':''}>{r.difference>0?'+':''}{r.difference}</td>
        <td>{r.matches.length}</td><td>{r.points}</td><td>{r.otherPoints}</td><td>{r.fulls??'—'}</td>
        <td><button type="button" aria-expanded={open} aria-controls={'equipo-rival-'+encodeURIComponent(r.id)} aria-label={(open?'Cerrar':'Ver')+' enfrentamientos contra '+r.name} onClick={()=>setExpanded(old=>open?old.filter(x=>x!==r.id):[...old,r.id])}>{open?'−':'+'}</button></td>
@@ -65,10 +65,10 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
  const grouped=[...new Set(titles.map(t=>t.code))].map(code=>({code,items:titles.filter(t=>t.code===code)}));
  return <article className="equipo-page">
   <header className="equipo-header">
-   <span className="eyebrow">MI EQUIPO · PRODE TAFA</span>
+   <span className="eyebrow">MI CLUB · PRODE TAFA</span>
    <div className="equipo-shield"><ParticipantShield userId={identity.id} name={identity.participantName} shieldUrl={identity.shieldUrl} size="lg"/></div>
    <h1>{identity.teamName}</h1>
-   <p>Participante: <a href={'#/club/participante/'+encodeURIComponent(identity.id)}>{identity.participantName}</a> {identity.foundedSeason?'· Fundado en T'+identity.foundedSeason:''}</p>
+   <p>Participante: {identity.participantName} {identity.foundedSeason?'· Fundado en T'+identity.foundedSeason:''}</p>
    {division&&<small>{division.name} · Temporada {division.seasonNumber}</small>}
   </header>
   <section className="equipo-titles" aria-label="Trofeos ganados">
