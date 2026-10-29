@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import {it,expect} from 'vitest';
 import {createHistoricalTemplate,parseHistoricalWorkbook} from '../src/historical-xlsx';
-import type {ArchivePayload} from '../worker/historical-archive';
+import type {ArchivePayload} from '../src/historical-schema';
 
 it('crea una plantilla Excel real y la lee sin inventar copas, resultados ni participantes',async()=>{
  const blob=createHistoricalTemplate(1);
