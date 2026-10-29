@@ -1,6 +1,9 @@
 name: Archivo histórico - actualizar esquema D1 (única vez)
 
 on:
+  # Re-run after updating Cloudflare's D1 edit permission, without pushing
+  # application changes or touching the production Worker.
+  workflow_dispatch:
   push:
     branches: [feat/archivo-historico-importaciones]
     paths:

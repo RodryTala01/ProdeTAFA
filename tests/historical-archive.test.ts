@@ -2,7 +2,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {createHash} from 'node:crypto';
 import {readFileSync,readdirSync} from 'node:fs';
 import {beforeEach,afterEach,describe,it,expect} from 'vitest';
-import {normalizeArchive,activeHistoricalArchives,historicalStats,handleHistoricalArchive,type ArchivePayload} from '../worker/historical-archive';
+import {normalizeArchive,activeHistoricalArchives,historicalStats,handleHistoricalArchive,mergeArchiveBatches,type ArchivePayload} from '../worker/historical-archive';
 import type {Env} from '../worker/index';
 
 const source:ArchivePayload={
@@ -73,6 +73,36 @@ describe('Archivo histórico por temporada',()=>{
   expect(await activeHistoricalArchives(env().DB)).toHaveLength(0);
   expect((db.prepare("SELECT status FROM historical_imports WHERE id=?").get(inserted.id) as {status:string}).status).toBe('reverted');
   expect((db.prepare("SELECT COUNT(*) AS n FROM audit_log WHERE entity_type='historical_import'").get() as {n:number}).n).toBe(2);
+ });
+ it('permite sumar campeones e IFFHS a T1 en un segundo lote y revertir solo ese lote',async()=>{
+  const first={...source,results:[],iffhs:[]};
+  const second={...source,statistics:[],standings:[],rounds:[]};
+  const preview=async(data:ArchivePayload)=>await (await handleHistoricalArchive(request('admin/historical-imports/preview','admin','POST',{data}),env()))!.json() as {ok:boolean;sha256:string;errors:string[]};
+  const save=async(data:ArchivePayload,sha256:string)=>await (await handleHistoricalArchive(request('admin/historical-imports','admin','POST',{data,sha256,sourceName:'T1-parte.xlsx'}),env()))!.json() as {id:number};
+  const p1=await preview(first);expect(p1.ok).toBe(true);
+  const s1=await save(first,p1.sha256);
+  const p2=await preview(second);expect(p2.ok).toBe(true);
+  const s2=await save(second,p2.sha256);
+  const archives=await activeHistoricalArchives(env().DB);
+  expect(archives).toHaveLength(1);
+  expect(archives[0].data.statistics).toHaveLength(2);
+  expect(archives[0].data.results).toHaveLength(1);
+  expect(historicalStats(archives).get('A')?.points).toBe(40);
+  const season=await handleHistoricalArchive(request('admin/historical-imports/season/1','admin'),env());
+  expect((await season!.json() as {data:ArchivePayload}).data.iffhs).toHaveLength(1);
+  const again=await preview(first);
+  expect(again.ok).toBe(false);
+  expect(again.errors.join(' ')).toMatch(/Ya existe un registro/);
+  const undo=await handleHistoricalArchive(request('admin/historical-imports/'+s2.id+'/revert','admin','POST',{seasonNumber:1,sha256:p2.sha256,reason:'Corregir palmarés'}),env());
+  expect(undo?.status).toBe(200);
+  const after=await activeHistoricalArchives(env().DB);
+  expect(after[0].data.results).toHaveLength(0);
+  expect(historicalStats(after).get('A')?.points).toBe(40);
+  expect((db.prepare("SELECT status FROM historical_imports WHERE id=?").get(s1.id) as {status:string}).status).toBe('active');
+ });
+ it('rechaza cambios contradictorios en identidades entre lotes',()=>{
+  const result=mergeArchiveBatches([source,{...source,participants:[{...source.participants[0],userId:'B'},source.participants[1]],statistics:[],standings:[],rounds:[],results:[],matches:[],movements:[],iffhs:[]}]);
+  expect(result.errors.join(' ')).toContain('contradictorios');
  });
  it('no permite superponer archivo con resultados oficiales ya existentes',async()=>{
   db.exec("INSERT INTO tafa_seasons(id,season_number,name) VALUES(1,1,'T1'); INSERT INTO competitions(id,season_id,code,canonical_name,display_name,family) VALUES(1,1,'LIGA_A','Liga A','Liga A','LEAGUE'); INSERT INTO rounds(id,name) VALUES(1,'Fecha'); INSERT INTO competition_stages(id,competition_id,code,name,stage_type,sequence) VALUES(1,1,'LIGA','Liga','LEAGUE_TABLE',1); INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence) VALUES(1,1,1,1,1)");

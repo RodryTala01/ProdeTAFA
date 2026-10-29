@@ -16,7 +16,9 @@ CREATE TABLE historical_imports (
  revert_reason TEXT,
  CHECK ((status='active' AND reverted_at IS NULL) OR (status='reverted' AND reverted_at IS NOT NULL))
 );
-CREATE UNIQUE INDEX idx_historical_imports_one_active_per_season
- ON historical_imports(season_number) WHERE status='active';
+-- A season can be loaded in independent, reversible batches (table today,
+-- titles tomorrow). The API checks collisions at the individual record level.
+CREATE INDEX idx_historical_imports_active_season
+ ON historical_imports(season_number,status);
 CREATE INDEX idx_historical_imports_history
  ON historical_imports(season_number,created_at DESC);

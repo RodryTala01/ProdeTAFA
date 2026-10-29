@@ -7,6 +7,13 @@ import './admin-historical.css';
 type Preview={ok:boolean;errors:string[];warnings:string[];counts:Record<string,number>;sha256:string;season:{number:number;name:string}|null};
 type Entry={id:number;seasonNumber:number;seasonName:string;sourceName:string;sha256:string;counts:Record<string,number>;status:'active'|'reverted';createdAt:string;revertedAt:string|null;revertReason:string|null;createdBy:string|null};
 const label:Record<string,string>={participants:'Participantes',competitions:'Competiciones',statistics:'Estadísticas',standings:'Tablas',rounds:'Fechas',results:'Resultados',matches:'Cruces',movements:'Movimientos',iffhs:'IFFHS'};
+function argentinaDate(utc:string|null){
+ if(!utc)return '—';
+ const instant=new Date(utc.includes('T')?utc:utc.replace(' ','T')+'Z');
+ return Number.isNaN(instant.getTime())?'Fecha inválida':new Intl.DateTimeFormat('es-AR',{
+  timeZone:'America/Argentina/Buenos_Aires',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23',
+ }).format(instant);
+}
 async function api<T>(path:string,method='GET',payload?:unknown):Promise<T>{
  const r=await fetch(path,{method,credentials:'same-origin',headers:{'content-type':'application/json'},body:payload?JSON.stringify(payload):undefined});
  const data=await r.json().catch(()=>({})) as T & {error?:string};
@@ -60,20 +67,30 @@ export default function AdminHistoricalArchive(){
   catch(e){setError(e instanceof Error?e.message:'No pudimos abrir esta carga');}
   finally{setBusy(false);}
  }
- function getTemplate(){
-  downloadArchiveBlob(createHistoricalTemplate(seasonNumber,undefined,users),'TAFA_Plantilla_Archivo_T'+seasonNumber+'.xlsx');
+ async function getTemplate(){
+  setBusy(true);setError('');
+  try{
+   const result=await api<{data:ArchivePayload|null}>('/api/admin/historical-imports/season/'+seasonNumber);
+   const existing=result.data;
+   // Catalogs are reused for a new partial load, never its already imported
+   // statistics or results: this prevents accidental double counting.
+   const base=existing?{...existing,
+    statistics:[],standings:[],rounds:[],results:[],matches:[],movements:[],iffhs:[]}:undefined;
+   downloadArchiveBlob(createHistoricalTemplate(seasonNumber,base,users),'TAFA_Plantilla_Archivo_T'+seasonNumber+'.xlsx');
+  }catch(e){setError(e instanceof Error?e.message:'No pudimos preparar la plantilla');}
+  finally{setBusy(false);}
  }
- const active=entries.filter(e=>e.status==='active').length;
+ const active=new Set(entries.filter(e=>e.status==='active').map(e=>e.seasonNumber)).size;
  return <section className="history-admin">
-   <header className="panel-heading"><div><span className="eyebrow">ADMINISTRACIÓN · ARCHIVO</span><h1>Archivo histórico</h1><p>Cargá una temporada por vez. Cada carga tiene vista previa, origen y reversión independiente.</p></div><div className="history-count">{active} temporadas cargadas</div></header>
+   <header className="panel-heading"><div><span className="eyebrow">ADMINISTRACIÓN · ARCHIVO</span><h1>Archivo histórico</h1><p>Avanzá temporada por temporada. Podés completar una misma temporada en varias importaciones independientes.</p></div><div className="history-count">{active} temporadas cargadas</div></header>
    {error&&<p role="alert" className="alert alert--error">{error}</p>}
    {notice&&<p role="status" className="admin-success">{notice}</p>}
    <div className="history-admin-grid">
     <section className="card panel form-stack history-import-panel">
       <h2>1. Preparar temporada</h2>
-      <p>Completá el Excel oficial. Podés dejar vacías las hojas de competiciones que no existieron; la hoja Competiciones solo debe incluir los torneos realmente jugados.</p>
+      <p>Completá el Excel oficial. La plantilla reutiliza los participantes y competiciones ya cargados de esa temporada, pero deja vacías las estadísticas para evitar duplicarlas. Solo agregá nuevos datos; nunca inventes torneos que no existieron.</p>
       <label className="field"><span>Número de temporada para plantilla</span><input type="number" min="1" max="500" value={seasonNumber} onChange={e=>setSeasonNumber(Math.max(1,Math.floor(Number(e.target.value)||1)))}/></label>
-      <button className="button button--secondary" onClick={getTemplate}>Descargar plantilla Excel (.xlsx)</button>
+      <button className="button button--secondary" disabled={busy} onClick={()=>void getTemplate()}>Descargar plantilla Excel (.xlsx)</button>
       <label className="field"><span>2. Seleccionar archivo T{seasonNumber}</span><input type="file" accept=".xlsx,.json" onChange={e=>void upload(e)} disabled={busy}/></label>
       <p className="sport-footnote">La plantilla funciona también como respaldo. Podés importar Excel completo o un archivo JSON previamente exportado por el sistema.</p>
       {busy&&<p role="status">Procesando…</p>}
@@ -88,13 +105,13 @@ export default function AdminHistoricalArchive(){
     </section>
     <section className="card panel">
       <h2>Historial de importaciones</h2>
-      <p>Las cargas revertidas permanecen registradas para auditoría. Una temporada revertida puede importarse de nuevo corregida.</p>
+      <p>Cada lote tiene su origen y se puede revertir individualmente. Revertir una carga no afecta los demás datos de la temporada.</p>
       {!entries.length?<p>Todavía no hay importaciones. Empezá por T1.</p>:
       <div className="history-list">{entries.map(entry=><article className="history-item" key={entry.id}>
-       <div className="history-item-head"><div><strong>T{entry.seasonNumber} · {entry.seasonName}</strong><small>#{entry.id} · {entry.createdAt} · {entry.createdBy??'Admin'}</small></div><span className={'history-status history-status--'+entry.status}>{entry.status==='active'?'Activa':'Revertida'}</span></div>
+       <div className="history-item-head"><div><strong>T{entry.seasonNumber} · {entry.seasonName}</strong><small>#{entry.id} · {argentinaDate(entry.createdAt)} (ARG) · {entry.createdBy??'Admin'}</small></div><span className={'history-status history-status--'+entry.status}>{entry.status==='active'?'Activa':'Revertida'}</span></div>
        <small>Origen: {entry.sourceName}</small>
        <div className="history-item-buttons"><button className="button button--ghost" disabled={busy} onClick={()=>void inspect(entry)}>Detalle / respaldo</button>{entry.status==='active'&&<button className="button button--secondary" disabled={busy} onClick={()=>{setRevert(entry);setReason('');}}>Revertir carga</button>}</div>
-       {entry.status==='reverted'&&<p className="sport-footnote">Revertida: {entry.revertedAt}. {entry.revertReason}</p>}
+       {entry.status==='reverted'&&<p className="sport-footnote">Revertida: {argentinaDate(entry.revertedAt)} (ARG). {entry.revertReason}</p>}
       </article>)}</div>}
     </section>
    </div>
@@ -105,7 +122,7 @@ export default function AdminHistoricalArchive(){
    </section>}
    {revert&&<div className="modal-backdrop"><section className="modal card history-revert" role="dialog" aria-modal="true" aria-label="Revertir importación histórica">
      <h2>Revertir T{revert.seasonNumber} · Importación #{revert.id}</h2>
-     <p>Los datos dejarán de aparecer en Mi Club, rankings e historiales. El archivo y la auditoría se conservan. No afecta las demás temporadas ni los pronósticos oficiales.</p>
+     <p>Solo los registros de esta importación dejarán de aparecer en Mi Club, rankings e historiales. El respaldo y la auditoría se conservan. No afecta las otras cargas ni los pronósticos oficiales.</p>
      <label className="field"><span>Motivo obligatorio</span><textarea rows={3} value={reason} onChange={e=>setReason(e.target.value)} placeholder="Ej.: tabla de posiciones mal interpretada"/></label>
      <div className="modal-actions"><button className="button button--ghost" disabled={busy} onClick={()=>setRevert(null)}>Cancelar</button><button className="button button--danger" disabled={busy||reason.trim().length<5} onClick={()=>void revertImport()}>Confirmar reversión de T{revert.seasonNumber}</button></div>
    </section></div>}

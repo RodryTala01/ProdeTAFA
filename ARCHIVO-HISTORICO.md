@@ -2,15 +2,15 @@
 
 ## Objetivo y proceso por temporada
 
-Cada archivo representa **una temporada**. Se carga T1 y se comprueba en la vista previa, luego T2, T3...; nunca se presume que se jugaron todas las copas en todas las temporadas. Las ediciones de Mundial o Copa América pueden utilizar solamente una competición `TOURNAMENT`.
+Cada archivo representa **una temporada**, pero una temporada puede completarse mediante varios archivos/lotes sin repetir registros deportivos. Se carga T1 y se comprueba en la vista previa, luego T2, T3...; nunca se presume que se jugaron todas las copas en todas las temporadas. Las ediciones de Mundial o Copa América pueden utilizar solamente una competición `TOURNAMENT`.
 
 En Admin → **Archivo histórico**:
-1. Descargar la plantilla Excel para T1. Incluye un catálogo de participantes actuales, con `userId`, cuando el administrador está conectado.
+1. Descargar la plantilla Excel para T1. Incluye un catálogo de participantes actuales, con `userId`, cuando el administrador está conectado. Si la temporada ya tiene cargas, también precompleta los participantes y competiciones históricas, dejando vacías las hojas de datos deportivos para agregar solo registros nuevos.
 2. Completar sus hojas en el Excel (o pedir a ChatGPT que prepare el archivo a partir de las planillas originales).
 3. Elegir el archivo `.xlsx`, revisar conteos, errores y advertencias.
 4. Marcar confirmación de revisión y guardar. Se registra el nombre del archivo, checksum SHA-256 y usuario administrador.
 5. Examinar el historial y descargar un respaldo Excel o JSON.
-6. Si una importación era equivocada, **revertir esa carga** con motivo. Se marca como revertida y desaparece de los cómputos pero permanece en el historial y auditoría. T1 puede reimportarse corregida sin tocar T2.
+6. Si una importación era equivocada, **revertir esa carga** con motivo. Se marca como revertida y desaparece de los cómputos pero permanece en el historial y auditoría. Se puede completar T1 por partes y revertir solo la parte equivocada sin tocar T2 ni otras cargas de T1.
 
 ## Estructura del Excel
 
@@ -34,7 +34,7 @@ No reemplazar celdas vacías por 0 si el dato no existía. No agregar filas fict
 
 - `migrations/0017_historical_imports.sql` crea una tabla aditiva sin modificar puntuaciones ni predicciones ya existentes.
 - El archivo original no se almacena en binario: se guarda **el contenido normalizado** y se puede exportar desde el historial en Excel/JSON.
-- Solo un lote activo por temporada (índice único parcial). Se permite histórico de versiones revertidas.
+- Se permiten varios lotes activos por temporada, pero un mismo registro deportivo no puede repetirse entre lotes. Las identidades y los catálogos deben coincidir; cada lote conserva su reversión independiente.
 - El origen y reversión se registran en `audit_log`.
 - Las estadísticas históricas se suman una sola vez desde `Estadisticas`, nunca desde las tablas por competición.
 - Las cuentas antiguas sin `userId` no se asignan por parecido de nombre para evitar atribuciones incorrectas.

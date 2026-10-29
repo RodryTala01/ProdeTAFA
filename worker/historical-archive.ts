@@ -6,6 +6,48 @@ type R=Record<string,unknown>;
 const obj=(x:unknown):x is R=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const str=(x:unknown)=>x===null||x===undefined?'':String(x).trim();
 const text=(x:unknown,max=120)=>str(x).slice(0,max);
+type ArchiveTable=(typeof archiveTables)[number];
+function archiveRecordKey(table:ArchiveTable,row:R){
+ const key=(...names:string[])=>names.map(name=>str(row[name])).join(':');
+ switch(table){
+  case 'participants':return key('key');
+  case 'competitions':return key('code');
+  case 'statistics':return key('participantKey');
+  case 'standings':return key('competitionCode','participantKey');
+  case 'rounds':return key('round','participantKey');
+  case 'results':return key('competitionCode','participantKey','teamLabel');
+  case 'matches':return key('competitionCode','stage','round')+':'+[str(row.aKey),str(row.bKey)].sort().join(':');
+  case 'movements':return key('participantKey','type');
+  case 'iffhs':return key('participantKey');
+ }
+}
+/** Merge independent imports from the same season without ever summing the
+ * same statistic twice. Participant/competition catalogs may be repeated in
+ * each workbook; sports records must be non-overlapping. */
+export function mergeArchiveBatches(batches:ArchivePayload[]){
+ const errors:string[]=[];
+ if(!batches.length)return {data:null as ArchivePayload|null,errors};
+ const first=batches[0];
+ const data:ArchivePayload={version:1,season:{...first.season},participants:[],competitions:[],statistics:[],standings:[],rounds:[],results:[],matches:[],movements:[],iffhs:[]};
+ const indexes=Object.fromEntries(archiveTables.map(table=>[table,new Map<string,R>()])) as Record<ArchiveTable,Map<string,R>>;
+ for(const batch of batches){
+  if(batch.season.number!==first.season.number||batch.season.name!==first.season.name||batch.season.kind!==first.season.kind){
+   errors.push('Metadatos de temporada diferentes entre importaciones');continue;
+  }
+  for(const table of archiveTables)for(const item of batch[table]){
+   const row=item as unknown as R,key=archiveRecordKey(table,row),existing=indexes[table].get(key);
+   if(existing){
+    if(table==='participants'||table==='competitions'){
+     if(JSON.stringify(existing)!==JSON.stringify(row))errors.push('Datos contradictorios en '+table+': '+key);
+    }else errors.push('Ya existe un registro de '+table+': '+key);
+    continue;
+   }
+   indexes[table].set(key,row);
+   (data[table] as unknown[]).push(item);
+  }
+ }
+ return {data,errors:[...new Set(errors)].slice(0,100)};
+}
 const number=(x:unknown,required=false,decimal=false):number|null=>{
  if(x===null||x===undefined||x==='')return required?NaN:null;
  const n=Number(x);
@@ -126,9 +168,19 @@ async function loggedIn(request:Request,env:Env){
  .bind(hash).first<{id:string;role:string}>();
 }
 export async function activeHistoricalArchives(db:D1Database):Promise<Array<{seasonNumber:number;data:ArchivePayload}>>{
- const rows=await db.prepare("SELECT season_number,payload_json FROM historical_imports WHERE status='active' ORDER BY season_number")
+ const rows=await db.prepare("SELECT season_number,payload_json FROM historical_imports WHERE status='active' ORDER BY season_number,id")
  .all<{season_number:number;payload_json:string}>();
- return (rows.results??[]).map(r=>({seasonNumber:r.season_number,data:JSON.parse(r.payload_json) as ArchivePayload}));
+ const grouped=new Map<number,ArchivePayload[]>();
+ for(const row of rows.results??[]){
+  const batches=grouped.get(row.season_number)??[];
+  batches.push(JSON.parse(row.payload_json) as ArchivePayload);
+  grouped.set(row.season_number,batches);
+ }
+ return [...grouped].map(([seasonNumber,batches])=>{
+  const merged=mergeArchiveBatches(batches);
+  if(merged.errors.length||!merged.data)throw Error('Inconsistencia en archivo histórico T'+seasonNumber+': '+merged.errors.join('; '));
+  return {seasonNumber,data:merged.data};
+ });
 }
 export function archivedUserKey(data:ArchivePayload,key:string){
  const p=data.participants.find(p=>p.key===key);
@@ -172,6 +224,12 @@ export async function handleHistoricalArchive(request:Request,env:Env):Promise<R
  }
  if(user.role!=='admin')return error('Solo administradores',403);
  const simple=path==='/api/admin/historical-imports';
+ const seasonDetail=path.match(/^\/api\/admin\/historical-imports\/season\/(\d+)$/);
+ if(seasonDetail&&request.method==='GET'){
+  const seasonNumber=Number(seasonDetail[1]);
+  const row=(await activeHistoricalArchives(env.DB)).find(item=>item.seasonNumber===seasonNumber);
+  return json({data:row?.data??null});
+ }
  if(simple&&request.method==='GET'){
   const rows=await env.DB.prepare("SELECT h.id,h.season_number AS seasonNumber,h.season_name AS seasonName,h.source_name AS sourceName,h.source_sha256 AS sha256,h.counts_json AS counts,h.status,h.created_at AS createdAt,h.reverted_at AS revertedAt,h.revert_reason AS revertReason,u.full_name AS createdBy FROM historical_imports h LEFT JOIN users u ON u.id=h.created_by ORDER BY h.id DESC")
   .all();return json({imports:(rows.results??[]).map((r:R)=>({...r,counts:JSON.parse(String(r.counts))}))});
@@ -210,8 +268,12 @@ export async function handleHistoricalArchive(request:Request,env:Env):Promise<R
   if(unknown.length)normalized.errors.push('IDs de participantes no registrados: '+unknown.slice(0,12).join(', '));
   if(normalized.payload){
    const season=normalized.payload.season.number;
-   const active=await env.DB.prepare("SELECT id FROM historical_imports WHERE season_number=? AND status='active'").bind(season).first();
-   if(active)normalized.errors.push('Ya existe una importación activa de T'+season+'. Revertí primero la carga anterior.');
+   const existing=await env.DB.prepare("SELECT payload_json FROM historical_imports WHERE season_number=? AND status='active' ORDER BY id")
+    .bind(season).all<{payload_json:string}>();
+   const merged=mergeArchiveBatches([...(existing.results??[]).map(r=>JSON.parse(r.payload_json) as ArchivePayload),normalized.payload]);
+   normalized.errors.push(...merged.errors);
+   if(!archiveTables.some(table=>table!=='participants'&&table!=='competitions'&&normalized.payload![table].length))
+    normalized.errors.push('La carga debe contener al menos una fila de estadísticas, tablas, fechas, resultados, cruces, movimientos o IFFHS.');
    const official=await env.DB.prepare("SELECT COUNT(*) AS n FROM tafa_seasons s JOIN competitions c ON c.season_id=s.id LEFT JOIN competition_results res ON res.competition_id=c.id LEFT JOIN competition_round_links l ON l.competition_id=c.id WHERE s.season_number=? AND (res.id IS NOT NULL OR l.id IS NOT NULL)").bind(season).first<{n:number}>();
    if(Number(official?.n??0)>0)normalized.errors.push('T'+season+' contiene resultados o Fechas del motor oficial; para evitar duplicados no puede importarse como archivo independiente.');
   }
@@ -226,7 +288,7 @@ export async function handleHistoricalArchive(request:Request,env:Env):Promise<R
   const p=normalized.payload!;
   const insert=await env.DB.prepare("INSERT INTO historical_imports(season_number,season_name,source_name,source_sha256,payload_json,counts_json,created_by) VALUES(?,?,?,?,?,?,?) RETURNING id")
    .bind(p.season.number,p.season.name,sourceName,sha,content,JSON.stringify(normalized.counts),user.id).first<{id:number}>().catch(()=>null);
-  if(!insert)return error('No se pudo confirmar. Revisá si T'+p.season.number+' ya fue importada.',409);
+  if(!insert)return error('No se pudo confirmar la importación de T'+p.season.number+'.',409);
   await env.DB.prepare("INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json) VALUES(?,'historical_import.committed','historical_import',?,NULL,?)")
    .bind(user.id,String(insert.id),JSON.stringify({seasonNumber:p.season.number,sha256:sha,counts:normalized.counts})).run();
   return json({ok:true,id:insert.id,seasonNumber:p.season.number,counts:normalized.counts},201);

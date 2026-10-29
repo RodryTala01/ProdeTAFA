@@ -46,7 +46,7 @@ export function createHistoricalTemplate(seasonNumber=1,data?:ArchivePayload,use
   ['Catalogo TAFA',[['userId','fullName'],...users.map(u=>[u.id,u.fullName])]],
   ['LEEME',[
    ['ARCHIVO HISTORICO TAFA','INSTRUCCIONES'],
-   ['Uso','Una importación por temporada; las hojas sin datos se dejan solo con encabezados.'],
+   ['Uso','Una temporada puede tener varias importaciones. Cada una incluye solo nuevos datos; se pueden dejar hojas sin filas.'],
    ['Participantes','key: clave única histórica (ej. RODRI), name: nombre histórico, userId: ID actual de TAFA o vacío, division: opcional.'],
    ['Competiciones','Solo incluir competiciones efectivamente disputadas. kind: LEAGUE, CUP, TOURNAMENT o PROMOTION.'],
    ['Estadisticas','Totales generales de cada participante por temporada. Obligatorio points; demás cifras opcionales.'],
@@ -57,7 +57,7 @@ export function createHistoricalTemplate(seasonNumber=1,data?:ArchivePayload,use
    ['Movimientos','type: ASCENSO, DESCENSO, PERMANENCIA u OTRO.'],
    ['IFFHS','Puntos IFFHS de esa temporada (separados de los puntos deportivos).'],
    ['Validación','El importador muestra vista previa, nombres sin vincular y controles antes de confirmar.'],
-   ['Reversión','Una carga se puede revertir desde el historial sin tocar datos oficiales ni otras temporadas.'],
+   ['Reversión','Cada importación se puede revertir desde el historial sin tocar otros lotes ni los datos oficiales.'],
   ]]
  ];
  const sheetTags=sheets.map(([n],i)=>'<sheet name="'+esc(n)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>').join('');
