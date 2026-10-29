@@ -173,7 +173,7 @@ export async function handleHistoricalArchive(request:Request,env:Env):Promise<R
  if(user.role!=='admin')return error('Solo administradores',403);
  const simple=path==='/api/admin/historical-imports';
  if(simple&&request.method==='GET'){
-  const rows=await env.DB.prepare("SELECT h.id,h.season_number AS seasonNumber,h.season_name AS seasonName,h.source_name AS sourceName,h.source_sha256 AS sha256,h.counts_json AS counts,h.status,h.created_at AS createdAt,h.reverted_at AS revertedAt,h.revert_reason AS revertReason,u.full_name AS createdBy FROM historical_imports h LEFT JOIN users u ON u.id=h.created_by ORDER BY h.id DESC LIMIT 150")
+  const rows=await env.DB.prepare("SELECT h.id,h.season_number AS seasonNumber,h.season_name AS seasonName,h.source_name AS sourceName,h.source_sha256 AS sha256,h.counts_json AS counts,h.status,h.created_at AS createdAt,h.reverted_at AS revertedAt,h.revert_reason AS revertReason,u.full_name AS createdBy FROM historical_imports h LEFT JOIN users u ON u.id=h.created_by ORDER BY h.id DESC")
   .all();return json({imports:(rows.results??[]).map((r:R)=>({...r,counts:JSON.parse(String(r.counts))}))});
  }
  const match=path.match(/^\/api\/admin\/historical-imports\/(\d+)$/);
