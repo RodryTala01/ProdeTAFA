@@ -20,12 +20,12 @@ describe('Participante: Home y navegación', () => {
     expect(participantRoute('#/admin')).toBe('inicio');
     for (const path of ['inicio', 'pronosticos', 'competiciones', 'club', 'club/historial', 'competiciones/liga-b']) expect(participantRoute('#/' + path)).toBe(path);
   });
-  it('navegación tiene cinco links, iconos accesibles y un destino activo', () => {
+  it('navegación tiene cuatro links, iconos accesibles y un destino activo', () => {
     const html = renderToStaticMarkup(createElement(ParticipantNavigation, { route: 'club/historial' }));
-    expect(html.match(/<a /g)).toHaveLength(5);
+    expect(html.match(/<a /g)).toHaveLength(4);
     expect(html.match(/aria-current="page"/g)).toHaveLength(1);
     expect(html).toContain('href="#/club" aria-current="page"');
-    for (const label of ['Inicio','Pronósticos','Competiciones','Mi Club','Mi Equipo']) expect(html).toContain(label);
+    for (const label of ['Inicio','Pronósticos','Competiciones','Mi Club']) expect(html).toContain(label);
   });
   it('Mi Club conserva accesos a historial y pronósticos por Fecha', () => {
     const html = renderToStaticMarkup(createElement(ParticipantClub, { name: 'Persona de prueba', data }));
