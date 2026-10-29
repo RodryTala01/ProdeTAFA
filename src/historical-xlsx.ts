@@ -8,18 +8,25 @@ const names:{[K in keyof ArchivePayload]?:string}={
 const esc=(v:unknown)=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const alphabet=(index:number)=>{let s='';for(let i=index+1;i>0;i=Math.floor((i-1)/26))s=String.fromCharCode(65+(i-1)%26)+s;return s;};
 const xmlStart='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-function sheetXml(rows:unknown[][]){
+function sheetXml(rows:unknown[][],name:string){
  let body='';
  for(let i=0;i<rows.length;i++){
   const cells=rows[i].map((v,j)=>{
    if(v===null||v===undefined||v==='')return '';
-   const ref=alphabet(j)+(i+1);
-   if(typeof v==='number'&&Number.isFinite(v))return '<c r="'+ref+'"><v>'+v+'</v></c>';
-   return '<c r="'+ref+'" t="inlineStr"><is><t>'+esc(v)+'</t></is></c>';
+   const ref=alphabet(j)+(i+1),style=i===0?' s="1"':'';
+   if(typeof v==='number'&&Number.isFinite(v))return '<c r="'+ref+'"'+style+'><v>'+v+'</v></c>';
+   return '<c r="'+ref+'"'+style+' t="inlineStr"><is><t>'+esc(v)+'</t></is></c>';
   }).join('');
   body+='<row r="'+(i+1)+'">'+cells+'</row>';
  }
- return xmlStart+'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetData>'+body+'</sheetData></worksheet>';
+ const columns=rows[0]??[],last=alphabet(columns.length-1),validations:string[]=[];
+ for(const [i,col] of columns.entries()){
+  const range=alphabet(i)+'2:'+alphabet(i)+'20001';
+  const values=col==='kind'?'LEAGUE,CUP,TOURNAMENT,PROMOTION':col==='scoreBasis'?'INDIVIDUAL,DUO':col==='type'?'ASCENSO,DESCENSO,PERMANENCIA,OTRO':null;
+  if(values)validations.push('<dataValidation type="list" allowBlank="1" showErrorMessage="1" errorTitle="Valor inválido" error="Elegí una opción del listado" sqref="'+range+'"><formula1>"'+values+'"</formula1></dataValidation>');
+ }
+ const controls=validations.length?'<dataValidations count="'+validations.length+'">'+validations.join('')+'</dataValidations>':'';
+ return xmlStart+'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>'+columns.map((_,i)=>'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+(name==='LEEME'?(i===0?26:115):24)+'" customWidth="1"/>').join('')+'</cols><sheetData>'+body+'</sheetData>'+(name==='LEEME'?'':'<autoFilter ref="A1:'+last+Math.max(2,rows.length)+'"/>')+controls+'</worksheet>';
 }
 const encoder=new TextEncoder();
 const u16=(b:Uint8Array,i:number,v:number)=>{b[i]=v&255;b[i+1]=(v>>8)&255;};
@@ -39,21 +46,26 @@ function zipStored(files:Array<[string,string]>){
  for(const b of [...local,...central,tail]){out.set(b,p);p+=b.length;}
  return out;
 }
+function templateCell(table:string,column:string,row:Record<string,unknown>,data:ArchivePayload){
+ if(table==='rounds'&&column==='competitionCode')return row.competitionCode||(data.competitions.length===1?data.competitions[0].code:'');
+ if(table==='matches'&&column==='matchId')return row.matchId||'legacy:'+String(row.competitionCode)+':'+String(row.stage)+':'+String(row.round??'')+':'+[String(row.aKey),String(row.bKey)].sort().join(':');
+ return row[column]??'';
+}
 export function createHistoricalTemplate(seasonNumber=1,data?:ArchivePayload,users:Array<{id:string;fullName:string}>=[]){
  const sheets:Array<[string,unknown[][]]>=[
   ['Temporada',[['campo','valor'],['version',1],['number',data?.season.number??seasonNumber],['name',data?.season.name??'Temporada '+seasonNumber],['kind',data?.season.kind??'MIXTA'],['notes',data?.season.notes??'']]],
-  ...archiveTables.map(table=>[names[table]!,[Array.from(archiveColumns[table]),...(data?.[table]??[]).map(row=>archiveColumns[table].map(column=>(row as unknown as Record<string,unknown>)[column]??''))]] as [string,unknown[][]]),
+  ...archiveTables.map(table=>[names[table]!,[Array.from(archiveColumns[table]),...(data?.[table]??[]).map(row=>archiveColumns[table].map(column=>templateCell(table,column,row as unknown as Record<string,unknown>,data!)))]] as [string,unknown[][]]),
   ['Catalogo TAFA',[['userId','fullName'],...users.map(u=>[u.id,u.fullName])]],
   ['LEEME',[
    ['ARCHIVO HISTORICO TAFA','INSTRUCCIONES'],
    ['Uso','Una temporada puede tener varias importaciones. Cada una incluye solo nuevos datos; se pueden dejar hojas sin filas.'],
    ['Participantes','key: clave única histórica (ej. RODRI), name: nombre histórico, userId: ID actual de TAFA o vacío, division: opcional.'],
    ['Competiciones','Solo incluir competiciones efectivamente disputadas. kind: LEAGUE, CUP, TOURNAMENT o PROMOTION.'],
-   ['Estadisticas','Totales generales de cada participante por temporada. Obligatorio points; demás cifras opcionales.'],
-   ['Tablas','Clasificación final por competición. position >= 1. No duplicar los puntos globales por haber dos tablas.'],
-   ['Fechas','Puntos de cada Fecha por participante, si existen.'],
-   ['Resultados','Cada premio/fase registrado; resultCode: CHAMPION, RUNNER_UP, SEMIFINAL, etc.'],
-   ['Cruces','Solo enfrentamientos directos oficiales. scoreBasis: INDIVIDUAL o DUO.'],
+   ['Estadisticas','Puntos oficiales inalterables. Extras = points - 3*fulls - partials, solo si esos datos existen; no inventar distribución por Fecha.'],
+   ['Tablas','Clasificación por competitionCode; position >= 1. Nunca sumar al total general: Estadisticas es la única fuente de totales históricos.'],
+   ['Fechas','competitionCode obligatorio: distingue Fecha 1 de dos competiciones. No distribuir Extras generales entre Fechas sin respaldo original.'],
+   ['Resultados','Declarar títulos explícitos. Brasil 2021: COPA_AMERICA_2021 / TOURNAMENT; CHAMPION de Copa América, nunca inferir Liga A desde una tabla.'],
+   ['Cruces','matchId obligatorio, único y estable en toda la temporada. Solo cruces oficiales; scoreBasis: INDIVIDUAL o DUO. Dúos históricos: cuatro filas individuales A1-B1, A1-B2, A2-B1 y A2-B2, con cuatro matchId distintos; no deduplicar.'],
    ['Movimientos','type: ASCENSO, DESCENSO, PERMANENCIA u OTRO.'],
    ['IFFHS','Puntos IFFHS de esa temporada (separados de los puntos deportivos).'],
    ['Validación','El importador muestra vista previa, nombres sin vincular y controles antes de confirmar.'],
@@ -62,9 +74,10 @@ export function createHistoricalTemplate(seasonNumber=1,data?:ArchivePayload,use
  ];
  const sheetTags=sheets.map(([n],i)=>'<sheet name="'+esc(n)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>').join('');
  const workbook=xmlStart+'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+sheetTags+'</sheets></workbook>';
- const rels=xmlStart+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+sheets.map((_,i)=>'<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>').join('')+'</Relationships>';
- const types=xmlStart+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+sheets.map((_,i)=>'<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('')+'</Types>';
- const files:Array<[string,string]>=[['[Content_Types].xml',types],['_rels/.rels',xmlStart+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],['xl/workbook.xml',workbook],['xl/_rels/workbook.xml.rels',rels],...sheets.map(([n,rows],i)=>['xl/worksheets/sheet'+(i+1)+'.xml',sheetXml(rows)] as [string,string])];
+ const rels=xmlStart+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+sheets.map((_,i)=>'<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>').join('')+'<Relationship Id="styles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+ const styles=xmlStart+'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF203020"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="2"><xf fontId="0" fillId="0" borderId="0" xfId="0"/><xf fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"><alignment wrapText="1"/></xf></cellXfs></styleSheet>';
+ const types=xmlStart+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+sheets.map((_,i)=>'<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('')+'</Types>';
+ const files:Array<[string,string]>=[['[Content_Types].xml',types],['_rels/.rels',xmlStart+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],['xl/styles.xml',styles],['xl/workbook.xml',workbook],['xl/_rels/workbook.xml.rels',rels],...sheets.map(([n,rows],i)=>['xl/worksheets/sheet'+(i+1)+'.xml',sheetXml(rows,n)] as [string,string])];
  return new Blob([zipStored(files) as BlobPart],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
 }
 function r16(b:Uint8Array,p:number){return b[p]|b[p+1]<<8;}
@@ -144,6 +157,12 @@ export async function parseHistoricalWorkbook(file:File):Promise<ArchivePayload>
   const expected=Array.from(archiveColumns[table]);
   if(expected.some(c=>!headers.includes(c)))throw Error('Encabezados incorrectos en '+names[table]+'. Descargá la plantilla vigente.');
   data[table]=rows.slice(1).filter(r=>r.some(v=>v!==undefined&&v!==null&&v!=='')).map(r=>Object.fromEntries(expected.map(k=>[k,r[headers.indexOf(k)]??''])));
+ }
+ for(const table of ['rounds','matches'] as const){
+  for(const [index,row] of (data[table] as Record<string,unknown>[]).entries()){
+   const field=table==='rounds'?'competitionCode':'matchId';
+   if(!String(row[field]??'').trim())throw Error(names[table]+' fila '+(index+2)+': '+field+' obligatorio.');
+  }
  }
  return data as unknown as ArchivePayload;
 }

@@ -1,4 +1,5 @@
 import type {Env} from './index';
+import {historySummaries,historyDetail} from './season-history';
 
 export type ArchiveRow={id:number;season_number:number;season_name:string;source_name:string;source_sha256:string;payload_json:string;counts_json:string;status:string;created_at:string;reverted_at:string|null;revert_reason:string|null};
 import {archiveTables,archiveColumns,type ArchivePayload,type ArchiveParticipant,type ArchiveCompetition,type ArchiveStatistic,type ArchiveStanding,type ArchiveRound,type ArchiveResult,type ArchiveMatch,type ArchiveMovement,type ArchiveIffhs} from '../src/historical-schema';
@@ -14,9 +15,9 @@ function archiveRecordKey(table:ArchiveTable,row:R){
   case 'competitions':return key('code');
   case 'statistics':return key('participantKey');
   case 'standings':return key('competitionCode','participantKey');
-  case 'rounds':return key('round','participantKey');
+  case 'rounds':return key('competitionCode','round','participantKey');
   case 'results':return key('competitionCode','participantKey','teamLabel');
-  case 'matches':return key('competitionCode','stage','round')+':'+[str(row.aKey),str(row.bKey)].sort().join(':');
+  case 'matches':return str(row.matchId)||key('competitionCode','stage','round')+':'+[str(row.aKey),str(row.bKey)].sort().join(':');
   case 'movements':return key('participantKey','type');
   case 'iffhs':return key('participantKey');
  }
@@ -35,7 +36,10 @@ export function mergeArchiveBatches(batches:ArchivePayload[]){
    errors.push('Metadatos de temporada diferentes entre importaciones');continue;
   }
   for(const table of archiveTables)for(const item of batch[table]){
-   const row=item as unknown as R,key=archiveRecordKey(table,row),existing=indexes[table].get(key);
+   const row={...item} as unknown as R;
+   if(table==='rounds'&&!row.competitionCode&&batch.competitions.length===1)row.competitionCode=batch.competitions[0].code;
+   if(table==='matches'&&!row.matchId)row.matchId='legacy:'+str(row.competitionCode)+':'+str(row.stage)+':'+str(row.round)+':'+[str(row.aKey),str(row.bKey)].sort().join(':');
+   const key=archiveRecordKey(table,row),existing=indexes[table].get(key);
    if(existing){
     if(table==='participants'||table==='competitions'){
      if(JSON.stringify(existing)!==JSON.stringify(row))errors.push('Datos contradictorios en '+table+': '+key);
@@ -43,7 +47,7 @@ export function mergeArchiveBatches(batches:ArchivePayload[]){
     continue;
    }
    indexes[table].set(key,row);
-   (data[table] as unknown[]).push(item);
+   (data[table] as unknown[]).push(row);
   }
  }
  return {data,errors:[...new Set(errors)].slice(0,100)};
@@ -98,14 +102,16 @@ export function normalizeArchive(value:unknown){
     if(!Number.isFinite(positive(r.position)))errors.push(context+': posición inválida');
    }else if(table==='rounds'){
     const round=field('round');
+    if(Object.hasOwn(r,'competitionCode')&&!field('competitionCode'))errors.push(context+': competitionCode obligatorio');
     if(!round)errors.push(context+': Fecha obligatoria');
-    payload.rounds.push({round,participantKey:field('participantKey',80),points:count('points',true)!,fulls:count('fulls'),partials:count('partials'),errors:count('errors'),extras:count('extras')});
+    payload.rounds.push({competitionCode:field('competitionCode').toUpperCase()||undefined,round,participantKey:field('participantKey',80),points:count('points',true)!,fulls:count('fulls'),partials:count('partials'),errors:count('errors'),extras:count('extras')});
    }else if(table==='results'){
     payload.results.push({competitionCode:field('competitionCode').toUpperCase(),participantKey:field('participantKey',80),position:count('position'),resultCode:field('resultCode').toUpperCase(),teamLabel:field('teamLabel')||null});
    }else if(table==='matches'){
+    if(Object.hasOwn(r,'matchId')&&!field('matchId'))errors.push(context+': matchId obligatorio');
     const basis=(field('scoreBasis').toUpperCase()||'INDIVIDUAL') as ArchiveMatch['scoreBasis'];
     if(!['INDIVIDUAL','DUO'].includes(basis))errors.push(context+': tipo de cruce inválido');
-    payload.matches.push({competitionCode:field('competitionCode').toUpperCase(),stage:field('stage'),round:field('round')||null,aKey:field('aKey',80),bKey:field('bKey',80),pointsA:count('pointsA',true)!,pointsB:count('pointsB',true)!,plenosA:count('plenosA'),plenosB:count('plenosB'),scoreBasis:basis});
+    payload.matches.push({matchId:field('matchId',120)||undefined,competitionCode:field('competitionCode').toUpperCase(),stage:field('stage'),round:field('round')||null,aKey:field('aKey',80),bKey:field('bKey',80),pointsA:count('pointsA',true)!,pointsB:count('pointsB',true)!,plenosA:count('plenosA'),plenosB:count('plenosB'),scoreBasis:basis});
    }else if(table==='movements'){
     const type=field('type').toUpperCase() as ArchiveMovement['type'];
     if(!['ASCENSO','DESCENSO','PERMANENCIA','OTRO'].includes(type))errors.push(context+': tipo de movimiento inválido');
@@ -131,10 +137,16 @@ export function normalizeArchive(value:unknown){
  };
  for(const s of payload.statistics)check('Estadísticas','stat:'+s.participantKey,[s.participantKey]);
  for(const s of payload.standings)check('Tabla','table:'+s.competitionCode+':'+s.participantKey,[s.participantKey],s.competitionCode);
- for(const r of payload.rounds)check('Fecha','round:'+r.round+':'+r.participantKey,[r.participantKey]);
+ for(const r of payload.rounds){
+  if(!r.competitionCode&&payload.competitions.length===1)r.competitionCode=payload.competitions[0].code;
+  if(!r.competitionCode)errors.push('Fecha: competitionCode obligatorio cuando hay varias competiciones');
+  check('Fecha','round:'+r.competitionCode+':'+r.round+':'+r.participantKey,[r.participantKey],r.competitionCode);
+ }
  for(const r of payload.results)check('Resultado','result:'+r.competitionCode+':'+r.participantKey+':'+r.teamLabel,[r.participantKey],r.competitionCode);
  for(const m of payload.matches){
-  check('Cruce','match:'+m.competitionCode+':'+m.stage+':'+m.round+':'+[m.aKey,m.bKey].sort().join(':'),[m.aKey,m.bKey],m.competitionCode);
+  // Legacy JSON remains readable; new workbooks require an explicit stable ID.
+  m.matchId ||= 'legacy:'+m.competitionCode+':'+m.stage+':'+(m.round??'')+':'+[m.aKey,m.bKey].sort().join(':');
+  check('Cruce','match:'+m.matchId,[m.aKey,m.bKey],m.competitionCode);
   if(!m.stage||m.aKey===m.bKey)errors.push('Cruce con instancia vacía o rival idéntico');
  }
  for(const m of payload.movements)check('Movimiento','movement:'+m.participantKey+':'+m.type,[m.participantKey]);
@@ -161,7 +173,7 @@ const error=(msg:string,status=400)=>json({error:msg},status);
 async function loggedIn(request:Request,env:Env){
  const cookie=request.headers.get('cookie')?.split(';').map(x=>x.trim()).find(x=>x.startsWith('prode_session='));
  if(!cookie)return null;
- const token=decodeURIComponent(cookie.slice('prode_session='.length));
+ let token:string;try{token=decodeURIComponent(cookie.slice('prode_session='.length));}catch{return null;}
  const bytes=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token)));
  const hash=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
  return env.DB.prepare("SELECT u.id,u.role FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND julianday(s.expires_at)>julianday('now') AND u.is_active=1 LIMIT 1")
@@ -203,8 +215,23 @@ export function historicalStats(archives:Awaited<ReturnType<typeof activeHistori
 }
 export async function handleHistoricalArchive(request:Request,env:Env):Promise<Response|null>{
  const path=new URL(request.url).pathname;
- if(!path.startsWith('/api/admin/historical-imports')&&!path.startsWith('/api/participant/historical-archive/'))return null;
+ if(!path.startsWith('/api/admin/historical-imports')&&!path.startsWith('/api/participant/historical-archive/')&&!path.startsWith('/api/participant/history'))return null;
  const user=await loggedIn(request,env);if(!user)return error('No autorizado',401);
+ if(path.startsWith('/api/participant/history')){
+  if(request.method!=='GET')return error('Método inválido',405);
+  if(path==='/api/participant/history')return json({seasons:await historySummaries(env.DB)});
+  const route=path.match(/^\/api\/participant\/history\/(\d+)(?:\/([A-Z0-9_]+))?$/);
+  if(!route)return error('Temporada inexistente',404);
+  const detail=await historyDetail(request,env,Number(route[1]));
+  if(!detail)return error('Temporada sin información disponible',404);
+  if(route[2]){
+   const code=route[2];if(!detail.data.competitions.some(c=>c.code===code))return error('Competición inexistente',404);
+   detail.data={...detail.data,competitions:detail.data.competitions.filter(c=>c.code===code),
+    standings:detail.data.standings.filter(r=>r.competitionCode===code),rounds:detail.data.rounds.filter(r=>(r.competitionCode|| (detail.data.competitions.length===1?detail.data.competitions[0].code:null))===code),results:detail.data.results.filter(r=>r.competitionCode===code),matches:detail.data.matches.filter(r=>r.competitionCode===code)};
+   detail.officialLinks=detail.officialLinks.filter(l=>l.code===code);
+  }
+  return json(detail);
+ }
  if(path.startsWith('/api/participant/historical-archive/')){
   if(request.method!=='GET')return error('Método inválido',405);
   let id='';try{id=decodeURIComponent(path.split('/').at(-1)??'');}catch{return error('ID inválido');}

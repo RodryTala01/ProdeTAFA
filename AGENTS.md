@@ -378,3 +378,9 @@ Si una regla futura es ambigua, no inventar una extensión grande: mantener el c
 - Conservar el logo TAFA original. Imágenes compartidas con proporción intacta y fallback de iniciales ante ausencia/error.
 - Registros frontend por code/ID estable y overrides por temporada. Sólo archivos suministrados o URLs reales del backend; sin generación, descargas, uploads, DB ni migraciones.
 - Ver ASSETS.md. Preview de assets exclusivamente DEV.
+
+### Historia — archivo público autenticado
+- Quinta sección participante: Inicio | Pronósticos | Competiciones | Mi Club | Historia, en escritorio y móvil.
+- Historia usa sólo lotes históricos activos y temporadas oficiales finalizadas/archivadas. Títulos explícitos: T1 Brasil 2021 es Copa América, nunca inferir Liga A. No importar T1 durante este bloque.
+- Fechas históricas identificadas por competitionCode/round/participantKey y cruces por matchId estable; conservar cuatro cruces individuales Dúos. Nuevos campos en JSON, sin nueva migración.
+- Estadisticas sigue siendo la única fuente de totales importados; nunca sumar tablas de competiciones de nuevo.
