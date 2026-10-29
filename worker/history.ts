@@ -1,3 +1,4 @@
+import {activeHistoricalArchives,historicalStats} from './historical-archive';
 type Env = { DB: D1Database };
 
 type SessionUser = { id: string; role: 'admin' | 'participant'; is_active: number };
@@ -82,7 +83,24 @@ export async function handleHistory(request: Request, env: Env): Promise<Respons
       SELECT *, RANK() OVER (ORDER BY points DESC) AS position
       FROM totals ORDER BY points DESC, fullName COLLATE NOCASE, userId
     `).all();
-    return json({ standings: rows.results ?? [] });
+    const merged=new Map<string,{userId:string;fullName:string;points:number;fulls:number;partials:number;roundsPlayed:number}>();
+    for(const raw of rows.results??[]){
+      const row=raw as {userId:string;fullName:string;points:number;fulls:number;partials:number;roundsPlayed:number};
+      merged.set(row.userId,{...row,points:Number(row.points),fulls:Number(row.fulls),partials:Number(row.partials),roundsPlayed:Number(row.roundsPlayed)});
+    }
+    const archives=historicalStats(await activeHistoricalArchives(env.DB));
+    for(const [id,h] of archives){
+      const row=merged.get(id)??{userId:id,fullName:h.fullName,points:0,fulls:0,partials:0,roundsPlayed:0};
+      row.points+=h.points;row.fulls+=h.fulls;row.partials+=h.partials;row.roundsPlayed+=h.dates;
+      merged.set(id,row);
+    }
+    const sorted=[...merged.values()].sort((a,b)=>b.points-a.points||a.fullName.localeCompare(b.fullName,'es')||a.userId.localeCompare(b.userId));
+    let last:number|null=null,pos=0;
+    return json({standings:sorted.map((r,i)=>{
+      if(last===null||r.points!==last)pos=i+1;
+      last=r.points;
+      return {...r,position:pos};
+    })});
   }
 
   const targetId = profile ? decodeURIComponent(profile[1]) : user.id;
