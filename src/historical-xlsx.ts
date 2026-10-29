@@ -39,10 +39,10 @@ function zipStored(files:Array<[string,string]>){
  for(const b of [...local,...central,tail]){out.set(b,p);p+=b.length;}
  return out;
 }
-export function createHistoricalTemplate(seasonNumber=1){
+export function createHistoricalTemplate(seasonNumber=1,data?:ArchivePayload){
  const sheets:Array<[string,unknown[][]]>=[
-  ['Temporada',[['campo','valor'],['version',1],['number',seasonNumber],['name','Temporada '+seasonNumber],['kind','MIXTA'],['notes','']]],
-  ...archiveTables.map(table=>[names[table]!,[Array.from(archiveColumns[table])]] as [string,unknown[][]]),
+  ['Temporada',[['campo','valor'],['version',1],['number',data?.season.number??seasonNumber],['name',data?.season.name??'Temporada '+seasonNumber],['kind',data?.season.kind??'MIXTA'],['notes',data?.season.notes??'']]],
+  ...archiveTables.map(table=>[names[table]!,[Array.from(archiveColumns[table]),...(data?.[table]??[]).map(row=>archiveColumns[table].map(column=>(row as unknown as Record<string,unknown>)[column]??''))]] as [string,unknown[][]]),
   ['LEEME',[
    ['ARCHIVO HISTORICO TAFA','INSTRUCCIONES'],
    ['Uso','Una importación por temporada; las hojas sin datos se dejan solo con encabezados.'],
