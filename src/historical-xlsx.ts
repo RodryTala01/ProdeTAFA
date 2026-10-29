@@ -129,8 +129,7 @@ export async function parseHistoricalWorkbook(file:File):Promise<ArchivePayload>
  for(const sh of nodes(wb,'sheet')){
   const name=sh.getAttribute('name')??'';
   const id=sh.getAttribute('r:id')??sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
-  const target=paths.get(id);
-  if(!target)continue;
+  const target=(id?paths.get(id):null)||('worksheets/sheet'+(sh.getAttribute('sheetId')??'')+'.xml');
   const resolved=target.startsWith('/')?target.slice(1):target.startsWith('xl/')?target:'xl/'+target.replace(/^\.\//,'');
   const xml=files.get(resolved);if(xml)sheets.set(name,sheetRows(xml,shared));
  }
