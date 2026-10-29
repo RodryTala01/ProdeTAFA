@@ -131,7 +131,7 @@ export default function ParticipantsAdmin() {
     {fetching && <p role="status">Cargando participantes…</p>}
     <div className="user-list">{visible.map(entry => <div className="user-row" key={entry.id}>
       <ParticipantShield userId={entry.id} name={entry.fullName} decorative/><div className="user-data"><strong>{entry.fullName}</strong><span>{entry.phone}{!entry.isActive && ' · Inactivo'}</span></div>
-      <AdminMenu label={`Acciones de ${entry.fullName}`}><button disabled={loading} onClick={()=>void editTeam(entry)}>Editar Mi Equipo</button><button onClick={() => setHistoryUser(entry)}>Ver historial</button><button disabled={loading} onClick={() => { setError(''); setResetUser(entry); setNewPassword(''); }}>Cambiar contraseña</button><button className="admin-menu-danger" disabled={loading} onClick={() => entry.isActive ? setConfirmUser(entry) : void toggleParticipant(entry)}>{entry.isActive ? 'Desactivar' : 'Reactivar'}</button></AdminMenu>
+      <AdminMenu label={`Acciones de ${entry.fullName}`}><button disabled={loading} onClick={()=>void editTeam(entry)}>Editar Mi Club</button><button onClick={() => setHistoryUser(entry)}>Ver historial</button><button disabled={loading} onClick={() => { setError(''); setResetUser(entry); setNewPassword(''); }}>Cambiar contraseña</button><button className="admin-menu-danger" disabled={loading} onClick={() => entry.isActive ? setConfirmUser(entry) : void toggleParticipant(entry)}>{entry.isActive ? 'Desactivar' : 'Reactivar'}</button></AdminMenu>
     </div>)}</div>
     {!fetching && !visible.length && <p className="empty-copy">{participants.length ? 'No hay participantes con esos filtros.' : 'Todavía no hay participantes. Creá la primera cuenta para comenzar.'}</p>}
     {historyUser && <section className="card panel"><div className="panel-heading"><h2>{historyUser.fullName}</h2><button className="button button--ghost" onClick={() => setHistoryUser(null)}>Cerrar historial</button></div><PredictionHistoryBrowser key={historyUser.id} participantId={historyUser.id}/></section>}
@@ -140,7 +140,7 @@ export default function ParticipantsAdmin() {
       <PasswordField label="Contraseña inicial" value={password} onChange={event => setPassword(event.target.value)} minLength={6} autoComplete="new-password" required/>{feedback}
       <div className="modal-actions"><button type="button" className="button button--ghost" disabled={loading} onClick={() => { setCreating(false); setPassword(''); }}>Cancelar</button><button className="button button--primary" disabled={loading}>{loading ? 'Creando…' : 'Crear participante'}</button></div>
     </form></AdminModal>}
-    {teamUser&&<AdminModal title={'Mi Equipo · '+teamUser.fullName} busy={loading} onClose={()=>setTeamUser(null)}><form className="form-stack" onSubmit={saveTeam}>
+    {teamUser&&<AdminModal title={'Mi Club · '+teamUser.fullName} busy={loading} onClose={()=>setTeamUser(null)}><form className="form-stack" onSubmit={saveTeam}>
       <ParticipantShield userId={teamUser.id} name={teamUser.fullName} shieldUrl={teamShield||null} size="lg"/>
       <label className="field"><span>Nombre del equipo</span><input value={teamName} onChange={e=>setTeamName(e.target.value)} minLength={3} maxLength={48} required/></label>
       <label className="field"><span>Escudo publicado en TAFA (opcional)</span><input value={teamShield} onChange={e=>setTeamShield(e.target.value)} placeholder="/teams/escudo.png"/></label>
