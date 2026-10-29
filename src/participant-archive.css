@@ -1,0 +1,32 @@
+.participant-archive { display:grid; gap:var(--space-5); min-width:0; }
+.archive-heading h1 { font-family:var(--font-display); text-transform:uppercase; margin-block:var(--space-2); }
+.archive-heading p,.archive-empty { color:var(--text-muted); }
+.archive-empty { padding-block:var(--space-3); }
+.archive-filters { display:flex; flex-wrap:wrap; gap:var(--space-4); }
+.archive-filters label { display:grid; gap:var(--space-2); flex:1 1 200px; }
+.archive-season-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:var(--space-4); }
+.archive-season-cups { list-style:none; padding:0; display:grid; gap:var(--space-3); }
+.archive-season-cups li,.archive-competition__heading,.archive-person { display:flex; gap:var(--space-3); align-items:center; }
+.archive-person { min-width:0; overflow-wrap:anywhere; }
+.archive-person a { color:var(--text); }
+.participant-archive small { display:block; color:var(--text-muted); }
+.archive-tabs { display:flex; flex-wrap:wrap; gap:var(--space-3); }
+.archive-tabs a { padding:var(--space-3); border-bottom:2px solid var(--border); }
+.archive-tabs a[aria-current] { border-color:var(--accent); color:var(--accent); }
+.archive-competition { min-width:0; }
+.archive-awards { display:flex; flex-wrap:wrap; gap:var(--space-4); }
+.archive-awards>div { display:grid; gap:var(--space-2); border-left:2px solid var(--accent); padding-left:var(--space-3); }
+.archive-table { width:100%; overflow-x:auto; margin-block:var(--space-3); }
+.archive-table table { border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+.archive-table th,.archive-table td { padding:var(--space-3); text-align:left; border-bottom:1px solid var(--border); }
+.archive-table th { color:var(--text-muted); font-size:.8rem; }
+.archive-table td:first-child { white-space:nowrap; }
+.archive-score { white-space:nowrap; color:var(--accent); font-weight:bold; }
+.participant-archive details { border-bottom:1px solid var(--border); }
+.participant-archive summary { padding:var(--space-3); cursor:pointer; }
+@media(max-width:600px) {
+ .archive-table th,.archive-table td { padding:var(--space-2); }
+ .archive-table table { min-width:540px; }
+ .archive-heading h1 { font-size:1.7rem; }
+ .archive-tabs a { padding:var(--space-2); }
+}

@@ -32,3 +32,11 @@ it('exporta e importa una temporada histórica con todas las hojas en XLSX',asyn
  expect(parsed.results[0].resultCode).toBe('CHAMPION');
  expect(parsed.iffhs[0].points).toBe(150.5);
 });
+it('plantilla conserva competitionCode, cuatro matchId distintos y controles de Excel',async()=>{
+ const data:ArchivePayload={version:1,season:{number:4,name:'T4',kind:'MIXTA',notes:''},participants:[{key:'A1',name:'A1',userId:null,division:null},{key:'A2',name:'A2',userId:null,division:null},{key:'B1',name:'B1',userId:null,division:null},{key:'B2',name:'B2',userId:null,division:null}],competitions:[{code:'LIGA_A',name:'Liga A',kind:'LEAGUE'},{code:'COPA_DUOS',name:'Copa Dúos',kind:'CUP'}],statistics:[],standings:[],results:[],movements:[],iffhs:[],rounds:['LIGA_A','COPA_DUOS'].map(competitionCode=>({competitionCode,round:'Fecha 1',participantKey:'A1',points:4,fulls:null,partials:null,errors:null,extras:null})),matches:['A1:B1','A1:B2','A2:B1','A2:B2'].map((pair,i)=>({matchId:'FINAL-'+i,competitionCode:'COPA_DUOS',stage:'Final',round:'Fecha 1',aKey:pair.split(':')[0],bKey:pair.split(':')[1],pointsA:4,pointsB:0,plenosA:null,plenosB:null,scoreBasis:'DUO'}))};
+ const blob=createHistoricalTemplate(4,data),parsed=await parseHistoricalWorkbook(new File([blob],'T4.xlsx'));
+ expect(parsed.rounds.map(r=>r.competitionCode)).toEqual(['LIGA_A','COPA_DUOS']);expect(parsed.matches.map(m=>m.matchId)).toEqual(['FINAL-0','FINAL-1','FINAL-2','FINAL-3']);
+ const raw=await blob.text();expect(raw).toContain('<autoFilter');expect(raw).toContain('<dataValidations');expect(raw).toContain('styles.xml');expect(raw).toContain('matchId obligatorio');
+ const missing=structuredClone(data);missing.rounds[0].competitionCode='';
+ await expect(parseHistoricalWorkbook(new File([createHistoricalTemplate(4,missing)],'bad.xlsx'))).rejects.toThrow('competitionCode obligatorio');
+});

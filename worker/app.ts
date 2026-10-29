@@ -36,7 +36,7 @@ export default {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido',403);
       return (await handlePromiedosCache(request,env)) ?? jsonError('Ruta no encontrada',404);
     }
-    if(pathname.startsWith('/api/admin/historical-imports')||pathname.startsWith('/api/participant/historical-archive/')){
+    if(pathname.startsWith('/api/admin/historical-imports')||pathname.startsWith('/api/participant/historical-archive/')||pathname.startsWith('/api/participant/history')){
       if(!mutationAllowed(request))return jsonError('Origen de solicitud no permitido',403);
       return (await handleHistoricalArchive(request,env))??jsonError('Archivo no encontrado',404);
     }
