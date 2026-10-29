@@ -68,7 +68,7 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
    <span className="eyebrow">MI CLUB · PRODE TAFA</span>
    <div className="equipo-shield"><ParticipantShield userId={identity.id} name={identity.participantName} shieldUrl={identity.shieldUrl} size="lg"/></div>
    <h1>{identity.teamName}</h1>
-   <p>Participante: <a href={'#/club/participante/'+encodeURIComponent(identity.id)}>{identity.participantName}</a> {identity.foundedSeason?'· Fundado en T'+identity.foundedSeason:''}</p>
+   <p>Participante: {identity.participantName} {identity.foundedSeason?'· Fundado en T'+identity.foundedSeason:''}</p>
    {division&&<small>{division.name} · Temporada {division.seasonNumber}</small>}
   </header>
   <section className="equipo-titles" aria-label="Trofeos ganados">
