@@ -45,7 +45,7 @@ try {
       data?.officialPredictionsReady !== true ||
       data?.triggerSchemaReady !== true ||
       data?.migrationLedgerReady !== true ||
-      data?.minimumMigration !== '0016_team_profiles.sql' ||
+      data?.minimumMigration !== '0017_historical_imports.sql' ||
       data?.singleOpenRoundReady !== true ||
       missingTables === null || missingTables.length !== 0 ||
       missingColumns === null || missingColumns.length !== 0 ||
@@ -65,6 +65,8 @@ try {
   // Read-only route probes: these must exist and reject anonymous access.
   await checkStatus('/api/auth/me', 401);
   await checkStatus('/api/admin/competition-engine', 401);
+  await checkStatus('/api/admin/historical-imports', 401);
+  await checkStatus('/api/participant/historical-archive/unknown', 401);
   await checkStatus('/api/competition-engine/current', 401);
   await checkStatus('/api/competition-engine/iffhs/ranking', 401);
   await checkStatus('/api/competition-engine/leagues/A/standings', 401);
