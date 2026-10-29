@@ -97,7 +97,7 @@ async function readZip(file:File):Promise<Map<string,string>>{
  return files;
 }
 const parseXml=(text:string)=>{const doc=new DOMParser().parseFromString(text,'application/xml');if(doc.querySelector('parsererror'))throw Error('XML de Excel inválido');return doc;};
-const nodes=(parent:Element|Document,name:string)=>Array.from(parent.getElementsByTagNameNS('*',name));
+const nodes=(parent:Element|Document,name:string)=>Array.from(parent.getElementsByTagName('*')).filter(element=>(element.localName??element.tagName?.split(':').at(-1))===name);
 function sheetRows(xml:string,shared:string[]){
  const doc=parseXml(xml),rows:unknown[][]=[];
  for(const row of nodes(doc,'row')){
