@@ -108,7 +108,7 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
      {s.rounds.length>0&&<div><h3>Puntos por Fecha</h3><div className="equipo-archive-rounds">{s.rounds.map((d,i)=><span key={i}>{d.round}: <strong>{d.points} PTS</strong></span>)}</div></div>}
     </div>
    </details>)}
-  </section>
+  </section>}
  </article>;
 }
 export default function MiEquipo({userId,route}:{userId:string;route:string}){
