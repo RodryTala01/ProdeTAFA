@@ -12,6 +12,14 @@ export type TeamPageData={
  titles:Array<{code:string;name:string;seasonNumber:number}>;
  rankings:{general:{current:number|null;best:{position:number;seasonNumber:number}|null};iffhs:{current:number|null;best:{position:number;seasonNumber:number}|null;throughSeason:number|null;missingSeasons?:number[]}};
  encounters:TeamMatch[];
+ historicalSeasons?:Array<{seasonNumber:number;seasonName:string;kind:string;name:string;division:string|null;
+ statistics:{points:number;fulls:number|null;partials:number|null;errors:number|null;extras:number|null;dates:number|null}|null;
+ standings:Array<{competitionCode:string;competitionName:string;position:number;points:number}>;
+ rounds:Array<{round:string;points:number;fulls:number|null;partials:number|null;errors:number|null;extras:number|null}>;
+ results:Array<{competitionCode:string;competitionName:string;resultCode:string;position:number|null}>;
+ movements:Array<{type:string;fromDivision:string|null;toDivision:string|null;detail:string|null}>;
+ iffhs:{points:number;position:number|null}|null;}>;
+
 };
 type Rival={id:string;name:string;matches:TeamMatch[];difference:number;points:number;otherPoints:number;fulls:number|null;participantName?:string;shieldUrl?:string|null};
 export function groupOfficialRivals(matches:TeamMatch[]):Rival[]{
@@ -43,7 +51,7 @@ export function TeamHistory({matches}:{matches:TeamMatch[]}){
     <tbody>{rivals.map(r=>{
       const open=expanded.includes(r.id);
       return <Fragment key={r.id}><tr>
-       <th scope="row"><a className="equipo-rival" href={'#/club/participante/'+encodeURIComponent(r.id)}><ParticipantShield userId={r.id} name={r.participantName??r.name} shieldUrl={r.shieldUrl} size="sm" decorative/><span>{r.name}</span></a></th>
+       <th scope="row">{r.id.startsWith('hist:')?<span className="equipo-rival"><ParticipantShield name={r.name} size="sm" decorative/><span>{r.name}</span></span>:<a className="equipo-rival" href={'#/club/participante/'+encodeURIComponent(r.id)}><ParticipantShield userId={r.id} name={r.participantName??r.name} shieldUrl={r.shieldUrl} size="sm" decorative/><span>{r.name}</span></a>}</th>
        <td className={r.difference>0?'equipo-positive':r.difference<0?'equipo-negative':''}>{r.difference>0?'+':''}{r.difference}</td>
        <td>{r.matches.length}</td><td>{r.points}</td><td>{r.otherPoints}</td><td>{r.fulls??'—'}</td>
        <td><button type="button" aria-expanded={open} aria-controls={'equipo-rival-'+encodeURIComponent(r.id)} aria-label={(open?'Cerrar':'Ver')+' enfrentamientos contra '+r.name} onClick={()=>setExpanded(old=>open?old.filter(x=>x!==r.id):[...old,r.id])}>{open?'−':'+'}</button></td>
@@ -86,6 +94,21 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
   <div className="equipo-rankings"><Ranking name="TABLA GENERAL" info={rankings.general}/><Ranking name="RANKING IFFHS" info={rankings.iffhs}/></div>
   {rankings.iffhs.throughSeason&&<p className="equipo-rank-note">IFFHS · ventana de cinco temporadas hasta T{rankings.iffhs.throughSeason}{rankings.iffhs.missingSeasons?.length?' · Sin datos en '+rankings.iffhs.missingSeasons.map(n=>'T'+n).join(', '):''}. Mejor posición calculada por temporada.</p>}
   <TeamHistory key={identity.id} matches={encounters}/>
+  {!!data.historicalSeasons?.length&&<section className="equipo-archive-seasons" aria-label="Archivo de temporadas anteriores">
+   <h2>TEMPORADAS HISTÓRICAS</h2>
+   <p>Información recuperada de planillas oficiales. Cada temporada muestra únicamente lo que efectivamente se disputó.</p>
+   {data.historicalSeasons.map(s=><details key={s.seasonNumber}>
+    <summary><strong>T{s.seasonNumber} · {s.seasonName}</strong><span>{s.statistics?s.statistics.points+' PTS':''} {s.division?'· '+s.division:''}</span></summary>
+    <div className="equipo-archive-season-detail">
+     {s.statistics&&<p><strong>Total:</strong> {s.statistics.points} PTS · {s.statistics.fulls??'—'} plenos · {s.statistics.partials??'—'} parciales · {s.statistics.errors??'—'} errores · {s.statistics.extras??'—'} extras</p>}
+     {s.iffhs&&<p><strong>IFFHS:</strong> {s.iffhs.points} puntos{s.iffhs.position?' · '+s.iffhs.position+'.º':''}</p>}
+     {s.standings.length>0&&<div><h3>Tablas</h3><ul>{s.standings.map((row,i)=><li key={i}>{row.competitionName}: {row.position}.º · {row.points} PTS</li>)}</ul></div>}
+     {s.results.length>0&&<div><h3>Competiciones</h3><ul>{s.results.map((row,i)=><li key={i}>{row.competitionName} · {row.resultCode}{row.position?' · '+row.position+'.º':''}</li>)}</ul></div>}
+     {s.movements.length>0&&<div><h3>Ascensos y descensos</h3><ul>{s.movements.map((m,i)=><li key={i}>{m.type} · {m.fromDivision??'—'} → {m.toDivision??'—'}{m.detail?' · '+m.detail:''}</li>)}</ul></div>}
+     {s.rounds.length>0&&<div><h3>Puntos por Fecha</h3><div className="equipo-archive-rounds">{s.rounds.map((d,i)=><span key={i}>{d.round}: <strong>{d.points} PTS</strong></span>)}</div></div>}
+    </div>
+   </details>)}
+  </section>
  </article>;
 }
 export default function MiEquipo({userId,route}:{userId:string;route:string}){
