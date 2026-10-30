@@ -16,7 +16,7 @@ Escudos: coincidencia exacta y única del nombre de archivo con full_name consul
 - Rodrigo Talarico: 9f149f8d-a923-4b4c-8b9a-bd053f1f134b
 - Santi: 816314d2-d124-4ba1-a3b2-f4facd580533
 
-Sin participante real identificado; no asignados:
+Lista inicial de archivos pendientes de identificación al integrar la Home (superada por la revisión por ID que figura al final):
 
 - Alexis Segovia.png
 - Anto.png
@@ -73,24 +73,12 @@ Sin participante real identificado; no asignados:
 - Yago.png
 
 
-## Escudos completos del RAR
+## Escudos originales y cobertura verificada (2026-10-29)
 
-El RAR entregado el 16/10/2026 contiene 64 escudos. Todos quedaron incorporados en `public/participants/shields.webp` como atlas 8×8.
+El RAR suministrado contiene 64 PNG originales. Se conservan byte a byte en public/participants/originals; los 11 PNG por UUID existentes conservan prioridad. Sin transformación, pérdida de transparencia ni imágenes inventadas.
 
-Resolución:
-- si existe asset por UUID, sigue teniendo prioridad;
-- si no existe, `ParticipantShield` busca coincidencia exacta del nombre normalizado (ignora mayúsculas y tildes) contra los 64 nombres del RAR;
-- si tampoco hay coincidencia, conserva el fallback de iniciales.
+Se detectó que public/participants/shields.webp era un archivo corrupto (HTTP 200 pero sin cabecera RIFF/WEBP ni contenido decodificable). Esto dejaba invisibles los 17 participantes que dependían del atlas. Se retiraron ese archivo y la presentación CSS por sprites; ParticipantShield reutiliza AssetImage y PNG reales, con fallback visible si una imagen falla.
 
-Esto permite mostrar escudos de participantes actuales, inactivos e históricos sin inventar UUIDs para nombres que no estaban identificados en producción.
+Consulta productiva de sólo lectura: 28 participantes, todos identificados por UUID y todos con escudo suministrado; cero participantes históricos importados actualmente. participantShieldKeys enlaza los 28 IDs al catálogo sin depender de nombres editables. Los otros 36 nombres no reciben UUID inventado: quedan disponibles para registros históricos sin cuenta.
 
-## Verified participant IDs (2026-10-28)
-
-Read-only production directory: 28 participants, all with a supplied shield.
-All 28 IDs are now registered in participantSpriteKeys. Existing 11 direct PNGs
-retain priority; the remaining 17 resolve their atlas position by stable ID, even
-after a display-name change. No ambiguous or unmatched current participants.
-The other 36 supplied shield names have no current participant ID and remain
-available through the existing name fallback; no identities were invented.
-
-The Fecha ranking and Admin submission lists now use ParticipantShield too.
+Los listados Admin de envíos, ranking de Fecha y revelado de pronósticos también muestran ParticipantShield. Tests verifican integridad PNG/CRC y descompresión para todos los archivos registrados, además de cobertura de los 28 IDs.
