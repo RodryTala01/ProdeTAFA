@@ -1,4 +1,4 @@
-import {useState,type CSSProperties} from 'react';
+import {useState,type CSSProperties,type ReactNode} from 'react';
 import {competitionAsset,participantAsset,participantNamedAsset,teamAssets} from './competition-assets';
 import './asset-images.css';
 export type AssetSize = 'xs'|'sm'|'md'|'lg';
@@ -7,7 +7,7 @@ export function initials(name:string) {
   const words=name.trim().split(/\s+/).filter(Boolean);
   return (words.length>1?`${Array.from(words[0])[0]}${Array.from(words[words.length-1])[0]}`:Array.from(words[0]??'').slice(0,2).join('')).toUpperCase()||'—';
 }
-type ImageProps={src?:string|null;name:string;size?:AssetSize;decorative?:boolean;fallback?:string;loading?:'lazy'|'eager'};
+type ImageProps={src?:string|null;name:string;size?:AssetSize;decorative?:boolean;fallback?:ReactNode;loading?:'lazy'|'eager'};
 // Remount by source so a changed URL can recover after an earlier image failed.
 function AssetSource({src,name,size='md',decorative=false,fallback,loading='lazy'}:ImageProps) {
   const [failed,setFailed]=useState(false);
