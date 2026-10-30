@@ -1,3 +1,4 @@
+import {ParticipantShield} from './AssetImage';
 import { useEffect, useState } from 'react';
 import './round-ranking.css';
 
@@ -84,7 +85,7 @@ export default function RoundRanking({ roundId, mode, refreshToken = 0 }: Props)
                 <tr key={entry.userId}>
                   <td><strong>{entry.position}</strong></td>
                   <td>
-                    <strong>{entry.fullName}</strong>
+                    <span className="participant-shield-name"><ParticipantShield userId={entry.userId} name={entry.fullName} size="sm" decorative/><strong>{entry.fullName}</strong></span>
                     {entry.provisional && <small> provisional</small>}
                   </td>
                   <td className="ranking-points">{entry.points}</td>

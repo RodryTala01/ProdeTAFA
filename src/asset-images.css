@@ -1,7 +1,6 @@
 .asset-image { display:inline-flex; flex-shrink:0; vertical-align:middle; align-items:center; justify-content:center; }
 .asset-image img { display:block; width:100%; height:100%; object-fit:contain; border-radius:0; }
 .asset-image__fallback { display:flex; width:100%; height:100%; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface); color:var(--text-muted); font-weight:700; line-height:1; }
-.asset-image__sprite { display:block; width:100%; height:100%; background-image:url('/participants/shields.webp'); background-size:800% 800%; background-repeat:no-repeat; }
 .asset-image--xs { font-size:.6rem; }
 .asset-image--sm { font-size:.7rem; }
 .asset-image--md { font-size:.85rem; }
@@ -14,3 +13,6 @@
 .asset-preview-sample { display:flex; align-items:center; flex-wrap:wrap; gap:var(--space-3); padding:var(--space-4) 0; border-bottom:1px solid var(--border); }
 
 .asset-image > img { width:100%; height:100%; object-fit:contain; border-radius:0; }
+
+.participant-shield-name { display:inline-flex; align-items:center; gap:8px; min-width:0; }
+.participant-shield-name > strong { min-width:0; overflow-wrap:anywhere; }

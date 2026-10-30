@@ -1,3 +1,4 @@
+import {ParticipantShield} from './AssetImage';
 import {useEffect,useState} from 'react';
 import './admin-submissions.css';
 export type SubmissionParticipant={id:string;name:string;active:number;lastAt:string|null;count:number};
@@ -10,7 +11,7 @@ export function SubmissionLists({participants}:{participants:SubmissionParticipa
  const sent=active.filter(p=>p.lastAt);
  const pending=active.filter(p=>!p.lastAt);
  const inactive=participants.filter(p=>!p.active);
- const person=(p:SubmissionParticipant)=><li key={p.id}><strong>{p.name}</strong><span>{p.lastAt?<>Enviado · <time dateTime={p.lastAt}>{sentAt(p.lastAt)}</time>{p.count>1?' · Reenviado':''}</>:'No envió'}</span></li>;
+ const person=(p:SubmissionParticipant)=><li key={p.id}><span className="participant-shield-name"><ParticipantShield userId={p.id} name={p.name} size="sm" decorative/><strong>{p.name}</strong></span><span>{p.lastAt?<>Enviado · <time dateTime={p.lastAt}>{sentAt(p.lastAt)}</time>{p.count>1?' · Reenviado':''}</>:'No envió'}</span></li>;
  return <><p className="submission-counts"><strong>{sent.length} enviaron</strong><span>{pending.length} no enviaron</span><small>{active.length} participantes activos</small></p><div className="submission-lists"><section aria-label="No enviaron"><h3>No enviaron · {pending.length}</h3>{pending.length?<ul>{pending.map(person)}</ul>:<p>{active.length?'Todos los participantes activos enviaron.':'No hay participantes activos.'}</p>}</section><section aria-label="Enviaron"><h3>Enviaron · {sent.length}</h3>{sent.length?<ul>{sent.map(person)}</ul>:<p>Todavía no hay envíos de participantes activos.</p>}</section></div>{inactive.length>0&&<details><summary>Participantes inactivos · {inactive.length}</summary><ul className="submission-inactive">{inactive.map(person)}</ul></details>}</>;
 }
 export default function AdminRoundSubmissions({roundId}:{roundId:number}){
