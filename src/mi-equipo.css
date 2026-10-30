@@ -1,0 +1,48 @@
+.equipo-page{--equipo-green:var(--home-fluor);max-width:970px;margin:0 auto;padding:10px 0 48px;color:var(--text)}
+.equipo-page a{color:inherit}.equipo-header{text-align:center;padding:24px 12px 16px}
+.equipo-header .eyebrow{color:var(--equipo-green)}.equipo-header h1{font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.75rem);margin:8px 0 4px;letter-spacing:.015em}
+.equipo-header p,.equipo-header small{margin:0;font-size:.86rem;color:var(--text-muted)}
+.equipo-shield{height:112px;margin:12px auto;display:flex;justify-content:center;align-items:center}
+.equipo-shield .asset-image,.equipo-shield .participant-sprite{width:96px;height:110px;object-fit:contain}
+.equipo-titles{min-height:95px;display:flex;gap:18px;justify-content:center;align-items:start;flex-wrap:wrap;padding:12px 0 22px;border-bottom:1px solid var(--border)}
+.equipo-titles>p{font-size:.84rem;color:var(--text-muted);margin:10px}
+.equipo-trophy{text-align:center;width:112px;display:grid;justify-items:center;gap:3px;font-size:.77rem;line-height:1.2}
+.equipo-trophy .competition-image{display:block;min-height:48px}.equipo-trophy strong{font-size:1.15rem}.equipo-trophy small{color:var(--text-muted)}
+.equipo-points{text-align:center;padding:20px 0 16px;border-bottom:1px solid var(--border)}
+.equipo-total{font:800 clamp(2rem,5vw,3.2rem) var(--font-display);color:var(--equipo-green);font-variant-numeric:tabular-nums}
+.equipo-points h2{font-size:.9rem;margin:2px 0 16px;letter-spacing:.09em}
+.equipo-points dl{display:flex;justify-content:space-around;gap:12px;flex-wrap:wrap;margin:0}
+.equipo-points dl>div{min-width:100px;max-width:170px;flex:1;padding:3px}
+.equipo-points dd{font:700 1.3rem var(--font-display);margin:0;font-variant-numeric:tabular-nums}
+.equipo-points dt{font-size:.72rem;color:var(--text-muted);margin-top:3px}
+.equipo-rankings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0 26px}
+.equipo-ranking{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-control);padding:17px 12px;display:grid;text-align:center;gap:4px}
+.equipo-ranking strong{font:800 clamp(1.7rem,3vw,2.5rem) var(--font-display);color:var(--equipo-green)}
+.equipo-ranking span{font-size:.78rem;font-weight:750;letter-spacing:.05em}
+.equipo-ranking small{color:var(--text-muted)}
+.equipo-history{margin-top:14px}.equipo-history>h2{background:var(--surface-raised);border-top:2px solid var(--equipo-green);padding:12px;text-align:center;margin:0;font-size:1rem;letter-spacing:.04em}
+.equipo-history>p{font-size:.78rem;color:var(--text-muted);margin:9px 0 12px}
+.equipo-table-scroll{overflow-x:auto;max-width:100%;border:1px solid var(--border)}
+.equipo-table,.equipo-detail table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.equipo-table thead{background:var(--surface-raised);font-size:.75rem}
+.equipo-table th,.equipo-table td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:center;font-size:.81rem;white-space:nowrap}
+.equipo-table tbody>tr:nth-of-type(4n+1){background:var(--surface)}
+.equipo-table tbody>tr:not(.equipo-detail)>th{text-align:left;min-width:170px;font-weight:650;white-space:normal}
+.equipo-table tbody>tr:not(.equipo-detail)>th a{text-decoration:none}.equipo-table tbody>tr:not(.equipo-detail)>th a:hover{text-decoration:underline}
+.equipo-table .equipo-positive{color:var(--success);font-weight:800;background:var(--success-soft)}
+.equipo-table .equipo-negative{color:var(--danger);font-weight:800;background:var(--danger-soft)}
+.equipo-table button{width:30px;height:30px;font-weight:800;font-size:1.1rem;border:1px solid var(--success);background:var(--success-soft);color:var(--success);border-radius:var(--radius-sm);cursor:pointer}
+.equipo-table button:focus-visible{outline:2px solid var(--equipo-green);outline-offset:3px}
+.equipo-table .equipo-detail>td{padding:0;border-left:3px solid var(--equipo-green);white-space:normal}
+.equipo-detail-inner{background:var(--surface-raised);padding:14px;overflow-x:auto;text-align:left}
+.equipo-detail-inner h3{margin:0 0 8px;font-size:.92rem}
+.equipo-detail table th,.equipo-detail table td{font-size:.76rem;padding:8px 7px;border-bottom:1px solid var(--border);text-align:left}
+@media(max-width:650px){.equipo-header{padding-top:10px}.equipo-shield{height:89px}.equipo-shield .asset-image,.equipo-shield .participant-sprite{width:75px;height:86px}.equipo-titles{gap:6px}.equipo-trophy{width:86px;font-size:.7rem}.equipo-points dl{gap:5px}.equipo-points dl>div{flex:1 1 29%;min-width:75px}.equipo-points dd{font-size:1.1rem}.equipo-rankings{gap:7px}.equipo-ranking{padding:12px 6px}.equipo-ranking small{font-size:.69rem}.equipo-table th,.equipo-table td{padding:8px 6px}.equipo-history>h2{font-size:.87rem}.equipo-detail-inner{padding:10px}}
+
+.equipo-rival{display:flex;align-items:center;gap:8px}.equipo-rival>span:last-child{min-width:0;overflow-wrap:anywhere}
+.equipo-table button{min-width:44px;min-height:44px}
+.equipo-shield .asset-image{transform:scale(1.5)}
+.equipo-stats-note,.equipo-rank-note{color:var(--text-muted);font-size:.75rem;text-align:center}
+@media(max-width:650px){.equipo-shield .asset-image{transform:scale(1.2)}.equipo-page{min-width:0}.equipo-header h1{overflow-wrap:anywhere}.equipo-table tbody>tr:not(.equipo-detail)>th{min-width:140px}}
+
+.equipo-archive-seasons{margin-top:28px;border-top:1px solid var(--border)}.equipo-archive-seasons>h2{font-size:1rem;padding:10px 0}.equipo-archive-seasons>p{font-size:.79rem;color:var(--text-muted)}.equipo-archive-seasons>details{border-bottom:1px solid var(--border)}.equipo-archive-seasons summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;min-height:49px;gap:12px;padding:10px 4px}.equipo-archive-seasons summary span{font-size:.78rem;color:var(--text-muted);text-align:right}.equipo-archive-season-detail{background:var(--surface-raised);padding:12px 18px;font-size:.84rem}.equipo-archive-season-detail h3{font-size:.9rem;margin:12px 0 6px}.equipo-archive-season-detail ul{margin:0;padding-left:20px}.equipo-archive-rounds{display:flex;gap:8px;flex-wrap:wrap}.equipo-archive-rounds span{padding:6px 8px;border:1px solid var(--border)}

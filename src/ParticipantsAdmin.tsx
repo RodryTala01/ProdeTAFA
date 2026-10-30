@@ -33,6 +33,9 @@ function Field({ label, value, onChange, type = 'text', placeholder, autoComplet
 }
 
 export default function ParticipantsAdmin() {
+  const [teamUser,setTeamUser]=useState<User|null>(null);
+  const [teamName,setTeamName]=useState('');
+  const [teamShield,setTeamShield]=useState('');
   const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
@@ -82,6 +85,23 @@ export default function ParticipantsAdmin() {
     finally { setLoading(false); }
   }
 
+  async function editTeam(entry:User){
+    setLoading(true);setError('');setSuccess('');
+    try{
+      const data=await api<{identity:{teamName:string;shieldUrl:string|null}}>('/api/participant/teams/'+encodeURIComponent(entry.id));
+      setTeamName(data.identity.teamName);setTeamShield(data.identity.shieldUrl??'');setTeamUser(entry);
+    }catch(caught){setError(caught instanceof Error?caught.message:'No pudimos cargar el equipo.');}
+    finally{setLoading(false);}
+  }
+  async function saveTeam(event:FormEvent){
+    event.preventDefault();if(!teamUser||loading)return;
+    setLoading(true);setError('');setSuccess('');
+    try{
+      await api('/api/admin/teams/'+encodeURIComponent(teamUser.id),{method:'PUT',body:JSON.stringify({teamName,shieldUrl:teamShield})});
+      setSuccess('Identidad del equipo guardada.');setTeamUser(null);
+    }catch(caught){setError(caught instanceof Error?caught.message:'No pudimos guardar el equipo.');}
+    finally{setLoading(false);}
+  }
   async function toggleParticipant(entry: User) {
     if (entry.role !== 'participant') return;
     setConfirmUser(null);
@@ -106,12 +126,12 @@ export default function ParticipantsAdmin() {
   const feedback = <>{error && <div className="alert alert--error" role="alert">{error}</div>}{success && <p role="status" className="admin-success">{success}</p>}</>;
   return <section className="participants-admin">
     <div className="panel-heading"><div><span className="eyebrow">{active} ACTIVOS · {participants.length} PARTICIPANTES</span><h1>Participantes</h1></div><button className="button button--primary" onClick={() => { setError(''); setCreating(true); }}>Crear participante</button></div>
-    {!creating && !resetUser && !credentials && feedback}
+    {!creating && !resetUser && !credentials && !teamUser && feedback}
     <div className="admin-filter-bar"><label className="field"><span>Buscar participante</span><input type="search" placeholder="Nombre o teléfono" value={search} onChange={event => setSearch(event.target.value)}/></label><label className="field"><span>Estado</span><select value={filter} onChange={event => setFilter(event.target.value)}><option value="all">Todos</option><option value="active">Activos</option><option value="inactive">Inactivos</option></select></label><button className="button button--ghost" disabled={fetching || loading} onClick={() => void loadUsers()}>Actualizar</button></div>
     {fetching && <p role="status">Cargando participantes…</p>}
     <div className="user-list">{visible.map(entry => <div className="user-row" key={entry.id}>
       <ParticipantShield userId={entry.id} name={entry.fullName} decorative/><div className="user-data"><strong>{entry.fullName}</strong><span>{entry.phone}{!entry.isActive && ' · Inactivo'}</span></div>
-      <AdminMenu label={`Acciones de ${entry.fullName}`}><button onClick={() => setHistoryUser(entry)}>Ver historial</button><button disabled={loading} onClick={() => { setError(''); setResetUser(entry); setNewPassword(''); }}>Cambiar contraseña</button><button className="admin-menu-danger" disabled={loading} onClick={() => entry.isActive ? setConfirmUser(entry) : void toggleParticipant(entry)}>{entry.isActive ? 'Desactivar' : 'Reactivar'}</button></AdminMenu>
+      <AdminMenu label={`Acciones de ${entry.fullName}`}><button disabled={loading} onClick={()=>void editTeam(entry)}>Editar Mi Club</button><button onClick={() => setHistoryUser(entry)}>Ver historial</button><button disabled={loading} onClick={() => { setError(''); setResetUser(entry); setNewPassword(''); }}>Cambiar contraseña</button><button className="admin-menu-danger" disabled={loading} onClick={() => entry.isActive ? setConfirmUser(entry) : void toggleParticipant(entry)}>{entry.isActive ? 'Desactivar' : 'Reactivar'}</button></AdminMenu>
     </div>)}</div>
     {!fetching && !visible.length && <p className="empty-copy">{participants.length ? 'No hay participantes con esos filtros.' : 'Todavía no hay participantes. Creá la primera cuenta para comenzar.'}</p>}
     {historyUser && <section className="card panel"><div className="panel-heading"><h2>{historyUser.fullName}</h2><button className="button button--ghost" onClick={() => setHistoryUser(null)}>Cerrar historial</button></div><PredictionHistoryBrowser key={historyUser.id} participantId={historyUser.id}/></section>}
@@ -119,6 +139,13 @@ export default function ParticipantsAdmin() {
       <Field label="Nombre y apellido" value={fullName} onChange={setFullName}/><Field label="Teléfono" value={phone} onChange={setPhone} type="tel"/>
       <PasswordField label="Contraseña inicial" value={password} onChange={event => setPassword(event.target.value)} minLength={6} autoComplete="new-password" required/>{feedback}
       <div className="modal-actions"><button type="button" className="button button--ghost" disabled={loading} onClick={() => { setCreating(false); setPassword(''); }}>Cancelar</button><button className="button button--primary" disabled={loading}>{loading ? 'Creando…' : 'Crear participante'}</button></div>
+    </form></AdminModal>}
+    {teamUser&&<AdminModal title={'Mi Club · '+teamUser.fullName} busy={loading} onClose={()=>setTeamUser(null)}><form className="form-stack" onSubmit={saveTeam}>
+      <ParticipantShield userId={teamUser.id} name={teamUser.fullName} shieldUrl={teamShield||null} size="lg"/>
+      <label className="field"><span>Nombre del equipo</span><input value={teamName} onChange={e=>setTeamName(e.target.value)} minLength={3} maxLength={48} required/></label>
+      <label className="field"><span>Escudo publicado en TAFA (opcional)</span><input value={teamShield} onChange={e=>setTeamShield(e.target.value)} placeholder="/teams/escudo.png"/></label>
+      <p>Usá un asset publicado en /participants/ o /teams/. Vacío conserva el escudo del participante.</p>{feedback}
+      <div className="modal-actions"><button type="button" className="button button--ghost" disabled={loading} onClick={()=>setTeamUser(null)}>Cancelar</button><button className="button button--primary" disabled={loading||teamName.trim().length<3}>{loading?'Guardando…':'Guardar equipo'}</button></div>
     </form></AdminModal>}
     {resetUser && <AdminModal title={`Cambiar contraseña · ${resetUser.fullName}`} busy={loading} onClose={() => { setResetUser(null); setNewPassword(''); }}><p>La contraseña anterior dejará de funcionar y se cerrarán sus sesiones.</p><form className="form-stack" onSubmit={resetPassword}><PasswordField label="Nueva contraseña" value={newPassword} onChange={event => setNewPassword(event.target.value)} minLength={6} autoComplete="new-password" required/>{feedback}<div className="modal-actions"><button type="button" className="button button--ghost" disabled={loading} onClick={() => { setResetUser(null); setNewPassword(''); }}>Cancelar</button><button className="button button--primary" disabled={loading}>Guardar contraseña</button></div></form></AdminModal>}
     {confirmUser && <AdminConfirm title={`¿Desactivar a ${confirmUser.fullName}?`} action="Desactivar" busy={loading} onCancel={() => setConfirmUser(null)} onConfirm={() => void toggleParticipant(confirmUser)}>Se bloqueará su acceso y se cerrarán sus sesiones. Sus pronósticos, puntajes e historial se conservan.</AdminConfirm>}

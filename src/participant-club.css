@@ -53,3 +53,12 @@
   .club-more > div { display:grid; gap:0; padding:4px 12px; background:var(--surface-raised); }
   .history-match-score { font-size:.875rem; }
 }
+
+/* Unified profile: detailed historical sections remain optional beneath the primary club identity. */
+.club-extras { margin-top:var(--space-5); border-top:1px solid var(--border); }
+.club-extras>summary { cursor:pointer; display:flex; align-items:center; min-height:48px; font-weight:700; font-size:.88rem; color:var(--text); padding:12px 3px; list-style:none; }
+.club-extras>summary::after { content:'+'; margin-left:auto; color:var(--home-fluor); font-size:1.35rem; }
+.club-extras[open]>summary::after { content:'−'; }
+.club-extras>summary::-webkit-details-marker { display:none; }
+.club-extras .club-columns { margin-top:var(--space-3); }
+.club-extras .reference-section { margin-bottom:var(--space-4); }

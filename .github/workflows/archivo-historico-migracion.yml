@@ -1,0 +1,55 @@
+name: Archivo histórico - actualizar esquema D1 (única vez)
+
+on:
+  # Re-run after updating Cloudflare's D1 edit permission, without pushing
+  # application changes or touching the production Worker.
+  workflow_dispatch:
+  push:
+    branches: [feat/archivo-historico-importaciones]
+    paths:
+      - .github/workflows/archivo-historico-migracion.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prode-tafa-schema-upgrade
+  cancel-in-progress: false
+
+jobs:
+  migrate-archive:
+    name: Verify and apply additive D1 migration 0017
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Check and run local schema migration
+        run: npm run db:migrate:local
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: E2E isolated sports
+        run: npm run test:e2e:ci
+      - name: Verify remote migration ledger (read-only)
+        run: node scripts/preflight-archive-migration.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Apply only pending migration 0017
+        run: npm run db:migrate:remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Validate full remote schema (read-only)
+        run: node scripts/check-deploy-schema.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

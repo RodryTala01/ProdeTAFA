@@ -329,6 +329,16 @@ Patrón conceptual indicado por el usuario:
 - Health profundo debe detectar esquema de Liga incompleto y más de una fecha abierta.
 - CI debe aplicar todas las migraciones D1 locales antes de tests/build.
 
+## Archivo histórico — temporadas anteriores
+
+- Cargar y auditar una temporada por vez (T1, T2, T3...), conservando los archivos originales fuera de la base de datos. Antes de importarla, el administrador debe revisar el informe y el Excel normalizado.
+- Una temporada incluye **solo las competiciones realmente disputadas**: puede contener únicamente Liga A, Copa Total, un Mundial o Copa América. Nunca inferir copas ausentes ni crear pronósticos ficticios.
+- La misma temporada puede completarse con lotes parciales (puntos primero, palmarés después). Cada lote debe ser independiente, tener origen y huella SHA-256, y no repetir registros deportivos activos. Los catálogos de participantes y competiciones se pueden repetir solo si son consistentes.
+- Vincular nombres históricos a IDs actuales de participante explícitamente; nunca deducir la identidad por similitud de nombre.
+- Antes de confirmar, mostrar conteos, inconsistencias y advertencias. La confirmación requiere vista previa vigente; una reversión individual debe requerir motivo, conservar auditoría y dejar de sumar solo su lote.
+- Ranking histórico, Mi Club, palmarés, rivales e IFFHS deben leer los lotes activos sin duplicar los datos del motor oficial ni mezclar puntos deportivos con puntos IFFHS.
+- La migración `0017_historical_imports.sql` es aditiva y debe estar aplicada/verificada en D1 antes de publicar el Worker con esta funcionalidad. No omitir la validación del esquema por un fallo de permisos.
+
 ## Estado de migraciones
 
 - `0015_promiedos_cache.sql`: tabla aislada para fixtures/detalles de proveedor y solicitudes de adquisición. No modifica tablas deportivas. Pendiente de aplicación productiva.
@@ -368,3 +378,9 @@ Si una regla futura es ambigua, no inventar una extensión grande: mantener el c
 - Conservar el logo TAFA original. Imágenes compartidas con proporción intacta y fallback de iniciales ante ausencia/error.
 - Registros frontend por code/ID estable y overrides por temporada. Sólo archivos suministrados o URLs reales del backend; sin generación, descargas, uploads, DB ni migraciones.
 - Ver ASSETS.md. Preview de assets exclusivamente DEV.
+
+### Historia — archivo público autenticado
+- Quinta sección participante: Inicio | Pronósticos | Competiciones | Mi Club | Historia, en escritorio y móvil.
+- Historia usa sólo lotes históricos activos y temporadas oficiales finalizadas/archivadas. Títulos explícitos: T1 Brasil 2021 es Copa América, nunca inferir Liga A. No importar T1 durante este bloque.
+- Fechas históricas identificadas por competitionCode/round/participantKey y cruces por matchId estable; conservar cuatro cruces individuales Dúos. Nuevos campos en JSON, sin nueva migración.
+- Estadisticas sigue siendo la única fuente de totales importados; nunca sumar tablas de competiciones de nuevo.

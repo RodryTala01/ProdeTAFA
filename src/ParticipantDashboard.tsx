@@ -1,3 +1,4 @@
+import ParticipantArchive from './ParticipantArchive';
 import {useRoundRefresh} from './round-refresh';
 import ParticipantAllTime from './ParticipantAllTime';
 import {ParticipantShield} from './AssetImage';
@@ -53,6 +54,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
     <div className={`dashboard participant-dashboard ${route === 'pronosticos' ? 'participant-dashboard--predictions' : ''}`}>
       <section ref={content} className="participant-content" tabIndex={-1} aria-label="Contenido del participante">
         {route === 'pronosticos' ? <><div className="section-heading"><a className="button button--ghost" href="#/club/historial">Ver historial</a></div><ParticipantRound /></>
+          : route.startsWith('historia') ? <ParticipantArchive key={route} route={route}/>
           : route === 'club/historicos' ? <ParticipantAllTime userId={user.id}/>
           : route.startsWith('club/historial') ? <ParticipantHistory key={route} user={user} route={route}/>
           : route.startsWith('club/enfrentamientos') ? <><a href={new URLSearchParams(route.split('?')[1]).get('user')?`#/club/participante/${encodeURIComponent(new URLSearchParams(route.split('?')[1]).get('user')!)}`:'#/club'} className="button button--ghost">Volver al perfil</a><HeadToHead/></>
