@@ -1,0 +1,59 @@
+name: One-off - rename TAFA administrator display name
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/rename-admin-once.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prode-tafa-admin-rename-once
+  cancel-in-progress: false
+
+jobs:
+  rename:
+    name: Guarded admin display-name update
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Verify roles, rename admin only, and audit
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          const adminId='baf38f1e-d0e4-46f1-bce7-d6a26ab56c48';
+          const participantId='9f149f8d-a923-4b4c-8b9a-bd053f1f134b';
+          function query(sql){
+            const output=execFileSync('npx',['wrangler','d1','execute','DB','--remote','--json','--command',sql],{encoding:'utf8',maxBuffer:1024*1024});
+            const parsed=JSON.parse(output);
+            if(!Array.isArray(parsed)||parsed.some(r=>r.success!==true))throw Error('D1 remote query failed');
+            return parsed.flatMap(r=>r.results??[]);
+          }
+          function check(){
+            const rows=query(`SELECT id,role,full_name FROM users WHERE id IN ('${adminId}','${participantId}')`);
+            const admin=rows.find(r=>r.id===adminId);
+            const participant=rows.find(r=>r.id===participantId);
+            if(admin?.role!=='admin'||!['Rodrigo Talarico','Admin'].includes(admin.full_name))throw Error('Admin identity mismatch: no changes made');
+            if(participant?.role!=='participant'||participant.full_name!=='Rodrigo Talarico')throw Error('Participant identity mismatch: no changes made');
+            return admin.full_name;
+          }
+          const before=check();
+          if(before==='Rodrigo Talarico'){
+            query(`UPDATE users SET full_name='Admin',updated_at=datetime('now') WHERE id='${adminId}' AND role='admin' AND full_name='Rodrigo Talarico'`);
+            query(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json) VALUES ('${adminId}','admin.display_name.updated','user','${adminId}','{"fullName":"Rodrigo Talarico"}','{"fullName":"Admin"}')`);
+          }
+          if(check()!=='Admin')throw Error('Admin rename not confirmed');
+          console.log('Verified: administrator displays Admin; participant keeps Rodrigo Talarico; IDs and roles unchanged.');
+          NODE
