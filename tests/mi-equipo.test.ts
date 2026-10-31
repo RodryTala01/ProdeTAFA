@@ -24,7 +24,7 @@ describe('Mi Equipo minimalista',()=>{
  });
  it('renders only confirmed trophy examples, official Prode metrics and both rankings',()=>{
   const page=html(MiEquipoProfile,{data:team});
-  for(const value of ['Equipo de Ana','Copa Total','18','Plenos','Parciales','Errores','Extras','Pronósticos enviados','TABLA GENERAL','RANKING IFFHS','Mejor 2.º · T32','Mejor 1.º · T31','HISTORIAL DE ENFRENTAMIENTOS'])expect(page).toContain(value);
+  for(const value of ['Equipo de Ana','Copa Total','18','Plenos','Parciales','Errores','Extras','Pronósticos enviados','TABLA GENERAL','RANKING IFFHS','Mejor 2.º · T32','Mejor 1.º · T31','Historial de enfrentamientos'])expect(page).toContain(value);
   expect(page).not.toMatch(/Partidos ganados|Partidos empatados|Partidos perdidos|Goles a favor/);
   expect(page).not.toMatch(/Cambiar escudo|Editar equipo|Guardar nombre/);
  });
@@ -76,3 +76,10 @@ it('IFFHS does not retain a stale position after leaving the five-season window'
  expect(iffhsPositions([{userId:'A',seasonNumber:25,points:500},{userId:'B',seasonNumber:32,points:100}],'A',['A','B']).current).toBe(2);
  expect(iffhsPositions([{userId:'A',seasonNumber:25,points:500},{userId:'B',seasonNumber:32,points:100}],'A').current).toBeNull();
 });
+
+ it('counts wins rather than point margins and respects confirmed tiebreak winners',()=>{
+  const matches=[{...fake,ownPoints:6,rivalPoints:1},{...fake,id:2,ownPoints:2,rivalPoints:7},{...fake,id:3,ownPoints:3,rivalPoints:3,outcome:'win' as const,resolution:'tiebreak'},{...fake,id:4,ownPoints:1,rivalPoints:1}];
+  const rival=groupOfficialRivals(matches)[0];
+  expect(rival).toMatchObject({difference:1,wins:2,draws:1,losses:1,points:12,otherPoints:12});
+  expect(rival.matches.length).toBe(rival.wins+rival.draws+rival.losses);
+ });

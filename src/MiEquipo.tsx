@@ -4,7 +4,7 @@ import {useParticipantRead,ParticipantState} from './ParticipantState';
 import {competitionHref,phaseName} from './participant-competitions';
 import './mi-equipo.css';
 
-export type TeamMatch={id:number;seasonNumber:number;competitionCode:string;competitionName:string;stageName:string;roundName:string|null;opponentId:string;opponentName:string;opponentParticipantName?:string;opponentShieldUrl?:string|null;scoreBasis?:string;resolution?:string|null;ownPoints:number;rivalPoints:number;plenos:number|null};
+export type TeamMatch={id:number;seasonNumber:number;competitionCode:string;competitionName:string;stageName:string;roundName:string|null;opponentId:string;opponentName:string;opponentParticipantName?:string;opponentShieldUrl?:string|null;scoreBasis?:string;resolution?:string|null;outcome?:'win'|'draw'|'loss'|null;ownPoints:number;rivalPoints:number;plenos:number|null};
 export type TeamPageData={
  identity:{id:string;participantName:string;teamName:string;shieldUrl:string|null;foundedSeason:number|null};
  division:{name:string;seasonNumber:number}|null;
@@ -21,13 +21,15 @@ export type TeamPageData={
  iffhs:{points:number;position:number|null}|null;}>;
 
 };
-type Rival={id:string;name:string;matches:TeamMatch[];difference:number;points:number;otherPoints:number;fulls:number|null;participantName?:string;shieldUrl?:string|null};
+type Rival={id:string;name:string;matches:TeamMatch[];difference:number;wins:number;draws:number;losses:number;points:number;otherPoints:number;fulls:number|null;participantName?:string;shieldUrl?:string|null};
 export function groupOfficialRivals(matches:TeamMatch[]):Rival[]{
  const result=new Map<string,Rival>();
  for(const m of matches){
-  const entry=result.get(m.opponentId)??{id:m.opponentId,name:m.opponentName,matches:[],difference:0,points:0,otherPoints:0,fulls:0,participantName:m.opponentParticipantName,shieldUrl:m.opponentShieldUrl};
+  const entry=result.get(m.opponentId)??{id:m.opponentId,name:m.opponentName,matches:[],difference:0,wins:0,draws:0,losses:0,points:0,otherPoints:0,fulls:0,participantName:m.opponentParticipantName,shieldUrl:m.opponentShieldUrl};
   entry.matches.push(m);entry.points+=m.ownPoints;entry.otherPoints+=m.rivalPoints;
-  entry.difference=entry.points-entry.otherPoints;
+  const outcome=matchOutcome(m);
+  if(outcome==='win')entry.wins++;else if(outcome==='loss')entry.losses++;else entry.draws++;
+  entry.difference=entry.wins-entry.losses;
   if(m.plenos===null)entry.fulls=null;
   else if(entry.fulls!==null)entry.fulls+=m.plenos;
   result.set(m.opponentId,entry);
@@ -39,33 +41,37 @@ const rank=(n:number|null)=>n===null?'—':n+'.º';
 function Ranking({name,info}:{name:string;info:{current:number|null;best:{position:number;seasonNumber:number}|null}}){
  return <section className="equipo-ranking"><strong>{rank(info.current)}</strong><span>{name}</span><small>{info.best?'Mejor '+rank(info.best.position)+' · T'+info.best.seasonNumber:'Mejor posición no disponible'}</small></section>;
 }
-export function TeamHistory({matches}:{matches:TeamMatch[]}){
+function matchOutcome(m:TeamMatch){
+ return m.outcome??(m.ownPoints>m.rivalPoints?'win':m.ownPoints<m.rivalPoints?'loss':'draw');
+}
+export function TeamHistory({matches,identity}:{matches:TeamMatch[];identity?:TeamPageData['identity']}){
  const [expanded,setExpanded]=useState<string[]>([]);
  const rivals=useMemo(()=>groupOfficialRivals(matches),[matches]);
+ const person=(id:string|undefined,name:string,participantName?:string,shieldUrl?:string|null)=><span className="equipo-rival"><ParticipantShield userId={id?.startsWith('hist:')?undefined:id} name={participantName??name} shieldUrl={shieldUrl} size="sm" decorative/><span>{name}</span></span>;
  return <section className="equipo-history" id="club-historiales" aria-label="Historial de enfrentamientos oficiales">
-   <h2>HISTORIAL DE ENFRENTAMIENTOS</h2>
-   <p>Solo cruces directos oficiales confirmados. DIF = diferencia de puntos; CR = cruces; RIV = puntos del rival.</p>
-   {rivals.length===0?<p>Todavía no hay enfrentamientos oficiales confirmados para este equipo.</p>:
-   <div className="equipo-table-scroll"><table className="equipo-table">
-    <thead><tr><th scope="col">RIVAL</th><th scope="col">DIF</th><th scope="col">CR</th><th scope="col">PTS</th><th scope="col">RIV</th><th scope="col">PL</th><th scope="col">Ficha</th></tr></thead>
-    <tbody>{rivals.map(r=>{
-      const open=expanded.includes(r.id);
-      return <Fragment key={r.id}><tr>
-       <th scope="row">{r.id.startsWith('hist:')?<span className="equipo-rival"><ParticipantShield name={r.name} size="sm" decorative/><span>{r.name}</span></span>:<a className="equipo-rival" href={'#/club/participante/'+encodeURIComponent(r.id)}><ParticipantShield userId={r.id} name={r.participantName??r.name} shieldUrl={r.shieldUrl} size="sm" decorative/><span>{r.name}</span></a>}</th>
-       <td className={r.difference>0?'equipo-positive':r.difference<0?'equipo-negative':''}>{r.difference>0?'+':''}{r.difference}</td>
-       <td>{r.matches.length}</td><td>{r.points}</td><td>{r.otherPoints}</td><td>{r.fulls??'—'}</td>
-       <td><button type="button" aria-expanded={open} aria-controls={'equipo-rival-'+encodeURIComponent(r.id)} aria-label={(open?'Cerrar':'Ver')+' enfrentamientos contra '+r.name} onClick={()=>setExpanded(old=>open?old.filter(x=>x!==r.id):[...old,r.id])}>{open?'−':'+'}</button></td>
-      </tr>
-      {open&&<tr className="equipo-detail" id={'equipo-rival-'+encodeURIComponent(r.id)}><td colSpan={7}>
-       <div className="equipo-detail-inner">
-        <h3>Enfrentamientos contra {r.name}</h3>{r.matches.some(m=>m.scoreBasis==='DUO')&&<p>En Copa Dúos, PTS y RIV son puntos de las duplas; PL corresponde al participante.</p>}
-        <table><thead><tr><th>Temporada</th><th>Competencia</th><th>Instancia</th><th>Mis PTS</th><th>Rival</th></tr></thead>
-         <tbody>{r.matches.map(m=><tr key={m.id+'-'+m.opponentId}><td>T{m.seasonNumber}</td><td><a href={competitionHref(m.competitionCode,m.seasonNumber)}>{m.competitionName}</a></td><td>{phaseName(m.stageName)}{m.resolution==='tiebreak'?' · TAFA confirmado':''}{m.roundName?' · '+m.roundName:''}</td><td>{m.ownPoints}</td><td>{m.rivalPoints}</td></tr>)}</tbody>
-        </table>
-       </div></td></tr>}
-      </Fragment>;
-    })}</tbody>
-   </table></div>}
+  <h2>Historial de enfrentamientos</h2>
+  <p>DIF = victorias − derrotas · PF/PC = puntos a favor/en contra</p>
+  {!rivals.length?<p>Todavía no hay enfrentamientos oficiales confirmados para este equipo.</p>:<div className="equipo-table-scroll"><table className="equipo-table">
+   <thead><tr>{['RIVAL','DIF','PJ','PG','PE','PP','PF','PC','FICHA'].map(label=><th scope="col" key={label}>{label}</th>)}</tr></thead>
+   <tbody>{rivals.map(r=>{
+    const open=expanded.includes(r.id);
+    return <Fragment key={r.id}><tr>
+     <th scope="row">{r.id.startsWith('hist:')?person(undefined,r.name):<a href={'#/club/participante/'+encodeURIComponent(r.id)}>{person(r.id,r.name,r.participantName,r.shieldUrl)}</a>}</th>
+     <td className={r.difference>0?'equipo-positive':r.difference<0?'equipo-negative':''}>{r.difference>0?'+':''}{r.difference}</td>
+     <td>{r.matches.length}</td><td>{r.wins}</td><td>{r.draws}</td><td>{r.losses}</td><td>{r.points}</td><td>{r.otherPoints}</td>
+     <td><button type="button" aria-expanded={open} aria-controls={'equipo-rival-'+encodeURIComponent(r.id)} aria-label={(open?'Cerrar':'Ver')+' enfrentamientos contra '+r.name} onClick={()=>setExpanded(old=>open?old.filter(x=>x!==r.id):[...old,r.id])}>{open?'−':'+'}</button></td>
+    </tr>{open&&<tr className="equipo-detail" id={'equipo-rival-'+encodeURIComponent(r.id)}><td colSpan={9}><div className="equipo-detail-inner">
+     {[...r.matches].sort((a,b)=>b.seasonNumber-a.seasonNumber||(a.id<0&&b.id<0?a.id-b.id:b.id-a.id)).map(m=>{
+      const outcome=matchOutcome(m),label=outcome==='win'?'Victoria':outcome==='loss'?'Derrota':'Empate';
+      return <article className="equipo-encounter" key={m.id+'-'+m.opponentId}>
+       <div className="equipo-encounter-meta"><strong>T{m.seasonNumber} · <a href={competitionHref(m.competitionCode,m.seasonNumber)}>{m.competitionName}</a></strong><small>{phaseName(m.stageName)}{m.roundName?' · '+m.roundName:''}</small>{m.scoreBasis==='DUO'&&<small>Marcador de la pareja</small>}</div>
+       <div className="equipo-encounter-score">{person(identity?.id,identity?.teamName??'Equipo consultado',identity?.participantName,identity?.shieldUrl)}<strong>{m.ownPoints} <span>–</span> {m.rivalPoints}</strong>{person(r.id,r.name,r.participantName,r.shieldUrl)}</div>
+       <div className={'equipo-outcome equipo-outcome-'+outcome}>{label}{m.resolution==='tiebreak'&&<small>{m.outcome==='win'?identity?.teamName:m.outcome==='loss'?r.name:null}{m.outcome&&m.outcome!=='draw'?' avanzó por TAFA':' · TAFA confirmado'}</small>}</div>
+      </article>;
+     })}
+    </div></td></tr>}</Fragment>;
+   })}</tbody>
+  </table></div>}
  </section>;
 }
 export function MiEquipoProfile({data}:{data:TeamPageData}){
@@ -93,7 +99,7 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
   </section>
   <div className="equipo-rankings"><Ranking name="TABLA GENERAL" info={rankings.general}/><Ranking name="RANKING IFFHS" info={rankings.iffhs}/></div>
   {rankings.iffhs.throughSeason&&<p className="equipo-rank-note">IFFHS · ventana de cinco temporadas hasta T{rankings.iffhs.throughSeason}{rankings.iffhs.missingSeasons?.length?' · Sin datos en '+rankings.iffhs.missingSeasons.map(n=>'T'+n).join(', '):''}. Mejor posición calculada por temporada.</p>}
-  <TeamHistory key={identity.id} matches={encounters}/>
+  <TeamHistory key={identity.id} matches={encounters} identity={identity}/>
   {!!data.historicalSeasons?.length&&<section className="equipo-archive-seasons" aria-label="Archivo de temporadas anteriores">
    <h2>TEMPORADAS HISTÓRICAS</h2>
    <p>Información recuperada de planillas oficiales. Cada temporada muestra únicamente lo que efectivamente se disputó.</p>

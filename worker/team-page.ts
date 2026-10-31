@@ -2,7 +2,7 @@ import type {Env} from './index';
 import {activeHistoricalArchives,archivedUserKey,historicalStats} from './historical-archive';
 
 type Who={id:string;role:string};
-type RivalRow={id:number;seasonNumber:number;competitionCode:string;competitionName:string;stageName:string;roundName:string|null;opponentId:string;opponentName:string;opponentParticipantName:string;opponentShieldUrl:string|null;scoreBasis:string;resolution:string|null;ownPoints:number;rivalPoints:number;plenos:number|null};
+type RivalRow={id:number;seasonNumber:number;competitionCode:string;competitionName:string;stageName:string;roundName:string|null;opponentId:string;opponentName:string;opponentParticipantName:string;opponentShieldUrl:string|null;scoreBasis:string;resolution:string|null;outcome?:'win'|'draw'|'loss'|null;ownPoints:number;rivalPoints:number;plenos:number|null};
 const json=(value:unknown,status=200)=>new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'private, no-store'}});
 const fail=(message:string,status=400)=>json({error:message},status);
 async function session(request:Request,db:D1Database):Promise<Who|null>{
@@ -155,6 +155,7 @@ async function teamRead(db:D1Database,id:string){
  const iffhsRank=iffhsPositions(iffhsRows,id,[...(people.results??[]).map(p=>p.id),...archiveTotals.keys()]);
  const encounters=await db.prepare(`SELECT e.id,s.season_number AS seasonNumber,c.code AS competitionCode,c.display_name AS competitionName,
  st.name AS stageName,r.name AS roundName,enemy.user_id AS opponentId,COALESCE(tp.team_name,'Equipo de '||u.full_name) AS opponentName,u.full_name AS opponentParticipantName,tp.shield_url AS opponentShieldUrl,ea.entry_type AS scoreBasis,e.resolution,
+ CASE WHEN e.winner_entry_id=mine.entry_id THEN 'win' WHEN e.winner_entry_id IS NOT NULL THEN 'loss' ELSE NULL END AS outcome,
  CASE WHEN mine.entry_id=e.entry_a_id THEN e.score_a ELSE e.score_b END AS ownPoints,
  CASE WHEN mine.entry_id=e.entry_a_id THEN e.score_b ELSE e.score_a END AS rivalPoints,
  (SELECT CASE WHEN COUNT(ps.prediction_id)=0 THEN NULL ELSE SUM(CASE WHEN ps.base_points=3 THEN 1 ELSE 0 END) END FROM official_predictions op JOIN matches mm ON mm.id=op.match_id JOIN prediction_scores ps ON ps.prediction_id=op.id
