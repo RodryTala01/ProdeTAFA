@@ -24,7 +24,7 @@ it('unifica la identidad, rankings e historial de Mi Equipo con el recorrido del
  expect(html).toContain('Mi Club Original');
  expect(html).toContain('TABLA GENERAL');
  expect(html).toContain('RANKING IFFHS');
- expect(html).toContain('HISTORIAL DE ENFRENTAMIENTOS');
+ expect(html).toContain('Historial de enfrentamientos');
  expect(html).toContain('id="club-detalles"');
  expect(html).toContain('Historial de Fechas');
  expect(html).toContain('Últimas Fechas');

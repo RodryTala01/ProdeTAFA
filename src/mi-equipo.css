@@ -20,27 +20,37 @@
 .equipo-ranking strong{font:800 clamp(1.7rem,3vw,2.5rem) var(--font-display);color:var(--equipo-green)}
 .equipo-ranking span{font-size:.78rem;font-weight:750;letter-spacing:.05em}
 .equipo-ranking small{color:var(--text-muted)}
-.equipo-history{margin-top:14px}.equipo-history>h2{background:var(--surface-raised);border-top:2px solid var(--equipo-green);padding:12px;text-align:center;margin:0;font-size:1rem;letter-spacing:.04em}
-.equipo-history>p{font-size:.78rem;color:var(--text-muted);margin:9px 0 12px}
-.equipo-table-scroll{overflow-x:auto;max-width:100%;border:1px solid var(--border)}
-.equipo-table,.equipo-detail table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-.equipo-table thead{background:var(--surface-raised);font-size:.75rem}
-.equipo-table th,.equipo-table td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:center;font-size:.81rem;white-space:nowrap}
-.equipo-table tbody>tr:nth-of-type(4n+1){background:var(--surface)}
-.equipo-table tbody>tr:not(.equipo-detail)>th{text-align:left;min-width:170px;font-weight:650;white-space:normal}
-.equipo-table tbody>tr:not(.equipo-detail)>th a{text-decoration:none}.equipo-table tbody>tr:not(.equipo-detail)>th a:hover{text-decoration:underline}
-.equipo-table .equipo-positive{color:var(--success);font-weight:800;background:var(--success-soft)}
-.equipo-table .equipo-negative{color:var(--danger);font-weight:800;background:var(--danger-soft)}
-.equipo-table button{width:30px;height:30px;font-weight:800;font-size:1.1rem;border:1px solid var(--success);background:var(--success-soft);color:var(--success);border-radius:var(--radius-sm);cursor:pointer}
+.equipo-history{margin-top:20px;background:var(--surface);border:1px solid var(--border);padding:16px;min-width:0}
+.equipo-history>h2{margin:0;font:700 1.15rem var(--font-display)}
+.equipo-history>p{font-size:.8rem;color:var(--text-muted);margin:7px 0 16px}
+.equipo-table-scroll{overflow-x:auto;max-width:100%}
+.equipo-table{width:100%;min-width:640px;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.equipo-table thead{background:var(--surface-raised)}
+.equipo-table th,.equipo-table td{padding:10px 9px;border-bottom:1px solid var(--border);text-align:right;font-size:.84rem;white-space:nowrap}
+.equipo-table thead th{font-size:.72rem;color:var(--text-muted);font-weight:600}
+.equipo-table th:first-child{text-align:left}
+.equipo-table tbody>tr:not(.equipo-detail)>th{min-width:170px;font-weight:650;white-space:normal}
+.equipo-table tbody>tr:not(.equipo-detail):hover{background:var(--surface-raised)}
+.equipo-table a{text-decoration:none}.equipo-table a:hover{text-decoration:underline}
+.equipo-table .equipo-positive{color:var(--success);font-weight:750}
+.equipo-table .equipo-negative{color:var(--danger);font-weight:750}
+.equipo-table button{width:32px;height:32px;min-width:32px;min-height:32px;font-size:1.1rem;border:1px solid var(--border);background:var(--surface-raised);color:var(--text-muted);border-radius:var(--radius-sm);cursor:pointer}
+.equipo-table button:hover,.equipo-table button[aria-expanded=true]{color:var(--text);border-color:var(--text-muted)}
 .equipo-table button:focus-visible{outline:2px solid var(--equipo-green);outline-offset:3px}
-.equipo-table .equipo-detail>td{padding:0;border-left:3px solid var(--equipo-green);white-space:normal}
-.equipo-detail-inner{background:var(--surface-raised);padding:14px;overflow-x:auto;text-align:left}
-.equipo-detail-inner h3{margin:0 0 8px;font-size:.92rem}
-.equipo-detail table th,.equipo-detail table td{font-size:.76rem;padding:8px 7px;border-bottom:1px solid var(--border);text-align:left}
+.equipo-table .equipo-detail>td{padding:0;white-space:normal;text-align:left}
+.equipo-detail-inner{background:var(--surface-raised);padding:4px 14px}
+.equipo-encounter{display:grid;grid-template-columns:minmax(150px,1fr) minmax(240px,1.5fr) minmax(75px,.5fr);gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--border)}
+.equipo-encounter:last-child{border-bottom:0}
+.equipo-encounter-meta{display:grid;gap:5px;font-size:.8rem}.equipo-encounter-meta small{color:var(--text-muted);font-size:.75rem}
+.equipo-encounter-score{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center}.equipo-encounter-score>strong{font:750 1.35rem var(--font-display);white-space:nowrap}.equipo-encounter-score>strong span{color:var(--text-muted)}
+.equipo-encounter-score .equipo-rival{flex-direction:column;text-align:center;font-size:.8rem;gap:5px}
+.equipo-outcome{font-size:.8rem;font-weight:650;text-align:right}.equipo-outcome small{display:block;color:var(--text-muted);font-weight:400;margin-top:5px;font-size:.72rem}
+.equipo-outcome-win{color:var(--success)}.equipo-outcome-loss{color:var(--danger)}.equipo-outcome-draw{color:var(--text-muted)}
+@media(max-width:650px){.equipo-history{padding:12px}.equipo-encounter{grid-template-columns:1fr;gap:12px}.equipo-outcome{text-align:center}.equipo-encounter-meta{gap:4px}}
 @media(max-width:650px){.equipo-header{padding-top:10px}.equipo-shield{height:89px}.equipo-shield .asset-image,.equipo-shield .participant-sprite{width:75px;height:86px}.equipo-titles{gap:6px}.equipo-trophy{width:86px;font-size:.7rem}.equipo-points dl{gap:5px}.equipo-points dl>div{flex:1 1 29%;min-width:75px}.equipo-points dd{font-size:1.1rem}.equipo-rankings{gap:7px}.equipo-ranking{padding:12px 6px}.equipo-ranking small{font-size:.69rem}.equipo-table th,.equipo-table td{padding:8px 6px}.equipo-history>h2{font-size:.87rem}.equipo-detail-inner{padding:10px}}
 
 .equipo-rival{display:flex;align-items:center;gap:8px}.equipo-rival>span:last-child{min-width:0;overflow-wrap:anywhere}
-.equipo-table button{min-width:44px;min-height:44px}
+
 .equipo-shield .asset-image{transform:scale(1.5)}
 .equipo-stats-note,.equipo-rank-note{color:var(--text-muted);font-size:.75rem;text-align:center}
 @media(max-width:650px){.equipo-shield .asset-image{transform:scale(1.2)}.equipo-page{min-width:0}.equipo-header h1{overflow-wrap:anywhere}.equipo-table tbody>tr:not(.equipo-detail)>th{min-width:140px}}
