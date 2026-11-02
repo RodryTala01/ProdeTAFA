@@ -10,8 +10,8 @@ const b64u=(b:Uint8Array)=>btoa(String.fromCharCode(...b)).replace(/\+/g,'-').re
 const unb64u=(s:string)=>new Uint8Array(Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-s.length%4)%4)),c=>c.charCodeAt(0)));
 const raw=(s:string)=>enc.encode(s);
 async function hmac(key:Uint8Array,value:Uint8Array){
- const k=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-256'},false,['sign']);
- return new Uint8Array(await crypto.subtle.sign('HMAC',k,value));
+ const k=await crypto.subtle.importKey('raw',key as BufferSource,{name:'HMAC',hash:'SHA-256'},false,['sign']);
+ return new Uint8Array(await crypto.subtle.sign('HMAC',k,value as BufferSource));
 }
 async function encrypt(subscription:Subscription,payload:string){
  const ua=unb64u(subscription.p256dh),auth=unb64u(subscription.auth);
