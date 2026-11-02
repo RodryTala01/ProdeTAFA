@@ -20,6 +20,7 @@ import { handleCompetitionPromotion } from './competition-promotion';
 import { handleIffhs } from './iffhs';
 import { handleSeasonTransition } from './season-transition';
 import {handleTeamPage} from './team-page';
+import {handlePush,sendDuePushNotifications} from './push';
 import {handleHistoricalArchive} from './historical-archive';
 
 function jsonError(message: string, status: number) {
@@ -32,6 +33,10 @@ function jsonError(message: string, status: number) {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const pathname = new URL(request.url).pathname;
+    if(pathname.startsWith('/api/participant/push/')){
+      if(!mutationAllowed(request))return jsonError('Origen de solicitud no permitido',403);
+      return (await handlePush(request,env))??jsonError('Ruta no encontrada',404);
+    }
     if (pathname.startsWith('/api/internal/promiedos-cache')) {
       if (!mutationAllowed(request)) return jsonError('Origen de solicitud no permitido',403);
       return (await handlePromiedosCache(request,env)) ?? jsonError('Ruta no encontrada',404);
@@ -110,6 +115,7 @@ export default {
   },
 
   async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(sendDuePushNotifications(env).catch(e=>console.error('Push cron failed',e instanceof Error?e.message:'Unknown')));
     return entryWorker.scheduled(controller, env, ctx);
   },
 } satisfies ExportedHandler<Env>;
