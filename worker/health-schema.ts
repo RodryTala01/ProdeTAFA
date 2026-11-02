@@ -51,11 +51,17 @@ export const REQUIRED_PRODUCTION_TABLES = [
   'promiedos_cache',
   'team_profiles',
   'historical_imports',
+  'push_config',
+  'push_subscriptions',
+  'push_deliveries',
   ...CORE_PRODUCTION_TABLES,
   ...T32_PRODUCTION_TABLES,
 ] as const;
 
 export const REQUIRED_PRODUCTION_COLUMNS = {
+  "push_config": ["id","public_key"],
+  "push_subscriptions": ["id","user_id","endpoint","p256dh","auth","created_at","updated_at"],
+  "push_deliveries": ["id","subscription_id","event_key","status","attempts","attempted_at","sent_at"],
   "promiedos_cache": ["kind","cache_key","payload_json","fetched_at","expires_at","requested_at"],
   "audit_log": ["id","actor_user_id","action","entity_type","entity_id","before_json","after_json","created_at"],
   "competition_champions_nodes": ["id","competition_id","node_code","label","branch","sequence","source_a_type","source_a_ref","source_b_type","source_b_ref","stage_id","round_link_id","encounter_id","created_at","updated_at"],
@@ -119,6 +125,6 @@ export const REQUIRED_PRODUCTION_TRIGGERS = [
   'invalidate_official_score_update',
 ] as const;
 
-export const MINIMUM_PRODUCTION_MIGRATION = '0017_historical_imports.sql';
+export const MINIMUM_PRODUCTION_MIGRATION = '0018_push_notifications.sql';
 
-export const REQUIRED_PRODUCTION_MIGRATIONS = ["0001_initial.sql","0002_league_seasons.sql","0003_league_entry_slot.sql","0004_prediction_history.sql","0005_official_predictions.sql","0006_competition_engine.sql","0007_iffhs.sql","0008_competition_results.sql","0009_stage_qualifiers.sql","0010_duos_survival.sql","0011_competition_qualification_slots.sql","0012_champions_bracket_nodes.sql","0013_season_transition_plan.sql","0014_duos_admin.sql","0015_promiedos_cache.sql","0016_team_profiles.sql","0017_historical_imports.sql"] as const;
+export const REQUIRED_PRODUCTION_MIGRATIONS = ["0001_initial.sql","0002_league_seasons.sql","0003_league_entry_slot.sql","0004_prediction_history.sql","0005_official_predictions.sql","0006_competition_engine.sql","0007_iffhs.sql","0008_competition_results.sql","0009_stage_qualifiers.sql","0010_duos_survival.sql","0011_competition_qualification_slots.sql","0012_champions_bracket_nodes.sql","0013_season_transition_plan.sql","0014_duos_admin.sql","0015_promiedos_cache.sql","0016_team_profiles.sql","0017_historical_imports.sql","0018_push_notifications.sql"] as const;
