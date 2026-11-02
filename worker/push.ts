@@ -104,6 +104,11 @@ export async function handlePush(request:Request,env:Env):Promise<Response|null>
   const count=await env.DB.prepare('SELECT COUNT(*) AS n FROM push_subscriptions WHERE user_id=?').bind(user.id).first<{n:number}>();
   return json({publicKey,ready:Boolean(publicKey&&env.PUSH_VAPID_PRIVATE_KEY),devices:Number(count?.n??0)});
  }
+ if(request.method==='POST'&&path==='/api/participant/push/status'){
+  const b=await request.json().catch(()=>null) as {endpoint?:string}|null;
+  const row=await env.DB.prepare('SELECT 1 AS present FROM push_subscriptions WHERE endpoint=? AND user_id=? LIMIT 1').bind(b?.endpoint??'',user.id).first();
+  return json({enabled:Boolean(row)});
+ }
  if(request.method==='POST'&&path==='/api/participant/push/subscribe'){
   const b=await request.json().catch(()=>null) as {endpoint?:string;keys?:{p256dh?:string;auth?:string}}|null;
   const endpoint=b?.endpoint||'',p256dh=b?.keys?.p256dh||'',auth=b?.keys?.auth||'';

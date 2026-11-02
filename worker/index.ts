@@ -12,6 +12,7 @@ export interface Env {
   FOOTBALL_API_KEY?: string;
   PROMIEDOS_INGEST_TOKEN?: string;
   GITHUB_ACTIONS_TOKEN?: string;
+  PUSH_VAPID_PRIVATE_KEY?: string;
 }
 
 type Role = 'admin' | 'participant';
