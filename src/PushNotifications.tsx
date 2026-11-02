@@ -15,12 +15,17 @@ function decode(key:string){
  return buffer;
 }
 const supported=()=>typeof window!=='undefined'&&'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
-const iosWeb=()=>/iPad|iPhone|iPod/.test(navigator.userAgent);
+const iosWeb=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const standalone=()=>window.matchMedia('(display-mode: standalone)').matches
  ||Boolean((navigator as Navigator & {standalone?:boolean}).standalone);
 
-export default function PushNotifications(){
+export default function PushNotifications({userId}:{userId:string}){
+ const storageKey='tafa:push-prompt-dismissed:'+userId;
+ const [dismissed,setDismissed]=useState(()=>{
+  try{return sessionStorage.getItem(storageKey)==='1';}catch{return false;}
+ });
  const [config,setConfig]=useState<Config|null>(null);
+ const [checked,setChecked]=useState(false);
  const [enabled,setEnabled]=useState(false);
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState('');
@@ -30,7 +35,9 @@ export default function PushNotifications(){
   let alive=true;
   (async()=>{
    try{
-    const cfg=await api<Config>('config');if(!alive)return;setConfig(cfg);
+    const cfg=await api<Config>('config');
+    if(!alive)return;
+    setConfig(cfg);
     if(!supported()||!cfg.ready)return;
     const reg=await navigator.serviceWorker.register('/sw.js');
     const subscription=await reg.pushManager.getSubscription();
@@ -41,23 +48,28 @@ export default function PushNotifications(){
      if(alive)setEnabled(status.enabled);
     }
    }catch(e){if(alive)setError(e instanceof Error?e.message:'No se pudo consultar el permiso');}
+   finally{if(alive)setChecked(true);}
   })();
   return ()=>{alive=false;};
- },[]);
+ },[userId]);
  const compatible=supported()&&(!iosWeb()||standalone());
+ const blocked=supported()&&Notification.permission==='denied';
+ function dismiss(){
+  setDismissed(true);
+  try{sessionStorage.setItem(storageKey,'1');}catch{/* Still dismiss in this session. */}
+ }
  async function activate(){
-  if(!config?.publicKey||!compatible)return;
+  if(!config?.publicKey||!compatible||blocked)return;
   setBusy(true);setError('');setMessage('');
   try{
-   // The permission prompt is triggered by the participant's actual button click.
+   // Browser permission requires an explicit user click; never request automatically on page load.
    const permission=await Notification.requestPermission();
-   if(permission!=='granted')throw Error('El dispositivo no autorizó las notificaciones. Revisá los permisos del navegador.');
+   if(permission!=='granted')throw Error('No se autorizó el permiso. Podés cambiarlo desde la configuración del navegador.');
    const reg=await navigator.serviceWorker.register('/sw.js');
    const existing=await reg.pushManager.getSubscription();
    const subscription=existing??await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decode(config.publicKey) as BufferSource});
-   const value=subscription.toJSON();
-   await api('subscribe',{method:'POST',body:JSON.stringify(value)});
-   setCurrent(subscription);setEnabled(true);setMessage('Notificaciones activadas en este dispositivo.');
+   await api('subscribe',{method:'POST',body:JSON.stringify(subscription.toJSON())});
+   setCurrent(subscription);setEnabled(true);setMessage('¡Notificaciones activadas en este dispositivo!');
   }catch(e){setError(e instanceof Error?e.message:'No se pudieron activar las notificaciones');}
   finally{setBusy(false);}
  }
@@ -69,7 +81,7 @@ export default function PushNotifications(){
     await api('unsubscribe',{method:'POST',body:JSON.stringify({endpoint:subscription.endpoint})});
     await subscription.unsubscribe();
    }
-   setEnabled(false);setCurrent(null);setMessage('Notificaciones desactivadas en este dispositivo.');
+   setEnabled(false);setCurrent(null);dismiss();setMessage('Notificaciones desactivadas en este dispositivo.');
   }catch(e){setError(e instanceof Error?e.message:'No se pudieron desactivar');}
   finally{setBusy(false);}
  }
@@ -82,17 +94,31 @@ export default function PushNotifications(){
   }catch(e){setError(e instanceof Error?e.message:'No se pudo enviar la prueba');}
   finally{setBusy(false);}
  }
- return <section className="push-settings" aria-label="Notificaciones de TAFA">
-  <div className="push-settings__top"><div><h2>Notificaciones</h2><p>Recibí avisos de nuevas Fechas, pronósticos pendientes y resultados, incluso con TAFA cerrada.</p></div><span aria-hidden="true">🔔</span></div>
-  {!config?<p className="push-settings__hint">Consultando disponibilidad…</p>
-   :!config.ready?<p className="push-settings__hint">Las notificaciones todavía no están configuradas en TAFA.</p>
-   :!supported()?<p className="push-settings__hint">Este navegador no admite notificaciones push. Probá con Chrome, Firefox, Edge o la app instalada.</p>
-   :iosWeb()&&!standalone()?<p className="push-settings__hint">En iPhone: abrí TAFA desde Safari, tocá Compartir → Agregar a inicio y luego abrí TAFA desde el icono para activarlas.</p>
-   :<div className="push-settings__actions">
-    <button type="button" className="button button--secondary" disabled={busy} onClick={()=>void(enabled?deactivate():activate())}>{busy?'Procesando…':enabled?'Desactivar en este dispositivo':'Activar notificaciones'}</button>
-    {enabled&&<button type="button" className="button button--ghost" disabled={busy} onClick={()=>void test()}>Enviar prueba</button>}
-    <span className="push-settings__hint">{enabled?'Activadas en este dispositivo.':'No se enviarán avisos hasta que las actives.'}</span>
-   </div>}
+ if(!checked)return null;
+ const inviting=Boolean(config?.ready&&!enabled&&!dismissed);
+ const hint=!config?'No pudimos consultar las notificaciones.'
+  :!config.ready?'Las notificaciones todavía no están configuradas en TAFA.'
+  :!supported()?'Este navegador no admite notificaciones push.'
+  :iosWeb()&&!standalone()?'En iPhone: desde Safari, tocá Compartir → Agregar a inicio. Abrí TAFA desde ese ícono para activar las notificaciones.'
+  :blocked?'Las notificaciones están bloqueadas. Habilitalas desde los permisos de este sitio en el navegador.'
+  :null;
+ return <section className={'push-settings'+(inviting?' push-settings--invite':' push-settings--compact')} aria-label="Notificaciones de TAFA">
+  <div className="push-settings__top">
+   <div>
+    <h2>{inviting?'🔔 Activá las notificaciones':'Notificaciones'}</h2>
+    {inviting?<p>Enterate cuando haya una nueva fecha, cuando te falte enviar tus pronósticos o cuando estén los resultados. Te avisamos aunque TAFA esté cerrada.</p>
+      :<p>{enabled?'Activadas en este dispositivo.':'Avisos al celular o computadora, incluso con la web cerrada.'}</p>}
+   </div>
+   {inviting&&<span aria-hidden="true">🔔</span>}
+  </div>
+  {hint&&<p className="push-settings__hint">{hint}</p>}
+  {config?.ready&&compatible&&<div className="push-settings__actions">
+   {enabled?<><button type="button" className="button button--ghost" disabled={busy} onClick={()=>void test()}>Enviar prueba</button>
+     <button type="button" className="button button--ghost" disabled={busy} onClick={()=>void deactivate()}>Desactivar</button></>
+    :!blocked&&<button type="button" className="button button--primary" disabled={busy} onClick={()=>void activate()}>{busy?'Activando…':'Activar notificaciones'}</button>}
+   {inviting&&<button type="button" className="button button--ghost" onClick={dismiss}>Ahora no</button>}
+  </div>}
+  {inviting&&!(config?.ready&&compatible)&&<button type="button" className="button button--ghost" onClick={dismiss}>Entendido</button>}
   {error&&<p className="push-settings__error" role="alert">{error}</p>}
   {message&&<p className="push-settings__success" role="status">{message}</p>}
  </section>;
