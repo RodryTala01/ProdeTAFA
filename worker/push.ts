@@ -129,17 +129,131 @@ async function adminPushOverview(request:Request,env:Env){
    id:number;userId:string;name:string;eventKey:string;status:'pending'|'sent'|'failed';
    attempts:number;attemptedAt:string
   }>();
+
+ const currentRound=await env.DB.prepare("SELECT id,name FROM rounds WHERE status='open' ORDER BY id DESC LIMIT 1").first<{id:number;name:string}>();
+ const finishedRound=await env.DB.prepare("SELECT id,name FROM rounds WHERE status='finished' ORDER BY finished_at DESC,id DESC LIMIT 1").first<{id:number;name:string}>();
+ const pendingUserIds:string[]=[];
+ if(currentRound){
+  for(const p of people.results??[]){
+   if(p.active&&p.devices>0&&await pending(env,p.id,currentRound.id))pendingUserIds.push(p.id);
+  }
+ }
+ const pastManual=await env.DB.prepare(`SELECT id,created_at AS createdAt,after_json AS payload
+  FROM audit_log WHERE action='push.manual_completed'
+  ORDER BY id DESC LIMIT 12`).all<{id:number;createdAt:string;payload:string}>();
+ const manualMessages=(pastManual.results??[]).flatMap(item=>{
+  try{
+   const details=JSON.parse(item.payload) as {title:string;body:string;participants:number;devices:number;accepted:number;failed:number;kind:string};
+   return [{id:item.id,createdAt:item.createdAt,...details}];
+  }catch{return [];}
+ });
  return json({
   participants:(people.results??[]).map(p=>({
    ...p,active:Boolean(p.active),devices:Number(p.devices),sent:Number(p.sent),failed:Number(p.failed)
   })),
-  deliveries:history.results??[]
+  deliveries:history.results??[],currentRound:currentRound??null,finishedRound:finishedRound??null,
+  pendingUserIds,manualMessages
  });
+}
+
+
+type ManualRequest={
+ requestId?:string;
+ kind?:'new_round'|'reminder'|'results'|'custom';
+ audience?:'all'|'pending'|'selected';
+ userIds?:string[];
+ title?:string;
+ body?:string;
+ destination?:'inicio'|'pronosticos'|'competiciones'|'club';
+};
+async function adminPushSend(request:Request,env:Env):Promise<Response>{
+ if(request.method!=='POST')return json({error:'Método no permitido'},405);
+ const admin=await session(request,env,'admin');
+ if(!admin)return json({error:'Acceso de administrador requerido'},403);
+ if(!env.PUSH_VAPID_PRIVATE_KEY||!(await vapidPublic(env)))return json({error:'El servicio push no está configurado'},503);
+ if(Number(request.headers.get('content-length')??0)>6000)return json({error:'Solicitud demasiado grande'},413);
+ const textBody=await request.text();
+ if(textBody.length>6000)return json({error:'Solicitud demasiado grande'},413);
+ let b:ManualRequest|null=null;
+ try{b=JSON.parse(textBody) as ManualRequest;}catch{return json({error:'Datos inválidos'},400);}
+ if(!b||typeof b!=='object'||Array.isArray(b))return json({error:'Datos inválidos'},400);
+ const {requestId,kind,audience}=b;
+ if(typeof requestId!=='string'||! /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId))
+  return json({error:'Identificador de envío inválido'},400);
+ if(!['new_round','reminder','results','custom'].includes(kind??'')||!['all','pending','selected'].includes(audience??''))
+  return json({error:'Seleccioná un aviso y destinatarios válidos'},400);
+ if(kind==='reminder'&&audience!=='pending')return json({error:'Los recordatorios deben enviarse solo a quienes tienen pronósticos pendientes'},400);
+ if(audience==='selected'&&(!Array.isArray(b.userIds)||b.userIds.length<1||b.userIds.length>100
+  ||b.userIds.some(id=>typeof id!=='string'||id.length>128)))
+  return json({error:'Elegí entre 1 y 100 participantes'},400);
+ const previous=await env.DB.prepare("SELECT 1 AS found FROM audit_log WHERE action='push.manual_requested' AND entity_id=? LIMIT 1").bind(requestId).first();
+ if(previous)return json({error:'Este envío ya fue solicitado. Revisá el historial antes de volver a enviarlo.'},409);
+ const recent=await env.DB.prepare("SELECT COUNT(*) AS n FROM audit_log WHERE action='push.manual_requested' AND actor_user_id=? AND created_at>=datetime('now','-30 seconds')").bind(admin.id).first<{n:number}>();
+ if(Number(recent?.n??0)>0)return json({error:'Para evitar envíos repetidos, esperá 30 segundos antes de enviar otro aviso.'},429);
+ const openRound=await env.DB.prepare("SELECT id,name FROM rounds WHERE status='open' ORDER BY id DESC LIMIT 1").first<{id:number;name:string}>();
+ const latestFinished=await env.DB.prepare("SELECT id,name FROM rounds WHERE status='finished' ORDER BY finished_at DESC,id DESC LIMIT 1").first<{id:number;name:string}>();
+ if((kind==='new_round'||kind==='reminder'||audience==='pending')&&!openRound)
+  return json({error:'No hay una Fecha abierta para este aviso'},409);
+ if(kind==='results'&&!latestFinished)return json({error:'Todavía no hay una Fecha finalizada'},409);
+ let notice:Notice;
+ switch(kind){
+  case 'new_round':
+   notice={title:'⚽ ¡Nueva fecha disponible!',body:openRound!.name+' ya está disponible. ¡Cargá tus pronósticos!',url:'/#/pronosticos',tag:'tafa-manual-'+requestId};
+   break;
+  case 'reminder':
+   notice={title:'⏰ ¡Pronósticos pendientes!',body:'Todavía no enviaste o tenés cambios pendientes en '+openRound!.name+'. ¡Entrá a TAFA!',url:'/#/pronosticos',tag:'tafa-manual-'+requestId};
+   break;
+  case 'results':
+   notice={title:'🏆 ¡Resultados disponibles!',body:'Ya podés consultar los resultados de '+latestFinished!.name+' y tu posición en TAFA.',url:'/#/club/historial',tag:'tafa-manual-'+requestId};
+   break;
+  default:{
+   const title=typeof b.title==='string'?b.title.trim():'';
+   const body=typeof b.body==='string'?b.body.trim():'';
+   if(title.length<3||title.length>70||body.length<5||body.length>240
+    ||/[<>]/.test(title+body)||/[\u0000-\u0008\u000e-\u001f]/.test(title+body))
+    return json({error:'El título debe tener 3 a 70 caracteres y el mensaje entre 5 y 240, sin HTML'},400);
+   const allowed:{[k:string]:string}={inicio:'/#/inicio',pronosticos:'/#/pronosticos',competiciones:'/#/competiciones',club:'/#/club'};
+   if(typeof b.destination!=='string'||!(b.destination in allowed))return json({error:'Elegí un destino válido'},400);
+   notice={title,body,url:allowed[b.destination],tag:'tafa-manual-'+requestId};
+  }
+ }
+ const all=(await env.DB.prepare(`SELECT ps.id,ps.user_id,ps.endpoint,ps.p256dh,ps.auth
+  FROM push_subscriptions ps JOIN users u ON u.id=ps.user_id
+  WHERE u.role='participant' AND u.is_active=1`).all<Subscription>()).results??[];
+ const selected=new Set(b.userIds??[]);
+ const eligibleUserIds=new Set<string>();
+ for(const s of all){
+  if(audience==='selected'&&!selected.has(s.user_id))continue;
+  eligibleUserIds.add(s.user_id);
+ }
+ if(audience==='pending'){
+  for(const userId of [...eligibleUserIds])if(!(await pending(env,userId,openRound!.id)))eligibleUserIds.delete(userId);
+ }
+ const targets=all.filter(s=>eligibleUserIds.has(s.user_id));
+ if(!targets.length)return json({error:'No hay dispositivos registrados para esos destinatarios'},409);
+ if(targets.length>100)return json({error:'Hay más de 100 dispositivos. Seleccioná un grupo más pequeño.'},409);
+ const eventKey='manual:'+requestId;
+ const audit=JSON.stringify({kind,audience,title:notice.title,body:notice.body,destination:notice.url,
+  participants:eligibleUserIds.size,devices:targets.length});
+ await env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json)
+ VALUES(?,'push.manual_requested','push',?,?)`).bind(admin.id,requestId,audit).run();
+ let accepted=0,failed=0;
+ for(let index=0;index<targets.length;index+=8){
+  const delivered=await Promise.all(targets.slice(index,index+8).map(s=>send(env,s,notice,eventKey)));
+  accepted+=delivered.filter(Boolean).length;
+  failed+=delivered.filter(ok=>!ok).length;
+ }
+ const report={requestId,kind,audience,title:notice.title,body:notice.body,
+  participants:eligibleUserIds.size,devices:targets.length,accepted,failed};
+ await env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,after_json)
+ VALUES(?,'push.manual_completed','push',?,?)`).bind(admin.id,requestId,JSON.stringify(report)).run();
+ return json({ok:true,...report});
 }
 
 export async function handlePush(request:Request,env:Env):Promise<Response|null>{
  const path=new URL(request.url).pathname;
  if(path==='/api/admin/push/overview')return adminPushOverview(request,env);
+ if(path==='/api/admin/push/send')return adminPushSend(request,env);
  if(!path.startsWith('/api/participant/push/'))return null;
  const user=await session(request,env);
  if(!user)return json({error:'Sesión de participante requerida'},401);
