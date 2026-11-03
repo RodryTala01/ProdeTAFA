@@ -53,12 +53,12 @@ async function vapidAuth(endpoint:string,publicKey:string,privateKey:string){
  return 'vapid t='+message+'.'+b64u(sig)+', k='+publicKey;
 }
 const json=(o:unknown,status=200)=>new Response(JSON.stringify(o),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});
-async function session(request:Request,env:Env){
+async function session(request:Request,env:Env,role:'admin'|'participant'='participant'){
  const cookie=request.headers.get('cookie')?.split(';').map(s=>s.trim()).find(s=>s.startsWith('prode_session='));
  if(!cookie)return null;
  let token='';try{token=decodeURIComponent(cookie.slice('prode_session='.length));}catch{return null;}
  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',raw(token))),n=>n.toString(16).padStart(2,'0')).join('');
- return env.DB.prepare("SELECT u.id FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND julianday(s.expires_at)>julianday('now') AND u.is_active=1 AND u.role='participant' LIMIT 1").bind(hash).first<{id:string}>();
+ return env.DB.prepare("SELECT u.id FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND julianday(s.expires_at)>julianday('now') AND u.is_active=1 AND u.role=? LIMIT 1").bind(hash,role).first<{id:string}>();
 }
 async function vapidPublic(env:Env){
  const row=await env.DB.prepare('SELECT public_key FROM push_config WHERE id=1').first<{public_key:string}>();
@@ -94,8 +94,52 @@ async function send(env:Env,s:Subscription,notice:Notice,eventKey:string){
  await env.DB.prepare("UPDATE push_deliveries SET status='failed' WHERE subscription_id=? AND event_key=?").bind(s.id,eventKey).run();
  return false;
 }
+
+async function adminPushOverview(request:Request,env:Env){
+ if(request.method!=='GET')return json({error:'Método no permitido'},405);
+ const admin=await session(request,env,'admin');
+ if(!admin)return json({error:'Acceso de administrador requerido'},403);
+ // Read-only summary; never expose subscription endpoints, encryption keys or phone numbers.
+ const people=await env.DB.prepare(`SELECT u.id,u.full_name AS name,u.is_active AS active,
+  COALESCE(s.devices,0) AS devices,s.last_registered_at AS lastRegisteredAt,
+  COALESCE(d.sent,0) AS sent,COALESCE(d.failed,0) AS failed
+  FROM users u
+  LEFT JOIN (
+   SELECT user_id,COUNT(*) AS devices,MAX(updated_at) AS last_registered_at
+   FROM push_subscriptions GROUP BY user_id
+  ) s ON s.user_id=u.id
+  LEFT JOIN (
+   SELECT ps.user_id,
+    SUM(CASE WHEN pd.status='sent' THEN 1 ELSE 0 END) AS sent,
+    SUM(CASE WHEN pd.status='failed' THEN 1 ELSE 0 END) AS failed
+   FROM push_subscriptions ps
+   JOIN push_deliveries pd ON pd.subscription_id=ps.id
+   GROUP BY ps.user_id
+  ) d ON d.user_id=u.id
+  WHERE u.role='participant'
+  ORDER BY u.is_active DESC,u.full_name COLLATE NOCASE,u.id`).all<{
+   id:string;name:string;active:number;devices:number;lastRegisteredAt:string|null;sent:number;failed:number
+  }>();
+ const history=await env.DB.prepare(`SELECT pd.id,ps.user_id AS userId,u.full_name AS name,
+  pd.event_key AS eventKey,pd.status,pd.attempts,pd.attempted_at AS attemptedAt
+  FROM push_deliveries pd
+  JOIN push_subscriptions ps ON ps.id=pd.subscription_id
+  JOIN users u ON u.id=ps.user_id AND u.role='participant'
+  ORDER BY pd.attempted_at DESC,pd.id DESC LIMIT 50`).all<{
+   id:number;userId:string;name:string;eventKey:string;status:'pending'|'sent'|'failed';
+   attempts:number;attemptedAt:string
+  }>();
+ return json({
+  participants:(people.results??[]).map(p=>({
+   ...p,active:Boolean(p.active),devices:Number(p.devices),sent:Number(p.sent),failed:Number(p.failed)
+  })),
+  deliveries:history.results??[]
+ });
+}
+
 export async function handlePush(request:Request,env:Env):Promise<Response|null>{
  const path=new URL(request.url).pathname;
+ if(path==='/api/admin/push/overview')return adminPushOverview(request,env);
  if(!path.startsWith('/api/participant/push/'))return null;
  const user=await session(request,env);
  if(!user)return json({error:'Sesión de participante requerida'},401);

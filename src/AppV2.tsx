@@ -2,6 +2,7 @@ import {ParticipantShield} from './AssetImage';
 import { Brand, Icon, PasswordField } from './ui';
 import ParticipantsAdmin from './ParticipantsAdmin';
 import AdminHistoricalArchive from './AdminHistoricalArchive';
+import AdminPushNotifications from './AdminPushNotifications';
 import { AdminMenu } from './AdminUI';
 import './admin-shell.css';
 import { FormEvent, useEffect, useState } from 'react';
@@ -119,7 +120,7 @@ function Header({ user, subtitle, onLogout }: { user: User; subtitle: string; on
 
 
 function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }) {
-  const [section, setSection] = useState<'rounds' | 'competitions' | 'participants' | 'archive'>('rounds');
+  const [section, setSection] = useState<'rounds' | 'competitions' | 'participants' | 'archive' | 'notifications'>('rounds');
   return (
     <main className="app-shell admin-shell">
       <Header user={user} subtitle="Administrador" onLogout={onLogout} />
@@ -129,12 +130,13 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
           <button className={`admin-tab ${section === 'competitions' ? 'admin-tab--active' : ''}`} aria-current={section === 'competitions' ? 'page' : undefined} onClick={() => setSection('competitions')}>Competiciones</button>
           <button className={`admin-tab ${section === 'participants' ? 'admin-tab--active' : ''}`} aria-current={section === 'participants' ? 'page' : undefined} onClick={() => setSection('participants')}>Participantes</button>
           <button className={`admin-tab ${section === 'archive' ? 'admin-tab--active' : ''}`} aria-current={section === 'archive' ? 'page' : undefined} onClick={() => setSection('archive')}>Archivo histórico</button>
+          <button className={`admin-tab ${section === 'notifications' ? 'admin-tab--active' : ''}`} aria-current={section === 'notifications' ? 'page' : undefined} onClick={() => setSection('notifications')}>Notificaciones</button>
         </nav>
         {section === 'rounds'
           ? <AdminRounds />
           : section === 'competitions'
             ? <AdminCompetitions />
-            : section === 'participants' ? <ParticipantsAdmin /> : <AdminHistoricalArchive />}
+            : section === 'participants' ? <ParticipantsAdmin /> : section === 'notifications' ? <AdminPushNotifications /> : <AdminHistoricalArchive />}
       </section>
     </main>
   );
