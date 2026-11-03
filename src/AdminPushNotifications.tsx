@@ -1,10 +1,11 @@
 import {useEffect,useMemo,useState} from 'react';
 import {ParticipantShield} from './AssetImage';
+import AdminPushComposer, {type ManualOverview} from './AdminPushComposer';
 import './admin-push.css';
 
 type Person={id:string;name:string;active:boolean;devices:number;lastRegisteredAt:string|null;sent:number;failed:number};
 type Delivery={id:number;userId:string;name:string;eventKey:string;status:'pending'|'sent'|'failed';attempts:number;attemptedAt:string};
-type Overview={participants:Person[];deliveries:Delivery[]};
+type Overview=Omit<ManualOverview,'participants'> & {participants:Person[];deliveries:Delivery[]};
 type Filter='all'|'enabled'|'missing'|'inactive';
 
 function dateAr(value:string|null){
@@ -19,6 +20,7 @@ function dateAr(value:string|null){
 }
 function eventName(key:string){
  if(key.startsWith('test:'))return 'Prueba';
+ if(key.startsWith('manual:'))return 'Notificación manual';
  const match=key.match(/^round:(\d+):(published|reminder24|reminder2|finished)$/);
  if(!match)return 'Otro aviso';
  const labels:Record<string,string>={published:'Fecha publicada',reminder24:'Recordatorio 24 h',reminder2:'Recordatorio 2 h',finished:'Fecha finalizada'};
@@ -71,6 +73,7 @@ export default function AdminPushNotifications(){
     <div><small>Dispositivos registrados</small><strong>{devices}</strong></div>
    </div>
    <p className="admin-push-note">«Activadas» significa que hay al menos un dispositivo registrado. No confirma que el permiso siga vigente ni que se hayan leído los avisos.</p>
+   <AdminPushComposer data={data} onSent={()=>setRevision(n=>n+1)}/>
    <div className="admin-push-toolbar">
     <label className="field"><span>Buscar participante</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Nombre del participante"/></label>
     <label className="field"><span>Mostrar</span><select value={filter} onChange={e=>setFilter(e.target.value as Filter)}>
