@@ -5,7 +5,7 @@ import './admin-push.css';
 
 type Person={id:string;name:string;active:boolean;devices:number;lastRegisteredAt:string|null;sent:number;failed:number};
 type Delivery={id:number;userId:string;name:string;eventKey:string;status:'pending'|'sent'|'failed';attempts:number;attemptedAt:string};
-type Overview=ManualOverview & {participants:Person[];deliveries:Delivery[]};
+type Overview=Omit<ManualOverview,'participants'> & {participants:Person[];deliveries:Delivery[]};
 type Filter='all'|'enabled'|'missing'|'inactive';
 
 function dateAr(value:string|null){
