@@ -14,9 +14,6 @@ type Audience='all'|'pending'|'selected';
 type Destination='inicio'|'pronosticos'|'competiciones'|'club';
 type SendResult={ok:boolean;participants:number;devices:number;accepted:number;failed:number;error?:string};
 
-const label=(kind:Kind)=>({
- new_round:'Nueva fecha',reminder:'Recordatorio de pronósticos',results:'Resultados disponibles',custom:'Mensaje personalizado'
-})[kind];
 
 function dateAr(value:string){
  const iso=/(Z|[+-]\d{2}:\d{2})$/.test(value)?value:value.replace(' ','T')+'Z';
