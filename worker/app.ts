@@ -33,7 +33,7 @@ function jsonError(message: string, status: number) {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const pathname = new URL(request.url).pathname;
-    if(pathname.startsWith('/api/participant/push/')){
+    if(pathname.startsWith('/api/participant/push/')||pathname.startsWith('/api/admin/push/')){
       if(!mutationAllowed(request))return jsonError('Origen de solicitud no permitido',403);
       return (await handlePush(request,env))??jsonError('Ruta no encontrada',404);
     }
