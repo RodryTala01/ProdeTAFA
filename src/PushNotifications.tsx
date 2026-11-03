@@ -73,18 +73,6 @@ export default function PushNotifications({userId}:{userId:string}){
   }catch(e){setError(e instanceof Error?e.message:'No se pudieron activar las notificaciones');}
   finally{setBusy(false);}
  }
- async function deactivate(){
-  setBusy(true);setError('');setMessage('');
-  try{
-   const subscription=current??await (await navigator.serviceWorker.ready).pushManager.getSubscription();
-   if(subscription){
-    await api('unsubscribe',{method:'POST',body:JSON.stringify({endpoint:subscription.endpoint})});
-    await subscription.unsubscribe();
-   }
-   setEnabled(false);setCurrent(null);dismiss();setMessage('Notificaciones desactivadas en este dispositivo.');
-  }catch(e){setError(e instanceof Error?e.message:'No se pudieron desactivar');}
-  finally{setBusy(false);}
- }
  async function test(){
   if(!current)return;
   setBusy(true);setError('');setMessage('');
@@ -113,8 +101,7 @@ export default function PushNotifications({userId}:{userId:string}){
   </div>
   {hint&&<p className="push-settings__hint">{hint}</p>}
   {config?.ready&&compatible&&<div className="push-settings__actions">
-   {enabled?<><button type="button" className="button button--ghost" disabled={busy} onClick={()=>void test()}>Enviar prueba</button>
-     <button type="button" className="button button--ghost" disabled={busy} onClick={()=>void deactivate()}>Desactivar</button></>
+   {enabled?<button type="button" className="button button--ghost" disabled={busy} onClick={()=>void test()}>Enviar prueba</button>
     :!blocked&&<button type="button" className="button button--primary" disabled={busy} onClick={()=>void activate()}>{busy?'Activando…':'Activar notificaciones'}</button>}
    {inviting&&<button type="button" className="button button--ghost" onClick={dismiss}>Ahora no</button>}
   </div>}
