@@ -1,5 +1,5 @@
-const CACHE_NAME = 'prode-tafa-static-v2';
-const APP_SHELL = ['/', '/manifest.webmanifest', '/icon.svg'];
+const CACHE_NAME = 'prode-tafa-static-v3';
+const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/tafa-192.png', '/icons/tafa-badge-96.png'];
 self.addEventListener('install', event => {
  event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)));
  self.skipWaiting();
@@ -27,7 +27,7 @@ self.addEventListener('push',event=>{
  let info={title:'Prode TAFA',body:'Tenés una novedad en el Prode.',url:'/#/inicio',tag:'tafa-notice'};
  try{if(event.data)info={...info,...event.data.json()};}catch{}
  event.waitUntil(self.registration.showNotification(info.title,{
-  body:info.body,icon:'/icon.svg',badge:'/icon.svg',tag:info.tag,
+  body:info.body,icon:'/icons/tafa-192.png',badge:'/icons/tafa-badge-96.png',tag:info.tag,
   data:{url:info.url},renotify:false
  }));
 });
