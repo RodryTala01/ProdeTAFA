@@ -79,7 +79,11 @@ async function send(env:Env,s:Subscription,notice:Notice,eventKey:string){
   if(body.length>4096)throw Error('Push payload too large');
   const result=await fetch(s.endpoint,{method:'POST',headers:{
    'Content-Type':'application/octet-stream','Content-Encoding':'aes128gcm',
-   'TTL':'86400','Authorization':await vapidAuth(s.endpoint,publicKey,env.PUSH_VAPID_PRIVATE_KEY),
+   'TTL':'86400',
+   // Visible notifications should wake Android's push service even during Doze.
+   // Without Urgency, RFC 8030 defaults to normal and delivery can be deferred.
+   'Urgency':'high',
+   'Authorization':await vapidAuth(s.endpoint,publicKey,env.PUSH_VAPID_PRIVATE_KEY),
   },body:body as unknown as BodyInit});
   if(result.ok){
    await env.DB.prepare("UPDATE push_deliveries SET status='sent',sent_at=datetime('now') WHERE subscription_id=? AND event_key=?").bind(s.id,eventKey).run();
