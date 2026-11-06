@@ -72,15 +72,19 @@ are deleted or rewritten by disabling the cache.
 
 ## Kickoff diagnosis and repair
 
-Read-only checks of both /games and /gamecenter returned:
-- ehecaec, Liverpool-Manchester City: 11-10-2026 12:30 -> 2026-10-11T15:30:00.000Z.
-- egddcfg, Boca-Talleres: 16-10-2026 21:30 -> 2026-10-17T00:30:00.000Z.
+Fresh read-only acquisition from GitHub Actions (2026-11-06) compared against
+independent Argentine fixtures revealed a US Central seasonal clock:
+- Oct 27 (CDT, UTC−5): Borussia raw 14:45 -> Argentina 16:45.
+- Nov 6 (CST, UTC−6): Independiente–Riestra raw 16:15 -> Argentina 19:15
+  (confirmed by DSPORTS, TyC Sports and Riestra official site).
+- Nov 6 (CST, UTC−6): Barracas–Racing raw 12:00 -> Argentina 15:00 (TyC).
+- Nov 7 (CST, UTC−6): Boca–Defensa raw 14:30 -> Argentina 17:30 (Boca official).
 
-start_time is Argentine wall time without an offset. promiedosKickoff() already
-resolves America/Argentina/Buenos_Aires explicitly; do not add offsets. The old
-sync guard prevented repair once the incorrect stored kickoff had closed. Fresh,
-identity-validated cache now corrects historical as well as future kickoffs through
-normal sync, preserving predictions and result audit snapshots.
+Do not hardcode UTC−5 or UTC−6. Convert provider wall time using
+America/Chicago (daylight saving aware), store UTC, then display using
+America/Argentina/Buenos_Aires. The sync path corrects scheduled open
+matches from fresh provider day or gamecenter cache, preserving predictions,
+match identity, manually overridden results and finalized results.
 
 Promiedos started/final statuses also block prediction writes regardless of a
 future kickoff. If a started status contradicts a still-open timestamp, submission
