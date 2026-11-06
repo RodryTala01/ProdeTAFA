@@ -141,7 +141,7 @@ export async function getPromiedosWorkPlan(db:D1Database) {
     ORDER BY kickoff_at LIMIT 32`).all<{kickoff_at:string}>();
   for(const row of scheduled.results??[]){
     const value=row.kickoff_at.trim().replace(' ','T');
-    const at=new Date(/(?:Z|[+-]\\d{2}:?\\d{2})$/i.test(value)?value:value+'Z');
+    const at=new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)?value:value+'Z');
     if(!Number.isFinite(at.getTime()))continue;
     const date=dateFormat.format(at);
     const fresh=await db.prepare(`SELECT 1 AS ok FROM promiedos_cache WHERE kind='day'
