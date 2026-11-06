@@ -1,0 +1,19 @@
+name: Read-only Promiedos kickoff diagnosis
+on:
+  push:
+    branches: [diag/promiedos-times-2026-11]
+    paths: [.github/workflows/diagnose-promiedos-kickoff.yml]
+permissions:
+  contents: read
+jobs:
+  investigate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - name: Compare current raw provider clock to two timezone interpretations
+        run: node scripts/diagnose-promiedos-kickoff.mjs
