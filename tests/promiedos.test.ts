@@ -167,7 +167,7 @@ it('fresh sync repairs an erroneously early kickoff after its stored lock withou
  expect(db.prepare('SELECT * FROM official_predictions').all()).toEqual(before);
 });
 it('scheduled repair corrects an old kickoff before the game, without touching predictions or results',async()=>{
- insert();db.exec("UPDATE rounds SET status='open'");cache('day','2026-10-10',[game()]);
+ insert();db.exec("UPDATE rounds SET status='open'");cache('day','2026-10-10',[game({status:{enum:1,name:'Programado'},scores:undefined,events:[]})]);
  const before=db.prepare('SELECT * FROM official_predictions').all();
  expect(await repairCachedKickoffTimes(env().DB)).toBe(1);
  expect(db.prepare('SELECT kickoff_at,status,result_finalized_at FROM matches').get()).toMatchObject({kickoff_at:'2026-10-10T20:45:00.000Z',status:'NS',result_finalized_at:null});
