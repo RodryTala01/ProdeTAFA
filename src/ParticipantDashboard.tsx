@@ -49,12 +49,13 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
   }, [route, revision]);
   return <main className={`app-shell participant-shell ${route === 'inicio' ? 'participant-shell--home' : ''}`}>
     <header className="topbar participant-header"><a className="participant-brand" href="#/inicio" aria-label="Prode TAFA · Inicio"><img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="40" height="64"/><span>Prode <strong>TAFA</strong></span></a><ParticipantNavigation route={route} /><details ref={menu} className="profile-menu" onKeyDown={event => { if (event.key === 'Escape' && menu.current) { menu.current.open = false; menu.current.querySelector('summary')?.focus(); } }}>
-      <summary aria-label={`Menú de ${user.fullName}`}><span className="profile-name">{user.fullName}</span><span className="participant-profile-avatar"><ParticipantShield userId={user.id} name={user.fullName} decorative/></span><svg className="profile-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></summary>
-      <div className="profile-menu__items"><a href="#/club" onClick={() => { if (menu.current) menu.current.open = false; }}>Mi Club</a><button type="button" onClick={onLogout}><Icon name="logout" /> Cerrar sesión</button></div>
+      <summary aria-label={`Menú de ${user.fullName}`}><span className="profile-name">{user.fullName}</span><span className="participant-profile-avatar"><ParticipantShield userId={user.id} name={user.fullName} size="lg" decorative/></span><svg className="profile-chevron" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg></summary>
+      <div className="profile-menu__items"><a href="#/club" onClick={() => { if (menu.current) menu.current.open = false; }}>Mi Club</a><a href="#/configuracion" onClick={() => { if (menu.current) menu.current.open = false; }}>Configuración</a><button type="button" onClick={onLogout}><Icon name="logout" /> Cerrar sesión</button></div>
     </details></header>
     <div className={`dashboard participant-dashboard ${route === 'pronosticos' ? 'participant-dashboard--predictions' : ''}`}>
       <section ref={content} className="participant-content" tabIndex={-1} aria-label="Contenido del participante">
-        {route === 'pronosticos' ? <><div className="section-heading"><a className="button button--ghost" href="#/club/historial">Ver historial</a></div><ParticipantRound /></>
+        {route === 'configuracion' ? <section className="participant-settings"><h1>Configuración</h1><p>Notificaciones y permisos de este dispositivo.</p><PushNotifications userId={user.id} mode="settings"/></section>
+        : route === 'pronosticos' ? <ParticipantRound />
           : route.startsWith('historia') ? <ParticipantArchive route={route}/>
           : route === 'club/historicos' ? <ParticipantAllTime userId={user.id}/>
           : route.startsWith('club/historial') ? <ParticipantHistory key={route} user={user} route={route}/>
@@ -64,7 +65,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
           : route.startsWith('club/participante/') ? <ParticipantClubPage key={route} user={user} route={route}/>
           : route === 'competiciones/liga' ? <><a className="button button--ghost" href="#/competiciones">Volver a Competiciones</a><LeagueView /></>
           : route.startsWith('competiciones') ? <ParticipantCompetitionsPage route={route}/>
-           : <><PushNotifications userId={user.id}/>{loading ? <p className="loader" role="status">Cargando tu temporada…</p> : <><HomeErrors errors={data.errors} retry={() => setRevision(n => n + 1)} /><ParticipantHome name={user.fullName} userId={user.id} data={data} /></>}</>}
+           : <><PushNotifications userId={user.id} mode="prompt"/>{loading ? <p className="loader" role="status">Cargando tu temporada…</p> : <><HomeErrors errors={data.errors} retry={() => setRevision(n => n + 1)} /><ParticipantHome name={user.fullName} userId={user.id} data={data} /></>}</>}
       </section>
     </div>
   </main>;

@@ -35,6 +35,20 @@ describe('Promiedos provider outage handling',()=>{
    expect(report.internalFailures).toHaveLength(0);
    expect(acquisitionExitCode(report)).toBe(0);
  });
+ it('rejects an inconsistent provider snapshot without blocking other valid fixtures',async()=>{
+   const uploaded:string[]=[];
+   const report=await collectProviderCache({days:['2026-11-10'],games:['bad','good']},{
+     getDay:async()=>[],
+     getGame:async key=>({id:key}),
+     upload:async entry=>{if(entry.key==='bad')throw Error('Cache API HTTP 400');uploaded.push(entry.key);},
+     apply:async()=>({ok:true})
+   },{count:0});
+   expect(report.providerFailures).toHaveLength(1);
+   expect(report.internalFailures).toHaveLength(0);
+   expect(report.gameKeys).toEqual(['good']);
+   expect(uploaded).toEqual(['2026-11-10','good']);
+   expect(acquisitionExitCode(report)).toBe(0);
+ });
  it('a TAFA cache upload failure still fails the workflow',async()=>{
    const report=await collectProviderCache({days:[],games:['game']},{
      getDay:async()=>[],

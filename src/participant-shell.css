@@ -73,3 +73,14 @@
  .participant-dashboard { padding-bottom:calc(var(--nav-height) + 32px + env(safe-area-inset-bottom)); }
  .participant-shell .submit-card { bottom:calc(var(--nav-height) + env(safe-area-inset-bottom)); }
 }
+
+/* Full participant crest in the header, without circular crop, border or frame. */
+.participant-profile-avatar {width:60px;height:60px;border:0;border-radius:0;background:transparent;overflow:visible;}
+.participant-profile-avatar .asset-image {width:60px!important;height:60px!important;overflow:visible;}
+.participant-profile-avatar .asset-image img {width:100%;height:100%;object-fit:contain;border:0;border-radius:0;}
+.participant-profile-avatar .asset-image__fallback {border-radius:0;}
+.participant-settings {max-width:720px;display:grid;gap:12px;}
+.participant-settings>h1 {margin:0;}
+.participant-settings>p {margin:0;color:var(--text-muted);}
+.participant-settings .push-settings {max-width:100%;margin:0;}
+@media(max-width:950px){.participant-profile-avatar{width:54px;height:54px}.participant-profile-avatar .asset-image{width:54px!important;height:54px!important}}

@@ -107,3 +107,33 @@
 .prediction-dashboard .prediction-readonly { grid-template-columns:1fr; }
 .prediction-dashboard .prediction-competition { display:flex; }
 .prediction-dashboard .submit-card .button:disabled { background:var(--surface-raised); color:var(--text-muted); }
+
+/* Condensed prediction heading: just date, completion and next start. */
+.prediction-dashboard .participant-round-header {grid-template-columns:minmax(0,1fr) minmax(155px,240px) minmax(110px,160px);align-items:center;gap:16px;padding:12px 0;}
+.prediction-dashboard .participant-round-header h1 {margin:3px 0 0;font-size:clamp(1.4rem,2.6vw,1.9rem);font-weight:800;}
+.prediction-dashboard .prediction-progress {display:grid;gap:5px;}
+.prediction-dashboard .prediction-progress h2 {margin:0;font-size:.7rem;text-transform:uppercase;color:var(--text-muted);}
+.prediction-dashboard .prediction-progress>strong {font-size:.75rem;}
+.prediction-dashboard .prediction-progress progress {height:6px;}
+.prediction-dashboard .prediction-progress>span {font-size:.7rem;color:var(--text-muted);}
+.prediction-dashboard .prediction-next {padding-left:12px;border-left:1px solid var(--border);display:grid;gap:5px;}
+.prediction-dashboard .prediction-next>span {font-size:.7rem;color:var(--text-muted);}
+.prediction-dashboard .prediction-next>strong {font:700 1rem var(--font-display);color:var(--home-fluor);}
+.prediction-dashboard .prediction-toolbar {align-items:center;flex-wrap:wrap;padding:8px 0;gap:12px;}
+.prediction-dashboard .prediction-toolbar>div {flex:1 1 auto;}
+.prediction-history-link {color:var(--home-violet);font-size:.75rem;}
+.prediction-dashboard .round-history-card {padding:8px 12px;gap:8px;justify-content:flex-start;}
+.prediction-dashboard .round-history-card label {font-size:.8rem;color:var(--text-muted);}
+.prediction-dashboard .round-history-card select {flex:1 1 auto;max-width:440px;min-height:36px;}
+@media(max-width:700px){
+ .prediction-dashboard .participant-round-header {display:grid;grid-template-columns:minmax(0,1fr) minmax(105px,135px);gap:8px;padding:8px 0;}
+ .prediction-dashboard .participant-round-header h1 {font-size:1.4rem;}
+ .prediction-dashboard .participant-round-header .prediction-progress {grid-column:1/-1;grid-row:2;}
+ .prediction-dashboard .prediction-next {padding-left:8px;}
+ .prediction-dashboard .prediction-next>strong {font-size:.92rem;}
+ .prediction-dashboard .prediction-toolbar {gap:8px;}
+}
+
+/* Show results only when received; no empty \"– –\" placeholders pre-kickoff. */
+.participant-round--compact .prediction-matchup {align-items:center;}
+.participant-round--compact .prediction-team {gap:5px;}

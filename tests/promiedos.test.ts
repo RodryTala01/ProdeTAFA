@@ -18,6 +18,39 @@ function insert(provider='promiedos'){db.prepare(`INSERT INTO matches(id,round_i
 beforeEach(()=>{db=new DatabaseSync(':memory:');for(const f of readdirSync('migrations').filter(x=>x.endsWith('.sql')).sort())db.exec(readFileSync('migrations/'+f,'utf8'));db.exec(`INSERT INTO users(id,full_name,phone_normalized,password_hash,role) VALUES ('admin','Admin','1','hash','admin'); INSERT INTO rounds(id,name,status) VALUES (1,'Prueba','draft');`);db.prepare("INSERT INTO sessions(id,user_id,token_hash,expires_at) VALUES ('admin','admin',?,'2099-01-01')").run(createHash('sha256').update('admin').digest('hex'));});
 afterEach(()=>{db.close();vi.unstubAllGlobals();vi.restoreAllMocks();});
 it('converts provider US Central wall time with daylight saving and rejects invalid dates',()=>{expect(promiedosKickoff('10-10-2026 15:45')).toBe('2026-10-10T20:45:00.000Z');expect(()=>promiedosKickoff('31-02-2026 15:45')).toThrow();});
+it('Admin correction saves a real Argentina instant and protects it from stale provider sync',async()=>{
+ insert();db.exec("UPDATE rounds SET status='open'");
+ const input=new Date(Date.now()+2*86400000);
+ const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(input);
+ const v=(k:string)=>parts.find(p=>p.type===k)?.value;
+ const local=v('year')+'-'+v('month')+'-'+v('day')+'T'+v('hour')+':'+v('minute');
+ const response=await handleAdminRounds(req('rounds/1/matches/1/kickoff',{localDateTime:local,reason:'Horario oficial confirmado por el club'}),env());
+ expect(response?.status).toBe(200);
+ const after=db.prepare('SELECT kickoff_at FROM matches WHERE id=1').get()!.kickoff_at as string;
+ expect(after).toBe(new Date(local+':00-03:00').toISOString());
+ expect(db.prepare("SELECT action FROM audit_log WHERE entity_id='1'").all()).toMatchObject([{action:'match.kickoff_corrected'}]);
+ const provider=game({status:{enum:1,name:'Programado'},events:[],scores:undefined});
+ cache('day','2026-10-10',[provider]);cache('game','abc',provider);
+ expect(await repairCachedKickoffTimes(env().DB)).toBe(0);
+ await syncRoundResults(1,env());
+ expect(db.prepare('SELECT kickoff_at FROM matches WHERE id=1').get()!.kickoff_at).toBe(after);
+ expect(db.prepare('SELECT count(*) AS n FROM official_predictions').get()).toMatchObject({n:0});
+ const exposed=await handleAdminRounds(req('rounds/1'),env());
+ const detail=await exposed!.json() as {round:{matches:{kickoffOverride:boolean}[]}};
+ expect(detail.round.matches[0].kickoffOverride).toBe(true);
+});
+it('a finalized round can correct a past kickoff without reopening any predictions',async()=>{
+ insert();db.exec("UPDATE rounds SET status='finished'; UPDATE matches SET status='FT',result_finalized_at=datetime('now')");
+ const yesterday=new Date(Date.now()-86400000);
+ const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(yesterday);
+ const v=(key:string)=>parts.find(p=>p.type===key)?.value;
+ const local=v('year')+'-'+v('month')+'-'+v('day')+'T'+v('hour')+':'+v('minute');
+ const response=await handleAdminRounds(req('rounds/1/matches/1/kickoff',{localDateTime:local,reason:'Corrección histórica confirmada'}),env());
+ expect(response?.status).toBe(200);
+ expect(db.prepare('SELECT kickoff_at,status FROM matches WHERE id=1').get()).toMatchObject({kickoff_at:new Date(local+':00-03:00').toISOString(),status:'FT'});
+ expect(db.prepare('SELECT status FROM rounds WHERE id=1').get()).toMatchObject({status:'finished'});
+ expect(db.prepare('SELECT count(*) AS n FROM official_predictions').get()).toMatchObject({n:0});
+});
 it('search reads seven cached days without provider requests',async()=>{
  vi.stubGlobal('fetch',vi.fn());for(let i=10;i<=16;i++)cache('day','2026-10-'+i,[game(),game({id:'xyz'})]);
  const r=await handleAdminRounds(req('fixtures?from=2026-10-10&to=2026-10-16'),env());

@@ -24,7 +24,15 @@ export async function collectProviderCache(plan, {getDay,getGame,upload,apply,fa
       report.uploaded++;
       if(kind==='game')report.gameKeys.push(key);
     }catch(error){
-      report.internalFailures.push({operation:'cache-upload',kind,key,error:safeError(error)});
+      const message=safeError(error);
+      // Invalid provider payloads rejected by TAFA (400) are quarantined:
+      // keep the previous cache, warn, and continue acquiring other games/days.
+      // Auth/network/server failures still fail the pipeline.
+      if(message==='Cache API HTTP 400'){
+        report.providerFailures.push({kind,key,error:'Datos del proveedor inconsistentes; caché anterior conservada'});
+      }else{
+        report.internalFailures.push({operation:'cache-upload',kind,key,error:message});
+      }
     }
   }
   if(report.gameKeys.length){

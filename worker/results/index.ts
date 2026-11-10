@@ -204,7 +204,9 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
       // Fresh provider kickoffs can repair existing matches, including history.
       // Prediction writes also check started status so a time repair cannot reopen play.
       const update = env.DB.prepare(`UPDATE matches SET
-        kickoff_at = ?,
+        kickoff_at = CASE WHEN EXISTS(SELECT 1 FROM audit_log a
+          WHERE a.action='match.kickoff_corrected' AND a.entity_type='match'
+          AND a.entity_id=CAST(matches.id AS TEXT)) THEN kickoff_at ELSE ? END,
         status=?, elapsed_minutes=?, home_score_current=?, away_score_current=?,
         home_score_regulation=?, away_score_regulation=?, winning_team_provider_id=?, qualified_team_provider_id=?,
         went_to_extra_time=?, went_to_penalties=?, is_void=0,

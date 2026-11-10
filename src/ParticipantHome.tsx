@@ -70,20 +70,19 @@ export default function ParticipantHome({ name, data, userId }: { name: string; 
     <div className="home-welcome"><span>{data.season?.name??'PRODE TAFA'}</span><span>{name}</span></div>
     {!data.errors.includes('No pudimos cargar la próxima Fecha.')&&<NextRound round={data.round}/>}
     <div className="home-main-grid"><section className="home-panel"><HomeHeading title="Partidos de la Fecha" href="#/pronosticos" label="Ver toda la Fecha"/>
-      {matches.length?<div className="home-fixtures">{matches.slice(0,5).map((m,i)=>{
+      {matches.length?<div className="home-fixtures">{matches.map((m,i)=>{
         const state=homeFixtureState(m);
-        return <article className={`home-fixture ${state.isLive?'home-fixture--live':state.isFinal?'home-fixture--final':''}`} key={m.id??i}>
-          <time dateTime={m.kickoffAt}>{argentinaDateTime(m.kickoffAt,{month:'short'})}</time>
-          <span className="home-team"><TeamShield name={m.home!.name} teamId={m.home!.id} logoUrl={m.home!.logoUrl} size="sm" decorative/><span>{m.home!.name}</span></span>
-          <span className="home-match-center">
-            {state.started
-              ? <><strong className="home-real-score">{state.result??'— – —'}</strong><span className={state.isLive?'home-match-status home-match-status--live':'home-match-status home-match-status--final'}>{state.isLive?`EN VIVO${m.elapsedMinutes!=null?' · '+m.elapsedMinutes+'′':''}`:'FINAL'}</span>{state.prediction&&<small>Tu pronóstico: {state.prediction}</small>}{state.isFinal&&m.score&&<small className="home-match-points">{m.score.points>0?'+':''}{m.score.points} pts</small>}</>
-              : state.prediction
-                ? <><strong className="home-prediction-score">{state.prediction}</strong><small>Tu pronóstico</small></>
-                : <span className="home-versus">VS</span>}
-          </span>
-          <span className="home-team"><TeamShield name={m.away!.name} teamId={m.away!.id} logoUrl={m.away!.logoUrl} size="sm" decorative/><span>{m.away!.name}</span></span>
-          <a href="#/pronosticos" className="home-match-action">{state.action}</a><small className="home-fixture-league">{m.competitionName}</small>
+        const score=state.result??state.prediction??'VS';
+        return <article className={'home-fixture-card'+(state.isLive?' home-fixture-card--live':'')} key={m.id??i}>
+          <a className="home-fixture-link" href="#/pronosticos" aria-label={m.home!.name+' versus '+m.away!.name+', '+argentinaDateTime(m.kickoffAt)}>
+            <time dateTime={m.kickoffAt}>{argentinaDateTime(m.kickoffAt,{month:'short'})}</time>
+            <div className="home-fixture-teams">
+              <span><TeamShield name={m.home!.name} teamId={m.home!.id} logoUrl={m.home!.logoUrl} size="sm" decorative/><strong>{m.home!.name}</strong></span>
+              <b className="home-fixture-score">{score}</b>
+              <span><TeamShield name={m.away!.name} teamId={m.away!.id} logoUrl={m.away!.logoUrl} size="sm" decorative/><strong>{m.away!.name}</strong></span>
+            </div>
+            <small className={state.isLive?'home-fixture-status--live':'home-fixture-status'}>{state.isLive?'EN VIVO':state.isFinal?'Finalizado':m.isLocked?'Cerrado':state.prediction?'Pronosticado':'Disponible'}{state.isFinal&&m.score?' · '+m.score.points+' pts':''}</small>
+          </a>
         </article>;
       })}</div>:<p className="home-empty">Los partidos aparecerán cuando haya una Fecha publicada.</p>}
     </section><aside className="home-side"><section className="home-panel"><HomeHeading title="Tu posición" href={data.season?.division?competitionHref('LIGA_'+data.season.division.code,data.season.seasonNumber):'#/competiciones'} label="Ver Liga"/>

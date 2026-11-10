@@ -42,7 +42,9 @@ export async function repairCachedKickoffTimes(db: D1Database) {
   const matches = await db.prepare(`SELECT m.id,m.provider_fixture_id,m.home_team_provider_id,m.away_team_provider_id,m.kickoff_at
     FROM matches m JOIN rounds r ON r.id=m.round_id
     WHERE m.provider='promiedos' AND m.status='NS' AND r.status='open'
-      AND m.result_finalized_at IS NULL AND NOT ${manualResultSql('m')}`)
+      AND m.result_finalized_at IS NULL AND NOT ${manualResultSql('m')}
+      AND NOT EXISTS(SELECT 1 FROM audit_log a WHERE a.action='match.kickoff_corrected'
+        AND a.entity_type='match' AND a.entity_id=CAST(m.id AS TEXT))`)
     .all<{id:number;provider_fixture_id:string;home_team_provider_id:string;away_team_provider_id:string;kickoff_at:string}>();
   if(!matches.results?.length)return 0;
   const providerDay = new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_SOURCE_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
@@ -86,7 +88,9 @@ export async function repairCachedKickoffTimes(db: D1Database) {
     const updated=await db.prepare(`UPDATE matches SET kickoff_at=?,updated_at=datetime('now')
       WHERE id=? AND provider='promiedos' AND status='NS' AND result_finalized_at IS NULL
         AND round_id IN (SELECT id FROM rounds WHERE status='open')
-        AND NOT ${manualResultSql('matches')}`).bind(kickoff,m.id).run();
+        AND NOT ${manualResultSql('matches')}
+        AND NOT EXISTS(SELECT 1 FROM audit_log a WHERE a.action='match.kickoff_corrected'
+          AND a.entity_type='match' AND a.entity_id=CAST(matches.id AS TEXT))`).bind(kickoff,m.id).run();
     repaired+=updated.meta.changes??0;
   }
   return repaired;
