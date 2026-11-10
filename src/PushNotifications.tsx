@@ -19,7 +19,7 @@ const iosWeb=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platfo
 const standalone=()=>window.matchMedia('(display-mode: standalone)').matches
  ||Boolean((navigator as Navigator & {standalone?:boolean}).standalone);
 
-export default function PushNotifications({userId}:{userId:string}){
+export default function PushNotifications({userId,mode='prompt'}:{userId:string;mode?:'prompt'|'settings'}){
  const storageKey='tafa:push-prompt-dismissed:'+userId;
  const [dismissed,setDismissed]=useState(()=>{
   try{return sessionStorage.getItem(storageKey)==='1';}catch{return false;}
@@ -83,7 +83,8 @@ export default function PushNotifications({userId}:{userId:string}){
   finally{setBusy(false);}
  }
  if(!checked)return null;
- const inviting=Boolean(config?.ready&&!enabled&&!dismissed);
+ if(mode==='prompt'&&(enabled||dismissed))return null;
+ const inviting=mode==='prompt'&&Boolean(config?.ready&&!enabled&&!dismissed);
  const hint=!config?'No pudimos consultar las notificaciones.'
   :!config.ready?'Las notificaciones todavía no están configuradas en TAFA.'
   :!supported()?'Este navegador no admite notificaciones push.'
@@ -95,7 +96,7 @@ export default function PushNotifications({userId}:{userId:string}){
    <div>
     <h2>{inviting?'🔔 Activá las notificaciones':'Notificaciones'}</h2>
     {inviting?<p>Enterate cuando haya una nueva fecha, cuando te falte enviar tus pronósticos o cuando estén los resultados. Te avisamos aunque TAFA esté cerrada.</p>
-      :<p>{enabled?'Activadas en este dispositivo.':'Avisos al celular o computadora, incluso con la web cerrada.'}</p>}
+      :<p>{enabled?'Activadas en este dispositivo. Podés enviar una prueba.':'Avisos al celular o computadora, incluso con la web cerrada.'}</p>}
    </div>
    {inviting&&<span aria-hidden="true">🔔</span>}
   </div>
