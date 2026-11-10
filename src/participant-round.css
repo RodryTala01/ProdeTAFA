@@ -117,3 +117,7 @@
  .submit-copy { flex-basis:100%; }
  .resubmit-dialog { padding:16px; }
 }
+
+/* Small-screen scoring keeps inputs accessible without duplicate headings. */
+.participant-round--compact .prediction-list .prediction-card {padding-top:8px;padding-bottom:8px;}
+.participant-round--compact .prediction-close {font-size:.67rem;}
