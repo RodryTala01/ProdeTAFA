@@ -140,8 +140,9 @@ export default function ParticipantRound() {
   const [success, setSuccess] = useState('');
   const [reviewing, setReviewing] = useState(false);
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
-  const [compact, setCompact] = useState(() => { try { return localStorage.getItem('tafa.predictions.compact') === 'true'; } catch { return false; } });
+  const [compact, setCompact] = useState(() => { try { return localStorage.getItem('tafa.predictions.compact') !== 'false'; } catch { return false; } });
   const versions = useRef<Record<number, number>>({});
+  const savedVersions = useRef<Record<number, number>>({});
   const submitButton = useRef<HTMLButtonElement>(null);
   const reviewingRef = useRef(false);
   const returnFocus = useRef(false);
@@ -225,6 +226,8 @@ export default function ParticipantRound() {
     selectedRoundIdRef.current = roundId;
     setSelectedRoundId(roundId);
     versions.current = {};
+    savedVersions.current = {};
+    pendingSaves.current = {};
     setExpanded({});
     setDrafts({});
     setSaveState({});
@@ -260,6 +263,7 @@ export default function ParticipantRound() {
           extraTeamId: draft.extraTeamId,
         }),
       });
+      savedVersions.current[match.id] = Math.max(savedVersions.current[match.id] ?? 0, version);
       if ((versions.current[match.id] ?? 0) === version) setSaveState((current) => ({ ...current, [match.id]: 'Guardado' }));
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : 'Error al guardar';
@@ -320,10 +324,16 @@ export default function ParticipantRound() {
     setSuccess('');
     try {
       for (const timer of Object.values(timers.current)) clearTimeout(timer);
-      await Promise.all(Object.values(pendingSaves.current).map((save) => save.catch(() => {})));
-      for (const match of round.matches) {
-        if (!locked(match)) await saveMatch(match, drafts[match.id]);
-      }
+      // Flush only changed or failed edits; earlier this resent all 12 matches
+      // sequentially, even when untouched. Per-match queues keep edit order.
+      const dirty = round.matches.filter(match => !locked(match) && (
+        (versions.current[match.id] ?? 0) > (savedVersions.current[match.id] ?? 0)
+        || saveState[match.id] === 'Guardando…'
+        || (saveState[match.id] != null && !['Guardado','Guardando…'].includes(saveState[match.id]))
+      ));
+      await Promise.all(dirty.map(match => saveMatch(match, drafts[match.id])));
+      await Promise.all(round.matches.filter(match=>!locked(match)).map(match=>
+        pendingSaves.current[match.id] ?? Promise.resolve()));
       const data = await api<{ ok: true; lastSubmittedAt: string | null; submissionCount: number }>(
         `/api/participant/rounds/${round.id}/submit`,
         { method: 'POST', body: '{}' },
@@ -334,8 +344,8 @@ export default function ParticipantRound() {
         lastSubmittedAt: data.lastSubmittedAt,
         submissionCount: data.submissionCount,
       } : current);
-      await loadRound(false, round.id);
       setSuccess('Pronóstico enviado');
+      void loadRound(false, round.id);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo enviar el pronóstico');
     } finally {
@@ -385,7 +395,6 @@ export default function ParticipantRound() {
 
   const percent = round.matches.length ? Math.round(complete / round.matches.length * 100) : 0;
   const nextKickoff = round.matches.map(m => Date.parse(m.kickoffAt)).filter(t => t > now).sort((a,b) => a-b)[0];
-  const remaining = nextKickoff ? Math.max(0, Math.ceil((nextKickoff-now)/1000)) : 0;
   const resolved = round.matches.filter(m => FINAL_STATUSES.has(m.status) || m.result.isVoid);
   const stats = [['Puntos', round.pointsTotal], ['Plenos', round.matches.filter(m => m.score?.resultType === 'FULL').length], ['Parciales', round.matches.filter(m => m.score?.resultType === 'PARTIAL').length], ['Errores', round.matches.filter(m => m.score?.resultType === 'ERROR' || (FINAL_STATUSES.has(m.status) && !m.result.isVoid && m.officialPrediction.homeScore === null && !m.score)).length]];
   const progress = <><strong>{complete} DE {round.matches.length} COMPLETOS</strong><progress value={complete} max={round.matches.length || 1} aria-label="Partidos completos"/><span>{percent}%</span></>;
@@ -393,14 +402,12 @@ export default function ParticipantRound() {
     <div className={`participant-round prediction-dashboard ${compact ? 'participant-round--compact' : ''}`}>
       {rounds.length > 1 && (
         <section className="card round-history-card">
-          <div>
-            <span className="eyebrow">HISTORIAL</span>
-            <strong>Ver otra fecha</strong>
-          </div>
+          <label htmlFor="tafa-round-select">Fecha</label>
           <select
             disabled={submitting || reviewing || Object.values(saveState).includes('Guardando…')}
             value={selectedRoundId ?? round.id}
             onChange={(event) => void chooseRound(Number(event.target.value))}
+            id="tafa-round-select"
             aria-label="Elegir fecha del Prode"
           >
             {rounds.map((item) => (
@@ -413,16 +420,17 @@ export default function ParticipantRound() {
       )}
 
       <section className="participant-round-header">
-        <div><span className="eyebrow">{isFinished ? 'FECHA FINALIZADA' : 'FECHA ABIERTA'}</span><h1>PRONÓSTICOS <em>{round.name}</em></h1></div>
-        {nextKickoff && !isFinished && <div className="prediction-next"><span>PRÓXIMO PARTIDO</span><div>{[Math.floor(remaining/86400),Math.floor(remaining%86400/3600),Math.floor(remaining%3600/60),remaining%60].map((v,i)=><span key={i}><strong>{String(v).padStart(2,'0')}</strong><small>{['DÍAS','HORAS','MINUTOS','SEGUNDOS'][i]}</small></span>)}</div></div>}
-        <div className="prediction-progress"><h2>TU AVANCE</h2>{progress}</div>
+        <div><span className="eyebrow">PRONÓSTICOS · {isFinished ? 'FINALIZADA' : 'ABIERTA'}</span><h1>{round.name}</h1></div>
+        <div className="prediction-progress"><h2>Tu avance</h2>{progress}</div>
+        {nextKickoff && !isFinished && <div className="prediction-next"><span>Próximo partido</span><strong>{formatDuration(nextKickoff-now)}</strong></div>}
       </section>
       {round.matches.some(m => m.provider === 'promiedos') && <small>Datos de partidos: <a href="https://www.promiedos.com.ar/">Promiedos</a></small>}
       <div className="prediction-toolbar">
-        <div><strong>{complete}/{round.matches.length} completados</strong>{!isFinished && <span role="status" aria-live="polite"> · {saving}</span>}
+        <div>{!isFinished && <span role="status" aria-live="polite">{saving}</span>}
           {round.submitted && <p className="submission-state--ok">Pronóstico enviado{round.lastSubmittedAt ? ` · ${submissionTime(round.lastSubmittedAt)}` : ''}</p>}
           {round.submitted && changes.length > 0 && <p>Cambiaste {changes.length} partido{changes.length === 1 ? '' : 's'} desde tu último envío.</p>}
         </div>
+        <a className="prediction-history-link" href="#/club/historial">Ver historial</a>
         <label className="compact-switch"><input type="checkbox" checked={compact} onChange={event => { setCompact(event.target.checked); try { localStorage.setItem('tafa.predictions.compact', String(event.target.checked)); } catch { /* Optional preference. */ } }}/>Vista compacta</label>
       </div>
       <div className="prediction-layout"><section className="prediction-fixtures"><h2>PARTIDOS · {round.name}</h2><div className="prediction-columns" aria-hidden="true"><span># / FECHA Y HORA</span><span>COMPETICIÓN</span><span>LOCAL · PRONÓSTICO · VISITANTE</span><span>ESTADO</span></div>
