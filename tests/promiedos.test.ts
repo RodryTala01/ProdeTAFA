@@ -62,6 +62,44 @@ it('normal, extra time, penalties and extra + penalties keep regulation separate
  const pen=game({scores:[1,1],penalties:[1,3],winner:2,to_qualify:2,events:[{name:'Fin de los 90 minutos',scores:[1,1]},{name:'Penales',scores:[1,3],is_penalties_stage:true}]});expect(normalizePromiedosResult(pen)).toMatchObject({status:'PEN',regulation:[1,1],winner:'away',qualified:'away',wentToPenalties:true,wentToExtra:false});
  expect(normalizePromiedosResult({...pen,events:[...pen.events!,{name:'Suplementario',scores:[1,1]}]}).wentToExtra).toBe(true);
 });
+it('accepts verified two-legged penalty decider with a non-drawn 90-minute score',async()=>{
+  const vasco=game({
+    id:'abc',teams:[{id:'vasco',name:'Vasco Da Gama'},{id:'palmeiras',name:'Palmeiras'}],
+    start_time:'08-11-2026 14:00',status:{enum:3,name:'Por penales'},
+    scores:[2,1],game_time:120,winner:2,to_qualify:2,penalties:[4,5],
+    events:[{name:'Entretiempo',scores:[1,0]},
+      {name:'Fin de los 90 minutos',scores:[2,1]},
+      {name:'Penales',scores:[4,5],is_penalties_stage:true}]
+  });
+  const normalized=normalizePromiedosResult(vasco);
+  expect(normalized).toMatchObject({
+    status:'PEN',final:true,regulation:[2,1],current:[2,1],
+    penalties:[4,5],winner:'palmeiras',qualified:'palmeiras',wentToPenalties:true
+  });
+  expect(normalized.kickoffAt).toBe('2026-11-08T20:00:00.000Z');
+  insert();db.exec("UPDATE rounds SET status='open'; UPDATE matches SET kickoff_at='2026-11-08T19:00:00Z'");
+  db.exec("UPDATE matches SET home_team_provider_id='vasco',away_team_provider_id='palmeiras'");
+  cache('game','abc',vasco);
+  const ingest=await handlePromiedosCache(new Request('https://local/api/internal/promiedos-cache',{
+    method:'POST',headers:{authorization:'Bearer '+ingestionToken},
+    body:JSON.stringify({entries:[{kind:'game',key:'abc',fetchedAt:new Date().toISOString(),payload:vasco}]})
+  }),ingestionEnv());
+  expect(ingest?.status).toBe(200);
+  const result=await syncRoundResults(1,env());
+  expect(result.warnings).toHaveLength(0);
+  expect(result.finalized).toBe(1);
+  expect(db.prepare('SELECT status,home_score_regulation,away_score_regulation,winning_team_provider_id,qualified_team_provider_id,went_to_penalties,kickoff_at FROM matches WHERE id=1').get())
+    .toMatchObject({status:'PEN',home_score_regulation:2,away_score_regulation:1,
+      winning_team_provider_id:'palmeiras',qualified_team_provider_id:'palmeiras',
+      went_to_penalties:1,kickoff_at:'2026-11-08T20:00:00.000Z'});
+});
+it('rejects non-drawn penalty decider without confirmed qualifier',()=>{
+ const fixture=game({scores:[2,1],penalties:[4,5],winner:2,to_qualify:undefined,
+   status:{enum:3,name:'Por penales'},events:[
+     {name:'Fin de los 90 minutos',scores:[2,1]},
+     {name:'Penales',scores:[4,5],is_penalties_stage:true}]});
+ expect(()=>normalizePromiedosResult(fixture)).toThrow();
+});
 it('live normal is provisional, live extra requires explicit regulation',()=>{expect(normalizePromiedosResult(game({status:{enum:2,name:'2do Tiempo'},events:[]}))).toMatchObject({status:'LIVE',final:false,current:[2,1],regulation:null});expect(()=>normalizePromiedosResult(game({status:{enum:2,name:'Tiempo Extra'},events:[]}))).toThrow();});
 it.each([{events:[]},{scores:[9,7]},{winner:2},{status:{enum:4,name:'Suspendido'}}])('rejects ambiguous result %j without writing',async changes=>{insert();db.exec("UPDATE matches SET status='FT',home_score_regulation=2,away_score_regulation=1,home_score_current=2,away_score_current=1,result_finalized_at='2026-10-10'");const before=db.prepare('SELECT * FROM matches').get();respond(game(changes as any));const result=await syncRoundResults(1,env());expect(result.updated).toBe(0);expect(result.warnings).toHaveLength(1);expect(db.prepare('SELECT * FROM matches').get()).toEqual(before);});
 it('adds provider from verified game rather than trusting supplied names',async()=>{respond();const r=await handleAdminRounds(new Request('https://local/api/admin/rounds/1/matches',{method:'POST',headers:{cookie:'prode_session=admin'},body:JSON.stringify({fixture:{provider:'promiedos',providerFixtureId:'abc',home:{name:'Fake'},away:{name:'Fake'},kickoffAt:'2026-10-10T18:45:00Z'},matchType:'NORMAL'})}),env());expect(r?.status).toBe(201);expect(db.prepare('SELECT provider,home_team_name,kickoff_at FROM matches').get()).toMatchObject({provider:'promiedos',home_team_name:'Local',kickoff_at:'2026-10-10T20:45:00.000Z'});});

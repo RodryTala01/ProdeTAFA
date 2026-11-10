@@ -111,11 +111,17 @@ export function normalizePromiedosResult(g: PromiedosGame) {
   const side = (n: number | undefined) => n === 1 || n === 2 ? g.teams[n - 1].id : null;
   if (final && wentToPenalties) {
     assert(pen); const ps = score(pen.scores);
-    assert(current && current[0] === current[1]);
+    // Penalties may decide a two-legged tie on aggregate even when the
+    // second-leg regulation score itself is not tied (e.g. 2–1, agg 2–2).
+    // Never rewrite the regulation score to match the shootout.
+    assert(current);
     assert(ps[0] !== ps[1]);
     if (g.penalties !== undefined) { const p = score(g.penalties); assert(p[0] === ps[0] && p[1] === ps[1]); }
     winner = side(g.winner); assert(winner && winner === g.teams[ps[0] > ps[1] ? 0 : 1].id);
     qualified = side(g.to_qualify); assert(!qualified || qualified === winner);
+    // In a non-level second leg, an explicit qualification confirmation is
+    // required: only the penalty taker/winner field alone is not enough.
+    if (current[0] !== current[1]) assert(qualified === winner);
   } else if (final && current) {
     winner = current[0] === current[1] ? null : g.teams[current[0] > current[1] ? 0 : 1].id;
     assert(!side(g.winner) || side(g.winner) === winner);
