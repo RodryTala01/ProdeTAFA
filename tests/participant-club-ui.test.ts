@@ -56,6 +56,29 @@ it('does not label an absent score or prediction as an error',()=>{const match=h
 it('head-to-head is an honest empty state without internal language',()=>{const html=render(HeadToHead,{});expect(html).toContain('Próximamente vas a poder consultar');expect(html).not.toContain('Falta definir');expect(html).not.toContain('<table');});
 it('league links navigate to profiles and historical routes survive refresh',()=>{expect(render(LeagueTable,{rows:clubExample.league!.standings,user:'demo-1',season:99})).toContain('#/club/participante/demo-1?season=99');for(const path of ['club/historial/8?user=other','club/enfrentamientos','club/envios','club/participante/other?season=99'])expect(participantRoute('#/'+path)).toBe(path);});
 it('history uses one participant selector and no editable prediction inputs',()=>{const html=render(HistoryDetail,{data:historyExample,participantId:'demo-1',currentUserId:'demo-1',onSelect:()=>{}});expect(html.match(/<select/g)).toHaveLength(1);expect(html).not.toMatch(/<input|Enviar pronóstico/);});
+it('no muestra el encabezado viejo mientras espera la ficha nueva de Mi Club',async()=>{
+ Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});
+ let finishTeam:(response:Response)=>void=()=>{};
+ const delayedTeam=new Promise<Response>(resolve=>{finishTeam=resolve;});
+ vi.stubGlobal('fetch',vi.fn(async (url:string)=>{
+  if(url.includes('/teams/'))return delayedTeam;
+  if(url.includes('/profiles/'))return Response.json(clubExample.profile);
+  if(url.includes('/overview'))return Response.json({...clubExample.overview,season:null});
+  return Response.json(clubExample.league);
+ }));
+ const host=document.createElement('div');document.body.append(host);
+ const root=createRoot(host);
+ try{
+  await act(async()=>{root.render(createElement(ParticipantClubPage,{user:{id:'demo-1',fullName:'Participante'},route:'club'}));});
+  expect(host.textContent).toContain('Cargando');
+  expect(host.querySelector('.club-heading')).toBeNull();
+  expect(host.querySelector('.equipo-header')).toBeNull();
+  await act(async()=>{finishTeam(Response.json(teamFixture));});
+  expect(host.textContent).toContain('Mi Club Original');
+  expect(host.querySelector('.equipo-header')).not.toBeNull();
+  expect(host.querySelector('.club-heading')).toBeNull();
+ }finally{await act(async()=>root.unmount());host.remove();}
+});
 it('human error includes a working retry that recovers the profile',async()=>{
  Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});let fail=true;
  vi.stubGlobal('fetch',vi.fn(async (url:string)=>{if(fail)throw Error('SQLITE private detail');return Response.json(url.includes('/profiles/')?clubExample.profile:url.includes('/teams/')?teamFixture:url.includes('/overview')?{...clubExample.overview,season:null}:clubExample.league);}));
