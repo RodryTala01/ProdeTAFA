@@ -121,3 +121,13 @@
 /* Small-screen scoring keeps inputs accessible without duplicate headings. */
 .participant-round--compact .prediction-list .prediction-card {padding-top:8px;padding-bottom:8px;}
 .participant-round--compact .prediction-close {font-size:.67rem;}
+
+/* Compact fixture mode preserves data-entry controls but removes duplicate captions. */
+.participant-round--compact .prediction-home>small,
+.participant-round--compact .prediction-away>small,
+.participant-round--compact .prediction-value>small,
+.participant-round--compact .penalty-prediction>p,
+.participant-round--compact .penalty-prediction>.prediction-secondary,
+.participant-round--compact .prediction-lock-time {display:none!important;}
+.participant-round--compact .prediction-card .prediction-date {gap:4px;}
+.participant-round--compact .prediction-footer {gap:4px;}

@@ -133,3 +133,7 @@
  .prediction-dashboard .prediction-next>strong {font-size:.92rem;}
  .prediction-dashboard .prediction-toolbar {gap:8px;}
 }
+
+/* Show results only when received; no empty \"– –\" placeholders pre-kickoff. */
+.participant-round--compact .prediction-matchup {align-items:center;}
+.participant-round--compact .prediction-team {gap:5px;}

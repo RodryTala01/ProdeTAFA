@@ -494,9 +494,9 @@ export default function ParticipantRound() {
                 <div className="prediction-home"><small>LOCAL</small><Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl}/></div>
                 <div className="prediction-center">
                   <div className="prediction-value"><small>MI PRONÓSTICO</small>{isLocked ? <div className="prediction-readonly" aria-label="Tu pronóstico"><strong>{draft.homeScore || '—'} – {draft.awayScore || '—'}</strong><small aria-label="Bloqueado"><svg width="12" height="14" viewBox="0 0 16 18" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2" y="8" width="12" height="8" rx="1"/><path d="M5 8V5a3 3 0 016 0v3"/></svg> Cerrado</small></div> : scoreInputs}</div>
-                  <div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
+                  {(match.result.isVoid||isLive||isFinal||resultHome!=null||resultAway!=null)&&<div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
                     {match.result.isVoid ? <small>Partido anulado · no suma puntos</small> : <><span>RESULTADO REAL{isFinal ? ' · 90′' : ''}</span><strong>{resultHome ?? '–'} - {resultAway ?? '–'}</strong>{isFinal && match.result.wentToPenalties && penaltyWinner && <small>Penales: {penaltyWinner}</small>}</>}
-                  </div>
+                  </div>}
                 </div>
                 <div className="prediction-away"><small>VISITANTE</small><Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl}/></div>
               </div>
@@ -532,7 +532,7 @@ export default function ParticipantRound() {
 
               <div className={`prediction-footer prediction-state--${isLive ? 'live' : match.result.isVoid ? 'void' : match.score?.resultType?.toLowerCase() ?? (isFinal && match.officialPrediction.homeScore === null ? 'error' : 'pending')}`}>
                 {isLive && <strong>EN VIVO{match.elapsedMinutes != null ? ` · ${match.elapsedMinutes}′` : ''}</strong>}
-                {!isLive && !isFinal && <strong>PENDIENTE</strong>}
+                {!isLive && !isFinal && <strong>{isLocked?'CERRADO':'PENDIENTE'}</strong>}
                 {isFinal && !match.result.isVoid && !match.score && match.officialPrediction.homeScore === null && <strong>ERROR · 0 pts</strong>}
                 <small>{isFinal || isFinished ? 'Finalizado' : isLocked ? 'Cerrado' : round.submitted && predictionChanged(match, draft) ? 'Modificado · pendiente de reenvío' : round.submitted && completePrediction(match, officialDraft(match.officialPrediction)) ? 'Enviado' : !completePrediction(match, draft) ? 'Incompleto' : saveState[match.id] === 'Guardado' ? 'Completado · guardado' : 'Completado'}</small>
                 {!isLocked && saveError && <div className="prediction-save-error" role="alert">{match.home.name} — {match.away.name}: {saveState[match.id]} <button type="button" className="button button--ghost" disabled={submitting || reviewing} onClick={() => void saveMatch(match, draft).catch(() => {})}>Reintentar guardado</button></div>}
