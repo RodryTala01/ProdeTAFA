@@ -326,9 +326,10 @@ export default function ParticipantRound() {
       for (const timer of Object.values(timers.current)) clearTimeout(timer);
       // Flush only changed or failed edits; earlier this resent all 12 matches
       // sequentially, even when untouched. Per-match queues keep edit order.
+      // Let in-flight autosaves settle first, avoiding duplicate PUTs on submit.
+      await Promise.all(Object.values(pendingSaves.current).map(save=>save.catch(()=>{})));
       const dirty = round.matches.filter(match => !locked(match) && (
         (versions.current[match.id] ?? 0) > (savedVersions.current[match.id] ?? 0)
-        || saveState[match.id] === 'Guardando…'
         || (saveState[match.id] != null && !['Guardado','Guardando…'].includes(saveState[match.id]))
       ));
       await Promise.all(dirty.map(match => saveMatch(match, drafts[match.id])));
