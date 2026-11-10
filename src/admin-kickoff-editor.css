@@ -1,0 +1,8 @@
+.admin-kickoff-editor{flex:1 1 100%;min-width:0;margin-top:6px;border-top:1px solid var(--border);padding-top:8px}
+.admin-kickoff-editor summary{cursor:pointer;font-size:.78rem;color:var(--text-muted);min-height:34px;display:flex;align-items:center}
+.admin-kickoff-editor form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:10px 0}
+.admin-kickoff-editor form p,.admin-kickoff-editor form small{grid-column:1/-1;margin:0;font-size:.78rem}
+.admin-kickoff-editor label{min-width:0;display:grid;gap:6px;font-size:.75rem}
+.admin-kickoff-editor input{width:100%;min-width:0}
+.admin-kickoff-editor button{justify-self:start}
+@media(max-width:700px){.admin-kickoff-editor form{grid-template-columns:1fr}}

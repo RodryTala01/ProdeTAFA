@@ -7,6 +7,7 @@ import { AdminConfirm, AdminMenu } from './AdminUI';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import RoundRanking from './RoundRanking';
 import AdminCorrections from './AdminCorrections';
+import AdminKickoffEditor from './AdminKickoffEditor';
 import PredictionHistory from './PredictionHistory';
 import './admin-rounds.css';
 
@@ -19,6 +20,7 @@ type StoredMatch = {
   competitionName: string | null;
   competitionLogoUrl: string | null;
   kickoffAt: string;
+  kickoffOverride?: boolean;
   status: string;
   matchType: 'NORMAL' | 'PENALTIES_ONLY';
   home: TeamData;
@@ -355,6 +357,7 @@ export default function AdminRounds() {
                         {match.goals.home !== null && match.goals.away !== null && <span className="penalty-badge">Resultado {match.goals.home} - {match.goals.away}</span>}
                         {match.matchType === 'PENALTIES_ONLY' && <span className="penalty-badge">PENALES</span>}
                       </div>
+                      {(isDraft||isOpen)&&['NS','scheduled'].includes(match.status)&&<AdminKickoffEditor roundId={selected.id} matchId={match.id} kickoffAt={match.kickoffAt} corrected={match.kickoffOverride} onChanged={()=>{setSuccess('Horario corregido para toda TAFA.');void loadRound(selected.id);}}/>}
                       {isDraft && <AdminMenu label={`Acciones de ${match.home.name} vs ${match.away.name}`}><button className="admin-menu-danger" disabled={busy} onClick={() => setConfirm({ title: '¿Quitar partido?', message: `${match.home.name} vs ${match.away.name} se quitará del borrador. Podés volver a agregarlo desde la búsqueda.`, action: 'Quitar partido', run: () => removeMatch(match) })}>Quitar partido</button></AdminMenu>}
                     </div>
                   ))}
