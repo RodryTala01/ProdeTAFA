@@ -39,6 +39,18 @@ it('Admin correction saves a real Argentina instant and protects it from stale p
  const detail=await exposed!.json() as {round:{matches:{kickoffOverride:boolean}[]}};
  expect(detail.round.matches[0].kickoffOverride).toBe(true);
 });
+it('a finalized round can correct a past kickoff without reopening any predictions',async()=>{
+ insert();db.exec("UPDATE rounds SET status='finished'; UPDATE matches SET status='FT',result_finalized_at=datetime('now')");
+ const yesterday=new Date(Date.now()-86400000);
+ const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(yesterday);
+ const v=(key:string)=>parts.find(p=>p.type===key)?.value;
+ const local=v('year')+'-'+v('month')+'-'+v('day')+'T'+v('hour')+':'+v('minute');
+ const response=await handleAdminRounds(req('rounds/1/matches/1/kickoff',{localDateTime:local,reason:'Corrección histórica confirmada'}),env());
+ expect(response?.status).toBe(200);
+ expect(db.prepare('SELECT kickoff_at,status FROM matches WHERE id=1').get()).toMatchObject({kickoff_at:new Date(local+':00-03:00').toISOString(),status:'FT'});
+ expect(db.prepare('SELECT status FROM rounds WHERE id=1').get()).toMatchObject({status:'finished'});
+ expect(db.prepare('SELECT count(*) AS n FROM official_predictions').get()).toMatchObject({n:0});
+});
 it('search reads seven cached days without provider requests',async()=>{
  vi.stubGlobal('fetch',vi.fn());for(let i=10;i<=16;i++)cache('day','2026-10-'+i,[game(),game({id:'xyz'})]);
  const r=await handleAdminRounds(req('fixtures?from=2026-10-10&to=2026-10-16'),env());
