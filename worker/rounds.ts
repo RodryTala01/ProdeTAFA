@@ -399,7 +399,8 @@ async function correctKickoff(request:Request,env:Env,admin:UserRow,roundId:numb
  if(!match)return error('Partido no encontrado',404);
  if(!['draft','open'].includes(match.round_status)||!['NS','scheduled'].includes(match.status))
   return error('Solo pueden corregirse horarios de partidos no iniciados de fechas abiertas o borradores',409);
- const previous=Date.parse(match.kickoff_at.trim().replace(' ','T').replace(/(?<!Z)(?<![+-]\d\d:\d\d)$/,''));
+ const stored=match.kickoff_at.trim().replace(' ','T');
+ const previous=Date.parse(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(stored)?stored:stored+'Z');
  if(Number.isFinite(previous)&&previous===date.getTime())return json({ok:true,unchanged:true});
  const newKickoff=date.toISOString();
  const updated=await env.DB.prepare(`UPDATE matches SET kickoff_at=?,updated_at=datetime('now')
