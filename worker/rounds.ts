@@ -200,7 +200,8 @@ async function getRound(env: Env, roundId: number) {
             home_team_provider_id, home_team_name, home_team_logo_url,
             away_team_provider_id, away_team_name, away_team_logo_url,
             kickoff_at, status, elapsed_minutes, match_type,
-            home_score_current, away_score_current
+            home_score_current, away_score_current,
+            EXISTS(SELECT 1 FROM audit_log a WHERE a.action='match.kickoff_corrected' AND a.entity_type='match' AND a.entity_id=CAST(matches.id AS TEXT)) AS kickoff_override
      FROM matches
      WHERE round_id = ?
      ORDER BY kickoff_at, id`,
@@ -222,6 +223,7 @@ async function getRound(env: Env, roundId: number) {
     match_type: 'NORMAL' | 'PENALTIES_ONLY';
     home_score_current: number | null;
     away_score_current: number | null;
+    kickoff_override: number;
   }>();
 
   return json({
@@ -241,6 +243,7 @@ async function getRound(env: Env, roundId: number) {
         home: { id: match.home_team_provider_id, name: match.home_team_name, logoUrl: match.home_team_logo_url },
         away: { id: match.away_team_provider_id, name: match.away_team_name, logoUrl: match.away_team_logo_url },
         kickoffAt: match.kickoff_at,
+        kickoffOverride: Boolean(match.kickoff_override),
         status: match.status,
         elapsedMinutes: match.elapsed_minutes,
         matchType: match.match_type,
@@ -370,6 +373,48 @@ async function removeMatch(env: Env, admin: UserRow, roundId: number, matchId: n
   return json({ ok: true });
 }
 
+
+async function correctKickoff(request:Request,env:Env,admin:UserRow,roundId:number,matchId:number){
+ const body=await request.json().catch(()=>null) as {localDateTime?:unknown;reason?:unknown}|null;
+ const value=typeof body?.localDateTime==='string'?body.localDateTime.trim():'';
+ const reason=typeof body?.reason==='string'?body.reason.trim():'';
+ if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)||reason.length<8||reason.length>300)
+  return error('Indicá día y hora de Argentina y un motivo de 8 a 300 caracteres');
+ // Explicit Argentine local time, independent of browser timezone; verify its real components.
+ const date=new Date(value+':00-03:00');
+ if(!Number.isFinite(date.getTime()))return error('Fecha inválida');
+ const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Argentina/Buenos_Aires',
+  year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(date);
+ const get=(type:string)=>parts.find(p=>p.type===type)?.value;
+ const [year,month,day]=value.slice(0,10).split('-');
+ if(get('year')!==year||get('month')!==month||get('day')!==day
+  ||get('hour')!==value.slice(11,13)||get('minute')!==value.slice(14,16))
+  return error('Fecha y hora argentina inválidas');
+ if(Math.abs(date.getTime()-Date.now())>366*86400000)return error('Solo se pueden corregir horarios dentro del próximo o anterior año');
+ const match=await env.DB.prepare(`SELECT m.id,m.round_id,m.kickoff_at,m.status,m.home_team_name,m.away_team_name,
+    r.status AS round_status FROM matches m JOIN rounds r ON r.id=m.round_id
+    WHERE m.id=? AND m.round_id=?`).bind(matchId,roundId).first<{
+     id:number;round_id:number;kickoff_at:string;status:string;home_team_name:string;away_team_name:string;round_status:string
+    }>();
+ if(!match)return error('Partido no encontrado',404);
+ if(!['draft','open'].includes(match.round_status)||!['NS','scheduled'].includes(match.status))
+  return error('Solo pueden corregirse horarios de partidos no iniciados de fechas abiertas o borradores',409);
+ const previous=Date.parse(match.kickoff_at.trim().replace(' ','T').replace(/(?<!Z)(?<![+-]\d\d:\d\d)$/,''));
+ if(Number.isFinite(previous)&&previous===date.getTime())return json({ok:true,unchanged:true});
+ const newKickoff=date.toISOString();
+ const updated=await env.DB.prepare(`UPDATE matches SET kickoff_at=?,updated_at=datetime('now')
+   WHERE id=? AND round_id=? AND status IN ('NS','scheduled')
+   AND round_id IN (SELECT id FROM rounds WHERE status IN ('draft','open'))`)
+   .bind(newKickoff,matchId,roundId).run();
+ if(Number(updated.meta.changes)!==1)return error('El partido cambió. Recargá la fecha y revisá el horario.',409);
+ await env.DB.prepare(`INSERT INTO audit_log
+   (actor_user_id,action,entity_type,entity_id,before_json,after_json)
+   VALUES (?,'match.kickoff_corrected','match',?,?,?)`)
+  .bind(admin.id,String(matchId),JSON.stringify({kickoffAt:match.kickoff_at}),
+   JSON.stringify({kickoffAt:newKickoff,localDateTime:value,reason,roundId,home:match.home_team_name,away:match.away_team_name})).run();
+ return json({ok:true,kickoffAt:newKickoff,locked:date.getTime()+60000<=Date.now()});
+}
+
 export async function handleAdminRounds(request: Request, env: Env): Promise<Response | null> {
   const url = new URL(request.url);
   const pathname = url.pathname;
@@ -398,6 +443,11 @@ export async function handleAdminRounds(request: Request, env: Env): Promise<Res
   const addMatchRoute = pathname.match(/^\/api\/admin\/rounds\/(\d+)\/matches$/);
   if (addMatchRoute && request.method === 'POST') {
     return addMatch(request, env, admin, Number(addMatchRoute[1]));
+  }
+
+  const correctKickoffRoute=pathname.match(/^\/api\/admin\/rounds\/(\d+)\/matches\/(\d+)\/kickoff$/);
+  if(correctKickoffRoute&&request.method==='PUT'){
+   return correctKickoff(request,env,admin,Number(correctKickoffRoute[1]),Number(correctKickoffRoute[2]));
   }
 
   const removeMatchRoute = pathname.match(/^\/api\/admin\/rounds\/(\d+)\/matches\/(\d+)$/);
