@@ -10,10 +10,11 @@ export function HeadToHead() {
   return <section className="reference-section"><h1>Enfrentamientos</h1><p>Próximamente vas a poder consultar acá tus enfrentamientos históricos.</p><a href="#/competiciones" className="button button--ghost">Ver competiciones</a></section>;
 }
 export function ClubProfile({data,own,team}:{data:ClubData;own:boolean;team:TeamPageData}) {
-  const {profile,overview,league}=data;
+  const {profile,overview}=data;
   const {id}=profile.participant;
   const stats=historyStats(profile.rounds);
   const season=overview.season;
+  const person=season?.people.find(p=>p.userId===id);
   const promotion=season?.competitions.find(c=>c.code==='PROMOCION');
   const inPromotion=!!promotion&&!!season?.members.some(m=>m.competitionId===promotion.id&&m.userId===id);
   const rows=season?.competitions.filter(c=>c.code!=='PROMOCION'&&season.members.some(m=>m.competitionId===c.id&&m.userId===id))??[];
@@ -52,6 +53,6 @@ export default function ParticipantClubPage({user,route}:{user:{id:string;fullNa
   return <>
     {encoded&&<nav className="club-links" aria-label="Volver"><a href={division?competitionHref(`LIGA_${division}`,overview.data?.season?.seasonNumber):'#/competiciones'}>Volver a {division?'Liga':'Competiciones'}</a>{own&&<a href="#/club">Ir a Mi Club</a>}</nav>}
     <ParticipantState loading={profile.loading||overview.loading||team.loading} error={profile.error||overview.error||team.error} retry={()=>{profile.retry();overview.retry();team.retry();}}/>
-    {profile.data&&overview.data&&team.data&&<><ParticipantState loading={league.loading} error={league.error} retry={league.retry}/><ClubProfile own={own} team={team.data} data={{profile:profile.data,overview:overview.data,league:league.data}}/></>}
+    {profile.data&&profile.data.participant.id===id&&overview.data&&team.data&&team.data.identity.id===id&&<><ParticipantState loading={league.loading} error={league.error} retry={league.retry}/><ClubProfile own={own} team={team.data} data={{profile:profile.data,overview:overview.data,league:league.data}}/></>}
   </>;
 }
