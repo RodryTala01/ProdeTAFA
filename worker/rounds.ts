@@ -397,15 +397,18 @@ async function correctKickoff(request:Request,env:Env,admin:UserRow,roundId:numb
      id:number;round_id:number;kickoff_at:string;status:string;home_team_name:string;away_team_name:string;round_status:string
     }>();
  if(!match)return error('Partido no encontrado',404);
- if(!['draft','open'].includes(match.round_status)||!['NS','scheduled'].includes(match.status))
-  return error('Solo pueden corregirse horarios de partidos no iniciados de fechas abiertas o borradores',409);
+ const historic=match.round_status==='finished';
+ if(historic&&date.getTime()>Date.now())return error('Un horario histórico no puede quedar en el futuro',409);
+ if(!historic&&(!['draft','open'].includes(match.round_status)||!['NS','scheduled'].includes(match.status)))
+  return error('Solo pueden corregirse horarios de partidos no iniciados o fechas finalizadas',409);
  const stored=match.kickoff_at.trim().replace(' ','T');
  const previous=Date.parse(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(stored)?stored:stored+'Z');
  if(Number.isFinite(previous)&&previous===date.getTime())return json({ok:true,unchanged:true});
  const newKickoff=date.toISOString();
  const updated=await env.DB.prepare(`UPDATE matches SET kickoff_at=?,updated_at=datetime('now')
-   WHERE id=? AND round_id=? AND status IN ('NS','scheduled')
-   AND round_id IN (SELECT id FROM rounds WHERE status IN ('draft','open'))`)
+   WHERE id=? AND round_id=?
+   AND (round_id IN (SELECT id FROM rounds WHERE status='finished')
+    OR (status IN ('NS','scheduled') AND round_id IN (SELECT id FROM rounds WHERE status IN ('draft','open'))))`)
    .bind(newKickoff,matchId,roundId).run();
  if(Number(updated.meta.changes)!==1)return error('El partido cambió. Recargá la fecha y revisá el horario.',409);
  await env.DB.prepare(`INSERT INTO audit_log

@@ -45,7 +45,7 @@ export default function AdminKickoffEditor({roundId,matchId,kickoffAt,corrected,
    <label>Inicio real · hora de Argentina <input type="datetime-local" required value={local} onChange={e=>setLocal(e.target.value)} disabled={busy}/></label>
    <label>Motivo <input required minLength={8} maxLength={300} placeholder="Ej.: horario confirmado por el club" value={reason} onChange={e=>setReason(e.target.value)} disabled={busy}/></label>
    <button type="submit" className="button button--secondary" disabled={busy||reason.trim().length<8}>{busy?'Guardando…':'Guardar horario'}</button>
-   <small>No modifica pronósticos enviados, resultados ni puntajes.</small>
+   <small>No modifica pronósticos enviados, resultados ni puntajes. En fechas finalizadas solo corrige la hora mostrada.</small>
    {error&&<p role="alert">{error}</p>}
    {success&&<p role="status">{success}</p>}
   </form>
