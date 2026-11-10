@@ -46,6 +46,20 @@ describe('Participante: Home y navegación', () => {
     expect(predictionState({ ...round, submitted: true, matches: [{ ...round.matches[0], prediction: { ...prediction, extraTeamId: 'a' } }] })).toContain('pendientes');
     expect(predictionState({ ...edited, submitted: true, matches: [{ ...edited.matches[0], isLocked: true }] })).toBe('Pronóstico enviado');
   });
+  it('Inicio muestra los doce partidos publicados en la nueva cuadrícula',()=>{
+    const matches=Array.from({length:12},(_,i)=>({
+      id:i+1,home:{id:'h'+i,name:'Local '+i,logoUrl:null},
+      away:{id:'a'+i,name:'Visita '+i,logoUrl:null},
+      kickoffAt:'2030-01-02T00:00:00Z',lockedAt:'2030-01-02T00:01:00Z',
+      isLocked:false,status:'NS',officialPrediction:prediction,prediction,
+      competitionName:'Liga',result:{homeCurrent:null,awayCurrent:null,homeRegulation:null,awayRegulation:null,isVoid:false},
+      score:null
+    }));
+    const model={...data,round:{...round,matches}} as any;
+    const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Participante',data:model}));
+    expect(html.match(/class="home-fixture-card"/g)).toHaveLength(12);
+    expect(html).toContain('Local 11');expect(html).toContain('Visita 0');
+  });
   it('Home usa nombre/posición reales recibidos, no fixtures personales', () => {
     const html = renderToStaticMarkup(createElement(ParticipantHome, { name: 'Nombre real recibido', data }));
     expect(html).toContain('Nombre real recibido'); expect(html).toContain(round.name);
