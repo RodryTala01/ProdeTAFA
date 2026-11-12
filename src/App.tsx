@@ -97,7 +97,7 @@ function SetupScreen({ onReady }: { onReady: (user: User) => void }) {
         <form className="form-stack" onSubmit={submit}>
           <Field label="Nombre y apellido" value={fullName} onChange={setFullName} placeholder="Rodrigo Talarico" autoComplete="name" />
           <Field label="Teléfono" value={phone} onChange={setPhone} placeholder="11 1234 5678" autoComplete="tel" />
-          <Field label="Contraseña" value={password} onChange={setPassword} type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
+          <Field label="Contraseña" value={password} onChange={setPassword} type="password" placeholder="Mínimo 10 caracteres" autoComplete="new-password" />
           {error && <div className="alert alert--error">{error}</div>}
           <button className="button button--primary" disabled={loading}>
             {loading ? 'Creando…' : 'Crear administrador'}
@@ -287,7 +287,7 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
                 <form className="form-stack" onSubmit={createParticipant}>
                   <Field label="Nombre y apellido" value={fullName} onChange={setFullName} placeholder="Nombre del participante" />
                   <Field label="Teléfono" value={phone} onChange={setPhone} placeholder="11 1234 5678" />
-                  <Field label="Contraseña inicial" value={password} onChange={setPassword} type="password" placeholder="Mínimo 6 caracteres" />
+                  <Field label="Contraseña inicial" value={password} onChange={setPassword} type="password" placeholder="Mínimo 10 caracteres" />
                   <button className="button button--primary" disabled={loading}>{loading ? 'Guardando…' : 'Agregar participante'}</button>
                 </form>
               </section>
@@ -341,7 +341,7 @@ function AdminDashboard({ user, onLogout }: { user: User; onLogout: () => void }
             <h2>{resetUser.fullName}</h2>
             <p>La contraseña anterior dejará de funcionar y se cerrarán sus sesiones abiertas.</p>
             <form className="form-stack" onSubmit={resetPassword}>
-              <Field label="Nueva contraseña" value={newPassword} onChange={setNewPassword} type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
+              <Field label="Nueva contraseña" value={newPassword} onChange={setNewPassword} type="password" placeholder="Mínimo 10 caracteres" autoComplete="new-password" />
               <div className="modal-actions">
                 <button type="button" className="button button--ghost" onClick={() => setResetUser(null)}>Cancelar</button>
                 <button className="button button--primary" disabled={loading}>Guardar contraseña</button>

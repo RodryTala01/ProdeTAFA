@@ -284,8 +284,9 @@ export default function ParticipantRound() {
   }
 
   function updateHomeScore(match: Match, value: string) {
+    if (value !== '' && !/^\d$/.test(value)) return;
     updateDraft(match, { homeScore: value });
-    if (/^\d{1,2}$/.test(value)) advanceFocus(match, 'home');
+    if (/^\d$/.test(value)) advanceFocus(match, 'home');
   }
 
   function focusEditable(input: HTMLInputElement | HTMLButtonElement | null | undefined) {
@@ -305,8 +306,9 @@ export default function ParticipantRound() {
   }
 
   function updateAwayScore(match: Match, value: string) {
+    if (value !== '' && !/^\d$/.test(value)) return;
     updateDraft(match, { awayScore: value });
-    if (!/^\d{1,2}$/.test(value) || locked(match)) return;
+    if (!/^\d$/.test(value) || locked(match)) return;
     advanceFocus(match, 'away');
   }
 
@@ -462,7 +464,7 @@ export default function ParticipantRound() {
                   ref={(element) => { homeInputs.current[match.id] = element; }}
                   type="number"
                   min="0"
-                  max="99"
+                  max="9"
                   inputMode="numeric"
                   value={draft.homeScore}
                   disabled={isLocked || submitting || reviewing}
@@ -476,7 +478,7 @@ export default function ParticipantRound() {
                   ref={(element) => { awayInputs.current[match.id] = element; }}
                   type="number"
                   min="0"
-                  max="99"
+                  max="9"
                   inputMode="numeric"
                   value={draft.awayScore}
                   disabled={isLocked || submitting || reviewing}

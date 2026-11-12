@@ -52,7 +52,10 @@ async function call(path: string, method = 'GET', body?: object, user = 'u') {
 }
 const save = (home = 1, away = 0, user = 'u') => call('participant/predictions/1','PUT',{ homeScore: home, awayScore: away },user);
 const penalty = (team = 'h2') => call('participant/predictions/2','PUT',{ homeScore: 1, awayScore: 1, extraTeamId: team });
-const submit = () => call('participant/rounds/1/submit','POST',{});
+// Most legacy scenarios verify score transitions; explicitly score after a submit
+// to preserve their intent without putting global recalculation on the request path.
+const submit = async () => { const response = await call('participant/rounds/1/submit','POST',{}); await recalculateRoundScores(1,env()); return response; };
+const submitWithoutScoring = () => call('participant/rounds/1/submit','POST',{});
 const official = () => db.prepare('SELECT * FROM official_predictions WHERE user_id=? AND match_id=1').get('u');
 const events = () => db.prepare('SELECT * FROM prediction_submission_events ORDER BY id').all();
 const points = () => Number(db.prepare('SELECT COALESCE(SUM(total_points),0) AS points FROM prediction_scores').get()?.points);
@@ -62,6 +65,19 @@ function result(status = 'FT') {
 }
 
 describe('borrador, oficial, auditoría y scoring', () => {
+  it('confirma el envío sin esperar recalcular todos los puntajes', async () => {
+    await ready(); result();
+    const response = await submitWithoutScoring();
+    expect(response?.status).toBe(200);
+    expect(official()).toBeTruthy();
+    expect(points()).toBe(0);
+    await recalculateRoundScores(1, env());
+    expect(points()).toBe(3);
+  });
+  it('rechaza pronósticos de dos cifras desde la API', async () => {
+    expect((await save(10, 0))?.status).toBe(400);
+    expect((await save(1, 10))?.status).toBe(400);
+  });
   it('autosave previo al primer envío no genera oficial, historial ni puntos', async () => {
     await ready(); result(); await recalculateRoundScores(1,env());
     expect(official()).toBeUndefined(); expect(events()).toHaveLength(0); expect(points()).toBe(0);

@@ -185,7 +185,10 @@ export async function handlePromiedosCache(request: Request, env: Env): Promise<
       const body=await request.json() as {games?:unknown};
       if(!Array.isArray(body.games)||body.games.length>24||body.games.some(key=>typeof key!=='string'||!keyValid('game',key)))return json({error:'Identificadores inválidos'},400);
       const ids=[...new Set(body.games as string[])];
-      if(!ids.length)return json({ok:true,updated:0,calculated:0});
+      // The authenticated apply step may run after uploading only daily fixtures.
+      // Apply their verified kickoff corrections now instead of waiting for cron.
+      const repairedKickoffs=await repairCachedKickoffTimes(env.DB);
+      if(!ids.length)return json({ok:true,updated:0,calculated:0,repairedKickoffs});
       const placeholders=ids.map(()=>'?').join(',');
       const rows=await env.DB.prepare(`SELECT id,round_id FROM matches WHERE provider='promiedos' AND provider_fixture_id IN (${placeholders})`).bind(...ids).all<{id:number;round_id:number}>();
       const groups=new Map<number,number[]>();
@@ -193,7 +196,7 @@ export async function handlePromiedosCache(request: Request, env: Env): Promise<
       const {syncRoundResults}=await import('./results/index');
       let updated=0,calculated=0;const warnings:string[]=[];
       for(const [roundId,matchIds] of groups){const result=await syncRoundResults(roundId,env,[],matchIds);updated+=result.updated;calculated+=result.calculated;warnings.push(...result.warnings);}
-      return json({ok:true,updated,calculated,warnings});
+      return json({ok:true,updated,calculated,repairedKickoffs,warnings});
     }catch{return json({error:'No se pudieron aplicar los datos adquiridos'},500);}
   }
   if (path!=='/api/internal/promiedos-cache' || request.method!=='POST') return json({error:'Ruta o método no permitido'},405);

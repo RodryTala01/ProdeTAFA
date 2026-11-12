@@ -1,5 +1,4 @@
 import { participantCompetitionContexts } from './participant-contexts';
-import { recalculateRoundScores } from './scoring';
 import { predictionHistory } from './prediction-history';
 
 type Env = {
@@ -107,8 +106,8 @@ function isLocked(kickoffAt: string, status?: string, provider?: string) {
 
 function nullableScore(value: unknown) {
   if (value === null || value === '') return null;
-  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 99) {
-    throw new Error('Los goles deben ser números enteros entre 0 y 99');
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 9) {
+    throw new Error('Los goles deben ser números enteros entre 0 y 9');
   }
   return value;
 }
@@ -444,8 +443,8 @@ async function submitRound(request: Request, env: Env, roundId: number) {
     }
     throw caught;
   }
-  await recalculateRoundScores(roundId, env);
-
+  // Confirm the official submission immediately. Scores are derived from
+  // official_predictions when new results arrive, not during user submission.
   const submission = await env.DB.prepare(
     `SELECT last_submitted_at, submission_count
      FROM round_submissions
