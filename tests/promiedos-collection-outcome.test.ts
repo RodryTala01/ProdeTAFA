@@ -23,6 +23,20 @@ describe('Promiedos provider outage handling',()=>{
    expect(apply).toHaveBeenCalledWith(['another-game']);
    expect(acquisitionExitCode(report)).toBe(0);
  });
+ it('applies a fresh day-only cache to repair scheduled kickoffs immediately',async()=>{
+   const apply=vi.fn(async (keys:string[])=>({ok:true,keys}));
+   const report=await collectProviderCache({days:['2026-11-06'],games:[]},{
+     getDay:async()=>[],
+     getGame:async()=>{throw Error('no gamecenter required');},
+     upload:async()=>{},
+     apply,
+   },{count:0});
+   expect(report.uploaded).toBe(1);
+   expect(report.gameKeys).toEqual([]);
+   expect(apply).toHaveBeenCalledOnce();
+   expect(apply).toHaveBeenCalledWith([]);
+   expect(acquisitionExitCode(report)).toBe(0);
+ });
  it('a provider outage alone does not trigger workflow failure emails',async()=>{
    const report=await collectProviderCache({days:[],games:['egddcde']},{
      getDay:async()=>[],
