@@ -103,3 +103,37 @@
 @media(max-width:1100px){.home-fixtures{grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media(max-width:800px){.home-fixtures{grid-template-columns:repeat(2,minmax(0,1fr));}.home-side{grid-template-columns:1fr;}}
 @media(max-width:390px){.home-fixtures{gap:6px;}.home-fixture-link{padding:9px 5px;}.home-fixture-teams strong{font-size:.62rem;}}
+
+
+/* Results and the participant's prediction always have explicit captions. */
+.home-fixture-link { gap:10px; }
+.home-fixture-teams { grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr); gap:6px; align-items:start; }
+.home-fixture-versus { align-self:center; font-size:.62rem; color:var(--text-muted); }
+.home-fixture-scores { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+.home-fixture-scores > div {
+  min-width:0; display:grid; align-content:start; gap:5px;
+  padding:8px 6px; background:var(--surface); border:1px solid var(--border);
+  border-left:2px solid var(--home-fluor); text-align:center;
+}
+.home-fixture-scores > .home-fixture-my-score { border-left-color:var(--home-violet); }
+.home-fixture-scores small { color:var(--home-fluor); font-size:.57rem; font-weight:700; line-height:1.25; letter-spacing:.02em; }
+.home-fixture-my-score small { color:var(--home-violet); }
+.home-fixture-scores strong { color:var(--text); font:700 .95rem/1.25 var(--font-display); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.home-fixture-result strong { color:var(--home-fluor); }
+.home-fixture-my-score strong { color:var(--home-violet); }
+.home-fixture-bottom { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; }
+.home-fixture-bottom small { color:var(--text-muted); font-size:.65rem; }
+.home-fixture-bottom .home-fixture-status--live { color:var(--danger); }
+.home-fixture-points { color:var(--home-fluor); font-size:.69rem; line-height:1.25; }
+@media(max-width:700px) {
+ .home-fixtures { grid-template-columns:minmax(0,1fr); }
+ .home-fixture-link { gap:10px; padding:12px; }
+ .home-fixture-teams strong { font-size:.81rem; }
+ .home-fixture-scores small { font-size:.65rem; }
+ .home-fixture-scores strong { font-size:1.1rem; }
+ .home-fixture-bottom { padding-top:5px; border-top:1px solid var(--border); }
+}
+@media(max-width:390px) {
+ .home-fixtures { grid-template-columns:minmax(0,1fr); }
+ .home-fixture-link { padding:12px; }
+}
