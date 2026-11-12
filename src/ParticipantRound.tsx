@@ -495,13 +495,21 @@ export default function ParticipantRound() {
               <span className="prediction-competition"><CompetitionImage name={match.competitionName||'Competencia'} logoUrl={match.competitionLogoUrl} size="xs" decorative/>{match.competitionName || 'Competencia'}</span>
               <div className="prediction-matchup">
                 <div className="prediction-home"><small>LOCAL</small><Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl}/></div>
-                <div className="prediction-center">
-                  <div className="prediction-value"><small>MI PRONÓSTICO</small>{isLocked ? <div className="prediction-readonly" aria-label="Tu pronóstico"><strong>{draft.homeScore || '—'} – {draft.awayScore || '—'}</strong><small aria-label="Bloqueado"><svg width="12" height="14" viewBox="0 0 16 18" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2" y="8" width="12" height="8" rx="1"/><path d="M5 8V5a3 3 0 016 0v3"/></svg> Cerrado</small></div> : scoreInputs}</div>
-                  {(match.result.isVoid||isLive||isFinal||resultHome!=null||resultAway!=null)&&<div className={`match-result ${isLive ? 'match-result--live' : ''}`}>
-                    {match.result.isVoid ? <small>Partido anulado · no suma puntos</small> : <><span>RESULTADO REAL{isFinal ? ' · 90′' : ''}</span><strong>{resultHome ?? '–'} - {resultAway ?? '–'}</strong>{isFinal && match.result.wentToPenalties && penaltyWinner && <small>Penales: {penaltyWinner}</small>}</>}
-                  </div>}
-                </div>
+                <span className="prediction-versus" aria-hidden="true">VS</span>
                 <div className="prediction-away"><small>VISITANTE</small><Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl}/></div>
+                <div className="prediction-center">
+                  <div className="prediction-value prediction-score-panel prediction-score-panel--mine">
+                    <small className="prediction-score-label">TU PRONÓSTICO</small>
+                    {isLocked ? <div className="prediction-readonly" aria-label="Tu pronóstico"><strong>{draft.homeScore || '—'} – {draft.awayScore || '—'}</strong><small aria-label="Bloqueado"><svg width="12" height="14" viewBox="0 0 16 18" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2" y="8" width="12" height="8" rx="1"/><path d="M5 8V5a3 3 0 016 0v3"/></svg> Cerrado</small></div> : scoreInputs}
+                  </div>
+                  <div className={`match-result prediction-score-panel prediction-score-panel--actual ${isLive ? 'match-result--live' : ''}`} aria-label="Resultado real del partido">
+                    {match.result.isVoid ? <><span>RESULTADO REAL</span><strong className="prediction-result-waiting">Anulado</strong></> : <>
+                      <span>{isLive ? 'RESULTADO EN VIVO' : 'RESULTADO REAL'}{isFinal ? ' · 90′' : ''}</span>
+                      <strong className={resultHome == null || resultAway == null ? 'prediction-result-waiting' : undefined}>{resultHome == null || resultAway == null ? (isFinal ? 'Sin confirmar' : 'Pendiente') : `${resultHome} – ${resultAway}`}</strong>
+                      {isFinal && match.result.wentToPenalties && penaltyWinner && <small>Penales: {penaltyWinner}</small>}
+                    </>}
+                  </div>
+                </div>
               </div>
               {!collapsed && match.matchType === 'PENALTIES_ONLY' && (
                 <div className="penalty-prediction">
