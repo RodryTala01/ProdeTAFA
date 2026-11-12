@@ -50,14 +50,22 @@ const HOME_LIVE_STATUSES = new Set(['1H','HT','2H','ET','BT','P','LIVE']);
 function homeFixtureState(match: HomeRound['matches'][number]) {
   const isFinal = HOME_FINAL_STATUSES.has(match.status ?? '');
   const isLive = HOME_LIVE_STATUSES.has(match.status ?? '');
-  const started = isFinal || isLive;
-  const hasPrediction = match.officialPrediction.homeScore != null && match.officialPrediction.awayScore != null;
-  const prediction = hasPrediction ? `${match.officialPrediction.homeScore} – ${match.officialPrediction.awayScore}` : null;
+  const hasOfficial = match.officialPrediction.homeScore != null && match.officialPrediction.awayScore != null;
+  const hasDraft = !match.isLocked && match.prediction.homeScore != null && match.prediction.awayScore != null;
+  // Never present an unsent draft change as the official submitted prediction.
+  // Closed matches always use only the server's official snapshot.
+  const saved = hasOfficial ? match.officialPrediction : hasDraft ? match.prediction : null;
+  const prediction = saved ? `${saved.homeScore} – ${saved.awayScore}` : null;
+  const predictionLabel = hasOfficial ? 'TU PRONÓSTICO · ENVIADO' : hasDraft ? 'BORRADOR · SIN ENVIAR' : 'TU PRONÓSTICO';
   const home = isFinal ? (match.result?.homeRegulation ?? match.result?.homeCurrent) : match.result?.homeCurrent;
   const away = isFinal ? (match.result?.awayRegulation ?? match.result?.awayCurrent) : match.result?.awayCurrent;
-  const result = started && home != null && away != null ? `${home} – ${away}` : null;
-  const action = started || match.isLocked ? 'Ver' : hasPrediction ? 'Modificar' : 'Pronosticar';
-  return { isFinal, isLive, started, prediction, result, action };
+  const result = (isFinal || isLive) && home != null && away != null ? `${home} – ${away}` : null;
+  const resultLabel = isLive ? 'RESULTADO EN VIVO' : isFinal ? 'RESULTADO REAL · 90′' : 'RESULTADO REAL';
+  const resultType = match.score?.resultType;
+  const scoreType = resultType === 'FULL' ? 'PLENO' : resultType === 'PARTIAL' ? 'PARCIAL' : resultType === 'ERROR' ? 'ERROR' : resultType === 'PENALTIES' ? 'PENALES' : resultType === 'VOID' ? 'ANULADO' : null;
+  const points = match.score && (isFinal || isLive) ? `${scoreType ? scoreType + ' · ' : ''}${match.score.points} pts` : isFinal && !hasOfficial && !match.result?.isVoid ? 'ERROR · 0 pts' : null;
+  const status = match.result?.isVoid ? 'Anulado' : isLive ? 'En vivo' : isFinal ? 'Finalizado' : match.isLocked ? 'Cerrado' : hasOfficial ? 'Enviado' : hasDraft ? 'Sin enviar' : 'Disponible';
+  return { isFinal, isLive, prediction, predictionLabel, result, resultLabel, points, status };
 }
 export default function ParticipantHome({ name, data, userId }: { name: string; data: HomeData; userId?:string }) {
   const user=userId??data.league?.currentUserId??data.overview?.currentUserId??'';
@@ -72,16 +80,22 @@ export default function ParticipantHome({ name, data, userId }: { name: string; 
     <div className="home-main-grid"><section className="home-panel"><HomeHeading title="Partidos de la Fecha" href="#/pronosticos" label="Ver toda la Fecha"/>
       {matches.length?<div className="home-fixtures">{matches.map((m,i)=>{
         const state=homeFixtureState(m);
-        const score=state.result??state.prediction??'VS';
         return <article className={'home-fixture-card'+(state.isLive?' home-fixture-card--live':'')} key={m.id??i}>
           <a className="home-fixture-link" href="#/pronosticos" aria-label={m.home!.name+' versus '+m.away!.name+', '+argentinaDateTime(m.kickoffAt)}>
-            <time dateTime={m.kickoffAt}>{argentinaDateTime(m.kickoffAt,{month:'short'})}</time>
+            <time dateTime={m.kickoffAt}>{argentinaDateTime(m.kickoffAt,{month:'short'})} · ARG</time>
             <div className="home-fixture-teams">
               <span><TeamShield name={m.home!.name} teamId={m.home!.id} logoUrl={m.home!.logoUrl} size="sm" decorative/><strong>{m.home!.name}</strong></span>
-              <b className="home-fixture-score">{score}</b>
+              <b className="home-fixture-versus" aria-hidden="true">VS</b>
               <span><TeamShield name={m.away!.name} teamId={m.away!.id} logoUrl={m.away!.logoUrl} size="sm" decorative/><strong>{m.away!.name}</strong></span>
             </div>
-            <small className={state.isLive?'home-fixture-status--live':'home-fixture-status'}>{state.isLive?'EN VIVO':state.isFinal?'Finalizado':m.isLocked?'Cerrado':state.prediction?'Pronosticado':'Disponible'}{state.isFinal&&m.score?' · '+m.score.points+' pts':''}</small>
+            <div className="home-fixture-scores">
+              <div className="home-fixture-result"><small>{state.resultLabel}</small><strong>{state.result ?? (state.isFinal ? 'Sin confirmar' : 'Por jugar')}</strong></div>
+              <div className="home-fixture-my-score"><small>{state.predictionLabel}</small><strong>{state.prediction ?? 'Sin enviar'}</strong></div>
+            </div>
+            <div className="home-fixture-bottom">
+              <small className={state.isLive?'home-fixture-status--live':'home-fixture-status'}>{state.status}</small>
+              {state.points && <strong className="home-fixture-points">{state.points}</strong>}
+            </div>
           </a>
         </article>;
       })}</div>:<p className="home-empty">Los partidos aparecerán cuando haya una Fecha publicada.</p>}
