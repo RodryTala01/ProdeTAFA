@@ -150,3 +150,33 @@ it('no busca resultados de otra Fecha cuando la actual todavía no tiene finales
   const fetcher=vi.fn(async(url:string)=>Response.json(url.includes('current')?{season:null}:url.includes('competition-contexts')?{contexts:[]}:{round}));vi.stubGlobal('fetch',fetcher);
   const home=await loadHome();expect(home.resultRound?.id).toBe(round.id);expect(fetcher.mock.calls.map(c=>c[0])).not.toContain('/api/participant/rounds');
 });
+
+
+it('Inicio separa resultado, pronóstico oficial y puntos aunque el borrador sea distinto',()=>{
+  const m={...round.matches[0],id:1,kickoffAt:'2030-01-01T12:00:00Z',isLocked:true,status:'FT',
+    home:{id:'h',name:'Local'},away:{id:'a',name:'Visitante'},
+    result:{homeCurrent:3,awayCurrent:1,homeRegulation:3,awayRegulation:1,isVoid:false},
+    prediction:{homeScore:9,awayScore:9,extraTeamId:null},
+    officialPrediction:{homeScore:1,awayScore:1,extraTeamId:null},
+    score:{points:0,resultType:'ERROR',extraPoints:0,provisional:false}};
+  const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Persona',
+    data:{...emptyHome,round:{...round,matches:[m]}} as any}));
+  expect(html).toContain('RESULTADO REAL · 90′');
+  expect(html).toContain('TU PRONÓSTICO · ENVIADO');
+  expect(html).toContain('3 – 1');
+  expect(html).toContain('1 – 1');
+  expect(html).toContain('ERROR · 0 pts');
+  expect(html).not.toContain('9 – 9');
+});
+it('Inicio marca borrador sin enviar y resultado todavía pendiente',()=>{
+  const m={...round.matches[0],id:1,status:'NS',home:{id:'h',name:'Local'},
+    away:{id:'a',name:'Visitante'},result:{homeCurrent:null,awayCurrent:null,isVoid:false},
+    prediction:{homeScore:2,awayScore:0,extraTeamId:null},
+    officialPrediction:{homeScore:null,awayScore:null,extraTeamId:null},score:null};
+  const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Persona',
+    data:{...emptyHome,round:{...round,matches:[m]}} as any}));
+  expect(html).toContain('BORRADOR · SIN ENVIAR');
+  expect(html).toContain('2 – 0');
+  expect(html).toContain('Por jugar');
+  expect(html).not.toContain('ERROR · 0 pts');
+});

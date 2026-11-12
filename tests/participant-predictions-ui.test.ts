@@ -60,5 +60,27 @@ describe('Pronósticos: interacción participante',()=>{
  it('al cerrarse el último cambio durante revisión no permite confirmar',async()=>{filled(true);data.matches[0].lockedAt='2026-10-01T12:00:01Z';await mount();await edit('Goles Local 1','2');await click('Reenviar');await tick(1100);expect(button('Confirmar cambios').disabled).toBe(true);expect(posts).toBe(0);});
 });
 
- it('separa pronóstico editable y resultado real sin inputs',async()=>{await mount();const card=host.querySelector('.prediction-card')!;expect(card.querySelectorAll('.prediction-value input')).toHaveLength(2);expect(card.querySelector('.match-result')).toBeNull();expect(card.querySelector('.match-result input')).toBeNull();expect(host.querySelectorAll('.submit-card button')).toHaveLength(1);});
+ it('separa pronóstico editable y resultado real sin inputs',async()=>{await mount();const card=host.querySelector('.prediction-card')!;expect(card.querySelectorAll('.prediction-value input')).toHaveLength(2);expect(card.querySelector('.match-result')?.textContent).toContain('Pendiente');expect(card.querySelector('.match-result input')).toBeNull();expect(host.querySelectorAll('.submit-card button')).toHaveLength(1);});
  it('final sin envío muestra ERROR y cero sin inventar un score',async()=>{const m=data.matches[0];m.status='FT';m.lockedAt='2026-10-01T11:00:00Z';m.result.homeRegulation=2;m.result.awayRegulation=0;await mount();expect(host.querySelector('.prediction-card .prediction-footer')?.textContent).toContain('ERROR · 0 pts');expect(m.score).toBeNull();});
+
+
+it('Pronósticos muestra paneles independientes para mi pronóstico y resultado final',async()=>{
+  filled(true);
+  const m=data.matches[0];m.status='FT';m.lockedAt='2026-10-01T11:00:00Z';
+  m.result.homeRegulation=3;m.result.awayRegulation=1;
+  m.score={points:0,basePoints:0,extraPoints:0,resultType:'ERROR',provisional:false};
+  await mount();
+  const card=host.querySelector('.prediction-card')!;
+  expect(card.querySelector('.prediction-score-panel--mine')?.textContent).toContain('TU PRONÓSTICO');
+  expect(card.querySelector('.prediction-score-panel--mine')?.textContent).toContain('1 – 0');
+  expect(card.querySelector('.prediction-score-panel--actual')?.textContent).toContain('RESULTADO REAL');
+  expect(card.querySelector('.prediction-score-panel--actual')?.textContent).toContain('3 – 1');
+  expect(card.querySelector('.prediction-center')?.children).toHaveLength(2);
+});
+it('Pronósticos editables usan dos cajas y separador independiente y centrable',async()=>{
+  await mount();
+  const panel=host.querySelector('.prediction-score-panel--mine')!;
+  expect(panel.querySelectorAll('input[type=number]')).toHaveLength(2);
+  expect(panel.querySelector('.score-separator')?.textContent).toBe('—');
+  expect(panel.querySelector('.prediction-score-label')?.textContent).toBe('TU PRONÓSTICO');
+});
