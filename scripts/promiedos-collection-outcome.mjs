@@ -35,7 +35,9 @@ export async function collectProviderCache(plan, {getDay,getGame,upload,apply,fa
       }
     }
   }
-  if(report.gameKeys.length){
+  // Even an acquisition containing only daily fixtures must apply fresh
+  // verified kickoff times immediately; gamecenter updates are optional.
+  if(report.uploaded>0){
     try{
       report.applied=await apply(report.gameKeys);
     }catch(error){
