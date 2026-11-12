@@ -32,7 +32,10 @@ export function normalizeLeagueName(value: string): string {
 const leagueLogoFiles = new Map<string,string>();
 for(const entry of leagueLogoEntries)for(const alias of entry.names){
   const key=normalizeLeagueName(alias);
-  if(leagueLogoFiles.has(key))throw new Error('Nombre duplicado de liga: '+alias);
+  const previous=leagueLogoFiles.get(key);
+  // Accented and unaccented aliases may normalize to the same competition.
+  // Only reject conflicting assignments to DIFFERENT real-world leagues.
+  if(previous && previous!==entry.file)throw new Error('Liga ambigua: '+alias);
   leagueLogoFiles.set(key,entry.file);
 }
 export function externalLeagueLogo(name?:string|null):string|undefined {
