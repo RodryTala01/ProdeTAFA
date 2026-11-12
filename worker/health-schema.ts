@@ -49,6 +49,7 @@ export const T32_PRODUCTION_TABLES = [
 
 export const REQUIRED_PRODUCTION_TABLES = [
   'promiedos_cache',
+  'login_attempts',
   'team_profiles',
   'historical_imports',
   'push_config',
@@ -59,6 +60,7 @@ export const REQUIRED_PRODUCTION_TABLES = [
 ] as const;
 
 export const REQUIRED_PRODUCTION_COLUMNS = {
+  "login_attempts": ["subject_key","failed_attempts","window_started_at","last_failed_at"],
   "push_config": ["id","public_key"],
   "push_subscriptions": ["id","user_id","endpoint","p256dh","auth","created_at","updated_at"],
   "push_deliveries": ["id","subscription_id","event_key","status","attempts","attempted_at","sent_at"],
@@ -125,6 +127,6 @@ export const REQUIRED_PRODUCTION_TRIGGERS = [
   'invalidate_official_score_update',
 ] as const;
 
-export const MINIMUM_PRODUCTION_MIGRATION = '0018_push_notifications.sql';
+export const MINIMUM_PRODUCTION_MIGRATION = '0019_login_rate_limits.sql';
 
-export const REQUIRED_PRODUCTION_MIGRATIONS = ["0001_initial.sql","0002_league_seasons.sql","0003_league_entry_slot.sql","0004_prediction_history.sql","0005_official_predictions.sql","0006_competition_engine.sql","0007_iffhs.sql","0008_competition_results.sql","0009_stage_qualifiers.sql","0010_duos_survival.sql","0011_competition_qualification_slots.sql","0012_champions_bracket_nodes.sql","0013_season_transition_plan.sql","0014_duos_admin.sql","0015_promiedos_cache.sql","0016_team_profiles.sql","0017_historical_imports.sql","0018_push_notifications.sql"] as const;
+export const REQUIRED_PRODUCTION_MIGRATIONS = ["0001_initial.sql","0002_league_seasons.sql","0003_league_entry_slot.sql","0004_prediction_history.sql","0005_official_predictions.sql","0006_competition_engine.sql","0007_iffhs.sql","0008_competition_results.sql","0009_stage_qualifiers.sql","0010_duos_survival.sql","0011_competition_qualification_slots.sql","0012_champions_bracket_nodes.sql","0013_season_transition_plan.sql","0014_duos_admin.sql","0015_promiedos_cache.sql","0016_team_profiles.sql","0017_historical_imports.sql","0018_push_notifications.sql","0019_login_rate_limits.sql"] as const;

@@ -72,7 +72,7 @@ function SetupScreen({ onReady }: { onReady: (user: User) => void }) {
       <form className="form-stack" onSubmit={submit}>
         <Field label="Nombre y apellido" value={fullName} onChange={setFullName} placeholder="Rodrigo Talarico" autoComplete="name" />
         <Field label="Teléfono" value={phone} onChange={setPhone} placeholder="11 1234 5678" autoComplete="tel" />
-        <Field label="Contraseña" value={password} onChange={setPassword} type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
+        <Field label="Contraseña" value={password} onChange={setPassword} type="password" placeholder="Mínimo 10 caracteres" autoComplete="new-password" />
         {error && <div className="alert alert--error" role="alert">{error}</div>}
         <button className="button button--primary" disabled={loading}>{loading ? 'Creando…' : 'Crear administrador'}</button>
       </form>

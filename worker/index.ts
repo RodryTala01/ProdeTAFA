@@ -6,6 +6,7 @@ import { handleAdminCorrections } from './admin-corrections';
 import { handleStandings } from './standings';
 import { getPromiedosWorkPlan } from './promiedos-cache';
 import { dispatchPromiedosRefresh } from './promiedos-dispatch';
+import { loginRetryAfter, recordLoginFailure, clearLoginFailures } from './auth-rate-limit';
 
 export interface Env {
   DB: D1Database;
@@ -220,7 +221,7 @@ async function createSession(request: Request, env: Env, userId: string) {
 function validateCredentials(fullName: string, phone: string, password: string) {
   if (fullName.trim().length < 3) return 'Ingresá nombre y apellido';
   if (normalizePhone(phone).length < 6) return 'Ingresá un teléfono válido';
-  if (password.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
+  if (password.length < 10) return 'La contraseña debe tener al menos 10 caracteres';
   return null;
 }
 
@@ -281,6 +282,13 @@ async function login(request: Request, env: Env) {
   const password = body.password ?? '';
   if (!phone || !password) return error('Completá teléfono y contraseña');
 
+  const ip = request.headers.get('CF-Connecting-IP');
+  const retryAfter = await loginRetryAfter(env.DB, phone, ip);
+  if (retryAfter > 0) return json(
+    { error: 'Demasiados intentos fallidos. Reintentá dentro de unos minutos.' },
+    { status: 429, headers: { 'retry-after': String(retryAfter), 'cache-control': 'no-store' } },
+  );
+
   const user = await env.DB.prepare(
     `SELECT id, full_name, phone_normalized, password_hash, role, is_active
      FROM users
@@ -291,9 +299,11 @@ async function login(request: Request, env: Env) {
     .first<UserWithPassword>();
 
   if (!user || !user.is_active || !(await verifyPassword(password, user.password_hash))) {
+    await recordLoginFailure(env.DB, phone, ip);
     return error('Teléfono o contraseña incorrectos', 401);
   }
 
+  await clearLoginFailures(env.DB, phone);
   const token = await createSession(request, env, user.id);
   const response = json({ user: publicUser(user) });
   response.headers.set('set-cookie', sessionCookie(request, token));
@@ -377,7 +387,7 @@ async function resetParticipantPassword(request: Request, env: Env, userId: stri
 
   const body = await parseBody<{ password?: string }>(request);
   const password = body?.password ?? '';
-  if (password.length < 6) return error('La contraseña debe tener al menos 6 caracteres');
+  if (password.length < 10) return error('La contraseña debe tener al menos 10 caracteres');
 
   const target = await env.DB.prepare(
     `SELECT id, full_name, phone_normalized, role, is_active

@@ -44,10 +44,45 @@ jobs:
       - name: T32 isolated E2E
         run: npm run test:e2e:ci
 
+  migrate-login-0019:
+    name: Apply approved D1 login migration 0019
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build, t32-e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: prode-tafa-d1-migration-0019
+      cancel-in-progress: false
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+      - name: Preflight - only migration 0019 can be pending
+        run: node scripts/preflight-login-0019.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Apply explicitly approved 0019 to production D1
+        run: npm run db:migrate:remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Verify remote migrations - read only
+        run: node scripts/check-deploy-schema.mjs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
   deploy-production:
     name: Deploy production after checks
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [build, t32-e2e]
+    needs: [build, t32-e2e, migrate-login-0019]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:
