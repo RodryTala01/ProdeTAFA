@@ -492,7 +492,7 @@ export default function ParticipantRound() {
           return (
             <article className={`prediction-card ${isLive ? 'prediction-card--live' : ''} ${collapsed ? 'prediction-card--collapsed' : ''}`} key={match.id}>
               <div className="prediction-date"><b>{index+1}</b><time dateTime={match.kickoffAt}>{formatKickoff(match.kickoffAt)}</time><details className="prediction-lock-time"><summary>Hora de cierre</summary>{formatKickoff(match.lockedAt)}</details></div>
-              <span className="prediction-competition"><CompetitionImage name={match.competitionName||'Competencia'} logoUrl={match.competitionLogoUrl} size="xs" decorative/>{match.competitionName || 'Competencia'}</span>
+              <span className="prediction-competition"><CompetitionImage name={match.competitionName||'Competencia'} logoUrl={match.competitionLogoUrl} size="sm" decorative/>{match.competitionName || 'Competencia'}</span>
               <div className="prediction-matchup">
                 <div className="prediction-home"><small>LOCAL</small><Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl}/></div>
                 <span className="prediction-versus" aria-hidden="true">VS</span>

@@ -1,5 +1,6 @@
 import {useState,type CSSProperties,type ReactNode} from 'react';
 import {competitionAsset,participantAsset,participantNamedAsset,teamAssets} from './competition-assets';
+import {externalLeagueLogo} from './external-league-assets';
 import './asset-images.css';
 export type AssetSize = 'xs'|'sm'|'md'|'lg';
 const sizes:Record<AssetSize,number>={xs:20,sm:28,md:40,lg:64};
@@ -25,7 +26,7 @@ export function TeamShield({name,teamId,logoUrl,...props}:{name:string;teamId?:s
 }
 export function CompetitionImage({code='',name,season,logoUrl,trophyUrl,variant='logo',size='md',decorative=false}:{code?:string;name:string;season?:number;logoUrl?:string|null;trophyUrl?:string|null;variant?:'logo'|'trophy';size?:AssetSize;decorative?:boolean}) {
   const asset=competitionAsset(code,season);
-  const logo=logoUrl||asset.logo;const trophy=trophyUrl||asset.trophy;
+  const logo=logoUrl||asset.logo||(!code?externalLeagueLogo(name):undefined);const trophy=trophyUrl||asset.trophy;
   const style=asset.accent?{color:`var(${asset.accent})`} as CSSProperties:undefined;
   return <span className="competition-image" style={style}><AssetImage name={name} fallback={initials(name)} src={variant==='trophy'?trophy||logo:logo||trophy} size={size} decorative={decorative}/></span>;
 }
