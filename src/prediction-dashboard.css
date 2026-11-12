@@ -137,3 +137,88 @@
 /* Show results only when received; no empty \"– –\" placeholders pre-kickoff. */
 .participant-round--compact .prediction-matchup {align-items:center;}
 .participant-round--compact .prediction-team {gap:5px;}
+
+
+/* Shared score panels: the forecast can never be mistaken for the real result.
+   Explicit tracks keep the two inputs and separator perfectly centered. */
+.prediction-dashboard .prediction-list { display:grid; gap:8px; border-top:0; }
+.prediction-dashboard .prediction-card {
+  border:1px solid var(--border); border-radius:4px;
+  background:var(--bg); padding:12px;
+}
+.prediction-dashboard .prediction-date { gap:3px; }
+.prediction-dashboard .prediction-matchup {
+  grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);
+  align-items:center; gap:6px 10px;
+}
+.prediction-dashboard .prediction-home { grid-column:1; grid-row:1; }
+.prediction-dashboard .prediction-versus { grid-column:2; grid-row:1; color:var(--text-muted); font-size:.65rem; text-align:center; }
+.prediction-dashboard .prediction-away { grid-column:3; grid-row:1; }
+.prediction-dashboard .prediction-center {
+  grid-column:1/-1; grid-row:2; width:100%; min-width:0;
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px; margin-top:5px; justify-items:stretch;
+}
+.prediction-dashboard .prediction-score-panel {
+  min-width:0; padding:9px 8px; border:1px solid var(--border);
+  border-left:2px solid var(--home-violet); background:var(--surface);
+  display:grid; justify-items:center; align-content:start; gap:7px;
+  text-align:center;
+}
+.prediction-dashboard .prediction-score-panel--actual { border-left-color:var(--home-fluor); }
+.prediction-dashboard .prediction-score-panel .prediction-score-label,
+.prediction-dashboard .prediction-score-panel--actual > span {
+  display:block; margin:0; font-size:.61rem; line-height:1.25;
+  font-weight:700; letter-spacing:.035em; color:var(--home-violet);
+}
+.prediction-dashboard .prediction-score-panel--actual > span { color:var(--home-fluor); }
+.participant-round--compact .prediction-value > .prediction-score-label { display:block!important; }
+.prediction-dashboard .score-prediction {
+  display:grid; grid-template-columns:44px 16px 44px;
+  align-items:center; justify-content:center; justify-items:center;
+  width:100%; margin:0; gap:8px;
+}
+.prediction-dashboard .score-side { width:100%; display:flex; justify-content:center; align-items:center; min-width:0; }
+.prediction-dashboard .score-side input {
+  box-sizing:border-box; width:44px; min-width:44px; height:44px;
+  margin:0; text-align:center;
+}
+.prediction-dashboard .score-separator {
+  display:grid; place-items:center; width:16px;
+  text-align:center; line-height:1; color:var(--text-muted);
+}
+.prediction-dashboard .prediction-readonly { justify-items:center; text-align:center; gap:4px; }
+.prediction-dashboard .prediction-readonly strong { font-variant-numeric:tabular-nums; }
+.prediction-dashboard .match-result {
+  margin:0; display:grid; justify-items:center; align-content:start;
+  gap:5px; text-align:center; color:var(--text);
+}
+.prediction-dashboard .match-result > strong { font-size:1.25rem; font-weight:700; color:var(--home-fluor); font-variant-numeric:tabular-nums; }
+.prediction-dashboard .match-result > .prediction-result-waiting { color:var(--text-muted); font-size:.82rem; }
+.prediction-dashboard .match-result > small { font-size:.65rem; color:var(--text-muted); }
+.prediction-dashboard .prediction-footer { align-content:start; }
+.prediction-dashboard .prediction-expand { text-align:left; }
+.prediction-dashboard .prediction-card--collapsed .prediction-competition { display:flex; }
+@media(max-width:850px) {
+  .prediction-dashboard .prediction-card { grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:9px 12px; }
+  .prediction-dashboard .prediction-date { grid-column:1; grid-row:1; }
+  .prediction-dashboard .prediction-competition { grid-column:2; grid-row:1; justify-content:flex-end; text-align:right; }
+  .prediction-dashboard .prediction-matchup { grid-column:1/-1; grid-row:2; }
+  .prediction-dashboard .prediction-footer,
+  .prediction-dashboard .penalty-prediction,
+  .prediction-dashboard .prediction-expand,
+  .prediction-dashboard .prediction-detail,
+  .prediction-dashboard .prediction-close { grid-column:1/-1; }
+  .prediction-dashboard .prediction-score-panel { padding:10px 8px; }
+}
+@media(max-width:700px) {
+  .prediction-dashboard .prediction-center { grid-template-columns:minmax(0,1fr); }
+  .prediction-dashboard .prediction-score-panel { padding:10px 12px; }
+  .prediction-dashboard .prediction-date { font-size:.72rem; }
+  .prediction-dashboard .prediction-competition { font-size:.67rem; }
+  .prediction-dashboard .prediction-footer {
+    display:flex; flex-wrap:wrap; justify-content:space-between;
+    border-top:1px solid var(--border); padding-top:9px; gap:8px;
+  }
+  .prediction-dashboard .prediction-matchup { grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr); }
+}
