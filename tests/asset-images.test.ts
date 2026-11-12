@@ -35,7 +35,7 @@ it('el logo de una liga reemplaza iniciales solo cuando no existe uno del provee
    await act(async()=>root.render(createElement(CompetitionImage,{name:'Premier League',logoUrl:'/from-provider.svg'})));
    expect(host.querySelector('img')?.getAttribute('src')).toBe('/from-provider.svg');
    await act(async()=>root.render(createElement(CompetitionImage,{name:'Premier League',code:'COPA_A'})));
-   expect(host.querySelector('img')).toBeNull();
+   expect(host.querySelector('img')?.getAttribute('src')).toBe('/competitions/copa_a.png');
    await act(async()=>root.render(createElement(CompetitionImage,{name:'Liga inventada'})));
    expect(host.querySelector('.asset-image__fallback')).not.toBeNull();
  }finally{await act(async()=>root.unmount());}
