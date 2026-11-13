@@ -225,3 +225,48 @@
 .archive-zone--promotion .archive-zone-note,.archive-zone--champion .archive-zone-note {color:var(--success);}
 .archive-zone--survived .archive-zone-note,.archive-zone--playoff .archive-zone-note {color:var(--warning);}
 .archive-zone--runner-up .archive-zone-note,.archive-zone--champions .archive-zone-note {color:var(--info);}
+
+
+/* Historical cup phases: group standings and elimination bracket are separate. */
+.archive-phase-tabs {display:flex;align-items:stretch;gap:8px;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-control);}
+.archive-phase-tabs button {flex:1;min-height:48px;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-muted);font:700 .9rem var(--font-display);cursor:pointer;padding:10px 16px;}
+.archive-phase-tabs button[aria-pressed="true"] {color:var(--accent);border-color:var(--accent);background:var(--accent-soft);}
+.archive-phase-tabs button:hover,.archive-phase-tabs button:focus-visible {outline:1px solid var(--accent);}
+.archive-group-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:16px;padding:18px;}
+.archive-group {min-width:0;align-self:start;border:1px solid var(--border-strong);border-radius:var(--radius-control);background:var(--bg);overflow:hidden;}
+.archive-group h3 {display:flex;justify-content:space-between;align-items:center;gap:8px;padding:13px 12px;font:800 1.05rem var(--font-display);border-bottom:1px solid var(--border);border-top:2px solid var(--accent);}
+.archive-group h3 small {font-size:.68rem;white-space:nowrap;font-weight:400;}
+.archive-group-table {overflow-x:auto;max-width:100%;}
+.archive-group-table table {width:100%;border-collapse:collapse;min-width:0;font-variant-numeric:tabular-nums;}
+.archive-group-table th,.archive-group-table td {padding:9px 10px;border-bottom:1px solid var(--border);font-size:.79rem;vertical-align:middle;}
+.archive-group-table tbody tr:last-child th,.archive-group-table tbody tr:last-child td {border-bottom:0;}
+.archive-group-table thead {color:var(--text-muted);background:var(--surface-raised);font-size:.68rem;}
+.archive-group-table th {text-align:left;}
+.archive-group-table td:last-child,.archive-group-table th:last-child {text-align:right;}
+.archive-group-table .archive-person {gap:7px;font-size:.76rem;}
+.archive-group-table .archive-person .archive-avatar {width:24px;height:24px;}
+.archive-group-table .archive-points {color:var(--accent);font-weight:750;}
+.archive-group-fixtures {padding:11px;border-top:1px solid var(--border);display:grid;gap:8px;}
+.archive-group-fixtures h4 {font-size:.77rem;color:var(--text-muted);margin:0 0 3px;}
+.archive-group-fixture .archive-match-card {background:var(--surface);}
+.archive-group-fixture .archive-match-entry {min-height:31px;}
+.archive-additional>summary {padding:14px 20px;cursor:pointer;color:var(--text-muted);font-size:.85rem;}
+.archive-additional[open]>summary {border-bottom:1px solid var(--border);color:var(--text);}
+.archive-bracket-note {padding:9px 20px;}
+/* Compact, top-aligned columns instead of vertical bracket-space distribution.
+   Avoid false connectors between matches that lack recorded advancement edges. */
+.archive-bracket {align-items:flex-start;gap:17px;padding:14px 18px 22px;}
+.archive-bracket-stage {flex:0 0 232px;align-self:start;}
+.archive-bracket-stage>h3 {position:static;min-height:51px;}
+.archive-bracket-encounters {display:flex;flex:initial;flex-direction:column;justify-content:flex-start;gap:9px;padding-top:10px;}
+.archive-bracket-node::after {display:none!important;}
+.archive-bracket-scroll {max-height:900px;}
+@media(max-width:700px){
+ .archive-phase-tabs {gap:6px;padding:5px;}
+ .archive-phase-tabs button {font-size:.82rem;padding:10px 8px;}
+ .archive-group-grid {grid-template-columns:1fr;padding:12px;gap:12px;}
+ .archive-bracket {gap:14px;padding:12px;}
+ .archive-bracket-stage {flex-basis:206px;}
+ .archive-bracket-encounters {gap:8px;}
+ .archive-bracket-scroll {max-height:680px;}
+}
