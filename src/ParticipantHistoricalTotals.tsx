@@ -55,7 +55,6 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
  const [tab,setTab]=useState<Tab>('palmares');
  const [code,setCode]=useState(data.competitions[0]?.code??'');
  const selected=data.competitions.some(c=>c.code===code)?code:data.competitions[0]?.code??'';
- const title=tabs.find(x=>x.id===tab)?.name??'Tablas Totales';
  const rows=data.perCompetition[selected]??[];
  return <div className="historical-totals">
   <div className="totals-header"><div><a href="#/historia" className="totals-back">Historia / Estadísticas históricas</a><h1>TABLAS TOTALES</h1></div><span className="totals-period">Todas las temporadas registradas</span></div>
