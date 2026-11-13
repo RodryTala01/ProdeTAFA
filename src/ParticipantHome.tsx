@@ -2,9 +2,10 @@ import {argentinaDateTime} from './match-time';
 import {ParticipantShield,CompetitionImage,TeamShield} from './AssetImage';
 import { useEffect, useState } from 'react';
 import CompetitionList from './CompetitionList';
-import { competitionRows, homeCompetitions, predictionState, type HomeData, type HomeRound } from './participant-home';
+import { competitionRows, predictionState, type HomeData, type HomeRound } from './participant-home';
+import {homeCompetitionDirectory,homeCompetitionStatuses,homeCompetitionName} from './home-competition-status';
 import { Icon } from './ui';
-import {competitionHref,phaseName} from './participant-competitions';
+import {competitionHref} from './participant-competitions';
 import './participant-home.css';
 
 export function NextRound({ round }: { round: HomeRound | null }) {
@@ -69,11 +70,14 @@ function homeFixtureState(match: HomeRound['matches'][number]) {
 }
 export default function ParticipantHome({ name, data, userId }: { name: string; data: HomeData; userId?:string }) {
   const user=userId??data.league?.currentUserId??data.overview?.currentUserId??'';
-  const cards=homeCompetitions(data,user);
+  const statuses=homeCompetitionStatuses(data,user);
+  const directory=homeCompetitionDirectory(data,user);
   const mine=data.league?.standings.find(row=>row.userId===user);
+  const leader=data.league?.standings[0];
+  const distance=mine&&leader?Math.max(0,leader.points-mine.points):null;
+  const leagueHref=data.season?.division?competitionHref('LIGA_'+data.season.division.code,data.season.seasonNumber):'#/competiciones';
+  const leagueName=data.season?.division?'LIGA_'+data.season.division.code:null;
   const matches=[...(data.round?.matches??[])].filter(m=>m.home&&m.away).sort((a,b)=>Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt));
-  const resultRound=data.round??data.resultRound;
-  const results=[...(resultRound?.matches??[])].filter(m=>m.home&&m.away&&['FT','AET','PEN'].includes(m.status??'')&&!m.result?.isVoid&&m.result?.homeRegulation!=null&&m.result?.awayRegulation!=null).sort((a,b)=>Date.parse(b.kickoffAt)-Date.parse(a.kickoffAt));
   return <div className="home-sports">
     <div className="home-welcome"><span>{data.season?.name??'PRODE TAFA'}</span><span>{name}</span></div>
     {!data.errors.includes('No pudimos cargar la próxima Fecha.')&&<NextRound round={data.round}/>}
@@ -99,19 +103,56 @@ export default function ParticipantHome({ name, data, userId }: { name: string; 
           </a>
         </article>;
       })}</div>:<p className="home-empty">Los partidos aparecerán cuando haya una Fecha publicada.</p>}
-    </section><aside className="home-side"><section className="home-panel"><HomeHeading title="Tu posición" href={data.season?.division?competitionHref('LIGA_'+data.season.division.code,data.season.seasonNumber):'#/competiciones'} label="Ver Liga"/>
-      {mine?<><div className="home-position"><strong>{mine.position}°</strong><div><b>{mine.points}</b><span>Puntos</span></div><ParticipantShield name={name} userId={user} size="lg"/></div><p>{data.league?.competition.displayName} · {data.league?.provisional?'Provisional':'Puntaje definitivo'}</p></>:<p className="home-empty">Todavía no hay una posición disponible.</p>}
-    </section><section className="home-panel"><HomeHeading title="Últimos resultados" href={resultRound?.status==='finished'?`#/club/historial/${resultRound.id}`:'#/pronosticos'} label="Ver Fecha"/>
-      {results.length?<><small>{resultRound?.name} · resultado de 90 minutos</small><div className="home-results">{results.map((m,i)=><div key={m.id??i}><div><TeamShield name={m.home!.name} logoUrl={m.home!.logoUrl} size="sm"/><strong>{m.result!.homeRegulation} – {m.result!.awayRegulation}</strong><TeamShield name={m.away!.name} logoUrl={m.away!.logoUrl} size="sm"/></div><small>{m.home!.name} · {m.away!.name}</small><small>Tu pronóstico: <strong>{m.officialPrediction.homeScore==null||m.officialPrediction.awayScore==null?'Sin pronóstico enviado':m.officialPrediction.homeScore+' – '+m.officialPrediction.awayScore}</strong></small><small><strong>{m.score?m.score.points+' pts':'Puntos pendientes'}</strong>{m.score?.provisional?' · provisional':''}{(m.score?.extraPoints??0)>0?' · +'+m.score!.extraPoints+' por penales':''}</small></div>)}</div></>:<p className="home-empty">Todavía no hay resultados definitivos en esta Fecha del Prode.</p>}
-    </section></aside></div>
-    <section className="home-panel"><HomeHeading title="Competiciones" href="#/competiciones" label="Ver todas"/>
-      {cards.length?<div className="home-cups">{cards.map(({competition:c,status,phase,sides,context})=><a className={'home-cup '+(c.family==='LEAGUE'?'home-cup--league':'')} href={competitionHref(c.code,data.season?.seasonNumber)} key={c.id}>
-        <CompetitionImage code={c.code} name={c.displayName} season={data.season?.seasonNumber} variant="trophy" size="lg" decorative/><h3>{c.code==='LIGA_A'?'Primera División':c.code==='LIGA_B'?'Segunda División':c.displayName}</h3>
-        {c.code===data.league?.competition.code&&mine?<p><strong>{mine.position}° puesto</strong><br/>{mine.points} pts</p>:<>
-          {sides.length===2?<div className="home-opponents">{sides.map((side,i)=><div className="home-cup-side" key={i}>{side.length?side.map(m=><span key={m.userId}><ParticipantShield userId={m.userId} name={m.fullName} season={data.season?.seasonNumber} size="sm" decorative/><small>{m.fullName}</small></span>):<small>Por definir</small>}</div>)}<b>VS</b></div>:context?.kind==='DUO_SURVIVAL'&&context.partner?<p>Con {context.partner.fullName}</p>:null}
-          <p className={status==='Eliminado'?'home-eliminated':''}>{status}</p>{phase&&<small>{phaseName(phase)}</small>}
-        </>
-      }</a>)}</div>:<p className="home-empty">Tus competiciones aparecerán cuando tengas una participación registrada.</p>}
+    </section></div>
+    <div className="home-overview" aria-label="Tu posición y estado general">
+      <section className="home-panel home-overview-league">
+        <HomeHeading title="Tu posición" href={leagueHref} label="Ver Liga"/>
+        {mine?<div className="home-league-content">
+          <div className="home-league-rank">
+            <span className="home-league-place">{mine.position}°</span>
+            {leagueName&&<span className="home-league-name"><CompetitionImage code={leagueName} name={data.league?.competition.displayName??leagueName} size="xs" decorative/>{homeCompetitionName(leagueName,data.league?.competition.displayName??leagueName)}</span>}
+          </div>
+          <div className="home-league-points"><strong>{mine.points} <small>pts</small></strong>
+            <span>{data.league?.provisional?'Tabla provisional':'Tabla de tu Liga'}</span>
+          </div>
+          <div className="home-league-stats" aria-label="Estadísticas de liga">
+            {([['Plenos',mine.fulls],['Parciales',mine.partials],['Errores',mine.errors],['Extras',mine.extras]] as const).filter(([,value])=>value!=null).map(([label,value])=>
+              <span key={label}><small>{label}</small><strong>{value}</strong></span>)}
+          </div>
+          {(distance!==null||mine.zone)&&<div className="home-league-zone">
+            {distance!==null&&<span>{distance===0?'En la primera posición':`A ${distance} pts del líder`}</span>}
+            {mine.zone&&<strong>{mine.zone.label}</strong>}
+          </div>}
+        </div>:<div className="home-league-unavailable">
+          <CompetitionImage code={leagueName??''} name={data.league?.competition.displayName??'Liga'} size="lg" decorative/>
+          <p>{data.season?.division?'Todavía no hay una posición disponible en tu Liga.':'Tu Liga aparecerá cuando tengas una división asignada.'}</p>
+        </div>}
+      </section>
+      <section className="home-panel home-status-panel">
+        <HomeHeading title="Tu estado general" href="#/competiciones" label="Ver todas las competiciones"/>
+        {statuses.length?<div className="home-status-grid">{statuses.map(card=>
+          <a className={`home-status-card home-status-card--${card.tone}`} key={card.code} href={card.href}
+             aria-label={`${card.name}: ${card.primary}${card.detail?' · '+card.detail:''}`}>
+            <CompetitionImage code={card.code} name={card.name} season={data.season?.seasonNumber} size="md" decorative/>
+            <span className="home-status-copy">
+              <strong>{card.name}</strong>
+              <b className="home-status-primary">{card.primary}</b>
+              {card.detail&&<small>{card.detail}</small>}
+            </span>
+            <span className="home-status-arrow" aria-hidden="true">›</span>
+          </a>)}</div>
+          :<p className="home-empty">Tus estados aparecerán cuando las competiciones tengan participantes o cruces registrados.</p>}
+      </section>
+    </div>
+    <section className="home-panel home-directory-panel">
+      <HomeHeading title="Competiciones" href="#/competiciones" label="Ver todas"/>
+      {directory.length?<nav className="home-competition-directory" aria-label="Accesos a competiciones">
+        {directory.map(card=><a key={card.code} href={card.href}
+          className={`home-competition-shortcut ${card.current?'home-competition-shortcut--mine':''}`}>
+          <CompetitionImage code={card.code} name={card.name} season={data.season?.seasonNumber} size="md" variant="trophy" decorative/>
+          <strong>{card.name}</strong>
+        </a>)}
+      </nav>:<p className="home-empty">Las competiciones aparecerán cuando estén configuradas para esta temporada.</p>}
     </section>
   </div>;
 }

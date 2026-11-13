@@ -6,6 +6,7 @@ import { homeCompetitions, competitionRows, emptyHome, loadHome, predictionState
 import { participantRoute } from '../src/participant-navigation';
 import { ParticipantNavigation } from '../src/ParticipantDashboard';
 import ParticipantHome, { HomeErrors, NextRound, ParticipantClub, ParticipantCompetitions } from '../src/ParticipantHome';
+import {homeCompetitionDirectory,homeCompetitionStatuses} from '../src/home-competition-status';
 
 const prediction = { homeScore: null, awayScore: null, extraTeamId: null };
 const round: HomeRound = { id: 7, name: 'Jornada publicada', status: 'open', submitted: false, serverNow: '2030-01-01T00:00:00Z', matches: [{ kickoffAt: '2030-01-02T00:00:00Z', lockedAt: '2030-01-02T00:01:00Z', isLocked: false, prediction, officialPrediction: prediction }] };
@@ -141,11 +142,23 @@ describe('Home deportiva: participación real', () => {
 });
 
 
-it('Últimos resultados muestra sólo la Fecha actual, pronóstico oficial y puntos persistidos',()=>{
-  const match={...round.matches[0],id:1,status:'FT',home:{id:'h',name:'Local real'},away:{id:'a',name:'Visitante real'},result:{homeRegulation:2,awayRegulation:1,isVoid:false},prediction:{homeScore:9,awayScore:9,extraTeamId:null},officialPrediction:{homeScore:2,awayScore:1,extraTeamId:null},score:{points:3,extraPoints:0,provisional:false}};
-  const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Persona',data:{...emptyHome,round:{...round,matches:[match]},resultRound:{...round,id:99,name:'Fecha anterior',matches:[{...match,home:{id:'other',name:'Otro partido anterior'}}]}}}));
-  expect(html).toContain('Tu pronóstico:');expect(html).toContain('2 – 1');expect(html).toContain('3 pts');expect(html).not.toContain('9 – 9');expect(html).not.toContain('Otro partido anterior');
+it('Inicio elimina Últimos resultados y conserva el marcador real en Partidos de la Fecha',()=>{
+  const match={...round.matches[0],id:1,status:'FT',home:{id:'h',name:'Local real'},away:{id:'a',name:'Visitante real'},
+    result:{homeRegulation:2,awayRegulation:1,isVoid:false},
+    prediction:{homeScore:9,awayScore:9,extraTeamId:null},
+    officialPrediction:{homeScore:2,awayScore:1,extraTeamId:null},
+    score:{points:3,extraPoints:0,provisional:false}};
+  const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Persona',
+    data:{...emptyHome,round:{...round,matches:[match]},resultRound:{...round,id:99,name:'Fecha anterior',matches:[]}}}));
+  expect(html).not.toContain('Últimos resultados');
+  expect(html).toContain('RESULTADO REAL · 90′');
+  expect(html).toContain('TU PRONÓSTICO · ENVIADO');
+  expect(html).toContain('2 – 1');
+  expect(html).toContain('3 pts');
+  expect(html).not.toContain('9 – 9');
 });
+
+
 it('no busca resultados de otra Fecha cuando la actual todavía no tiene finales',async()=>{
   const fetcher=vi.fn(async(url:string)=>Response.json(url.includes('current')?{season:null}:url.includes('competition-contexts')?{contexts:[]}:{round}));vi.stubGlobal('fetch',fetcher);
   const home=await loadHome();expect(home.resultRound?.id).toBe(round.id);expect(fetcher.mock.calls.map(c=>c[0])).not.toContain('/api/participant/rounds');
@@ -179,4 +192,58 @@ it('Inicio marca borrador sin enviar y resultado todavía pendiente',()=>{
   expect(html).toContain('2 – 0');
   expect(html).toContain('Por jugar');
   expect(html).not.toContain('ERROR · 0 pts');
+});
+
+it('El rediseño usa la liga, posición, estadísticas y zona realmente informadas',()=>{
+ const standings=[
+ {userId:'top',position:1,points:24,fulls:6,partials:6,errors:3,extras:0,zone:{code:'copa',label:'Zona de Copa'}},
+ {userId:'me',position:2,points:18,fulls:5,partials:3,errors:2,extras:0,zone:{code:'copa',label:'Zona de Copa'}}
+ ];
+ const model={...data,league:{...data.league!,currentUserId:'me',standings}} as HomeData;
+ const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Persona',data:model,userId:'me'}));
+ expect(html).toContain('Tu estado general');
+ expect(html).toContain('Tu posición');
+ expect(html).toContain('A 6 pts del líder');
+ expect(html).toContain('Zona de Copa');
+ expect(html).toContain('Plenos');
+ expect(html).toContain('Parciales');
+ expect(html).toContain('Errores');
+ expect(html).toContain('Extras');
+ expect(html).not.toContain('Últimos resultados');
+});
+it('Las tarjetas muestran estados verificados, rivales y compañeros sin inventar grupos o puestos',()=>{
+ const s={...data,overview:{currentUserId:'me',editions:[],season:{
+  id:1,seasonNumber:33,name:'Actual',status:'active',
+  competitions:['LIGA_A','COPA_A','COPA_DUOS','COPA_PAPA'].map((code,i)=>({
+   id:i+1,code,displayName:code,family:code.startsWith('LIGA_')?'LEAGUE':'CUP',status:'active',divisionId:null
+  })),
+  stages:[{id:10,competitionId:2,name:'Octavos',code:'R16',type:'KNOCKOUT',sequence:1,status:'active'}],
+  members:[{entryId:20,competitionId:2,userId:'me',fullName:'Persona',status:'active',entryType:'PERSON',validFrom:null,validTo:null},
+   {entryId:21,competitionId:3,userId:'me',fullName:'Persona',status:'active',entryType:'DUO',validFrom:null,validTo:null},
+   {entryId:21,competitionId:3,userId:'partner',fullName:'Compañera',status:'active',entryType:'DUO',validFrom:null,validTo:null},
+   {entryId:22,competitionId:4,userId:'me',fullName:'Persona',status:'eliminated',entryType:'PERSON',validFrom:null,validTo:null}],
+  people:[],links:[],results:[],history:[],segments:[],
+  encounters:[{id:99,stageId:10,roundId:7,entryAId:20,entryBId:30,scoreA:null,scoreB:null,status:'pending',winnerEntryId:null,confirmedAt:null,resolution:null,slot:'Q1'}]
+ }},season:{...data.season!,division:{code:'A',name:'Liga A'}}} as any;
+ const statuses=homeCompetitionStatuses(s,'me');
+ const league=statuses.find(c=>c.code==='LIGA_A');
+ const copa=statuses.find(c=>c.code==='COPA_A');
+ const duos=statuses.find(c=>c.code==='COPA_DUOS');
+ const papa=statuses.find(c=>c.code==='COPA_PAPA');
+ expect(league).toBeDefined();
+ expect(copa?.primary).toContain('Octavos');
+ expect(duos?.detail).toContain('Compañera');
+ expect(papa?.primary).toBe('Eliminado');
+ expect(statuses.map(c=>c.primary).join(' ')).not.toContain('2° en el grupo');
+ const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Persona',data:s,userId:'me'}));
+ expect(html).toContain('Tu estado general');
+ expect(html).not.toContain('Últimos resultados');
+});
+it('Competiciones es una sola franja de accesos con los torneos reales, sin copas ficticias',()=>{
+ const s={...data,season:{...data.season!,competitionCatalog:[liga,copa]}} as HomeData;
+ expect(homeCompetitionDirectory(s,'me').map(c=>c.code)).toEqual(['LIGA_B','COPA_A']);
+ const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Persona',data:s,userId:'me'}));
+ expect(html.match(/class="home-competition-directory"/g)).toHaveLength(1);
+ expect(html).toContain('Accesos a competiciones');
+ expect(html).not.toContain('Últimos resultados');
 });

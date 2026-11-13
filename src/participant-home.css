@@ -137,3 +137,82 @@
  .home-fixtures { grid-template-columns:minmax(0,1fr); }
  .home-fixture-link { padding:12px; }
 }
+
+
+/* Inicio: league position + competition-status overview, followed by a compact
+ * tournament directory. No duplicate match-results strip or oversized trophies. */
+.home-overview {
+ display:grid; grid-template-columns:minmax(0,.88fr) minmax(0,1.42fr);
+ gap:14px; margin:14px 0; align-items:stretch;
+}
+.home-overview > .home-panel {min-width:0; padding:18px 20px;}
+.home-overview .home-heading h2 {font-size:1.18rem;letter-spacing:.015em;}
+.home-league-content {display:grid; grid-template-columns:auto minmax(0,1fr); gap:18px 20px; align-items:center; padding:12px 0 4px;}
+.home-league-rank {display:grid;justify-items:start;gap:8px;min-width:0;}
+.home-league-place {font:900 clamp(2.3rem,4vw,4rem)/1 var(--font-display);color:var(--text);font-variant-numeric:tabular-nums;}
+.home-league-name {display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--home-violet);border-radius:12px;background:var(--bg);padding:5px 9px;color:var(--text);font-size:.74rem;font-weight:700;}
+.home-league-points {display:grid;align-content:center;gap:8px;min-width:0;border-left:1px solid var(--border);padding-left:20px;}
+.home-league-points strong {color:var(--home-fluor);font:800 clamp(1.65rem,3vw,2.45rem)/1.1 var(--font-display);font-variant-numeric:tabular-nums;}
+.home-league-points strong small {font-size:.55em;}
+.home-league-points > span {font-size:.73rem;color:var(--text-muted);}
+.home-league-stats {grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;border-top:1px solid var(--border);padding-top:14px;}
+.home-league-stats > span {display:grid;justify-items:center;gap:4px;min-width:0;}
+.home-league-stats small {color:var(--text-muted);font-size:.66rem;}
+.home-league-stats strong {font:700 1.12rem var(--font-display);font-variant-numeric:tabular-nums;}
+.home-league-zone {grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px;padding:11px 13px;border:1px solid var(--border-strong);border-radius:4px;background:var(--bg);font-size:.77rem;}
+.home-league-zone span {color:var(--text-muted);}
+.home-league-zone strong {color:var(--home-fluor);}
+.home-league-unavailable {display:flex;align-items:center;gap:16px;min-height:122px;}
+.home-league-unavailable p {color:var(--text-muted);font-size:.83rem;}
+.home-status-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.home-status-card {--status-color:var(--home-violet);display:flex;align-items:center;gap:10px;min-width:0;min-height:112px;padding:12px 10px;background:var(--bg);border:1px solid var(--border-strong);border-left:3px solid var(--status-color);border-radius:8px;color:var(--text);text-decoration:none;}
+.home-status-card--lime {--status-color:var(--home-fluor);}
+.home-status-card--blue {--status-color:#78b9f5;}
+.home-status-card--gold {--status-color:#f5c54b;}
+.home-status-card--danger {--status-color:var(--danger);}
+.home-status-card:hover,.home-status-card:focus-visible {outline:1px solid var(--status-color);border-color:var(--status-color);}
+.home-status-card .competition-image {align-self:flex-start;margin-top:2px;}
+.home-status-copy {display:grid;gap:5px;min-width:0;flex:1;}
+.home-status-copy > strong {font:800 .94rem/1.15 var(--font-display);}
+.home-status-primary {font:700 .84rem/1.2 var(--font-display);overflow-wrap:anywhere;}
+.home-status-copy > small {font-size:.72rem;line-height:1.35;color:var(--text-muted);overflow-wrap:anywhere;}
+.home-status-card--danger .home-status-primary {color:var(--danger);}
+.home-status-card--lime .home-status-primary {color:var(--home-fluor);}
+.home-status-arrow {color:var(--home-violet);font-size:1.4rem;align-self:center;line-height:1;}
+.home-directory-panel {margin-top:0;padding:18px 20px;}
+.home-competition-directory {display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:10px;}
+.home-competition-shortcut {display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;min-width:0;min-height:105px;border:1px solid var(--border-strong);border-radius:8px;background:var(--bg);color:var(--text);text-align:center;text-decoration:none;padding:10px 5px;}
+.home-competition-shortcut > strong {font:700 .82rem/1.22 var(--font-display);overflow-wrap:anywhere;}
+.home-competition-shortcut--mine {border-color:var(--home-violet);background:color-mix(in srgb,var(--home-violet) 9%,var(--bg));}
+.home-competition-shortcut:hover,.home-competition-shortcut:focus-visible {outline:1px solid var(--home-violet);border-color:var(--home-violet);}
+@media(max-width:1300px){
+ .home-overview {grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);}
+ .home-status-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+ .home-competition-directory {grid-template-columns:repeat(5,minmax(0,1fr));}
+}
+@media(max-width:900px){
+ .home-overview {grid-template-columns:1fr;}
+ .home-status-grid {grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media(max-width:700px){
+ .home-overview {gap:10px;margin:10px 0;}
+ .home-overview > .home-panel,.home-directory-panel {padding:14px 12px;}
+ .home-overview .home-heading {flex-wrap:wrap;gap:4px;}
+ .home-overview .home-heading h2 {font-size:1.05rem;}
+ .home-league-content {gap:12px;padding-top:6px;}
+ .home-league-place {font-size:2.8rem;}
+ .home-league-points {padding-left:12px;}
+ .home-status-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+ .home-status-card {min-height:105px;padding:10px 8px;gap:7px;}
+ .home-status-card .competition-image .asset-image {width:28px!important;height:28px!important;}
+ .home-status-copy > strong {font-size:.84rem;}
+ .home-status-primary {font-size:.75rem;}
+ .home-status-copy > small {font-size:.68rem;}
+ .home-competition-directory {display:flex;overflow-x:auto;gap:9px;padding:2px 2px 10px;scroll-snap-type:x proximity;}
+ .home-competition-shortcut {flex:0 0 112px;scroll-snap-align:start;min-height:93px;}
+}
+@media(max-width:390px){
+ .home-status-grid {grid-template-columns:minmax(0,1fr);}
+ .home-status-card {min-height:75px;}
+ .home-status-card .competition-image .asset-image {width:36px!important;height:36px!important;}
+}
