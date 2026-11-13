@@ -17,7 +17,7 @@ export type LeagueSummary = {
   competition: { code: string; displayName: string };
   currentUserId: string;
   provisional: boolean;
-  standings: { userId: string; position: number; points: number }[];
+  standings: { userId: string; position: number; points: number; fulls?: number; partials?: number; errors?: number; extras?: number; roundsPlayed?: number; zone?: { code:string; label:string } | null }[];
 };
 export type HomeData = {
   season: CurrentSeason | null; round: HomeRound | null; league: LeagueSummary | null;
