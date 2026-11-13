@@ -2,6 +2,7 @@ import {useEffect,useState,type ReactNode} from 'react';
 import {AssetImage,ParticipantShield} from './AssetImage';
 import {competitionAsset} from './competition-assets';
 import {Icon} from './ui';
+import {archiveStandingZone,historicalMatchLayout,isHistoricalPromotion,promotionHomeLeague,visibleArchiveCompetitions} from './archive-history-view';
 import type {HistorySummary,HistoryDetail} from './history-types';
 import type {ArchivePayload,ArchiveCompetition} from './historical-schema';
 import './participant-archive.css';
@@ -23,8 +24,8 @@ function Person({data,id}:{data:ArchivePayload;id:string}){
 }
 function Empty({children='Información no disponible.'}:{children?:ReactNode}){return <div className="archive-empty"><Icon name="book"/><p>{children}</p></div>;}
 function SectionHeading({title,detail}:{title:string;detail?:string}){return <div className="archive-section-heading"><h2>{title}</h2>{detail&&<span>{detail}</span>}</div>;}
-function StatsTable({data,rows,label,positions=false}:{data:ArchivePayload;rows:Array<{participantKey:string;position?:number;points:number;fulls:number|null;partials:number|null;errors:number|null;extras:number|null}>;label:string;positions?:boolean}){
- return <div className="archive-table" role="region" aria-label={label} tabIndex={0}><table><caption className="sr-only">{label}</caption><thead><tr>{positions&&<th scope="col">Posición</th>}<th scope="col">Participante</th><th scope="col">Puntos</th><th scope="col">Plenos</th><th scope="col">Parciales</th><th scope="col">Errores</th><th scope="col">Extras</th></tr></thead><tbody>{rows.map(r=><tr key={r.participantKey}>{positions&&<td><span className={'archive-position'+(r.position===1?' archive-position--first':'')}>{display(r.position)}{r.position!==undefined?'°':''}</span></td>}<th scope="row"><Person data={data} id={r.participantKey}/></th><td className="archive-points">{r.points}</td><td>{display(r.fulls)}</td><td>{display(r.partials)}</td><td>{display(r.errors)}</td><td>{display(historicalExtras(r))}</td></tr>)}</tbody></table></div>;
+function StatsTable({data,rows,label,positions=false,competition,source='imported'}:{data:ArchivePayload;rows:Array<{participantKey:string;position?:number;points:number;fulls:number|null;partials:number|null;errors:number|null;extras:number|null}>;label:string;positions?:boolean;competition?:ArchiveCompetition;source?:HistoryDetail['summary']['source']}){
+ return <div className="archive-table" role="region" aria-label={label} tabIndex={0}><table><caption className="sr-only">{label}</caption><thead><tr>{positions&&<th scope="col">Posición</th>}<th scope="col">Participante</th><th scope="col">Puntos</th><th scope="col">Plenos</th><th scope="col">Parciales</th><th scope="col">Errores</th><th scope="col">Extras</th></tr></thead><tbody>{rows.map(r=>{const zone=competition&&r.position!==undefined?archiveStandingZone(data,competition,r as ArchivePayload['standings'][number],source):null;return <tr key={r.participantKey} className={zone?'archive-zone archive-zone--'+zone.code:undefined} title={zone?.label}>{positions&&<td><span className={'archive-position'+(r.position===1?' archive-position--first':'')}>{display(r.position)}{r.position!==undefined?'°':''}</span>{zone&&<small className="archive-zone-note">{zone.label}</small>}</td>}<th scope="row"><Person data={data} id={r.participantKey}/></th><td className="archive-points">{r.points}</td><td>{display(r.fulls)}</td><td>{display(r.partials)}</td><td>{display(r.errors)}</td><td>{display(historicalExtras(r))}</td></tr>;})}</tbody></table></div>;
 }
 function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
  const {data,summary}=detail;
@@ -35,6 +36,58 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
   return <article className={'archive-award'+(champion?' archive-award--champion':'')} key={r.competitionCode+':'+r.participantKey+':'+i}><Trophy code={r.competitionCode} name={c?.name||r.competitionCode} season={summary.number} large/><div className="archive-award__body"><span className="archive-award__label">{resultNames[r.resultCode]}</span><h3>{c?.name||r.competitionCode}</h3><Person data={data} id={r.participantKey}/>{r.teamLabel&&<p>{r.teamLabel}</p>}</div>{row&&<div className="archive-award__points"><strong>{row.points}</strong><span>puntos</span></div>}</article>;
  })}</div>:<Empty>Sin resultados finales declarados.</Empty>;
 }
+// The bracket renders only persisted match scores. It intentionally does not
+// infer advancement or match winners from totals; historical tiebreak rules differ.
+function ArchiveMatchCards({detail,matches}:{detail:HistoryDetail;matches:ArchivePayload['matches']}){
+ return <div className="archive-match-stack">{matches.map((m,i)=><article className="archive-match-card" key={m.matchId??i}>
+  <div className="archive-match-entry"><Person data={detail.data} id={m.aKey}/><strong>{m.pointsA}</strong></div>
+  <div className="archive-match-entry"><Person data={detail.data} id={m.bKey}/><strong>{m.pointsB}</strong></div>
+  {(m.round||m.scoreBasis==='DUO')&&<div className="archive-match-caption">{m.round&&<small>{m.round}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</div>}
+ </article>)}</div>;
+}
+function ArchiveKnockout({detail,matches}:{detail:HistoryDetail;matches:ArchivePayload['matches']}){
+ const {bracket,groups,other}=historicalMatchLayout(matches);
+ const maximum=Math.max(1,...bracket.map(s=>s.matches.length));
+ return <>
+  {bracket.length>0&&<section className="archive-panel archive-bracket-panel">
+   <SectionHeading title="Llave de eliminación directa" detail={matches.length+' cruces registrados'}/>
+   <p className="archive-bracket-note">Deslizá horizontalmente para recorrer las rondas. Se muestran los encuentros y marcadores históricos, sin reconstruir clasificaciones que no estén registradas.</p>
+   <div className="archive-bracket-scroll" tabIndex={0} role="region" aria-label="Llave histórica de la competición">
+    <div className="archive-bracket" style={{minHeight:Math.max(250,maximum*106)+'px'}}>
+     {bracket.map((stage,i)=><section className="archive-bracket-stage" key={stage.key}>
+       <h3>{stage.label}<small>{stage.matches.length} {stage.matches.length===1?'cruce':'cruces'}</small></h3>
+       <div className="archive-bracket-encounters">{stage.matches.map((m,j)=><div className={'archive-bracket-node'+(i===bracket.length-1?' archive-bracket-node--last':'')} key={m.matchId??j}>
+        <ArchiveMatchCards detail={detail} matches={[m]}/>
+        {m.stage!==stage.label&&<small className="archive-bracket-source">{m.stage}</small>}
+       </div>)}</div>
+     </section>)}
+    </div>
+   </div>
+  </section>}
+  {groups.length>0&&<section className="archive-panel"><SectionHeading title="Fase de grupos" detail={groups.length+' encuentros'}/><div className="archive-other-matches">
+   {groups.map((m,i)=><div key={m.matchId??i}><h3>{m.round??m.stage}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}
+  </div></section>}
+  {other.length>0&&<section className="archive-panel"><SectionHeading title="Otros encuentros oficiales" detail={other.length+' cruces'}/><div className="archive-other-matches">{other.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
+ </>;
+}
+function LeaguePromotionHistory({detail}:{detail:HistoryDetail}){
+ const {data}=detail;
+ const codes=new Set(data.competitions.filter(isHistoricalPromotion).map(c=>c.code));
+ codes.add('PROMOCION');
+ const matches=data.matches.filter(m=>codes.has(m.competitionCode));
+ const movements=data.movements.filter(m=>['ASCENSO','DESCENSO','PERMANENCIA'].includes(m.type));
+ if(!matches.length&&!movements.length)return null;
+ return <section className="archive-panel archive-league-promotion">
+  <SectionHeading title="Promoción · Ascensos y descensos" detail={matches.length?matches.length+' enfrentamientos':undefined}/>
+  <p className="archive-bracket-note">Definiciones ligadas a la Liga. No constituyen una copa ni otorgan un campeón.</p>
+  {matches.length>0&&<div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div>}
+  {movements.length>0&&<ul className="archive-movements">{movements.map((m,i)=><li key={m.participantKey+':'+i}><Person data={data} id={m.participantKey}/>
+    <span className={'archive-movement-type archive-movement--'+m.type.toLowerCase()}>{m.type}</span>
+    <span>{m.fromDivision||'—'} → {m.toDivision||'—'}</span>{m.detail&&<small>{m.detail}</small>}
+  </li>)}</ul>}
+ </section>;
+}
+
 function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competition:ArchiveCompetition}){
  const {data,summary}=detail,c=competition;
  const standings=data.standings.filter(r=>r.competitionCode===c.code).sort((a,b)=>a.position-b.position);
@@ -46,9 +99,12 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
  return <div className="archive-competition">
   <div className="archive-competition-heading"><Trophy code={c.code} name={c.name} season={summary.number}/><div><span className="archive-kicker">Competición · T{summary.number}</span><h2>{c.name}</h2></div></div>
   <Podium detail={detail} code={c.code}/>
-  <section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>
+  <section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name} competition={c} source={summary.source}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>
   {(roundNames.length>0||links.length>0)&&<section className="archive-panel"><SectionHeading title="Resultados por Fecha" detail={roundNames.length?roundNames.length+' Fechas':undefined}/>{roundNames.map(round=><details className="archive-round" key={round}><summary><span><Icon name="calendar"/>{round}</span><span>Ver resultados</span></summary><StatsTable data={data} rows={rounds.filter(r=>r.round===round)} label={c.name+' · '+round}/></details>)}{links.length>0&&<div className="archive-round-links">{links.map(l=><a className="button button--secondary" key={l.roundId} href={'#/club/historial/'+l.roundId}>{l.name}<Icon name="arrow"/></a>)}</div>}</section>}
-  {matches.length>0&&<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-table" role="region" aria-label={'Cruces de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Fase / Fecha</th><th scope="col">Participante</th><th scope="col">Resultado</th><th scope="col">Rival</th></tr></thead><tbody>{matches.map((m,i)=><tr key={m.matchId||i}><td><strong>{m.stage}</strong>{m.round&&<small>{m.round}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</td><th scope="row"><Person data={data} id={m.aKey}/></th><td className="archive-score">{m.pointsA} – {m.pointsB}</td><td><Person data={data} id={m.bKey}/></td></tr>)}</tbody></table></div></section>}
+  {matches.length>0&&(c.kind==='CUP'||c.kind==='TOURNAMENT'
+    ?<ArchiveKnockout detail={detail} matches={matches}/>
+    :<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}{m.round&&<small>{m.round}</small>}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>)}
+  {c.kind==='LEAGUE'&&promotionHomeLeague(data)?.code===c.code&&<LeaguePromotionHistory detail={detail}/>}
   {(!roundNames.length&&!links.length||!matches.length)&&<p className="archive-availability">{!roundNames.length&&!links.length&&<span>Sin desglose por Fecha disponible.</span>}{!matches.length&&<span>Sin enfrentamientos oficiales disponibles.</span>}</p>}
  </div>;
 }
@@ -59,7 +115,8 @@ function Iffhs({detail}:{detail:HistoryDetail}){
 export function SeasonDetail({detail,competition,view}:{detail:HistoryDetail;competition?:string;view?:ArchiveView}){
  const {data,summary}=detail;
  const active=view||(competition?'competiciones':'resumen');
- const selected=data.competitions.find(c=>c.code===competition)||(!competition?data.competitions[0]:undefined);
+ const available=visibleArchiveCompetitions(data.competitions);
+ const selected=available.find(c=>c.code===competition)||available.find(c=>c.code===promotionHomeLeague(data)?.code)||available[0];
  const root='#/historia/'+summary.number;
  const total=(key:'points'|'extras')=>data.statistics.length&&data.statistics.every(r=>r[key]!==null)?data.statistics.reduce((n,r)=>n+(r[key]??0),0):null;
  return <>
@@ -88,7 +145,7 @@ export default function ParticipantArchive({route}:{route:string}){
  if(error)return <div className="participant-archive"><section className="archive-panel archive-error"><Icon name="book"/><h1>Historia</h1><p role="alert">{error}</p><div><button className="button button--primary" onClick={()=>setRevision(n=>n+1)}>Reintentar</button><a className="button button--secondary" href="#/historia">Volver a Historia</a></div></section></div>;
  if(number&&detail)return <div className="participant-archive"><SeasonDetail detail={detail} competition={competition} view={view}/></div>;
  const filtered=seasons.filter(s=>(s.number+' '+s.name).toLocaleLowerCase().includes(search.toLocaleLowerCase())&&(!kind||s.competitions.some(c=>c.kind===kind)));
- return <div className="participant-archive"><header className="archive-hero"><div className="archive-hero__row"><div><span className="archive-kicker">Archivo TAFA</span><h1>Historia</h1><p>Temporadas, títulos y estadísticas</p></div><span className="archive-hero__icon"><Icon name="book"/></span></div><div className="archive-meta"><span>{seasons.length} {seasons.length===1?'temporada disponible':'temporadas disponibles'}</span></div></header><div className="archive-filters"><label><span>Buscar temporada</span><input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Número o nombre"/></label><label><span>Tipo de competición</span><select value={kind} onChange={e=>setKind(e.target.value)}><option value="">Todas las competiciones</option><option value="LEAGUE">Liga</option><option value="CUP">Copa</option><option value="TOURNAMENT">Torneo</option><option value="PROMOTION">Promoción</option></select></label></div>
+ return <div className="participant-archive"><header className="archive-hero"><div className="archive-hero__row"><div><span className="archive-kicker">Archivo TAFA</span><h1>Historia</h1><p>Temporadas, títulos y estadísticas</p></div><span className="archive-hero__icon"><Icon name="book"/></span></div><div className="archive-meta"><span>{seasons.length} {seasons.length===1?'temporada disponible':'temporadas disponibles'}</span></div></header><div className="archive-filters"><label><span>Buscar temporada</span><input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Número o nombre"/></label><label><span>Tipo de competición</span><select value={kind} onChange={e=>setKind(e.target.value)}><option value="">Todas las competiciones</option><option value="LEAGUE">Liga</option><option value="CUP">Copa</option><option value="TOURNAMENT">Torneo</option></select></label></div>
   {!filtered.length?<Empty>{seasons.length?'No hay temporadas para estos filtros.':'Todavía no hay temporadas históricas disponibles.'}</Empty>:<div className="archive-season-grid">{filtered.map(s=><article className="archive-season-card" key={s.number}><div className="archive-season-card__heading"><span className="archive-season-number">T{s.number}</span><span className="archive-source">{s.source==='official'?'Oficial':s.source==='mixed'?'Histórica / oficial':'Histórica'}</span></div><h2><a href={'#/historia/'+s.number}>{s.name}</a></h2><div className="archive-season-facts"><span>{s.competitions.length} {s.competitions.length===1?'competición':'competiciones'}</span>{s.participantCount!==null&&<span>{s.participantCount} participantes</span>}</div><ul className="archive-season-cups">{s.competitions.map(c=><li key={c.code}><Trophy code={c.code} name={c.name} season={s.number}/><span><strong>{c.name}</strong>{c.champions.length>0?<small><span className="archive-champion-label">Campeón</span>{c.champions.join(' · ')}</small>:<small>Sin campeón declarado</small>}</span></li>)}</ul><a className="archive-season-cta" href={'#/historia/'+s.number}>Ver temporada<Icon name="arrow"/></a></article>)}</div>}
  </div>;
 }

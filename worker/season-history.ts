@@ -7,7 +7,7 @@ import {handleCompetitionLeagues} from './competition-leagues';
 const rows=async <T>(db:D1Database,sql:string,...args:(string|number)[]) => (await db.prepare(sql).bind(...args).all<T>()).results??[];
 export function importedSummary(data:ArchivePayload):HistorySummary{
  return {number:data.season.number,name:data.season.name,source:'imported',participantCount:data.participants.length,
- competitions:data.competitions.map(c=>({...c,champions:data.results.filter(r=>r.competitionCode===c.code&&r.resultCode==='CHAMPION').map(r=>r.teamLabel||data.participants.find(p=>p.key===r.participantKey)?.name||'Participante no disponible')}))};
+ competitions:data.competitions.filter(c=>c.kind!=='PROMOTION'&&c.code!=='PROMOCION').map(c=>({...c,champions:data.results.filter(r=>r.competitionCode===c.code&&r.resultCode==='CHAMPION').map(r=>r.teamLabel||data.participants.find(p=>p.key===r.participantKey)?.name||'Participante no disponible')}))};
 }
 export async function historySummaries(db:D1Database){
  const imported=(await activeHistoricalArchives(db)).map(({data})=>importedSummary(data));
@@ -19,8 +19,9 @@ export async function historySummaries(db:D1Database){
   // Old imports and official seasons must never produce duplicate season cards.
   const importedIndex=result.findIndex(x=>x.number===s.number);
   const competitions=await rows<{code:string;name:string;kind:string}>(db,`SELECT c.code,c.display_name AS name,c.family AS kind FROM competitions c JOIN tafa_seasons s ON s.id=c.season_id WHERE s.season_number=? AND (EXISTS(SELECT 1 FROM competition_results r WHERE r.competition_id=c.id) OR EXISTS(SELECT 1 FROM competition_round_links l JOIN rounds rd ON rd.id=l.round_id WHERE l.competition_id=c.id AND rd.status='finished')) ORDER BY c.sort_order,c.id`,s.number);
+  const visibleCompetitions=competitions.filter(c=>c.kind!=='PROMOTION'&&c.code!=='PROMOCION');
   const champions=await rows<{code:string;name:string}>(db,`SELECT c.code,e.display_name AS name FROM competition_results r JOIN competitions c ON c.id=r.competition_id JOIN tafa_seasons s ON s.id=c.season_id JOIN competition_entries e ON e.id=r.entry_id WHERE s.season_number=? AND r.result_code='CHAMPION'`,s.number);
-  const official={...s,source:'official' as const,competitions:competitions.map(c=>({...c,champions:champions.filter(x=>x.code===c.code).map(x=>x.name)}))};
+  const official={...s,source:'official' as const,competitions:visibleCompetitions.map(c=>({...c,champions:champions.filter(x=>x.code===c.code).map(x=>x.name)}))};
   if(importedIndex<0)result.push(official);
   else {
    const old=result[importedIndex];
