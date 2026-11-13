@@ -37,7 +37,6 @@ export function composeHistoricalTotals(
  const awards=new Map<string,{seasonNumber:number;code:string;userId:string;resultCode:string}>();
  const iffhs=new Map<string,IffhsScore>();
  const competitionNames=new Map<string,string>();
- const seenOfficialAwards=new Set<string>();
  const officialSeasonUsers=new Set(officialSeasons.map(s=>s.seasonNumber+':'+s.userId));
  const addName=(id:string,name:string)=>{if(!names.has(id)||!id.startsWith('hist:'))names.set(id,name);};
  const addCompetition=(code:string,name:string)=>{if(meaningful(code)&&!competitionNames.has(code))competitionNames.set(code,name);};
@@ -50,7 +49,6 @@ export function composeHistoricalTotals(
  };
  for(const a of officialAwards){
   addAward(a);
-  seenOfficialAwards.add(a.seasonNumber+':'+a.code);
  }
  for(const a of officialMembers){
   if(!meaningful(a.code))continue;
@@ -88,7 +86,6 @@ export function composeHistoricalTotals(
     for(const entry of group.entries)addPart(c.code,entry.participantKey);
   }
   for(const r of data.results){
-   if(seenOfficialAwards.has(data.season.number+':'+r.competitionCode))continue;
    addAward({seasonNumber:data.season.number,code:r.competitionCode,
     name:data.competitions.find(c=>c.code===r.competitionCode)?.name??r.competitionCode,
     userId:archivedUserKey(data,r.participantKey),fullName:display(r.participantKey),resultCode:r.resultCode});
@@ -130,7 +127,7 @@ export function composeHistoricalTotals(
   runnerUps:counts.get(userId)?.runnerUps??0,participations:participationsByUser.get(userId)?.size??0
  })),r=>r.championships);
  const perCompetition:Record<string,PalmarTotal[]>={};
- for(const [code,name] of competitionNames){
+ for(const [code] of competitionNames){
   const ids=new Set([...participationByCompetition.get(code)?.keys()??[],...[...counts].filter(([,value])=>value.codes.has(code)).map(([id])=>id)]);
   perCompetition[code]=rankSort([...ids].map(userId=>({
    userId,fullName:names.get(userId)??userId,
