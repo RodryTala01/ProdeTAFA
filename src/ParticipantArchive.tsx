@@ -2,7 +2,7 @@ import {useEffect,useState,type ReactNode} from 'react';
 import {AssetImage,ParticipantShield} from './AssetImage';
 import {competitionAsset} from './competition-assets';
 import {Icon} from './ui';
-import {archiveStandingZone,historicalMatchLayout,isHistoricalPromotion,promotionHomeLeague,visibleArchiveCompetitions} from './archive-history-view';
+import {archiveStandingZone,archiveHistoryGroups,historicalMatchLayout,isHistoricalPromotion,promotionHomeLeague,visibleArchiveCompetitions} from './archive-history-view';
 import type {HistorySummary,HistoryDetail} from './history-types';
 import type {ArchivePayload,ArchiveCompetition} from './historical-schema';
 import './participant-archive.css';
@@ -42,34 +42,59 @@ function ArchiveMatchCards({detail,matches}:{detail:HistoryDetail;matches:Archiv
  return <div className="archive-match-stack">{matches.map((m,i)=><article className="archive-match-card" key={m.matchId??i}>
   <div className="archive-match-entry"><Person data={detail.data} id={m.aKey}/><strong>{m.pointsA}</strong></div>
   <div className="archive-match-entry"><Person data={detail.data} id={m.bKey}/><strong>{m.pointsB}</strong></div>
-  {(m.round||m.scoreBasis==='DUO')&&<div className="archive-match-caption">{m.round&&<small>{m.round}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</div>}
+  {((m.round&&!/^\s*fuente\s*:/i.test(m.round))||m.scoreBasis==='DUO')&&<div className="archive-match-caption">{m.round&&!/^\s*fuente\s*:/i.test(m.round)&&<small>{m.round}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</div>}
  </article>)}</div>;
 }
 function ArchiveKnockout({detail,matches}:{detail:HistoryDetail;matches:ArchivePayload['matches']}){
- const {bracket,groups,other}=historicalMatchLayout(matches);
- const maximum=Math.max(1,...bracket.map(s=>s.matches.length));
+ const {bracket,other,additional}=historicalMatchLayout(matches);
  return <>
   {bracket.length>0&&<section className="archive-panel archive-bracket-panel">
-   <SectionHeading title="Llave de eliminación directa" detail={matches.length+' cruces registrados'}/>
-   <p className="archive-bracket-note">Deslizá horizontalmente para recorrer las rondas. Se muestran los encuentros y marcadores históricos, sin reconstruir clasificaciones que no estén registradas.</p>
+   <SectionHeading title="Llave de eliminación directa" detail={bracket.reduce((n,s)=>n+s.matches.length,0)+' cruces'}/>
+   <p className="archive-bracket-note">Rondas ordenadas de izquierda a derecha. Deslizá para recorrer la llave.</p>
    <div className="archive-bracket-scroll" tabIndex={0} role="region" aria-label="Llave histórica de la competición">
-    <div className="archive-bracket" style={{minHeight:Math.max(250,maximum*106)+'px'}}>
-     {bracket.map((stage,i)=><section className="archive-bracket-stage" key={stage.key}>
+    <div className="archive-bracket">
+     {bracket.map(stage=><section className="archive-bracket-stage" key={stage.key}>
        <h3>{stage.label}<small>{stage.matches.length} {stage.matches.length===1?'cruce':'cruces'}</small></h3>
-       <div className="archive-bracket-encounters">{stage.matches.map((m,j)=><div className={'archive-bracket-node'+(i===bracket.length-1?' archive-bracket-node--last':'')} key={m.matchId??j}>
+       <div className="archive-bracket-encounters">{stage.matches.map((m,j)=><div className="archive-bracket-node" key={m.matchId??j}>
         <ArchiveMatchCards detail={detail} matches={[m]}/>
-        {m.stage!==stage.label&&<small className="archive-bracket-source">{m.stage}</small>}
        </div>)}</div>
      </section>)}
     </div>
    </div>
   </section>}
-  {groups.length>0&&<section className="archive-panel"><SectionHeading title="Fase de grupos" detail={groups.length+' encuentros'}/><div className="archive-other-matches">
-   {groups.map((m,i)=><div key={m.matchId??i}><h3>{m.round??m.stage}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}
-  </div></section>}
+  {additional.length>0&&<details className="archive-panel archive-additional">
+   <summary>Otros encuentros registrados de la final ({additional.length})</summary>
+   <div className="archive-other-matches">{additional.map((m,i)=><ArchiveMatchCards key={m.matchId??i} detail={detail} matches={[m]}/>)}</div>
+  </details>}
   {other.length>0&&<section className="archive-panel"><SectionHeading title="Otros encuentros oficiales" detail={other.length+' cruces'}/><div className="archive-other-matches">{other.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
  </>;
 }
+function ArchiveGroups({detail,competitionCode,matches}:{detail:HistoryDetail;competitionCode:string;matches:ArchivePayload['matches']}){
+ const groups=archiveHistoryGroups(detail.data,competitionCode,matches);
+ if(!groups.length)return <Empty>Esta edición no tiene una fase de grupos documentada.</Empty>;
+ return <section className="archive-panel archive-groups-panel">
+  <SectionHeading title="Fase de grupos" detail={groups.length+' grupos'}/>
+  <div className="archive-group-grid">{groups.map(g=><section className="archive-group" key={g.name}>
+   <h3>{g.name}<small>{g.entries.length} participantes</small></h3>
+   <div className="archive-group-table">
+    <table><thead><tr>{g.entries.some(e=>e.position!==null)&&<th scope="col">Pos.</th>}<th scope="col">Participante</th><th scope="col">PTS</th></tr></thead>
+     <tbody>{g.entries.map(e=><tr key={e.participantKey}>
+      {g.entries.some(x=>x.position!==null)&&<td>{e.position??'—'}</td>}
+      <th scope="row"><Person data={detail.data} id={e.participantKey}/></th>
+      <td className="archive-points">{Number.isFinite(e.points)?e.points:'—'}</td>
+     </tr>)}</tbody>
+    </table>
+   </div>
+   {g.matches.length>0&&<div className="archive-group-fixtures">
+    <h4>Enfrentamientos · {g.matches.length}</h4>
+    {g.matches.map((m,i)=><div className="archive-group-fixture" key={m.matchId??i}>
+     <ArchiveMatchCards detail={detail} matches={[m]}/>
+    </div>)}
+   </div>}
+  </section>)}</div>
+ </section>;
+}
+
 function LeaguePromotionHistory({detail}:{detail:HistoryDetail}){
  const {data}=detail;
  const codes=new Set(data.competitions.filter(isHistoricalPromotion).map(c=>c.code));
@@ -96,16 +121,28 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
  const matches=data.matches.filter(r=>r.competitionCode===c.code);
  const links=detail.officialLinks.filter(l=>l.code===c.code);
  const roundNames=[...new Set(rounds.map(r=>r.round))];
+ const isCup=c.kind==='CUP'||c.kind==='TOURNAMENT';
+ const groups=isCup?archiveHistoryGroups(data,c.code,matches):[];
+ const cupBracket=isCup?historicalMatchLayout(matches):null;
+ const canEliminate=Boolean(cupBracket?.bracket.length||cupBracket?.other.length||cupBracket?.additional.length);
+ const [cupPhase,setCupPhase]=useState<'grupos'|'eliminatorias'>(groups.length?'grupos':'eliminatorias');
+ const shownPhase=cupPhase==='grupos'&&groups.length?'grupos':'eliminatorias';
  return <div className="archive-competition">
   <div className="archive-competition-heading"><Trophy code={c.code} name={c.name} season={summary.number}/><div><span className="archive-kicker">Competición · T{summary.number}</span><h2>{c.name}</h2></div></div>
   <Podium detail={detail} code={c.code}/>
   <section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name} competition={c} source={summary.source}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>
-  {(roundNames.length>0||links.length>0)&&<section className="archive-panel"><SectionHeading title="Resultados por Fecha" detail={roundNames.length?roundNames.length+' Fechas':undefined}/>{roundNames.map(round=><details className="archive-round" key={round}><summary><span><Icon name="calendar"/>{round}</span><span>Ver resultados</span></summary><StatsTable data={data} rows={rounds.filter(r=>r.round===round)} label={c.name+' · '+round}/></details>)}{links.length>0&&<div className="archive-round-links">{links.map(l=><a className="button button--secondary" key={l.roundId} href={'#/club/historial/'+l.roundId}>{l.name}<Icon name="arrow"/></a>)}</div>}</section>}
-  {matches.length>0&&(c.kind==='CUP'||c.kind==='TOURNAMENT'
-    ?<ArchiveKnockout detail={detail} matches={matches}/>
-    :<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}{m.round&&<small>{m.round}</small>}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>)}
+  {(!isCup||!groups.length)&&(roundNames.length>0||links.length>0)&&<section className="archive-panel"><SectionHeading title="Resultados por Fecha" detail={roundNames.length?roundNames.length+' Fechas':undefined}/>{roundNames.map(round=><details className="archive-round" key={round}><summary><span><Icon name="calendar"/>{round}</span><span>Ver resultados</span></summary><StatsTable data={data} rows={rounds.filter(r=>r.round===round)} label={c.name+' · '+round}/></details>)}{links.length>0&&<div className="archive-round-links">{links.map(l=><a className="button button--secondary" key={l.roundId} href={'#/club/historial/'+l.roundId}>{l.name}<Icon name="arrow"/></a>)}</div>}</section>}
+  {isCup&&(groups.length>0||canEliminate)&&<>
+   {groups.length>0&&canEliminate&&<nav className="archive-phase-tabs" aria-label={'Fases de '+c.name}>
+     <button type="button" aria-pressed={shownPhase==='grupos'} onClick={()=>setCupPhase('grupos')}>Grupos</button>
+     <button type="button" aria-pressed={shownPhase==='eliminatorias'} onClick={()=>setCupPhase('eliminatorias')}>Eliminatorias</button>
+   </nav>}
+   {shownPhase==='grupos'?<ArchiveGroups detail={detail} competitionCode={c.code} matches={matches}/>
+    :<ArchiveKnockout detail={detail} matches={matches}/>}
+  </>}
+  {!isCup&&matches.length>0&&<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}{m.round&&!/^\s*fuente\s*:/i.test(m.round)&&<small>{m.round}</small>}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
   {c.kind==='LEAGUE'&&promotionHomeLeague(data)?.code===c.code&&<LeaguePromotionHistory detail={detail}/>}
-  {(!roundNames.length&&!links.length||!matches.length)&&<p className="archive-availability">{!roundNames.length&&!links.length&&<span>Sin desglose por Fecha disponible.</span>}{!matches.length&&<span>Sin enfrentamientos oficiales disponibles.</span>}</p>}
+  {(!roundNames.length&&!links.length||(!matches.length&&!groups.length))&&<p className="archive-availability">{!roundNames.length&&!links.length&&<span>Sin desglose por Fecha disponible.</span>}{!matches.length&&!groups.length&&<span>Sin enfrentamientos oficiales disponibles.</span>}</p>}
  </div>;
 }
 function Iffhs({detail}:{detail:HistoryDetail}){
@@ -128,7 +165,7 @@ export function SeasonDetail({detail,competition,view}:{detail:HistoryDetail;com
    <section><SectionHeading title="Competiciones disputadas" detail={summary.competitions.length.toString()}/><div className="archive-competition-grid">{summary.competitions.map(c=><a className="archive-competition-link" key={c.code} href={root+'/'+c.code}><Trophy code={c.code} name={c.name} season={summary.number}/><span><strong>{c.name}</strong><small>Tabla y resultados</small></span><Icon name="arrow"/></a>)}</div></section>
    <a className="archive-ranking-link" href={root+'?view=iffhs'}><span className="archive-emblem"><Icon name="list"/></span><span><strong>IFFHS de la temporada</strong><small>{data.iffhs.length?data.iffhs.length+' participantes · Ver clasificación':'Información no disponible'}</small></span><Icon name="arrow"/></a>
    {data.movements.length>0&&<section className="archive-panel"><SectionHeading title="Ascensos y descensos"/><ul className="archive-movements">{data.movements.map((m,i)=><li key={i}><Person data={data} id={m.participantKey}/><span className="archive-movement-type">{m.type}</span><span>{m.fromDivision||'—'} → {m.toDivision||'—'}</span>{m.detail&&<small>{m.detail}</small>}</li>)}</ul></section>}
-  </>:active==='iffhs'?<Iffhs detail={detail}/>:<><nav className="archive-competition-tabs" aria-label="Competiciones de la temporada">{summary.competitions.map(c=><a key={c.code} aria-current={selected?.code===c.code?'page':undefined} href={root+'/'+c.code}>{c.name}</a>)}</nav>{selected?<CompetitionDetail detail={detail} competition={selected}/>:<Empty>Competición sin información disponible.</Empty>}</>}
+  </>:active==='iffhs'?<Iffhs detail={detail}/>:<><nav className="archive-competition-tabs" aria-label="Competiciones de la temporada">{summary.competitions.map(c=><a key={c.code} aria-current={selected?.code===c.code?'page':undefined} href={root+'/'+c.code}>{c.name}</a>)}</nav>{selected?<CompetitionDetail key={selected.code} detail={detail} competition={selected}/>:<Empty>Competición sin información disponible.</Empty>}</>}
  </>;
 }
 export default function ParticipantArchive({route}:{route:string}){
