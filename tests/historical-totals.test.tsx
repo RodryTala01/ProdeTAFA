@@ -86,3 +86,16 @@ it('la ficha de Mi Club presenta promedios fiables y resumen histórico con trof
  expect(html).not.toContain('>RUNNER_UP<');
  expect(html).not.toContain('>CHAMPION<');
 });
+
+it('históricos sin cuenta se unifican solo por la misma clave inequívoca, jamás por nombre parecido',()=>{
+ const previous={...archive,seasonNumber:3,data:{...archive.data,season:{...archive.data.season,number:3}}};
+ const combined=composeHistoricalTotals([previous,archive] as never,[],[],[],[],[]);
+ const beto=combined.general.filter(r=>r.fullName==='Beto histórico');
+ expect(beto).toHaveLength(1);
+ expect(beto[0]).toMatchObject({points:64,dates:8,averagePoints:8});
+ const another={...previous,data:{...previous.data,
+  participants:previous.data.participants.map(p=>p.key==='b'?{...p,name:'Otra persona'}:p)}};
+ const safe=composeHistoricalTotals([another,archive] as never,[],[],[],[],[]);
+ expect(safe.general.filter(r=>r.fullName==='Beto histórico')).toHaveLength(1);
+ expect(safe.general.filter(r=>r.fullName==='Otra persona')).toHaveLength(1);
+});
