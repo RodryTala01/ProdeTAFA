@@ -6,7 +6,7 @@ type OfficialScore={userId:string;fullName:string;dates:number;points:number;ful
 type Award={seasonNumber:number;code:string;name:string;userId:string;fullName:string;resultCode:string};
 type Member={seasonNumber:number;code:string;name:string;userId:string;fullName:string};
 type IffhsScore={seasonNumber:number;userId:string;fullName:string;pointsScaled:number};
-export type GeneralTotal={userId:string;fullName:string;position:number;points:number;fulls:number|null;partials:number|null;errors:number|null;extras:number|null;dates:number|null;averagePoints:number|null;averageFulls:number|null;averagePartials:number|null};
+export type GeneralTotal={userId:string;fullName:string;position:number;points:number;fulls:number|null;partials:number|null;errors:number|null;extras:number|null;dates:number|null;averagePoints:number|null;averageFulls:number|null;averagePartials:number|null;averageErrors:number|null;averageExtras:number|null};
 export type PalmarTotal={userId:string;fullName:string;position:number;championships:number;runnerUps:number;participations:number};
 export type IffhsTotal={userId:string;fullName:string;position:number;totalPoints:number;seasons:number;average:number;breakdown:Array<{seasonNumber:number;points:number|null}>};
 export type TotalsData={seasons:number[];competitions:Array<{code:string;name:string}>;palmares:PalmarTotal[];perCompetition:Record<string,PalmarTotal[]>;iffhsOfficial:{seasons:number[];ranking:IffhsTotal[]};iffhsTotal:IffhsTotal[];general:GeneralTotal[]};
@@ -33,7 +33,6 @@ export function composeHistoricalTotals(
  officialSeasons:Array<{seasonNumber:number;userId:string}>=[]
 ):TotalsData{
  const names=new Map<string,string>();
- const divisions=new Map<string,string>();
  const participation=new Set<string>();
  const awards=new Map<string,{seasonNumber:number;code:string;userId:string;resultCode:string}>();
  const iffhs=new Map<string,IffhsScore>();
@@ -161,7 +160,9 @@ export function composeHistoricalTotals(
  const overall=rankSort([...general.values()].map(r=>({...r,fullName:names.get(r.userId)??r.fullName})),r=>r.points)
   .map(r=>({...r,averagePoints:r.dates&&r.dates>0?r.points/r.dates:null,
    averageFulls:r.dates&&r.dates>0&&r.fulls!==null?r.fulls/r.dates:null,
-   averagePartials:r.dates&&r.dates>0&&r.partials!==null?r.partials/r.dates:null}));
+   averagePartials:r.dates&&r.dates>0&&r.partials!==null?r.partials/r.dates:null,
+   averageErrors:r.dates&&r.dates>0&&r.errors!==null?r.errors/r.dates:null,
+   averageExtras:r.dates&&r.dates>0&&r.extras!==null?r.extras/r.dates:null}));
  return {seasons,competitions:[...competitionNames].map(([code,name])=>({code,name})),
   palmares,perCompetition,
   iffhsOfficial:{seasons:officialWindow,ranking:rankedIffhs(officialWindow)},
