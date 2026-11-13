@@ -1,0 +1,37 @@
+.historical-totals{display:grid;gap:16px;min-width:0;color:var(--text)}
+.totals-header{display:flex;align-items:end;justify-content:space-between;gap:14px;border-bottom:1px solid var(--border);padding-bottom:17px}
+.totals-header h1{font:800 clamp(1.5rem,3vw,2rem)/1.2 var(--font-display);margin:8px 0 0}
+.totals-back{color:var(--text-muted);font-size:.78rem;text-decoration:none}
+.totals-period{color:var(--text-muted);font-size:.74rem}
+.totals-tabs,.totals-competitions{display:flex;flex-wrap:wrap;gap:8px}
+.totals-tabs button,.totals-competitions button{color:var(--text);background:var(--surface);min-height:42px;border:1px solid var(--border-strong);border-radius:var(--radius-control);padding:9px 13px;font-size:.82rem;font-weight:700;cursor:pointer}
+.totals-tabs button[aria-pressed=true],.totals-competitions button[aria-pressed=true]{background:color-mix(in srgb,var(--home-violet) 16%,var(--surface));border-color:var(--home-violet)}
+.totals-tabs button:hover,.totals-tabs button:focus-visible,.totals-competitions button:hover,.totals-competitions button:focus-visible{outline:1px solid var(--home-violet)}
+.totals-panel{padding:18px 18px 23px;border:1px solid var(--border-strong);border-radius:var(--radius-panel);background:var(--surface);min-width:0}
+.totals-panel-title{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.totals-panel-title>div{flex:1;min-width:0}
+.totals-panel-icon{font-size:1.65rem;color:var(--home-violet);width:35px;text-align:center}
+.totals-panel-title h2{font:800 1.35rem var(--font-display);margin:0}
+.totals-panel-title p{font-size:.8rem;color:var(--text-muted);margin:4px 0 0}
+.totals-competitions{margin-bottom:16px}
+.totals-competitions button{display:inline-flex;gap:7px;align-items:center;min-height:40px}
+.totals-table-wrap{max-width:100%;overflow:auto;scrollbar-width:thin;overscroll-behavior:contain;outline-offset:3px}
+.totals-table{width:100%;min-width:510px;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.totals-table--general{min-width:1120px}
+.totals-table th,.totals-table td{padding:10px 11px;border-bottom:1px solid var(--border);text-align:right;font-size:.82rem;white-space:nowrap}
+.totals-table thead{background:var(--surface-raised)}
+.totals-table thead th{color:var(--text-muted);font-size:.72rem}
+.totals-table th:nth-child(2){text-align:left}
+.totals-table tbody tr:first-child{background:color-mix(in srgb,var(--home-fluor) 7%,var(--surface))}
+.totals-table tbody tr:first-child>td:first-child,.totals-table tbody tr:first-child .totals-highlight{color:var(--home-fluor)}
+.totals-table tbody tr:hover{background:var(--surface-hover)}
+.totals-highlight{font-weight:800}
+.totals-person{display:flex;gap:8px;align-items:center;min-width:130px;white-space:normal}
+.totals-person a{color:inherit;text-decoration:none}
+.totals-person a:hover{color:var(--accent)}
+.totals-note,.totals-empty{font-size:.75rem;color:var(--text-muted);margin:0 0 12px}
+.archive-alltime-link{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border:1px solid var(--home-violet);border-radius:var(--radius-panel);background:color-mix(in srgb,var(--home-violet) 7%,var(--surface));text-decoration:none;color:var(--text)}
+.archive-alltime-link strong{font:800 1rem var(--font-display)}
+.archive-alltime-link span{font-size:.77rem;color:var(--text-muted)}
+.archive-alltime-link:hover,.archive-alltime-link:focus-visible{outline:1px solid var(--home-violet)}
+@media(max-width:720px){.totals-header>.totals-period{display:none}.totals-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.totals-tabs button{font-size:.73rem;padding:8px 3px}.totals-tabs button:last-child{grid-column:1/-1}.totals-panel{padding:11px 9px}.totals-panel-title{gap:6px}.totals-panel-title h2{font-size:1.05rem}.totals-panel-title p{font-size:.74rem}.totals-panel-title>.totals-period{font-size:.62rem;text-align:right}.totals-competitions{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px}.totals-competitions button{flex-shrink:0}.totals-table th,.totals-table td{padding:9px 8px;font-size:.76rem}.archive-alltime-link{align-items:start;flex-direction:column}}
