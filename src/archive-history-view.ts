@@ -77,7 +77,7 @@ export function historicalMatchLayout(matches:ArchiveMatch[]){
   const hidden=new Set<ArchiveMatch>();
   for(const pairMatches of pairs.values()){
    if(pairMatches.length<2)continue;
-   const liga=pairMatches.filter(m=>/\\bliga\\b/i.test(m.stage+' '+(m.round??'')));
+   const liga=pairMatches.filter(m=>/\bliga\b/i.test(m.stage+' '+(m.round??'')));
    if(liga.length!==1)continue;
    for(const m of pairMatches)if(m!==liga[0]){hidden.add(m);additional.push(m);}
   }
@@ -95,7 +95,7 @@ export function archiveHistoryGroups(data:ArchivePayload,competitionCode:string,
  const groupMatches=historicalMatchLayout(matches).groups;
  for(const m of groupMatches){
   const label=(m.round??'')+' '+m.stage;
-  const found=label.match(/\\bgrupo\\s*([0-9a-z]+)/i);
+  const found=label.match(/\bgrupo\s*([0-9a-z]+)/i);
   const name=found?'Grupo '+found[1]:'Grupo sin identificar';
   const id=clean(name);
   const group=names.get(id)??{name,entries:[],matches:[]};
@@ -109,8 +109,8 @@ export function archiveHistoryGroups(data:ArchivePayload,competitionCode:string,
   names.set(id,group);
  }
  return [...names.values()].sort((a,b)=>{
-  const an=Number(a.name.match(/\\d+/)?.[0]??Number.MAX_SAFE_INTEGER);
-  const bn=Number(b.name.match(/\\d+/)?.[0]??Number.MAX_SAFE_INTEGER);
+  const an=Number(a.name.match(/\d+/)?.[0]??Number.MAX_SAFE_INTEGER);
+  const bn=Number(b.name.match(/\d+/)?.[0]??Number.MAX_SAFE_INTEGER);
   return an-bn||a.name.localeCompare(b.name,'es');
  }).map(g=>({...g,entries:[...g.entries].sort((a,b)=>
   a.position!==null&&b.position!==null?a.position-b.position: (Number.isFinite(b.points)?b.points:-Infinity)-(Number.isFinite(a.points)?a.points:-Infinity)
