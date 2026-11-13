@@ -4,12 +4,12 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {createElement} from 'react';
 import {SeasonDetail,historicalExtras} from '../src/ParticipantArchive';
 import {participantRoute} from '../src/participant-navigation';
-import {archiveStandingZone,archiveHistoryGroups,historicalMatchLayout,visibleArchiveCompetitions} from '../src/archive-history-view';
+import {archiveStandingZone,archiveHistoryGroups,archivePublicDescription,historicalMatchLayout,visibleArchiveCompetitions} from '../src/archive-history-view';
 import {importedSummary} from '../worker/season-history';
 import type {HistoryDetail} from '../src/history-types';
 const detail:HistoryDetail={summary:{number:1,name:'Brasil 2021',source:'imported',participantCount:1,competitions:[{code:'COPA_AMERICA_2021',name:'Copa América',kind:'TOURNAMENT',champions:[]}]},data:{version:1,season:{number:1,name:'Brasil 2021',kind:'TOURNAMENT',notes:''},participants:[{key:'p',name:'Nombre real',userId:'public-user',division:null}],competitions:[{code:'COPA_AMERICA_2021',name:'Copa América',kind:'TOURNAMENT'}],standings:[{competitionCode:'COPA_AMERICA_2021',participantKey:'p',position:1,points:51,fulls:10,partials:10,errors:null,extras:null}],results:[],rounds:[],matches:[],movements:[],iffhs:[],statistics:[]},officialLinks:[],unavailable:[]};
 it('rutas Historia preservan navegación y rechazan rutas inválidas',()=>{for(const path of ['historia','historia/1','historia/1/COPA_AMERICA_2021'])expect(participantRoute('#/'+path)).toBe(path);expect(participantRoute('#/historia/abc')).toBe('inicio');});
-it('una tabla ganada no inventa un título y datos ausentes se identifican',()=>{const html=renderToStaticMarkup(createElement(SeasonDetail,{detail,view:'competiciones'}));expect(html).toContain('Copa América');expect(html).not.toContain('Liga A');expect(html).toContain('Sin resultados finales declarados');expect(html).toContain('Sin enfrentamientos oficiales');expect(html).toContain('#/club/participante/public-user');expect(html).toContain('>51<');expect(html).toContain('>11<');});
+it('una tabla ganada no inventa un título y datos ausentes se identifican',()=>{const html=renderToStaticMarkup(createElement(SeasonDetail,{detail,view:'competiciones'}));expect(html).toContain('Copa América');expect(html).not.toContain('Liga A');expect(html).toContain('Sin resultados finales declarados');expect(html).not.toContain('Tabla final');expect(html).not.toContain('Sin enfrentamientos oficiales');expect(html).not.toContain('Tabla final');expect(html).not.toContain('>51<');expect(html).not.toContain('>11<');});
 it('Extras usa datos oficiales sin inventar distribución cuando faltan contadores',()=>{expect(historicalExtras({points:51,fulls:10,partials:10,extras:null})).toBe(11);expect(historicalExtras({points:51,fulls:null,partials:10,extras:null})).toBeNull();expect(historicalExtras({points:51,fulls:10,partials:10,extras:7})).toBe(7);});
 
 const historyLeague:HistoryDetail={
@@ -50,7 +50,7 @@ it('la final principal usa el marcador de Liga sin mencionar fuentes y conserva 
  expect(html).toContain('Llave histórica de la competición');
  for(const label of ['Octavos','Semifinales','Final','9','10'])expect(html).toContain(label);
  expect(html.match(/class="archive-bracket-node"/g)).toHaveLength(3);
- expect(html).toContain('Otros encuentros registrados de la final (1)');
+ expect(html).toContain('Otros encuentros de la final · 1');
  expect(html).not.toContain('Fuente: hoja LIGA');
  expect(html).not.toContain('Fuente: hoja COPA A');
  expect(html).not.toContain('Final · partido registrado en LIGA');
@@ -73,8 +73,8 @@ it('color rojo indica descenso declarado; permanencia no se convierte en descens
  const data=historyLeague.data,league=data.competitions[0];
  const beto=archiveStandingZone(data,league,data.standings[1],'imported');
  const ceci=archiveStandingZone(data,league,data.standings[2],'imported');
- expect(beto).toMatchObject({code:'relegation',label:'Descenso confirmado'});
- expect(ceci).toMatchObject({code:'survived',label:'Permanencia confirmada'});
+ expect(beto).toMatchObject({code:'relegation',label:'Descenso'});
+ expect(ceci).toMatchObject({code:'survived',label:'Permanencia'});
  const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:historyLeague,competition:'LIGA_A'}));
  expect(html).toContain('archive-zone--relegation');
  expect(html).toContain('archive-zone--survived');
@@ -92,7 +92,7 @@ it('Promoción no es torneo con campeón: se muestra debajo de Liga, no en tarje
  expect(html).toContain('Promoción · Ascensos y descensos');
  expect(html).toContain('No constituyen una copa ni otorgan un campeón');
  expect(html).toContain('Promoción 1');
- expect(html).toContain('Descenso confirmado');
+ expect(html).toContain('>Descenso<');
  expect(html).not.toContain('href="#/historia/4/PROMOCION"');
  const catalog=renderToStaticMarkup(createElement(SeasonDetail,{detail:{...historyLeague,summary},view:'resumen'}));
  expect(catalog).not.toContain('href="#/historia/4/PROMOCION"');
@@ -166,4 +166,32 @@ it('la llave de octavos a final se ordena arriba sin alturas falsas, independien
  const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:historyLeague,competition:'COPA_A'}));
  expect(html).toContain('archive-bracket-encounters');
  expect(html).not.toContain('min-height:'); // Antes usaba altura máxima para espaciar las últimas rondas
+});
+
+it('las copas muestran solo Grupos y Eliminatorias, sin tabla final ni resultados por Fecha',()=>{
+ const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:historyLeague,competition:'COPA_A'}));
+ expect(html).not.toContain('Tabla final');
+ expect(html).not.toContain('Resultados por Fecha');
+ expect(html).not.toContain('Puestos de Copa A');
+ expect(html).toContain('Llave de eliminación directa');
+ const league=renderToStaticMarkup(createElement(SeasonDetail,{detail:historyLeague,competition:'LIGA_A'}));
+ expect(league).toContain('Tabla final');
+ expect(league).toContain('archive-zone--relegation');
+});
+it('la descripción pública omite fuentes Excel, nombres de hojas y aclaraciones entre paréntesis sin tocar nombres propios',()=>{
+ expect(archivePublicDescription('Ascenso a Primera División (lista oficial de TEMPORADA 4.xlsx, LIGA, columna CK)')).toBe('Ascenso a Primera División');
+ expect(archivePublicDescription('Permanencia (por regla T4)')).toBe('Permanencia');
+ expect(archivePublicDescription('Final · partido registrado en LIGA')).toBe('Final');
+ expect(archivePublicDescription('Fuente: hoja COPA A')).toBe('');
+ expect(archivePublicDescription('Reclasificación · archivo Excel T3')).toBe('Reclasificación');
+ const changed:HistoryDetail={...historyLeague,data:{...historyLeague.data,
+  participants:[...historyLeague.data.participants,{key:'nicol',name:'Nico Luchetti (R)',userId:null,division:null}],
+  movements:historyLeague.data.movements.map(m=>({...m,detail:m.participantKey==='dani'?'Ascenso a Primera División (lista oficial de TEMPORADA 4.xlsx, LIGA, columna CK)':m.detail}))
+ }};
+ const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:changed,competition:'LIGA_A'}));
+ expect(html).toContain('Ascenso a Primera División');
+ expect(html).not.toContain('TEMPORADA 4.xlsx');
+ expect(html).not.toContain('columna CK');
+ expect(html).not.toContain('Descenso confirmado');
+ expect(html).not.toContain('Permanencia confirmada');
 });

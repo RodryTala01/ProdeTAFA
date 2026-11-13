@@ -18,9 +18,9 @@ export function archiveStandingZone(data:ArchivePayload,competition:ArchiveCompe
  if(competition.kind!=='LEAGUE')return null;
  const division=competition.code==='LIGA_A'?'A':competition.code==='LIGA_B'?'B':'';
  const moves=data.movements.filter(m=>m.participantKey===row.participantKey&&(!division||m.fromDivision?.toUpperCase()===division));
- if(moves.some(m=>m.type==='DESCENSO'))return {code:'relegation',label:'Descenso confirmado'};
- if(moves.some(m=>m.type==='ASCENSO'))return {code:'promotion',label:'Ascenso confirmado'};
- if(moves.some(m=>m.type==='PERMANENCIA'))return {code:'survived',label:'Permanencia confirmada'};
+ if(moves.some(m=>m.type==='DESCENSO'))return {code:'relegation',label:'Descenso'};
+ if(moves.some(m=>m.type==='ASCENSO'))return {code:'promotion',label:'Ascenso'};
+ if(moves.some(m=>m.type==='PERMANENCIA'))return {code:'survived',label:'Permanencia'};
  const title=data.results.find(r=>r.competitionCode===competition.code&&r.participantKey===row.participantKey);
  if(title?.resultCode==='CHAMPION')return {code:'champion',label:'Campeón'};
  if(title?.resultCode==='RUNNER_UP')return {code:'runner-up',label:'Subcampeón'};
@@ -33,6 +33,23 @@ export function archiveStandingZone(data:ArchivePayload,competition:ArchiveCompe
  }
  return null;
 }
+/** Present only sporting descriptions, never spreadsheet provenance or
+ * explanations in parentheses. Participant names are deliberately untouched:
+ * historical qualifiers such as "Nico Luchetti (R)" are identity data. */
+export function archivePublicDescription(raw:string|null|undefined):string {
+ if(!raw)return '';
+ return raw
+  .replace(/\([^()]*\)/g,'')
+  .replace(/\s*[·—–-]\s*(?:fuente|hoja|archivo|planilla|partido registrado en|resultado registrado en)\b.*$/i,'')
+  .replace(/\b(?:fuente|origen)\s*:\s*.*$/i,'')
+  .replace(/\b(?:según|tomado de)\s+(?:archivo|planilla|hoja|excel)\b.*$/i,'')
+  .replace(/\b(?:temporada\s*\d+\.xlsx|archivo\s+excel|\S+\.xlsx)\b.*$/i,'')
+  .replace(/\b(ascenso|descenso|permanencia)\s+confirmad[oa]\b/gi,'$1')
+  .replace(/\s+/g,' ')
+  .replace(/[\s,;:·—–-]+$/g,'')
+  .trim();
+}
+
 export type ArchiveStage={key:string;label:string;rank:number;matches:ArchiveMatch[]};
 const clean=(s:string)=>s.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 export function archiveMatchStage(stage:string):{category:'bracket'|'groups'|'other';key:string;label:string;rank:number}{
