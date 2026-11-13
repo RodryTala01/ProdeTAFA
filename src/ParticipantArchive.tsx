@@ -42,7 +42,7 @@ function ArchiveMatchCards({detail,matches}:{detail:HistoryDetail;matches:Archiv
  return <div className="archive-match-stack">{matches.map((m,i)=><article className="archive-match-card" key={m.matchId??i}>
   <div className="archive-match-entry"><Person data={detail.data} id={m.aKey}/><strong>{m.pointsA}</strong></div>
   <div className="archive-match-entry"><Person data={detail.data} id={m.bKey}/><strong>{m.pointsB}</strong></div>
-  {((m.round&&!/^\\s*fuente\\s*:/i.test(m.round))||m.scoreBasis==='DUO')&&<div className="archive-match-caption">{m.round&&!/^\\s*fuente\\s*:/i.test(m.round)&&<small>{m.round}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</div>}
+  {((m.round&&!/^\s*fuente\s*:/i.test(m.round))||m.scoreBasis==='DUO')&&<div className="archive-match-caption">{m.round&&!/^\s*fuente\s*:/i.test(m.round)&&<small>{m.round}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</div>}
  </article>)}</div>;
 }
 function ArchiveKnockout({detail,matches}:{detail:HistoryDetail;matches:ArchivePayload['matches']}){
@@ -140,7 +140,7 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
    {shownPhase==='grupos'?<ArchiveGroups detail={detail} competitionCode={c.code} matches={matches}/>
     :<ArchiveKnockout detail={detail} matches={matches}/>}
   </>}
-  {!isCup&&matches.length>0&&<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}{m.round&&!/^\\s*fuente\\s*:/i.test(m.round)&&<small>{m.round}</small>}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
+  {!isCup&&matches.length>0&&<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}{m.round&&!/^\s*fuente\s*:/i.test(m.round)&&<small>{m.round}</small>}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
   {c.kind==='LEAGUE'&&promotionHomeLeague(data)?.code===c.code&&<LeaguePromotionHistory detail={detail}/>}
   {(!roundNames.length&&!links.length||(!matches.length&&!groups.length))&&<p className="archive-availability">{!roundNames.length&&!links.length&&<span>Sin desglose por Fecha disponible.</span>}{!matches.length&&!groups.length&&<span>Sin enfrentamientos oficiales disponibles.</span>}</p>}
  </div>;
