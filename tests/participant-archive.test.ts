@@ -4,7 +4,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {createElement} from 'react';
 import {SeasonDetail,historicalExtras} from '../src/ParticipantArchive';
 import {participantRoute} from '../src/participant-navigation';
-import {archiveStandingZone,historicalMatchLayout,visibleArchiveCompetitions} from '../src/archive-history-view';
+import {archiveStandingZone,archiveHistoryGroups,historicalMatchLayout,visibleArchiveCompetitions} from '../src/archive-history-view';
 import {importedSummary} from '../worker/season-history';
 import type {HistoryDetail} from '../src/history-types';
 const detail:HistoryDetail={summary:{number:1,name:'Brasil 2021',source:'imported',participantCount:1,competitions:[{code:'COPA_AMERICA_2021',name:'Copa América',kind:'TOURNAMENT',champions:[]}]},data:{version:1,season:{number:1,name:'Brasil 2021',kind:'TOURNAMENT',notes:''},participants:[{key:'p',name:'Nombre real',userId:'public-user',division:null}],competitions:[{code:'COPA_AMERICA_2021',name:'Copa América',kind:'TOURNAMENT'}],standings:[{competitionCode:'COPA_AMERICA_2021',participantKey:'p',position:1,points:51,fulls:10,partials:10,errors:null,extras:null}],results:[],rounds:[],matches:[],movements:[],iffhs:[],statistics:[]},officialLinks:[],unavailable:[]};
@@ -44,14 +44,17 @@ const historyLeague:HistoryDetail={
   iffhs:[]},
  officialLinks:[],unavailable:[]
 };
-it('las copas históricas se renderizan como llave de fases, con dos finales diferentes y marcadores exactos',()=>{
+it('la final principal usa el marcador de Liga sin mencionar fuentes y conserva el otro encuentro en detalle',()=>{
  const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:historyLeague,competition:'COPA_A'}));
  expect(html).toContain('Llave de eliminación directa');
  expect(html).toContain('Llave histórica de la competición');
- for(const label of ['Octavos','Semifinales','Final','Fuente: hoja LIGA','Fuente: hoja COPA A','9','10','3','4'])expect(html).toContain(label);
- expect(html.match(/class="archive-bracket-node/g)).toHaveLength(4);
- expect(html).not.toContain('Ganador'); // The old source does not provide advancement edges.
- expect(html).not.toContain('Sin enfrentamientos oficiales');
+ for(const label of ['Octavos','Semifinales','Final','9','10'])expect(html).toContain(label);
+ expect(html.match(/class="archive-bracket-node"/g)).toHaveLength(3);
+ expect(html).toContain('Otros encuentros registrados de la final (1)');
+ expect(html).not.toContain('Fuente: hoja LIGA');
+ expect(html).not.toContain('Fuente: hoja COPA A');
+ expect(html).not.toContain('Final · partido registrado en LIGA');
+ expect(html).not.toContain('Ganador'); // No se inventa quién avanzó.
 });
 it('la llave separa fase de grupos, desempate y final sin perder encuentros',()=>{
  const matches=[
@@ -99,4 +102,68 @@ it('la versión móvil de la llave conserva scroll accesible y tarjetas visibles
  expect(html).toContain('tabindex="0"');
  expect(html).toContain('role="region"');
  expect(html).toContain('archive-bracket-stage');
+});
+
+it('en T4 los grupos de Copa A existen aunque las hojas auxiliares no sean parte del payload JSON',()=>{
+ const keys=['t1-rodri-sebastian','t2-nico-avalos','t1-jhose','t1-pancho-muzzio',
+  't1-mario-talarico','t1-luciano-hufschmid','t1-anubis','t1-lautaro-scocier',
+  't1-matheo-olivera','t1-joel-marasco','t3-valentina-scocier','t1-aylen-benedetti',
+  't1-kevin-sivori','t1-rodrigo-talarico','t1-facu-montes'];
+ const data={...historyLeague.data,participants:keys.map(key=>({key,name:key,userId:null,division:null}))};
+ const groups=archiveHistoryGroups(data,'COPA_A',[]);
+ expect(groups).toHaveLength(4);
+ expect(groups.map(g=>g.entries.length)).toEqual([4,4,4,3]);
+ expect(groups[0].entries[0]).toMatchObject({participantKey:'t1-rodri-sebastian',points:26,position:1});
+ const uiDetail={...historyLeague,data};
+ const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:uiDetail,competition:'COPA_A'}));
+ expect(html).toContain('Fases de Copa A');
+ expect(html).toContain('Grupos');
+ expect(html).toContain('Eliminatorias');
+ expect(html).toContain('Grupo 4');
+ expect(html).toContain('>26<');
+ expect(html).not.toContain('Llave de eliminación directa'); // La llave pertenece a la otra pestaña.
+});
+it('T3 Copa Total muestra todos los ocho grupos, cruces y puntos oficiales sin recalcular',()=>{
+ const names=[
+  't3-leandro-montes','t2-nico-avalos','t3-pablo-aquino','t1-rodri-sebastian',
+  't1-aylen-benedetti','t1-pancho-muzzio','t1-matias-varela','t1-luciano-hufschmid','t1-anubis',
+  't1-facu-montes','t2-martin-bustos','t1-gabriel-talarico','t3-nahuel-ponce',
+  't1-joel-marasco','t1-kevin-sivori','t3-valentina-scocier','t1-rodrigo-talarico','t1-el-diego',
+  't1-jhose','t1-nahuel-scocier','t1-mario-talarico','t1-lautaro-scocier','t1-matheo-olivera',
+  't1-joaco-fernandez','t1-nahir-gomezz'
+ ];
+ const groupMatch={...historyLeague.data.matches[0],competitionCode:'COPA_TOTAL',
+  stage:'Fase de grupos',round:'Grupo 1 · Fecha 1',aKey:names[0],bKey:names[2],matchId:'T3-G1'};
+ const data={...historyLeague.data,season:{...historyLeague.data.season,number:3},
+  participants:names.map(key=>({key,name:key,userId:null,division:null}))};
+ const groups=archiveHistoryGroups(data,'COPA_TOTAL',[groupMatch]);
+ expect(groups).toHaveLength(8);
+ expect(groups.map(g=>g.entries.length)).toEqual([4,3,3,3,3,3,3,3]);
+ expect(groups[0].matches).toHaveLength(1);
+ expect(groups[0].entries.find(e=>e.participantKey==='t3-pablo-aquino')?.points).toBe(14);
+ expect(groups[0].entries.find(e=>e.participantKey==='t2-nico-avalos')?.points).toBe(7);
+});
+it('en T4 Copa B muestra sus cinco grupos y las puntuaciones originales',()=>{
+ const keys=['t3-nico-luchetti','t4-tomas-hon','t3-helyy','t3-aaron-rodas',
+  't3-valium','t4-pollo','t1-matias-varela','t1-gabriel-talarico','t4-eze',
+  't3-bruno-alonso','t1-joaco-fernandez','t4-natanael','t1-nahuel-scocier','t3-fede-gerez',
+  't3-santi','t1-el-diego','t4-juli-boetsch','t2-martin-bustos'];
+ const data={...historyLeague.data,participants:keys.map(key=>({key,name:key,userId:null,division:null}))};
+ const groups=archiveHistoryGroups(data,'COPA_B',[]);
+ expect(groups).toHaveLength(5);
+ expect(groups.map(g=>g.entries.length)).toEqual([4,4,4,3,3]);
+ expect(groups[4].entries[0].points).toBe(19);
+});
+it('una Copa sin tabla de grupos presenta la llave; no inventa equipos o grupos',()=>{
+ const data={...historyLeague.data,season:{...historyLeague.data.season,number:7}};
+ const groups=archiveHistoryGroups(data,'COPA_A',data.matches);
+ expect(groups).toHaveLength(0);
+ const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:{...historyLeague,data},competition:'COPA_A'}));
+ expect(html).toContain('Llave de eliminación directa');
+ expect(html).not.toContain('Grupo 1');
+});
+it('la llave de octavos a final se ordena arriba sin alturas falsas, independientemente de la cantidad de cruces',()=>{
+ const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:historyLeague,competition:'COPA_A'}));
+ expect(html).toContain('archive-bracket-encounters');
+ expect(html).not.toContain('min-height:'); // Antes usaba altura máxima para espaciar las últimas rondas
 });
