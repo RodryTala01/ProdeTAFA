@@ -86,7 +86,10 @@ export default function ParticipantHome({ name, data, userId }: { name: string; 
         const state=homeFixtureState(m);
         return <article className={'home-fixture-card'+(state.isLive?' home-fixture-card--live':'')} key={m.id??i}>
           <a className="home-fixture-link" href="#/pronosticos" aria-label={m.home!.name+' versus '+m.away!.name+', '+argentinaDateTime(m.kickoffAt)}>
-            <time dateTime={m.kickoffAt}>{argentinaDateTime(m.kickoffAt,{month:'short'})} · ARG</time>
+            <div className="home-fixture-meta">
+              <time dateTime={m.kickoffAt}>{argentinaDateTime(m.kickoffAt,{month:'short'})} · ARG</time>
+              {m.competitionName&&<span className="home-fixture-competition"><CompetitionImage name={m.competitionName} logoUrl={m.competitionLogoUrl} size="xs" decorative/><span>{m.competitionName}</span></span>}
+            </div>
             <div className="home-fixture-teams">
               <span><TeamShield name={m.home!.name} teamId={m.home!.id} logoUrl={m.home!.logoUrl} size="sm" decorative/><strong>{m.home!.name}</strong></span>
               <b className="home-fixture-versus" aria-hidden="true">VS</b>
