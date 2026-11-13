@@ -218,3 +218,10 @@
  .archive-bracket-scroll {max-height:610px;}
  .archive-other-matches {grid-template-columns:1fr;padding:12px;}
 }
+
+/* Each colored historical zone also has an accessible visible label. */
+.archive-zone-note {display:block;max-width:140px;font-size:.65rem!important;line-height:1.25;color:var(--text-muted);white-space:normal;}
+.archive-zone--relegation .archive-zone-note {color:var(--danger);}
+.archive-zone--promotion .archive-zone-note,.archive-zone--champion .archive-zone-note {color:var(--success);}
+.archive-zone--survived .archive-zone-note,.archive-zone--playoff .archive-zone-note {color:var(--warning);}
+.archive-zone--runner-up .archive-zone-note,.archive-zone--champions .archive-zone-note {color:var(--info);}
