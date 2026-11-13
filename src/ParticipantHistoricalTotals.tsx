@@ -1,15 +1,15 @@
+import {competitionFamily} from './historical-competition-family';
+import {historicalTrophies} from './historical-trophies';
 import {useState} from 'react';
-import {CompetitionImage,ParticipantShield} from './AssetImage';
+import {AssetImage,CompetitionImage,ParticipantShield} from './AssetImage';
 import {useParticipantRead,ParticipantState} from './ParticipantState';
-type PalmarTotal={userId:string;fullName:string;position:number;championships:number;runnerUps:number;participations:number};
-type GeneralTotal={userId:string;fullName:string;position:number;points:number;fulls:number|null;partials:number|null;errors:number|null;extras:number|null;dates:number|null;averagePoints:number|null;averageFulls:number|null;averagePartials:number|null;averageErrors:number|null;averageExtras:number|null};
-type IffhsTotal={userId:string;fullName:string;position:number;totalPoints:number;seasons:number;average:number;breakdown:Array<{seasonNumber:number;points:number|null}>};
-type TotalsData={seasons:number[];competitions:Array<{code:string;name:string}>;palmares:PalmarTotal[];perCompetition:Record<string,PalmarTotal[]>;iffhsOfficial:{seasons:number[];ranking:IffhsTotal[]};iffhsTotal:IffhsTotal[];general:GeneralTotal[]};
+import type {PalmarTotal,GeneralTotal,IffhsTotal,TotalsData} from './historical-totals-types';
+import {Icon} from './ui';
 import './historical-totals.css';
 
 type Tab='palmares'|'competencia'|'oficial'|'iffhs'|'general';
 const tabs:Array<{id:Tab;name:string}>=[
- {id:'palmares',name:'Palmarés total'},{id:'competencia',name:'Por competencia'},
+ {id:'palmares',name:'Palmarés'},{id:'competencia',name:'Por competencia'},
  {id:'oficial',name:'IFFHS Oficial'},{id:'iffhs',name:'IFFHS Total'},
  {id:'general',name:'Tabla general'},
 ];
@@ -21,21 +21,41 @@ function Player({userId,name}:{userId:string;name:string}){
   {userId.startsWith('hist:')?<span>{name}</span>:<a href={'#/club/participante/'+encodeURIComponent(userId)}>{name}</a>}
  </span>;
 }
-function Rows({rows,compact=false}:{rows:PalmarTotal[];compact?:boolean}){
+function CompetitionTrophy({code,name}:{code:string;name:string}){
+ const family=competitionFamily(code),trophy=historicalTrophies[family];
+ return trophy||family==='COPA_EUROAMERICA'
+  ?<AssetImage name={name} src={trophy?.image} size="sm" decorative fallback={<Icon name="trophy"/>}/>
+  :<CompetitionImage code={code} name={name} variant="trophy" size="sm" decorative/>;
+}
+function Awards({count,kind}:{count:number;kind:'gold'|'silver'}){
+ return <span className={'totals-awards totals-'+kind} aria-label={count+' '+(kind==='gold'?'campeonatos':'subcampeonatos')}>
+  {Array.from({length:Math.min(count,3)},(_,i)=><Icon key={i} name="trophy"/>)}<strong>{count}</strong>
+ </span>;
+}
+function leader<T extends {fullName:string}>(rows:T[],metric:(r:T)=>number|null,format=fmt){
+ const valid=rows.filter(r=>metric(r)!=null);
+ if(!valid.length)return '—';
+ const max=Math.max(...valid.map(r=>metric(r)!));
+ return valid.filter(r=>metric(r)===max).map(r=>r.fullName).join(' · ')+' — '+format(max);
+}
+function Indicators({items}:{items:Array<[string,string|number]>}){
+ return <dl className="totals-indicators">{items.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>;
+}
+function Rows({rows}:{rows:PalmarTotal[]}){
  return <div className="totals-table-wrap" tabIndex={0} role="region" aria-label="Palmarés de participantes">
   <table className="totals-table">
-   <thead><tr><th>Pos.</th><th>Participante</th><th>Campeonatos</th><th>Subcampeonatos</th>{!compact&&<th>Participaciones</th>}</tr></thead>
-   <tbody>{rows.map(r=><tr key={r.userId}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th><td className="totals-highlight">{r.championships}</td><td>{r.runnerUps}</td>{!compact&&<td>{r.participations}</td>}</tr>)}</tbody>
+   <thead><tr><th>Pos.</th><th>Participante</th><th>Campeonatos</th><th>Subcampeonatos</th><th>Participaciones</th></tr></thead>
+   <tbody>{rows.map(r=><tr key={r.userId} data-podium={r.position<=3?r.position:undefined}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th><td><Awards count={r.championships} kind="gold"/></td><td><Awards count={r.runnerUps} kind="silver"/></td><td>{r.participations}</td></tr>)}</tbody>
   </table>
  </div>;
 }
 function IffhsRows({rows,seasons,official}:{rows:IffhsTotal[];seasons:number[];official:boolean}){
  return <div className="totals-table-wrap" tabIndex={0} role="region" aria-label={official?'IFFHS Oficial':'IFFHS Total'}>
   <table className="totals-table">
-   <thead><tr><th>Pos.</th><th>Participante</th>{official?seasons.map(n=><th key={n}>T{n}</th>):null}<th>PTS IFFHS</th>{!official&&<><th>Temporadas</th><th>Prom. / temp.</th></>}</tr></thead>
+   <thead><tr><th>Pos.</th><th>Participante</th>{official?seasons.map(n=><th key={n}>T{n}</th>):null}<th>PTS IFFHS</th>{!official&&<><th>Temporadas</th><th>Prom. / temp.</th><th>Detalle</th></>}</tr></thead>
    <tbody>{rows.map(r=><tr key={r.userId}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th>
     {official&&seasons.map(n=><td key={n}>{r.breakdown.find(b=>b.seasonNumber===n)?.points==null?'—':decimal(r.breakdown.find(b=>b.seasonNumber===n)?.points??null)}</td>)}
-    <td className="totals-highlight">{decimal(r.totalPoints)}</td>{!official&&<><td>{r.seasons}</td><td>{decimal(r.average)}</td></>}
+    <td className="totals-highlight">{decimal(r.totalPoints)}</td>{!official&&<><td>{r.seasons}</td><td>{decimal(r.average)}</td><td><details className="totals-breakdown"><summary aria-label={'Temporadas de '+r.fullName}>Ver</summary><dl>{r.breakdown.map(b=><div key={b.seasonNumber}><dt>T{b.seasonNumber}</dt><dd>{decimal(b.points)}</dd></div>)}</dl></details></td></>}
    </tr>)}</tbody>
   </table>
  </div>;
@@ -43,35 +63,55 @@ function IffhsRows({rows,seasons,official}:{rows:IffhsTotal[];seasons:number[];o
 function GeneralRows({rows}:{rows:GeneralTotal[]}){
  return <div className="totals-table-wrap" role="region" aria-label="Tabla general histórica" tabIndex={0}>
   <table className="totals-table totals-table--general">
-   <thead><tr><th>#</th><th>Participante</th><th>PTS</th><th>Plenos</th><th>Parciales</th><th>Errores</th><th>Extras</th><th>Fechas</th><th>Prom. PTS</th><th>Prom. Pl.</th><th>Prom. Par.</th><th>Prom. Err.</th><th>Prom. Ext.</th></tr></thead>
+   <thead><tr><th>#</th><th>Participante</th><th>PTS</th><th>Plenos</th><th>Parciales</th><th>Errores</th><th>Extras</th><th>Promedio</th></tr></thead>
    <tbody>{rows.map(r=><tr key={r.userId}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th>
     <td className="totals-highlight">{fmt(r.points)}</td><td>{r.fulls===null?'—':fmt(r.fulls)}</td><td>{r.partials===null?'—':fmt(r.partials)}</td>
     <td>{r.errors===null?'—':fmt(r.errors)}</td><td>{r.extras===null?'—':fmt(r.extras)}</td>
-    <td>{r.dates===null?'—':fmt(r.dates)}</td><td>{decimal(r.averagePoints)}</td>
-    <td>{decimal(r.averageFulls)}</td><td>{decimal(r.averagePartials)}</td>
-    <td>{decimal(r.averageErrors)}</td><td>{decimal(r.averageExtras)}</td>
+    <td>{decimal(r.averagePoints)}</td>
    </tr>)}</tbody>
   </table>
  </div>;
 }
 export function HistoricalTotalsView({data}:{data:TotalsData}){
  const [tab,setTab]=useState<Tab>('palmares');
+ const [official,setOfficial]=useState(true);
  const [code,setCode]=useState(data.competitions[0]?.code??'');
  const selected=data.competitions.some(c=>c.code===code)?code:data.competitions[0]?.code??'';
  const rows=data.perCompetition[selected]??[];
+ const honours=tab==='competencia'?rows:official?data.palmaresOfficial:data.palmares;
+ const iffhs=tab==='oficial'?data.iffhsOfficial.ranking:data.iffhsTotal;
+ const latest=data.latestChampions[competitionFamily(selected)];
  return <div className="historical-totals">
   <div className="totals-header"><div><a href="#/historia" className="totals-back">Historia / Estadísticas históricas</a><h1>TABLAS TOTALES</h1></div><span className="totals-period">Todas las temporadas registradas</span></div>
   <nav className="totals-tabs" aria-label="Tablas Totales">{tabs.map(item=><button type="button" key={item.id} aria-pressed={item.id===tab} onClick={()=>setTab(item.id)}>{item.name}</button>)}</nav>
   <section className="totals-panel">
-   <header className="totals-panel-title"><span className="totals-panel-icon">{tab==='palmares'||tab==='competencia'?'🏆':tab==='general'?'▥':'◉'}</span><div><h2>{tab==='palmares'?'PALMARÉS TOTAL':tab==='competencia'?'PALMARÉS POR COMPETENCIA':tab==='oficial'?'IFFHS OFICIAL':tab==='iffhs'?'IFFHS TOTAL':'TABLA GENERAL TOTAL'}</h2><p>{tab==='palmares'?'Campeonatos y subcampeonatos de todas las temporadas':tab==='competencia'?'Elegí la competencia para consultar sus campeones':tab==='oficial'?'Ranking de las últimas cinco temporadas':tab==='iffhs'?'Ranking IFFHS acumulado de todas las temporadas':'Estadísticas acumuladas, ordenadas por puntos totales'}</p></div>
+   <header className="totals-panel-title"><span className="totals-panel-icon">{tab==='palmares'||tab==='competencia'?<img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="28" height="44"/>:tab==='general'?'▥':'◉'}</span><div><h2>{tab==='palmares'?(official?'PALMARÉS OFICIAL':'PALMARÉS TOTAL'):tab==='competencia'?'PALMARÉS POR COMPETENCIA':tab==='oficial'?'IFFHS OFICIAL':tab==='iffhs'?'IFFHS TOTAL':'TABLA GENERAL TOTAL'}</h2><p>{tab==='palmares'?'Campeonatos y subcampeonatos de todas las temporadas':tab==='competencia'?'Elegí la competencia para consultar sus campeones':tab==='oficial'?'Ranking de las últimas cinco temporadas':tab==='iffhs'?'Ranking IFFHS acumulado de todas las temporadas':'Estadísticas acumuladas, ordenadas por puntos totales'}</p></div>
     {tab==='oficial'&&<span className="totals-period">Últimas 5 temporadas</span>}</header>
-   {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">{data.competitions.map(c=><button type="button" key={c.code} aria-pressed={selected===c.code} onClick={()=>setCode(c.code)}><CompetitionImage code={c.code} name={c.name} variant="trophy" size="xs" decorative/>{c.name}</button>)}</div>}
-   {tab==='palmares'&&<Rows rows={data.palmares} compact/>}
-   {tab==='competencia'&&<Rows rows={rows}/>}
+   {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">{data.competitions.map(c=><button type="button" key={c.code} aria-pressed={selected===c.code} onClick={()=>setCode(c.code)}><CompetitionTrophy code={c.code} name={c.name}/>{c.name}</button>)}</div>}
+   {tab==='palmares'&&<div className="totals-tabs" role="group" aria-label="Modalidad de palmarés"><button type="button" aria-pressed={official} onClick={()=>setOfficial(true)}>Palmarés Oficial</button><button type="button" aria-pressed={!official} onClick={()=>setOfficial(false)}>Palmarés Total</button></div>}
+   {(tab==='palmares'||tab==='competencia')&&<><Indicators items={[
+    ['Máximo campeón',leader(honours,r=>r.championships||null)],
+    ['Más participaciones',leader(honours,r=>r.participations)],
+    ...(tab==='palmares'?[['Más subcampeonatos',leader(honours,r=>r.runnerUps||null)],['Campeonatos registrados',honours.reduce((sum,r)=>sum+r.championships,0)]] as Array<[string,string|number]>:latest?[['Último campeón',latest.name+' · T'+latest.seasonNumber]] as Array<[string,string]>:[])
+   ]}/><Rows rows={honours}/></>}
+   {(tab==='oficial'||tab==='iffhs')&&<Indicators items={[
+    ['Líder',leader(iffhs,r=>r.totalPoints,decimal)],['Puntos del líder',decimal(iffhs[0]?.totalPoints??null)],
+    ['Temporadas consideradas',tab==='oficial'?data.iffhsOfficial.seasons.map(n=>'T'+n).join(' · '):iffhs[0]?.breakdown.length??0],
+    ['Mejor promedio',leader(iffhs,r=>r.seasons?r.average:null,decimal)]
+   ]}/>}
+   {tab==='competencia'&&Object.values(historicalTrophies).some(t=>t===historicalTrophies[competitionFamily(selected)])&&(()=>{
+    const t=historicalTrophies[competitionFamily(selected)];
+    return <p className="totals-note">Imagen: <a href={'https://commons.wikimedia.org/wiki/File:'+t.source}>{t.author}</a> · <a href={'https://creativecommons.org/licenses/by-sa/'+t.license+'/'}>CC BY-SA {t.license}</a> · sin modificaciones.</p>;
+   })()}
    {tab==='oficial'&&<IffhsRows rows={data.iffhsOfficial.ranking} seasons={data.iffhsOfficial.seasons} official/>}
    {tab==='iffhs'&&<IffhsRows rows={data.iffhsTotal} seasons={[]} official={false}/>}
-   {tab==='general'&&<><p className="totals-note">Promedios por Fecha jugada. Cuando no existe un recuento histórico fiable de Fechas se indica «—».</p><GeneralRows rows={data.general}/></>}
-   {((tab==='palmares'&&!data.palmares.length)||(tab==='competencia'&&!rows.length)||(tab==='oficial'&&!data.iffhsOfficial.ranking.length)||(tab==='iffhs'&&!data.iffhsTotal.length)||(tab==='general'&&!data.general.length))&&<p className="totals-empty">Todavía no hay datos históricos disponibles para este ranking.</p>}
+   {tab==='general'&&<><Indicators items={[
+    ['Máximo puntaje',leader(data.general,r=>r.points)],
+    ['Mejor promedio',leader(data.general,r=>r.averagePoints,decimal)],
+    ['Más plenos',leader(data.general,r=>r.fulls)],
+    ['Participantes',data.general.length]
+   ]}/><p className="totals-note">Promedio de puntos por pronóstico puntuable.</p><GeneralRows rows={data.general}/></>}
+   {((tab==='palmares'&&!honours.length)||(tab==='competencia'&&!rows.length)||(tab==='oficial'&&!data.iffhsOfficial.ranking.length)||(tab==='iffhs'&&!data.iffhsTotal.length)||(tab==='general'&&!data.general.length))&&<p className="totals-empty">Todavía no hay datos históricos disponibles para este ranking.</p>}
   </section>
  </div>;
 }

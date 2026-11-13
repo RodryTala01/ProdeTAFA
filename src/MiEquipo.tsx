@@ -1,3 +1,4 @@
+import {scoringAverage} from './scoring-average';
 import {Fragment,useMemo,useState} from 'react';
 import {ParticipantShield,CompetitionImage} from './AssetImage';
 import {useParticipantRead,ParticipantState} from './ParticipantState';
@@ -39,7 +40,7 @@ export function groupOfficialRivals(matches:TeamMatch[]):Rival[]{
 }
 const fmt=(x:number)=>x.toLocaleString('es-AR');
 const fmtAverage=(x:number|null|undefined)=>x==null?'—':x.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
-export function historicalSeasonAverage(s:{points:number;dates:number|null}|null):number|null{return s?.dates&&s.dates>0?s.points/s.dates:null;}
+export const historicalSeasonAverage=scoringAverage;
 const historicResultLabels:Record<string,string>={CHAMPION:'Campeón',RUNNER_UP:'Subcampeón',RUNNERUP:'Subcampeón',ROUND_OF_16:'Octavos de final',ROUND_OF_32:'Dieciseisavos',QUARTER_FINAL:'Cuartos de final',SEMI_FINAL:'Semifinales',SEMIFINAL:'Semifinales',FINAL:'Finalista',ELIMINATED:'Eliminado',THIRD:'Tercero'};
 const historicResult=(code:string)=>historicResultLabels[code]??code.toLocaleLowerCase('es').replaceAll('_',' ');
 const rank=(n:number|null)=>n===null?'—':n+'.º';
@@ -99,7 +100,7 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
    </div>):<p>El equipo todavía no tiene títulos confirmados.</p>}
   </section>
   <section className="equipo-points" aria-label="Estadísticas del Prode">
-   <p className="equipo-stats-note">Fechas finalizadas · puntajes definitivos</p><strong className="equipo-total">{fmt(stats.points)}</strong><h2>PTS TOTALES</h2><p className="equipo-points-average">Promedio de puntaje total: <strong>{fmtAverage(stats.averagePoints===undefined?(stats.dates>0?stats.points/stats.dates:null):stats.averagePoints)}</strong> por Fecha</p>
+   <p className="equipo-stats-note">Fechas finalizadas · puntajes definitivos</p><strong className="equipo-total">{fmt(stats.points)}</strong><h2>PTS TOTALES</h2><p className="equipo-points-average">Promedio de puntaje total: <strong>{fmtAverage(stats.averagePoints===undefined?scoringAverage(stats):stats.averagePoints)}</strong> por pronóstico puntuable</p>
    <dl>{[[stats.fulls,'Plenos'],[stats.partials,'Parciales'],[stats.errors,'Errores'],[stats.extras,'Extras'],[stats.predictions,'Pronósticos enviados']].map(([n,label])=><div key={label}><dd>{fmt(n as number)}</dd><dt>{label}</dt></div>)}</dl>
   </section>
   <div className="equipo-rankings"><Ranking name="TABLA GENERAL" info={rankings.general}/><Ranking name="RANKING IFFHS" info={rankings.iffhs}/></div>

@@ -48,24 +48,24 @@ it('IFFHS Oficial mira cinco temporadas y Total suma todas, respetando puntos po
 });
 it('PTS manda en la tabla total, fechas desconocidas no generan promedios ficticios',()=>{
  const d=dataset();
- expect(d.general[0]).toMatchObject({userId:'A',points:58,dates:null,averagePoints:null,averageFulls:null});
+ expect(d.general[0]).toMatchObject({userId:'A',points:58,dates:null,averagePoints:58/103,averageFulls:null});
  const beto=d.general.find(r=>r.userId.startsWith('hist:'))!;
- expect(beto).toMatchObject({points:32,dates:4,averagePoints:8});
+ expect(beto).toMatchObject({points:32,dates:4,averagePoints:0.8});
  expect(d.general.every((r,i,a)=>i===0||a[i-1].points>=r.points)).toBe(true);
 });
 it('la interfaz de rankings tiene tabla limpia sin resultados de ejemplo ni duplicar fuentes',()=>{
  const html=renderToStaticMarkup(createElement(HistoricalTotalsView,{data:dataset()}));
  expect(html).toContain('TABLAS TOTALES');
- for(const name of ['Palmarés total','Por competencia','IFFHS Oficial','IFFHS Total','Tabla general'])expect(html).toContain(name);
+ for(const name of ['Palmarés Oficial','Palmarés Total','Por competencia','IFFHS Oficial','IFFHS Total','Tabla general'])expect(html).toContain(name);
  expect(html).toContain('Campeonatos');
  expect(html).toContain('Subcampeonatos');
  expect(html).toContain('Ana');
  expect(html).not.toContain('PROMOCION');
 });
 it('la ficha de Mi Club presenta promedios fiables y resumen histórico con trofeos y estados en castellano',()=>{
- expect(historicalSeasonAverage({points:48,dates:0})).toBeNull();
- expect(historicalSeasonAverage({points:48,dates:null})).toBeNull();
- expect(historicalSeasonAverage({points:48,dates:8})).toBe(6);
+ expect(historicalSeasonAverage({points:48,fulls:0,partials:0,errors:0})).toBeNull();
+ expect(historicalSeasonAverage({points:48,fulls:null,partials:33,errors:54})).toBeNull();
+ expect(historicalSeasonAverage({points:48,fulls:5,partials:33,errors:54})).toBeCloseTo(0.521739);
  const model:TeamPageData={
   identity:{id:'A',participantName:'Ana',teamName:'Equipo Ana',shieldUrl:null,foundedSeason:4},
   division:null,stats:{points:48,dates:0,fulls:5,partials:33,errors:54,extras:0,predictions:0,averagePoints:null},
@@ -92,10 +92,20 @@ it('históricos sin cuenta se unifican solo por la misma clave inequívoca, jam�
  const combined=composeHistoricalTotals([previous,archive] as never,[],[],[],[],[]);
  const beto=combined.general.filter(r=>r.fullName==='Beto histórico');
  expect(beto).toHaveLength(1);
- expect(beto[0]).toMatchObject({points:64,dates:8,averagePoints:8});
+ expect(beto[0]).toMatchObject({points:64,dates:8,averagePoints:0.8});
  const another={...previous,data:{...previous.data,
   participants:previous.data.participants.map(p=>p.key==='b'?{...p,name:'Otra persona'}:p)}};
  const safe=composeHistoricalTotals([another,archive] as never,[],[],[],[],[]);
  expect(safe.general.filter(r=>r.fullName==='Beto histórico')).toHaveLength(1);
  expect(safe.general.filter(r=>r.fullName==='Otra persona')).toHaveLength(1);
+});
+
+it('separa las participaciones y títulos oficiales de los totales sin duplicar ediciones',()=>{
+ const extra=[{seasonNumber:1,code:'COPA_AMERICA_2021',name:'Copa América Brasil 2021',userId:'A',fullName:'Ana',resultCode:'CHAMPION'},
+ {seasonNumber:1,code:'COPA_AMERICA',name:'Copa América',userId:'A',fullName:'Ana',resultCode:'CHAMPION'},
+ {seasonNumber:2,code:'MUNDIAL_DE_CLUBES',name:'Mundial de Clubes',userId:'A',fullName:'Ana',resultCode:'CHAMPION'}];
+ const totals=composeHistoricalTotals([],[],extra,extra,[]);
+ expect(totals.palmaresOfficial[0]).toMatchObject({championships:1,participations:1});
+ expect(totals.palmares[0]).toMatchObject({championships:2,participations:2});
+ expect(totals.perCompetition.MUNDIAL_DE_CLUBES[0].championships).toBe(1);
 });

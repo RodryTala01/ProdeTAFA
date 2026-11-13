@@ -34,4 +34,17 @@
 .archive-alltime-link strong{font:800 1rem var(--font-display)}
 .archive-alltime-link span{font-size:.77rem;color:var(--text-muted)}
 .archive-alltime-link:hover,.archive-alltime-link:focus-visible{outline:1px solid var(--home-violet)}
-@media(max-width:720px){.totals-header>.totals-period{display:none}.totals-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.totals-tabs button{font-size:.73rem;padding:8px 3px}.totals-tabs button:last-child{grid-column:1/-1}.totals-panel{padding:11px 9px}.totals-panel-title{gap:6px}.totals-panel-title h2{font-size:1.05rem}.totals-panel-title p{font-size:.74rem}.totals-panel-title>.totals-period{font-size:.62rem;text-align:right}.totals-competitions{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px}.totals-competitions button{flex-shrink:0}.totals-table th,.totals-table td{padding:9px 8px;font-size:.76rem}.archive-alltime-link{align-items:start;flex-direction:column}}
+@media(max-width:720px){.totals-header>.totals-period{display:none}.totals-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.totals-tabs button{font-size:.73rem;padding:8px 3px}.totals-tabs button:last-child{grid-column:1/-1}.totals-panel{padding:11px 9px}.totals-panel-title{gap:6px}.totals-panel-title h2{font-size:1.05rem}.totals-panel-title p{font-size:.74rem}.totals-panel-title>.totals-period{font-size:.62rem;text-align:right}.totals-competitions{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px}.totals-competitions button{flex-shrink:0}.totals-table th,.totals-table td{padding:9px 8px;font-size:.76rem}.archive-alltime-link{align-items:start;flex-direction:column}}.totals-table--general{min-width:640px}
+.totals-indicators{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));gap:8px;margin:14px 0}
+.totals-indicators>div{padding:10px;border:1px solid var(--border);background:var(--surface-raised);border-radius:var(--radius-control)}
+.totals-indicators dt{color:var(--text-muted);font-size:.73rem}
+.totals-indicators dd{margin:4px 0 0;font-size:.84rem;font-weight:750;color:var(--home-fluor);overflow-wrap:anywhere}
+.totals-awards{display:inline-flex;gap:4px;align-items:center}
+.totals-awards svg{width:14px;height:14px}
+.totals-gold,.totals-table tr[data-podium="1"]>td:first-child{color:var(--warning)}
+.totals-silver,.totals-table tr[data-podium="2"]>td:first-child{color:var(--text-muted)}
+.totals-table tr[data-podium="3"]>td:first-child{color:color-mix(in srgb,var(--warning) 65%,var(--danger))}
+.totals-breakdown summary{cursor:pointer;color:var(--text)}
+.totals-breakdown dl{margin:8px 0 0}
+.totals-breakdown dl>div{display:flex;gap:12px;justify-content:space-between;padding:3px 0}
+.totals-breakdown dd{margin:0}
