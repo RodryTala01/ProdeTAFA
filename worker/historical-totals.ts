@@ -55,7 +55,7 @@ export function composeHistoricalTotals(
   addName(a.userId,a.fullName);addCompetition(a.code,a.name);
   participation.add(key(a.seasonNumber,a.code,a.userId));
  }
- const general=new Map<string,Omit<GeneralTotal,'position'|'averagePoints'|'averageFulls'|'averagePartials'>>();
+ const general=new Map<string,Omit<GeneralTotal,'position'|'averagePoints'|'averageFulls'|'averagePartials'|'averageErrors'|'averageExtras'>>();
  for(const score of officialScores){
   addName(score.userId,score.fullName);
   general.set(score.userId,{userId:score.userId,fullName:score.fullName,
