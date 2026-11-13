@@ -167,8 +167,8 @@
 .home-status-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
 .home-status-card {--status-color:var(--home-violet);display:flex;align-items:center;gap:10px;min-width:0;min-height:112px;padding:12px 10px;background:var(--bg);border:1px solid var(--border-strong);border-left:3px solid var(--status-color);border-radius:8px;color:var(--text);text-decoration:none;}
 .home-status-card--lime {--status-color:var(--home-fluor);}
-.home-status-card--blue {--status-color:#78b9f5;}
-.home-status-card--gold {--status-color:#f5c54b;}
+.home-status-card--blue {--status-color:var(--home-violet);}
+.home-status-card--gold {--status-color:var(--warning);}
 .home-status-card--danger {--status-color:var(--danger);}
 .home-status-card:hover,.home-status-card:focus-visible {outline:1px solid var(--status-color);border-color:var(--status-color);}
 .home-status-card .competition-image {align-self:flex-start;margin-top:2px;}
