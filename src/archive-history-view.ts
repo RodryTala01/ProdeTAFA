@@ -25,7 +25,7 @@ export function archiveStandingZone(data:ArchivePayload,competition:ArchiveCompe
  if(title?.resultCode==='RUNNER_UP')return {code:'runner-up',label:'Subcampeón'};
  // Historical ranking positions alone cannot prove a relegation: seasons had different rules.
  // For official seasons, reuse the same visual zones as the live League table.
- if(source==='official'&&division){
+ if(source!=='imported'&&division){
   const total=data.standings.filter(r=>r.competitionCode===competition.code).length;
   const zone=leagueZone(row.position,total,division);
   if(zone)return {code:zone.code==='relegation'?'relegation':zone.code==='champions'?'champions':zone.code==='playoff'?'playoff':zone.code==='champion'?'champion':'promotion',label:zone.label};
