@@ -2,7 +2,7 @@ import {useEffect,useState,type ReactNode} from 'react';
 import {AssetImage,ParticipantShield} from './AssetImage';
 import {competitionAsset} from './competition-assets';
 import {Icon} from './ui';
-import {archiveStandingZone,archiveHistoryGroups,historicalMatchLayout,isHistoricalPromotion,promotionHomeLeague,visibleArchiveCompetitions} from './archive-history-view';
+import {archiveStandingZone,archiveHistoryGroups,archivePublicDescription,historicalMatchLayout,isHistoricalPromotion,promotionHomeLeague,visibleArchiveCompetitions} from './archive-history-view';
 import type {HistorySummary,HistoryDetail} from './history-types';
 import type {ArchivePayload,ArchiveCompetition} from './historical-schema';
 import './participant-archive.css';
@@ -42,7 +42,7 @@ function ArchiveMatchCards({detail,matches}:{detail:HistoryDetail;matches:Archiv
  return <div className="archive-match-stack">{matches.map((m,i)=><article className="archive-match-card" key={m.matchId??i}>
   <div className="archive-match-entry"><Person data={detail.data} id={m.aKey}/><strong>{m.pointsA}</strong></div>
   <div className="archive-match-entry"><Person data={detail.data} id={m.bKey}/><strong>{m.pointsB}</strong></div>
-  {((m.round&&!/^\s*fuente\s*:/i.test(m.round))||m.scoreBasis==='DUO')&&<div className="archive-match-caption">{m.round&&!/^\s*fuente\s*:/i.test(m.round)&&<small>{m.round}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</div>}
+  {(archivePublicDescription(m.round)||m.scoreBasis==='DUO')&&<div className="archive-match-caption">{archivePublicDescription(m.round)&&<small>{archivePublicDescription(m.round)}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</div>}
  </article>)}</div>;
 }
 function ArchiveKnockout({detail,matches}:{detail:HistoryDetail;matches:ArchivePayload['matches']}){
@@ -63,10 +63,10 @@ function ArchiveKnockout({detail,matches}:{detail:HistoryDetail;matches:ArchiveP
    </div>
   </section>}
   {additional.length>0&&<details className="archive-panel archive-additional">
-   <summary>Otros encuentros registrados de la final ({additional.length})</summary>
+   <summary>Otros encuentros de la final · {additional.length}</summary>
    <div className="archive-other-matches">{additional.map((m,i)=><ArchiveMatchCards key={m.matchId??i} detail={detail} matches={[m]}/>)}</div>
   </details>}
-  {other.length>0&&<section className="archive-panel"><SectionHeading title="Otros encuentros oficiales" detail={other.length+' cruces'}/><div className="archive-other-matches">{other.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
+  {other.length>0&&<section className="archive-panel"><SectionHeading title="Otros encuentros oficiales" detail={other.length+' cruces'}/><div className="archive-other-matches">{other.map((m,i)=><div key={m.matchId??i}><h3>{archivePublicDescription(m.stage)}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
  </>;
 }
 function ArchiveGroups({detail,competitionCode,matches}:{detail:HistoryDetail;competitionCode:string;matches:ArchivePayload['matches']}){
@@ -105,10 +105,10 @@ function LeaguePromotionHistory({detail}:{detail:HistoryDetail}){
  return <section className="archive-panel archive-league-promotion">
   <SectionHeading title="Promoción · Ascensos y descensos" detail={matches.length?matches.length+' enfrentamientos':undefined}/>
   <p className="archive-bracket-note">Definiciones ligadas a la Liga. No constituyen una copa ni otorgan un campeón.</p>
-  {matches.length>0&&<div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div>}
+  {matches.length>0&&<div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{archivePublicDescription(m.stage)}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div>}
   {movements.length>0&&<ul className="archive-movements">{movements.map((m,i)=><li key={m.participantKey+':'+i}><Person data={data} id={m.participantKey}/>
     <span className={'archive-movement-type archive-movement--'+m.type.toLowerCase()}>{m.type}</span>
-    <span>{m.fromDivision||'—'} → {m.toDivision||'—'}</span>{m.detail&&<small>{m.detail}</small>}
+    <span>{m.fromDivision||'—'} → {m.toDivision||'—'}</span>{archivePublicDescription(m.detail)&&<small>{archivePublicDescription(m.detail)}</small>}
   </li>)}</ul>}
  </section>;
 }
@@ -130,8 +130,8 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
  return <div className="archive-competition">
   <div className="archive-competition-heading"><Trophy code={c.code} name={c.name} season={summary.number}/><div><span className="archive-kicker">Competición · T{summary.number}</span><h2>{c.name}</h2></div></div>
   <Podium detail={detail} code={c.code}/>
-  <section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name} competition={c} source={summary.source}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>
-  {(!isCup||!groups.length)&&(roundNames.length>0||links.length>0)&&<section className="archive-panel"><SectionHeading title="Resultados por Fecha" detail={roundNames.length?roundNames.length+' Fechas':undefined}/>{roundNames.map(round=><details className="archive-round" key={round}><summary><span><Icon name="calendar"/>{round}</span><span>Ver resultados</span></summary><StatsTable data={data} rows={rounds.filter(r=>r.round===round)} label={c.name+' · '+round}/></details>)}{links.length>0&&<div className="archive-round-links">{links.map(l=><a className="button button--secondary" key={l.roundId} href={'#/club/historial/'+l.roundId}>{l.name}<Icon name="arrow"/></a>)}</div>}</section>}
+  {!isCup&&<section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name} competition={c} source={summary.source}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>}
+  {!isCup&&(roundNames.length>0||links.length>0)&&<section className="archive-panel"><SectionHeading title="Resultados por Fecha" detail={roundNames.length?roundNames.length+' Fechas':undefined}/>{roundNames.map(round=><details className="archive-round" key={round}><summary><span><Icon name="calendar"/>{round}</span><span>Ver resultados</span></summary><StatsTable data={data} rows={rounds.filter(r=>r.round===round)} label={c.name+' · '+round}/></details>)}{links.length>0&&<div className="archive-round-links">{links.map(l=><a className="button button--secondary" key={l.roundId} href={'#/club/historial/'+l.roundId}>{l.name}<Icon name="arrow"/></a>)}</div>}</section>}
   {isCup&&(groups.length>0||canEliminate)&&<>
    {groups.length>0&&canEliminate&&<nav className="archive-phase-tabs" aria-label={'Fases de '+c.name}>
      <button type="button" aria-pressed={shownPhase==='grupos'} onClick={()=>setCupPhase('grupos')}>Grupos</button>
@@ -140,9 +140,9 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
    {shownPhase==='grupos'?<ArchiveGroups detail={detail} competitionCode={c.code} matches={matches}/>
     :<ArchiveKnockout detail={detail} matches={matches}/>}
   </>}
-  {!isCup&&matches.length>0&&<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{m.stage}{m.round&&!/^\s*fuente\s*:/i.test(m.round)&&<small>{m.round}</small>}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
+  {!isCup&&matches.length>0&&<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{archivePublicDescription(m.stage)}{archivePublicDescription(m.round)&&<small>{archivePublicDescription(m.round)}</small>}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
   {c.kind==='LEAGUE'&&promotionHomeLeague(data)?.code===c.code&&<LeaguePromotionHistory detail={detail}/>}
-  {(!roundNames.length&&!links.length||(!matches.length&&!groups.length))&&<p className="archive-availability">{!roundNames.length&&!links.length&&<span>Sin desglose por Fecha disponible.</span>}{!matches.length&&!groups.length&&<span>Sin enfrentamientos oficiales disponibles.</span>}</p>}
+  {!isCup&&(!roundNames.length&&!links.length||(!matches.length&&!groups.length))&&<p className="archive-availability">{!roundNames.length&&!links.length&&<span>Sin desglose por Fecha disponible.</span>}{!matches.length&&!groups.length&&<span>Sin enfrentamientos oficiales disponibles.</span>}</p>}
  </div>;
 }
 function Iffhs({detail}:{detail:HistoryDetail}){
@@ -162,9 +162,9 @@ export function SeasonDetail({detail,competition,view}:{detail:HistoryDetail;com
   {active==='resumen'?<>
    <div className="archive-metrics"><div><span>Participantes</span><strong>{display(summary.participantCount)}</strong></div><div><span>Competiciones</span><strong>{summary.competitions.length}</strong></div>{total('points')!==null&&<div><span>Puntos deportivos</span><strong>{total('points')}</strong></div>}{total('extras')!==null&&<div><span>Extras</span><strong>{total('extras')}</strong></div>}</div>
    <section><SectionHeading title="Protagonistas de la temporada"/><Podium detail={detail}/></section>
-   <section><SectionHeading title="Competiciones disputadas" detail={summary.competitions.length.toString()}/><div className="archive-competition-grid">{summary.competitions.map(c=><a className="archive-competition-link" key={c.code} href={root+'/'+c.code}><Trophy code={c.code} name={c.name} season={summary.number}/><span><strong>{c.name}</strong><small>Tabla y resultados</small></span><Icon name="arrow"/></a>)}</div></section>
+   <section><SectionHeading title="Competiciones disputadas" detail={summary.competitions.length.toString()}/><div className="archive-competition-grid">{summary.competitions.map(c=><a className="archive-competition-link" key={c.code} href={root+'/'+c.code}><Trophy code={c.code} name={c.name} season={summary.number}/><span><strong>{c.name}</strong><small>{c.kind==='LEAGUE'?'Tabla y resultados':'Grupos y eliminatorias'}</small></span><Icon name="arrow"/></a>)}</div></section>
    <a className="archive-ranking-link" href={root+'?view=iffhs'}><span className="archive-emblem"><Icon name="list"/></span><span><strong>IFFHS de la temporada</strong><small>{data.iffhs.length?data.iffhs.length+' participantes · Ver clasificación':'Información no disponible'}</small></span><Icon name="arrow"/></a>
-   {data.movements.length>0&&<section className="archive-panel"><SectionHeading title="Ascensos y descensos"/><ul className="archive-movements">{data.movements.map((m,i)=><li key={i}><Person data={data} id={m.participantKey}/><span className="archive-movement-type">{m.type}</span><span>{m.fromDivision||'—'} → {m.toDivision||'—'}</span>{m.detail&&<small>{m.detail}</small>}</li>)}</ul></section>}
+   {data.movements.length>0&&<section className="archive-panel"><SectionHeading title="Ascensos y descensos"/><ul className="archive-movements">{data.movements.map((m,i)=><li key={i}><Person data={data} id={m.participantKey}/><span className="archive-movement-type">{m.type}</span><span>{m.fromDivision||'—'} → {m.toDivision||'—'}</span>{archivePublicDescription(m.detail)&&<small>{archivePublicDescription(m.detail)}</small>}</li>)}</ul></section>}
   </>:active==='iffhs'?<Iffhs detail={detail}/>:<><nav className="archive-competition-tabs" aria-label="Competiciones de la temporada">{summary.competitions.map(c=><a key={c.code} aria-current={selected?.code===c.code?'page':undefined} href={root+'/'+c.code}>{c.name}</a>)}</nav>{selected?<CompetitionDetail key={selected.code} detail={detail} competition={selected}/>:<Empty>Competición sin información disponible.</Empty>}</>}
  </>;
 }
