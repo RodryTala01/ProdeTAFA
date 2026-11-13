@@ -309,7 +309,7 @@ export default {
       if (response) return response;
     }
 
-    if (pathname === '/api/participant/history' || pathname === '/api/participant/history-ranking' || pathname.startsWith('/api/participant/profiles/')) {
+    if (pathname === '/api/participant/history' || pathname === '/api/participant/history-ranking' || pathname === '/api/participant/historical-totals' || pathname.startsWith('/api/participant/profiles/')) {
       const response = await handleHistory(request, env);
       if (response) return response;
     }

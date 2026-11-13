@@ -43,6 +43,18 @@ it('T1 importada alimenta Mi Club, ranking general, IFFHS y cruces; al revertir 
   expect(club.historicalSeasons[0].seasonNumber).toBe(1);
   const all=(await (await handleHistory(req('participant/history-ranking','A'),env))!.json() as {standings:Array<{userId:string;points:number}>}).standings;
   expect(all).toMatchObject([{userId:'A',points:52},{userId:'B',points:45}]);
+  const totalsResponse=await handleHistory(req('participant/historical-totals','A'),env);
+  expect(totalsResponse?.status).toBe(200);
+  const totalHistory=await totalsResponse!.json() as {
+   palmares:Array<{userId:string;championships:number;runnerUps:number}>;
+   iffhsOfficial:{ranking:Array<{userId:string;totalPoints:number}>};
+   general:Array<{userId:string;points:number;dates:number;averagePoints:number}>;
+   perCompetition:Record<string,Array<{userId:string;championships:number}>>;
+  };
+  expect(totalHistory.general.find(r=>r.userId==='A')).toMatchObject({points:52,dates:5,averagePoints:10.4});
+  expect(totalHistory.palmares.find(r=>r.userId==='A')?.championships).toBe(1);
+  expect(totalHistory.perCompetition.LIGA_A.find(r=>r.userId==='A')?.championships).toBe(1);
+  expect(totalHistory.iffhsOfficial.ranking.find(r=>r.userId==='A')?.totalPoints).toBe(120.5);
   const iff=(await (await handleIffhs(req('competition-engine/iffhs/ranking?throughSeason=1','A'),env))!.json() as {ranking:Array<{userId:string;totalPoints:number}>}).ranking;
   expect(iff[0]).toMatchObject({userId:'A',totalPoints:120.5});
   const reversed=await handleHistoricalArchive(req('admin/historical-imports/'+id+'/revert','admin','POST',{seasonNumber:1,sha256:preview.sha256,reason:'Corregir la tabla T1'}),env);

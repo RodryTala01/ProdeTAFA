@@ -1,4 +1,5 @@
 import {activeHistoricalArchives,historicalStats} from './historical-archive';
+import {historicalTotals} from './historical-totals';
 type Env = { DB: D1Database };
 
 type SessionUser = { id: string; role: 'admin' | 'participant'; is_active: number };
@@ -55,11 +56,14 @@ export async function handleHistory(request: Request, env: Env): Promise<Respons
   const pathname = new URL(request.url).pathname;
   const profile = pathname.match(/^\/api\/participant\/profiles\/([^/]+)$/);
   const allTime = pathname === '/api/participant/history-ranking';
-  if (pathname !== '/api/participant/history' && !profile && !allTime) return null;
+  const totalsPath = pathname === '/api/participant/historical-totals';
+  if (pathname !== '/api/participant/history' && !profile && !allTime && !totalsPath) return null;
   if (request.method !== 'GET') return error('Método no permitido', 405);
 
   const user = await sessionUser(request, env);
   if (!user || user.role !== 'participant') return error('Acceso de participante requerido', 403);
+
+  if (totalsPath) return json(await historicalTotals(env.DB));
 
   if (allTime) {
     // One official score per match, independent of how many competitions use a round.
