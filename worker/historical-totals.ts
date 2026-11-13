@@ -32,6 +32,24 @@ export function composeHistoricalTotals(
  officialIffhs:IffhsScore[],
  officialSeasons:Array<{seasonNumber:number;userId:string}>=[]
 ):TotalsData{
+ const historicRefs=new Map<string,{names:Set<string>;ids:Set<string>;count:number}>();
+ const normal=(value:string)=>value.toLocaleLowerCase('es').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/\\s+/g,' ').trim();
+ for(const {data} of archives)for(const p of data.participants){
+  const v=historicRefs.get(p.key)??{names:new Set<string>(),ids:new Set<string>(),count:0};
+  v.names.add(normal(p.name));if(p.userId)v.ids.add(p.userId);v.count++;
+  historicRefs.set(p.key,v);
+ }
+ // Stable participantKey is an explicit identity reference across seasons.
+ // Never merge on name alone, or when a key points at different names/accounts.
+ const archiveId=(data:Archive[number]['data'],participantKey:string)=>{
+  const p=data.participants.find(x=>x.key===participantKey);
+  if(!p)return 'hist:'+data.season.number+':'+participantKey;
+  if(p.userId)return p.userId;
+  const known=historicRefs.get(participantKey);
+  if(known?.names.size===1&&known.ids.size===1)return [...known.ids][0];
+  if(known?.names.size===1&&known.count>1&&known.ids.size===0)return 'hist:'+participantKey;
+  return archiveId(data,participantKey);
+ };
  const names=new Map<string,string>();
  const participation=new Set<string>();
  const awards=new Map<string,{seasonNumber:number;code:string;userId:string;resultCode:string}>();
@@ -68,11 +86,11 @@ export function composeHistoricalTotals(
  }
  for(const {data} of archives){
   for(const c of data.competitions)addCompetition(c.code,c.name);
-  for(const person of data.participants)addName(archivedUserKey(data,person.key),person.name);
+  for(const person of data.participants)addName(archiveId(data,person.key),person.name);
   const participant=(participantKey:string)=>data.participants.find(p=>p.key===participantKey);
   const display=(participantKey:string)=>participant(participantKey)?.name??participantKey;
   const addPart=(code:string,participantKey:string)=>{
-   if(meaningful(code))participation.add(key(data.season.number,code,archivedUserKey(data,participantKey)));
+   if(meaningful(code))participation.add(key(data.season.number,code,archiveId(data,participantKey)));
   };
   for(const person of data.participants){
    if(person.division)addPart('LIGA_'+person.division.toUpperCase(),person.key);
@@ -88,10 +106,10 @@ export function composeHistoricalTotals(
   for(const r of data.results){
    addAward({seasonNumber:data.season.number,code:r.competitionCode,
     name:data.competitions.find(c=>c.code===r.competitionCode)?.name??r.competitionCode,
-    userId:archivedUserKey(data,r.participantKey),fullName:display(r.participantKey),resultCode:r.resultCode});
+    userId:archiveId(data,r.participantKey),fullName:display(r.participantKey),resultCode:r.resultCode});
   }
   for(const r of data.statistics){
-   const userId=archivedUserKey(data,r.participantKey);
+   const userId=archiveId(data,r.participantKey);
    if(officialSeasonUsers.has(data.season.number+':'+userId))continue;
    const prev=general.get(userId)??{userId,fullName:display(r.participantKey),
      points:0,fulls:0,partials:0,errors:0,extras:0,dates:0};
@@ -101,7 +119,7 @@ export function composeHistoricalTotals(
      dates:numberSum(prev.dates,r.dates)});
   }
   for(const r of data.iffhs){
-   const userId=archivedUserKey(data,r.participantKey),id=data.season.number+':'+userId;
+   const userId=archiveId(data,r.participantKey),id=data.season.number+':'+userId;
    if(!iffhs.has(id))iffhs.set(id,{seasonNumber:data.season.number,userId,fullName:display(r.participantKey),pointsScaled:Math.round(r.points*100)});
   }
  }
