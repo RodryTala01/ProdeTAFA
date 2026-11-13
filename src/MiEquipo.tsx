@@ -2,13 +2,14 @@ import {Fragment,useMemo,useState} from 'react';
 import {ParticipantShield,CompetitionImage} from './AssetImage';
 import {useParticipantRead,ParticipantState} from './ParticipantState';
 import {competitionHref,phaseName} from './participant-competitions';
+import {archivePublicDescription} from './archive-history-view';
 import './mi-equipo.css';
 
 export type TeamMatch={id:number;seasonNumber:number;competitionCode:string;competitionName:string;stageName:string;roundName:string|null;opponentId:string;opponentName:string;opponentParticipantName?:string;opponentShieldUrl?:string|null;scoreBasis?:string;resolution?:string|null;outcome?:'win'|'draw'|'loss'|null;ownPoints:number;rivalPoints:number;plenos:number|null};
 export type TeamPageData={
  identity:{id:string;participantName:string;teamName:string;shieldUrl:string|null;foundedSeason:number|null};
  division:{name:string;seasonNumber:number}|null;
- stats:{dates:number;points:number;fulls:number;partials:number;errors:number;extras:number;predictions:number};
+ stats:{dates:number;points:number;fulls:number;partials:number;errors:number;extras:number;predictions:number;averagePoints?:number|null};
  titles:Array<{code:string;name:string;seasonNumber:number}>;
  rankings:{general:{current:number|null;best:{position:number;seasonNumber:number}|null};iffhs:{current:number|null;best:{position:number;seasonNumber:number}|null;throughSeason:number|null;missingSeasons?:number[]}};
  encounters:TeamMatch[];
@@ -37,6 +38,10 @@ export function groupOfficialRivals(matches:TeamMatch[]):Rival[]{
  return [...result.values()].sort((a,b)=>b.matches.length-a.matches.length||a.name.localeCompare(b.name,'es'));
 }
 const fmt=(x:number)=>x.toLocaleString('es-AR');
+const fmtAverage=(x:number|null|undefined)=>x==null?'—':x.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
+export function historicalSeasonAverage(s:{points:number;dates:number|null}|null):number|null{return s?.dates&&s.dates>0?s.points/s.dates:null;}
+const historicResultLabels:Record<string,string>={CHAMPION:'Campeón',RUNNER_UP:'Subcampeón',RUNNERUP:'Subcampeón',ROUND_OF_16:'Octavos de final',ROUND_OF_32:'Dieciseisavos',QUARTER_FINAL:'Cuartos de final',SEMI_FINAL:'Semifinales',SEMIFINAL:'Semifinales',FINAL:'Finalista',ELIMINATED:'Eliminado',THIRD:'Tercero'};
+const historicResult=(code:string)=>historicResultLabels[code]??code.toLocaleLowerCase('es').replaceAll('_',' ');
 const rank=(n:number|null)=>n===null?'—':n+'.º';
 function Ranking({name,info}:{name:string;info:{current:number|null;best:{position:number;seasonNumber:number}|null}}){
  return <section className="equipo-ranking"><strong>{rank(info.current)}</strong><span>{name}</span><small>{info.best?'Mejor '+rank(info.best.position)+' · T'+info.best.seasonNumber:'Mejor posición no disponible'}</small></section>;
@@ -94,7 +99,7 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
    </div>):<p>El equipo todavía no tiene títulos confirmados.</p>}
   </section>
   <section className="equipo-points" aria-label="Estadísticas del Prode">
-   <p className="equipo-stats-note">Fechas finalizadas · puntajes definitivos</p><strong className="equipo-total">{fmt(stats.points)}</strong><h2>PTS TOTALES</h2>
+   <p className="equipo-stats-note">Fechas finalizadas · puntajes definitivos</p><strong className="equipo-total">{fmt(stats.points)}</strong><h2>PTS TOTALES</h2><p className="equipo-points-average">Promedio de puntaje total: <strong>{fmtAverage(stats.averagePoints??(stats.dates>0?stats.points/stats.dates:null))}</strong> por Fecha</p>
    <dl>{[[stats.fulls,'Plenos'],[stats.partials,'Parciales'],[stats.errors,'Errores'],[stats.extras,'Extras'],[stats.predictions,'Pronósticos enviados']].map(([n,label])=><div key={label}><dd>{fmt(n as number)}</dd><dt>{label}</dt></div>)}</dl>
   </section>
   <div className="equipo-rankings"><Ranking name="TABLA GENERAL" info={rankings.general}/><Ranking name="RANKING IFFHS" info={rankings.iffhs}/></div>
@@ -106,12 +111,32 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
    {data.historicalSeasons.map(s=><details key={s.seasonNumber}>
     <summary><strong>T{s.seasonNumber} · {s.seasonName}</strong><span>{s.statistics?s.statistics.points+' PTS':''} {s.division?'· '+s.division:''}</span></summary>
     <div className="equipo-archive-season-detail">
-     {s.statistics&&<p><strong>Total:</strong> {s.statistics.points} PTS · {s.statistics.fulls??'—'} plenos · {s.statistics.partials??'—'} parciales · {s.statistics.errors??'—'} errores · {s.statistics.extras??'—'} extras</p>}
-     {s.iffhs&&<p><strong>IFFHS:</strong> {s.iffhs.points} puntos{s.iffhs.position?' · '+s.iffhs.position+'.º':''}</p>}
-     {s.standings.length>0&&<div><h3>Tablas</h3><ul>{s.standings.map((row,i)=><li key={i}>{row.competitionName}: {row.position}.º · {row.points} PTS</li>)}</ul></div>}
-     {s.results.length>0&&<div><h3>Competiciones</h3><ul>{s.results.map((row,i)=><li key={i}>{row.competitionName} · {row.resultCode}{row.position?' · '+row.position+'.º':''}</li>)}</ul></div>}
-     {s.movements.length>0&&<div><h3>Ascensos y descensos</h3><ul>{s.movements.map((m,i)=><li key={i}>{m.type} · {m.fromDivision??'—'} → {m.toDivision??'—'}{m.detail?' · '+m.detail:''}</li>)}</ul></div>}
-     {s.rounds.length>0&&<div><h3>Puntos por Fecha</h3><div className="equipo-archive-rounds">{s.rounds.map((d,i)=><span key={i}>{d.round}: <strong>{d.points} PTS</strong></span>)}</div></div>}
+      {s.statistics&&<div className="equipo-season-metrics">
+       <div className="equipo-season-metric equipo-season-metric--points"><small>Total</small><strong>{fmt(s.statistics.points)} PTS</strong></div>
+       <div className="equipo-season-metric"><small>Plenos</small><strong>{s.statistics.fulls??'—'}</strong></div>
+       <div className="equipo-season-metric"><small>Parciales</small><strong>{s.statistics.partials??'—'}</strong></div>
+       <div className="equipo-season-metric"><small>Errores</small><strong>{s.statistics.errors??'—'}</strong></div>
+       <div className="equipo-season-metric"><small>Extras</small><strong>{s.statistics.extras??'—'}</strong></div>
+       <div className="equipo-season-metric equipo-season-metric--average"><small>Promedio de puntaje total</small><strong>{fmtAverage(historicalSeasonAverage(s.statistics))}</strong></div>
+      </div>}
+      {s.iffhs&&<div className="equipo-season-iffhs"><span>IFFHS</span><strong>{fmtAverage(s.iffhs.points)} puntos</strong>{s.iffhs.position&&<span>· {s.iffhs.position}°</span>}</div>}
+      {(s.standings.length>0||s.results.length>0)&&<div className="equipo-season-columns">
+       {s.standings.length>0&&<section className="equipo-season-column"><h3>Tablas</h3>
+         <div className="equipo-season-list">{s.standings.map((row,i)=><div className="equipo-season-row" key={i}>
+           <CompetitionImage code={row.competitionCode} name={row.competitionName} season={s.seasonNumber} variant="trophy" size="xs" decorative/>
+           <strong>{row.competitionName}</strong><span>{row.position}°</span><b>{row.points} PTS</b>
+         </div>)}</div>
+       </section>}
+       {s.results.length>0&&<section className="equipo-season-column"><h3>Competiciones</h3>
+         <div className="equipo-season-list">{s.results.map((row,i)=><div className="equipo-season-row" key={i}>
+           <CompetitionImage code={row.competitionCode} name={row.competitionName} season={s.seasonNumber} variant="trophy" size="xs" decorative/>
+           <strong>{row.competitionName}</strong><span className={'equipo-season-status'+(row.resultCode==='CHAMPION'?' equipo-season-status--champion':row.resultCode==='RUNNER_UP'?' equipo-season-status--runner':'')}>{historicResult(row.resultCode)}</span>
+           {row.position&&<b>{row.position}°</b>}
+         </div>)}</div>
+       </section>}
+      </div>}
+      {s.movements.length>0&&<div className="equipo-season-movements"><h3>Ascensos y descensos</h3>{s.movements.map((m,i)=><span key={i}>{m.type.toLocaleLowerCase('es')} · {m.fromDivision??'—'} → {m.toDivision??'—'}{archivePublicDescription(m.detail)?' · '+archivePublicDescription(m.detail):''}</span>)}</div>}
+      {s.rounds.length>0&&<div><h3>Puntos por Fecha</h3><div className="equipo-archive-rounds">{s.rounds.map((d,i)=><span key={i}>{d.round}: <strong>{d.points} PTS</strong></span>)}</div></div>}
     </div>
    </details>)}
   </section>}
