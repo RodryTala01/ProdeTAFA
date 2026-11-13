@@ -75,6 +75,7 @@ async function teamRead(db:D1Database,id:string){
  LEFT JOIN official_predictions op ON op.user_id=rs.user_id AND op.match_id=m.id
  LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id AND ps.is_provisional=0
  WHERE rs.user_id=?`).bind(id).first();
+ const archiveDatesUnknown=archives.some(({data})=>data.participants.some(p=>p.userId===id&&data.statistics.some(s=>s.participantKey===p.key&&s.dates===null)));
  const combinedStats={
     dates:Number(stat?.dates??0)+(archiveUser?.dates??0),
     points:Number(stat?.points??0)+(archiveUser?.points??0),
@@ -83,6 +84,8 @@ async function teamRead(db:D1Database,id:string){
     errors:Number(stat?.errors??0)+(archiveUser?.errors??0),
     extras:Number(stat?.extras??0)+(archiveUser?.extras??0),
     predictions:Number(stat?.predictions??0)+(archiveUser?.predictions??0),
+    averagePoints:!archiveDatesUnknown&&(Number(stat?.dates??0)+(archiveUser?.dates??0))>0
+      ?(Number(stat?.points??0)+(archiveUser?.points??0))/(Number(stat?.dates??0)+(archiveUser?.dates??0)):null,
  };
  const historicTitles=archives.flatMap(({data})=>data.results.filter(r=>r.resultCode==='CHAMPION'&&archivedUserKey(data,r.participantKey)===id).map(row=>{
    const competition=data.competitions.find(c=>c.code===row.competitionCode);
