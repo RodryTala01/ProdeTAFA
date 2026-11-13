@@ -33,7 +33,7 @@ export function composeHistoricalTotals(
  officialSeasons:Array<{seasonNumber:number;userId:string}>=[]
 ):TotalsData{
  const historicRefs=new Map<string,{names:Set<string>;ids:Set<string>;count:number}>();
- const normal=(value:string)=>value.toLocaleLowerCase('es').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/\\s+/g,' ').trim();
+ const normal=(value:string)=>value.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
  for(const {data} of archives)for(const p of data.participants){
   const v=historicRefs.get(p.key)??{names:new Set<string>(),ids:new Set<string>(),count:0};
   v.names.add(normal(p.name));if(p.userId)v.ids.add(p.userId);v.count++;
@@ -48,7 +48,7 @@ export function composeHistoricalTotals(
   const known=historicRefs.get(participantKey);
   if(known?.names.size===1&&known.ids.size===1)return [...known.ids][0];
   if(known?.names.size===1&&known.count>1&&known.ids.size===0)return 'hist:'+participantKey;
-  return archiveId(data,participantKey);
+  return archivedUserKey(data,participantKey);
  };
  const names=new Map<string,string>();
  const participation=new Set<string>();
@@ -56,7 +56,7 @@ export function composeHistoricalTotals(
  const iffhs=new Map<string,IffhsScore>();
  const competitionNames=new Map<string,string>();
  const officialSeasonUsers=new Set(officialSeasons.map(s=>s.seasonNumber+':'+s.userId));
- const addName=(id:string,name:string)=>{if(!names.has(id)||!id.startsWith('hist:'))names.set(id,name);};
+ const addName=(id:string,name:string)=>{if(!names.has(id))names.set(id,name);};
  const addCompetition=(code:string,name:string)=>{if(meaningful(code)&&!competitionNames.has(code))competitionNames.set(code,name);};
  const addAward=(a:Award)=>{
   if(!meaningful(a.code)||(!champions.has(a.resultCode)&&!runners.has(a.resultCode)))return;
