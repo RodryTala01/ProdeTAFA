@@ -31,7 +31,7 @@ function IffhsRows({rows,seasons,official}:{rows:IffhsTotal[];seasons:number[];o
   <table className="totals-table">
    <thead><tr><th>Pos.</th><th>Participante</th>{official?seasons.map(n=><th key={n}>T{n}</th>):null}<th>PTS IFFHS</th>{!official&&<><th>Temporadas</th><th>Prom. / temp.</th></>}</tr></thead>
    <tbody>{rows.map(r=><tr key={r.userId}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th>
-    {official&&seasons.map(n=><td key={n}>{r.breakdown.find(b=>b.seasonNumber===n)?.points==null?'—':decimal(r.breakdown.find(b=>b.seasonNumber===n)!.points)}</td>)}
+    {official&&seasons.map(n=><td key={n}>{r.breakdown.find(b=>b.seasonNumber===n)?.points==null?'—':decimal(r.breakdown.find(b=>b.seasonNumber===n)?.points??null)}</td>)}
     <td className="totals-highlight">{decimal(r.totalPoints)}</td>{!official&&<><td>{r.seasons}</td><td>{decimal(r.average)}</td></>}
    </tr>)}</tbody>
   </table>
