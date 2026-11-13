@@ -247,3 +247,14 @@ it('Competiciones es una sola franja de accesos con los torneos reales, sin copa
  expect(html).toContain('Accesos a competiciones');
  expect(html).not.toContain('Últimos resultados');
 });
+
+it('Partidos de la Fecha identifica la liga real de cada cruce junto al horario ARG',()=>{
+ const m={...round.matches[0],id:1,competitionName:'Premier League',competitionLogoUrl:null,
+   home:{id:'a',name:'Local'},away:{id:'b',name:'Visitante'}};
+ const html=renderToStaticMarkup(createElement(ParticipantHome,{name:'Persona',
+   data:{...emptyHome,round:{...round,matches:[m]}} as any}));
+ expect(html).toContain('home-fixture-competition');
+ expect(html).toContain('Premier League');
+ expect(html).toContain('ARG');
+ expect(html).not.toContain('Últimos resultados');
+});
