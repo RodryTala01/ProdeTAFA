@@ -99,7 +99,7 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
    </div>):<p>El equipo todavía no tiene títulos confirmados.</p>}
   </section>
   <section className="equipo-points" aria-label="Estadísticas del Prode">
-   <p className="equipo-stats-note">Fechas finalizadas · puntajes definitivos</p><strong className="equipo-total">{fmt(stats.points)}</strong><h2>PTS TOTALES</h2><p className="equipo-points-average">Promedio de puntaje total: <strong>{fmtAverage(stats.averagePoints??(stats.dates>0?stats.points/stats.dates:null))}</strong> por Fecha</p>
+   <p className="equipo-stats-note">Fechas finalizadas · puntajes definitivos</p><strong className="equipo-total">{fmt(stats.points)}</strong><h2>PTS TOTALES</h2><p className="equipo-points-average">Promedio de puntaje total: <strong>{fmtAverage(stats.averagePoints===undefined?(stats.dates>0?stats.points/stats.dates:null):stats.averagePoints)}</strong> por Fecha</p>
    <dl>{[[stats.fulls,'Plenos'],[stats.partials,'Parciales'],[stats.errors,'Errores'],[stats.extras,'Extras'],[stats.predictions,'Pronósticos enviados']].map(([n,label])=><div key={label}><dd>{fmt(n as number)}</dd><dt>{label}</dt></div>)}</dl>
   </section>
   <div className="equipo-rankings"><Ranking name="TABLA GENERAL" info={rankings.general}/><Ranking name="RANKING IFFHS" info={rankings.iffhs}/></div>
