@@ -17,7 +17,7 @@ const fmt=(value:number)=>value.toLocaleString('es-AR',{maximumFractionDigits:2}
 const decimal=(value:number|null)=>value===null?'—':value.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
 function Player({userId,name}:{userId:string;name:string}){
  return <span className="totals-person">
-  <ParticipantShield userId={userId.startsWith('hist:')?undefined:userId} name={name} size="xs" decorative/>
+  <ParticipantShield userId={userId.startsWith('hist:')?undefined:userId} name={name} size="sm" decorative/>
   {userId.startsWith('hist:')?<span>{name}</span>:<a href={'#/club/participante/'+encodeURIComponent(userId)}>{name}</a>}
  </span>;
 }
@@ -29,7 +29,7 @@ function CompetitionTrophy({code,name}:{code:string;name:string}){
 }
 function Awards({count,kind}:{count:number;kind:'gold'|'silver'}){
  return <span className={'totals-awards totals-'+kind} aria-label={count+' '+(kind==='gold'?'campeonatos':'subcampeonatos')}>
-  {Array.from({length:Math.min(count,3)},(_,i)=><Icon key={i} name="trophy"/>)}<strong>{count}</strong>
+  {Array.from({length:Math.min(count,2)},(_,i)=><Icon key={i} name="trophy"/>)}<strong>{count>2?'+'+(count-2):count}</strong>{count>2&&<small>({count} total)</small>}
  </span>;
 }
 function leader<T extends {fullName:string}>(rows:T[],metric:(r:T)=>number|null,format=fmt){
@@ -41,9 +41,21 @@ function leader<T extends {fullName:string}>(rows:T[],metric:(r:T)=>number|null,
 function Indicators({items}:{items:Array<[string,string|number]>}){
  return <dl className="totals-indicators">{items.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>;
 }
+function HonourCards({rows,overall,latest}:{rows:PalmarTotal[];overall:boolean;latest?:{name:string;seasonNumber:number}}){
+ const card=(label:string,metric:(r:PalmarTotal)=>number,icon:'trophy'|'user',tone:string)=>{
+  const value=Math.max(0,...rows.map(metric));
+  return <div className={'totals-card '+tone}><dt><Icon name={icon}/>{label}</dt><dd><strong>{value||'—'}</strong>{value>0&&<ul>{rows.filter(r=>metric(r)===value).map(r=><li key={r.userId}><Player userId={r.userId} name={r.fullName}/></li>)}</ul>}</dd></div>;
+ };
+ return <dl className="totals-indicators totals-honour-cards">
+  {card('Máximo campeón',r=>r.championships,'trophy','totals-gold')}
+  {overall&&card('Más subcampeonatos',r=>r.runnerUps,'trophy','totals-silver')}
+  {card('Más participaciones',r=>r.participations,'user','')}
+  {overall?<div className="totals-card totals-registered"><dt><img src="/brand/tafa.png" alt=""/>Campeonatos registrados</dt><dd><strong>{rows.reduce((sum,r)=>sum+r.championships,0)}</strong></dd></div>:latest&&<div className="totals-card totals-gold"><dt><Icon name="trophy"/>Último campeón</dt><dd><strong>T{latest.seasonNumber}</strong><ul>{latest.name.split(' · ').map((name,i)=><li key={i}>{name}</li>)}</ul></dd></div>}
+ </dl>;
+}
 function Rows({rows}:{rows:PalmarTotal[]}){
  return <div className="totals-table-wrap" tabIndex={0} role="region" aria-label="Palmarés de participantes">
-  <table className="totals-table">
+  <table className="totals-table totals-table--honours">
    <thead><tr><th>Pos.</th><th>Participante</th><th>Campeonatos</th><th>Subcampeonatos</th><th>Participaciones</th></tr></thead>
    <tbody>{rows.map(r=><tr key={r.userId} data-podium={r.position<=3?r.position:undefined}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th><td><Awards count={r.championships} kind="gold"/></td><td><Awards count={r.runnerUps} kind="silver"/></td><td>{r.participations}</td></tr>)}</tbody>
   </table>
@@ -89,17 +101,14 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
     {tab==='oficial'&&<span className="totals-period">Últimas 5 temporadas</span>}</header>
    {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">{data.competitions.map(c=><button type="button" key={c.code} aria-pressed={selected===c.code} onClick={()=>setCode(c.code)}><CompetitionTrophy code={c.code} name={c.name}/>{c.name}</button>)}</div>}
    {tab==='palmares'&&<div className="totals-tabs" role="group" aria-label="Modalidad de palmarés"><button type="button" aria-pressed={official} onClick={()=>setOfficial(true)}>Palmarés Oficial</button><button type="button" aria-pressed={!official} onClick={()=>setOfficial(false)}>Palmarés Total</button></div>}
-   {(tab==='palmares'||tab==='competencia')&&<><Indicators items={[
-    ['Máximo campeón',leader(honours,r=>r.championships||null)],
-    ['Más participaciones',leader(honours,r=>r.participations)],
-    ...(tab==='palmares'?[['Más subcampeonatos',leader(honours,r=>r.runnerUps||null)],['Campeonatos registrados',honours.reduce((sum,r)=>sum+r.championships,0)]] as Array<[string,string|number]>:latest?[['Último campeón',latest.name+' · T'+latest.seasonNumber]] as Array<[string,string]>:[])
-   ]}/><Rows rows={honours}/></>}
+   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/><Rows rows={honours}/></>}
    {(tab==='oficial'||tab==='iffhs')&&<Indicators items={[
     ['Líder',leader(iffhs,r=>r.totalPoints,decimal)],['Puntos del líder',decimal(iffhs[0]?.totalPoints??null)],
     ['Temporadas consideradas',tab==='oficial'?data.iffhsOfficial.seasons.map(n=>'T'+n).join(' · '):iffhs[0]?.breakdown.length??0],
     ['Mejor promedio',leader(iffhs,r=>r.seasons?r.average:null,decimal)]
    ]}/>}
-   {tab==='competencia'&&Object.values(historicalTrophies).some(t=>t===historicalTrophies[competitionFamily(selected)])&&(()=>{
+   {tab==='competencia'&&competitionFamily(selected)==='COPA_AMERICA'&&<p className="totals-note">Imagen: <a href="https://copaamerica.com/es/novedades/copa-america-trofeo-original-restaurado-campeon-2024">CONMEBOL Copa América · trofeo original restaurado</a></p>}
+   {tab==='competencia'&&competitionFamily(selected)!=='COPA_AMERICA'&&Object.values(historicalTrophies).some(t=>t===historicalTrophies[competitionFamily(selected)])&&(()=>{
     const t=historicalTrophies[competitionFamily(selected)];
     return <p className="totals-note">Imagen: <a href={'https://commons.wikimedia.org/wiki/File:'+t.source}>{t.author}</a> · <a href={'https://creativecommons.org/licenses/by-sa/'+t.license+'/'}>CC BY-SA {t.license}</a> · sin modificaciones.</p>;
    })()}
