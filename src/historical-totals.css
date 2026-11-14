@@ -48,3 +48,23 @@
 .totals-breakdown dl{margin:8px 0 0}
 .totals-breakdown dl>div{display:flex;gap:12px;justify-content:space-between;padding:3px 0}
 .totals-breakdown dd{margin:0}
+.totals-honour-cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}
+.totals-honour-cards .totals-card{padding:12px;display:grid;align-content:start;gap:6px}
+.totals-card dt{display:flex;align-items:center;gap:7px;font-weight:650}
+.totals-card dt svg,.totals-card dt img{width:18px;height:20px;object-fit:contain;color:inherit}
+.totals-card dd>strong{font:800 1.8rem/1 var(--font-display);color:var(--home-fluor)}
+.totals-card.totals-gold dd>strong{color:var(--warning)}
+.totals-card.totals-silver dd>strong{color:var(--text)}
+.totals-card.totals-registered dd>strong{font-size:2.35rem}
+.totals-card ul{display:flex;flex-wrap:wrap;gap:5px;list-style:none;padding:0;margin:8px 0 0}
+.totals-card li{border:1px solid var(--border);border-radius:var(--radius-control);padding:3px 6px;color:var(--text);max-width:100%}
+.totals-card .totals-person{min-width:0;font-size:.75rem}
+.totals-table--honours .totals-person{font-weight:750;min-width:145px}
+.totals-table--honours .totals-awards svg{width:19px;height:19px;stroke-width:2.25}
+.totals-awards small{color:var(--text-muted)}
+.totals-table--honours tr[data-podium="1"]{--podium:var(--warning)}
+.totals-table--honours tr[data-podium="2"]{--podium:var(--text-muted)}
+.totals-table--honours tr[data-podium="3"]{--podium:color-mix(in srgb,var(--warning) 65%,var(--danger))}
+.totals-table--honours tbody tr[data-podium]{background:color-mix(in srgb,var(--podium) 8%,var(--surface))}
+.totals-table--honours tbody tr[data-podium]>td:first-child{box-shadow:inset 2px 0 var(--podium);color:var(--podium);font-weight:800}
+@media(max-width:540px){.totals-honour-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.totals-honour-cards .totals-card{padding:9px}.totals-card .totals-person{gap:4px}}

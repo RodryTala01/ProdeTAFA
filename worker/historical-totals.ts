@@ -192,7 +192,7 @@ export function composeHistoricalTotals(
    averagePartials:r.dates&&r.dates>0&&r.partials!==null?r.partials/r.dates:null,
    averageErrors:r.dates&&r.dates>0&&r.errors!==null?r.errors/r.dates:null,
    averageExtras:r.dates&&r.dates>0&&r.extras!==null?r.extras/r.dates:null}));
- return {seasons,competitions:[...competitionNames].filter(([code],index,all)=>all.findIndex(([other])=>competitionFamily(other)===competitionFamily(code))===index).map(([code,name])=>({code,name})),
+ return {seasons,competitions:[...competitionNames].filter(([code],index,all)=>all.findIndex(([other])=>competitionFamily(other)===competitionFamily(code))===index).map(([code,name])=>({code,name:competitionFamily(code)==='COPA_AMERICA'?'Copa América':name})),
   palmares,palmaresOfficial,latestChampions,perCompetition,
   iffhsOfficial:{seasons:officialWindow,ranking:rankedIffhs(officialWindow)},
   iffhsTotal:rankedIffhs([...new Set([...seasons,...iffhsSeasons])].sort((a,b)=>b-a)),general:overall};
