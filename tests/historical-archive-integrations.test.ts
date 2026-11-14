@@ -51,7 +51,7 @@ it('T1 importada alimenta Mi Club, ranking general, IFFHS y cruces; al revertir 
    general:Array<{userId:string;points:number;dates:number;averagePoints:number}>;
    perCompetition:Record<string,Array<{userId:string;championships:number}>>;
   };
-  expect(totalHistory.general.find(r=>r.userId==='A')).toMatchObject({points:52,dates:5,averagePoints:10.4});
+  expect(totalHistory.general.find(r=>r.userId==='A')).toMatchObject({points:52,dates:5,averagePoints:52/28});
   expect(totalHistory.palmares.find(r=>r.userId==='A')?.championships).toBe(1);
   expect(totalHistory.perCompetition.LIGA_A.find(r=>r.userId==='A')?.championships).toBe(1);
   expect(totalHistory.iffhsOfficial.ranking.find(r=>r.userId==='A')?.totalPoints).toBe(120.5);

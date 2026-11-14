@@ -1,3 +1,6 @@
+import {competitionFamily} from '../src/historical-competition-family';
+import type {GeneralTotal,PalmarTotal,IffhsTotal,TotalsData} from '../src/historical-totals-types';
+import {scoringAverage} from '../src/scoring-average';
 import {activeHistoricalArchives,archivedUserKey} from './historical-archive';
 import {documentedHistoryGroups} from '../src/historical-group-catalog';
 
@@ -6,13 +9,9 @@ type OfficialScore={userId:string;fullName:string;dates:number;points:number;ful
 type Award={seasonNumber:number;code:string;name:string;userId:string;fullName:string;resultCode:string};
 type Member={seasonNumber:number;code:string;name:string;userId:string;fullName:string};
 type IffhsScore={seasonNumber:number;userId:string;fullName:string;pointsScaled:number};
-export type GeneralTotal={userId:string;fullName:string;position:number;points:number;fulls:number|null;partials:number|null;errors:number|null;extras:number|null;dates:number|null;averagePoints:number|null;averageFulls:number|null;averagePartials:number|null;averageErrors:number|null;averageExtras:number|null};
-export type PalmarTotal={userId:string;fullName:string;position:number;championships:number;runnerUps:number;participations:number};
-export type IffhsTotal={userId:string;fullName:string;position:number;totalPoints:number;seasons:number;average:number;breakdown:Array<{seasonNumber:number;points:number|null}>};
-export type TotalsData={seasons:number[];competitions:Array<{code:string;name:string}>;palmares:PalmarTotal[];perCompetition:Record<string,PalmarTotal[]>;iffhsOfficial:{seasons:number[];ranking:IffhsTotal[]};iffhsTotal:IffhsTotal[];general:GeneralTotal[]};
-
 const champions=new Set(['CHAMPION']);
 const runners=new Set(['RUNNER_UP','RUNNERUP','SUBCAMPEON','SUBCHAMPION']);
+const officialCodes=new Set(['LIGA_A','COPA_TOTAL','COPA_A','COPA_AMERICA','EUROCOPA','MUNDIAL','COPA_EUROAMERICA','COPA_CAMPEONES','COPA_PAPA']);
 const meaningful=(code:string)=>code!=='PROMOCION';
 const key=(season:number,code:string,user:string)=>season+':'+code+':'+user;
 const n=(value:number|null|undefined)=>Number(value??0);
@@ -61,9 +60,9 @@ export function composeHistoricalTotals(
  const addAward=(a:Award)=>{
   if(!meaningful(a.code)||(!champions.has(a.resultCode)&&!runners.has(a.resultCode)))return;
   addName(a.userId,a.fullName);addCompetition(a.code,a.name);
-  const id=key(a.seasonNumber,a.code,a.userId)+':'+(champions.has(a.resultCode)?'champion':'runner');
-  awards.set(id,{seasonNumber:a.seasonNumber,code:a.code,userId:a.userId,resultCode:a.resultCode});
-  participation.add(key(a.seasonNumber,a.code,a.userId));
+  const id=key(a.seasonNumber,competitionFamily(a.code),a.userId);
+  if(!awards.has(id))awards.set(id,{seasonNumber:a.seasonNumber,code:a.code,userId:a.userId,resultCode:a.resultCode});
+  participation.add(key(a.seasonNumber,competitionFamily(a.code),a.userId));
  };
  for(const a of officialAwards){
   addAward(a);
@@ -71,7 +70,7 @@ export function composeHistoricalTotals(
  for(const a of officialMembers){
   if(!meaningful(a.code))continue;
   addName(a.userId,a.fullName);addCompetition(a.code,a.name);
-  participation.add(key(a.seasonNumber,a.code,a.userId));
+  participation.add(key(a.seasonNumber,competitionFamily(a.code),a.userId));
  }
  const general=new Map<string,Omit<GeneralTotal,'position'|'averagePoints'|'averageFulls'|'averagePartials'|'averageErrors'|'averageExtras'>>();
  for(const score of officialScores){
@@ -90,7 +89,7 @@ export function composeHistoricalTotals(
   const participant=(participantKey:string)=>data.participants.find(p=>p.key===participantKey);
   const display=(participantKey:string)=>participant(participantKey)?.name??participantKey;
   const addPart=(code:string,participantKey:string)=>{
-   if(meaningful(code))participation.add(key(data.season.number,code,archiveId(data,participantKey)));
+   if(meaningful(code))participation.add(key(data.season.number,competitionFamily(code),archiveId(data,participantKey)));
   };
   for(const person of data.participants){
    if(person.division)addPart('LIGA_'+person.division.toUpperCase(),person.key);
@@ -126,10 +125,11 @@ export function composeHistoricalTotals(
  const counts=new Map<string,{championships:number;runnerUps:number;codes:Map<string,{championships:number;runnerUps:number}>}>();
  for(const a of awards.values()){
   const entry=counts.get(a.userId)??{championships:0,runnerUps:0,codes:new Map()};
-  const item=entry.codes.get(a.code)??{championships:0,runnerUps:0};
+  const family=competitionFamily(a.code);
+  const item=entry.codes.get(family)??{championships:0,runnerUps:0};
   if(champions.has(a.resultCode)){entry.championships++;item.championships++;}
   else{entry.runnerUps++;item.runnerUps++;}
-  entry.codes.set(a.code,item);counts.set(a.userId,entry);
+  entry.codes.set(family,item);counts.set(a.userId,entry);
  }
  const participationsByUser=new Map<string,Set<string>>();
  const participationByCompetition=new Map<string,Map<string,number>>();
@@ -146,13 +146,27 @@ export function composeHistoricalTotals(
  })),r=>r.championships);
  const perCompetition:Record<string,PalmarTotal[]>={};
  for(const [code] of competitionNames){
-  const ids=new Set([...participationByCompetition.get(code)?.keys()??[],...[...counts].filter(([,value])=>value.codes.has(code)).map(([id])=>id)]);
+  const family=competitionFamily(code);
+  const ids=new Set([...participationByCompetition.get(family)?.keys()??[],...[...counts].filter(([,value])=>value.codes.has(family)).map(([id])=>id)]);
   perCompetition[code]=rankSort([...ids].map(userId=>({
    userId,fullName:names.get(userId)??userId,
-   championships:counts.get(userId)?.codes.get(code)?.championships??0,
-   runnerUps:counts.get(userId)?.codes.get(code)?.runnerUps??0,
-   participations:participationByCompetition.get(code)?.get(userId)??0
+   championships:counts.get(userId)?.codes.get(family)?.championships??0,
+   runnerUps:counts.get(userId)?.codes.get(family)?.runnerUps??0,
+   participations:participationByCompetition.get(family)?.get(userId)??0
   })),r=>r.championships);
+ }
+ const palmaresOfficial=rankSort(palmares.flatMap(row=>{
+  const participations=[...(participationsByUser.get(row.userId)??[])].filter(id=>officialCodes.has(id.split(':')[1])).length;
+  if(!participations)return [];
+  const awards=[...(counts.get(row.userId)?.codes??[])].filter(([code])=>officialCodes.has(code)).map(([,award])=>award);
+  return [{...row,participations,championships:awards.reduce((sum,a)=>sum+a.championships,0),runnerUps:awards.reduce((sum,a)=>sum+a.runnerUps,0)}];
+ }),r=>r.championships);
+ const latestChampions:TotalsData['latestChampions']={};
+ for(const award of awards.values()){
+  if(!champions.has(award.resultCode))continue;
+  const code=competitionFamily(award.code),last=latestChampions[code],name=names.get(award.userId)??award.userId;
+  if(!last||last.seasonNumber<award.seasonNumber)latestChampions[code]={seasonNumber:award.seasonNumber,name};
+  else if(last.seasonNumber===award.seasonNumber)last.name+=' · '+name;
  }
  const seasons=[...new Set([...archives.map(a=>a.seasonNumber),...officialIffhs.map(r=>r.seasonNumber),...officialAwards.map(r=>r.seasonNumber)])].sort((a,b)=>b-a);
  const iffhsSeasons=[...new Set([...iffhs.values()].map(r=>r.seasonNumber))].sort((a,b)=>b-a);
@@ -173,15 +187,15 @@ export function composeHistoricalTotals(
   return rankSort([...perUser.values()],r=>r.totalPoints).map(r=>({...r,average:r.seasons?r.totalPoints/r.seasons:0}));
  }
  const overall=rankSort([...general.values()].map(r=>({...r,fullName:names.get(r.userId)??r.fullName})),r=>r.points)
-  .map(r=>({...r,averagePoints:r.dates&&r.dates>0?r.points/r.dates:null,
+  .map(r=>({...r,averagePoints:scoringAverage(r),
    averageFulls:r.dates&&r.dates>0&&r.fulls!==null?r.fulls/r.dates:null,
    averagePartials:r.dates&&r.dates>0&&r.partials!==null?r.partials/r.dates:null,
    averageErrors:r.dates&&r.dates>0&&r.errors!==null?r.errors/r.dates:null,
    averageExtras:r.dates&&r.dates>0&&r.extras!==null?r.extras/r.dates:null}));
- return {seasons,competitions:[...competitionNames].map(([code,name])=>({code,name})),
-  palmares,perCompetition,
+ return {seasons,competitions:[...competitionNames].filter(([code],index,all)=>all.findIndex(([other])=>competitionFamily(other)===competitionFamily(code))===index).map(([code,name])=>({code,name})),
+  palmares,palmaresOfficial,latestChampions,perCompetition,
   iffhsOfficial:{seasons:officialWindow,ranking:rankedIffhs(officialWindow)},
-  iffhsTotal:rankedIffhs(iffhsSeasons),general:overall};
+  iffhsTotal:rankedIffhs([...new Set([...seasons,...iffhsSeasons])].sort((a,b)=>b-a)),general:overall};
 }
 export async function historicalTotals(db:D1Database):Promise<TotalsData>{
  const archives=await activeHistoricalArchives(db);

@@ -1,3 +1,4 @@
+import {scoringAverage} from '../src/scoring-average';
 import type {Env} from './index';
 import {activeHistoricalArchives,archivedUserKey,historicalStats} from './historical-archive';
 
@@ -75,7 +76,7 @@ async function teamRead(db:D1Database,id:string){
  LEFT JOIN official_predictions op ON op.user_id=rs.user_id AND op.match_id=m.id
  LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id AND ps.is_provisional=0
  WHERE rs.user_id=?`).bind(id).first();
- const archiveDatesUnknown=archives.some(({data})=>data.participants.some(p=>p.userId===id&&data.statistics.some(s=>s.participantKey===p.key&&s.dates===null)));
+ const archiveScoringUnknown=archives.some(({data})=>data.statistics.some(s=>archivedUserKey(data,s.participantKey)===id&&(s.fulls==null||s.partials==null||s.errors==null)));
  const combinedStats={
     dates:Number(stat?.dates??0)+(archiveUser?.dates??0),
     points:Number(stat?.points??0)+(archiveUser?.points??0),
@@ -84,9 +85,8 @@ async function teamRead(db:D1Database,id:string){
     errors:Number(stat?.errors??0)+(archiveUser?.errors??0),
     extras:Number(stat?.extras??0)+(archiveUser?.extras??0),
     predictions:Number(stat?.predictions??0)+(archiveUser?.predictions??0),
-    averagePoints:!archiveDatesUnknown&&(Number(stat?.dates??0)+(archiveUser?.dates??0))>0
-      ?(Number(stat?.points??0)+(archiveUser?.points??0))/(Number(stat?.dates??0)+(archiveUser?.dates??0)):null,
  };
+ const averagePoints=archiveScoringUnknown?null:scoringAverage(combinedStats);
  const historicTitles=archives.flatMap(({data})=>data.results.filter(r=>r.resultCode==='CHAMPION'&&archivedUserKey(data,r.participantKey)===id).map(row=>{
    const competition=data.competitions.find(c=>c.code===row.competitionCode);
    return {code:row.competitionCode,name:competition?.name??row.competitionCode,seasonNumber:data.season.number};
@@ -204,7 +204,7 @@ async function teamRead(db:D1Database,id:string){
  const founding=[identity.foundedSeason,...archiveSeasonNumbers].filter(x=>x!=null).map(Number).sort((a,b)=>a-b)[0]??null;
  const division=latestDivision&&Number((latestDivision as {seasonNumber:number}).seasonNumber)>=(historicDivisions[0]?.seasonNumber??0)?latestDivision:historicDivisions[0]??latestDivision;
  return {identity:{...identity,foundedSeason:founding,teamName:identity.teamName??'Equipo de '+identity.participantName},division,
-   stats:combinedStats,titles:[...(titles.results??[]),...historicTitles],
+   stats:{...combinedStats,averagePoints},titles:[...(titles.results??[]),...historicTitles],
    rankings:{general:{current:generalEntry?Number(generalEntry.position):null,best:generalBest},iffhs:iffhsRank},
    encounters:[...(encounters.results??[]),...historicMatches],historicalMovements:historicMovements,historicalSeasons};
 
