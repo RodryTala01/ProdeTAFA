@@ -12,6 +12,7 @@ function fixture(){
  CREATE TABLE official_predictions(id INTEGER PRIMARY KEY,user_id TEXT,match_id INTEGER);
  CREATE TABLE prediction_scores(prediction_id INTEGER PRIMARY KEY,total_points INTEGER,is_provisional INTEGER,calculated_at TEXT);
  CREATE TABLE push_subscriptions(id INTEGER PRIMARY KEY,user_id TEXT,endpoint TEXT,p256dh TEXT,auth TEXT);
+ CREATE TABLE push_deliveries(id INTEGER PRIMARY KEY,subscription_id INTEGER,event_key TEXT,status TEXT,attempts INTEGER,attempted_at TEXT,UNIQUE(subscription_id,event_key));
  `);
  db.exec("INSERT INTO users VALUES ('A','participant',1),('B','participant',1),('C','participant',1),('D','participant',0)");
  db.exec("INSERT INTO rounds VALUES (1,'open'),(2,'finished')");
@@ -35,6 +36,8 @@ function fixture(){
  const D1={prepare(sql:string){let args:unknown[]=[];return {bind(...v:unknown[]){args=v;return this;},async all<T>(){return {results:db.prepare(sql).all(...args) as T[]}}};}} as unknown as D1Database;
  const sent:Array<{user:string;message:MatchPushNotice;key:string;ttl:number|undefined;subscription:number}>=[];
  const delivery=async(s:MatchPushSubscription,message:MatchPushNotice,key:string,ttl?:number)=>{
+  const created=db.prepare("INSERT OR IGNORE INTO push_deliveries(subscription_id,event_key,status,attempts,attempted_at) VALUES (?,?,'sent',1,datetime('now'))").run(s.id,key);
+  if(created.changes===0)return false;
   sent.push({user:s.user_id,message,key,ttl,subscription:s.id});
   return true;
  };
@@ -61,7 +64,7 @@ describe('Notificaciones automáticas por partido',()=>{
    f.db.exec("INSERT INTO official_predictions VALUES(101,'B',4)");
    f.sent.length=0;
    await sendMatchPushNotifications(f.D1,f.delivery);
-   expect(f.sent.filter(x=>x.key==='match:4:reminder-1h').map(x=>x.user)).toEqual(['C']);
+   expect(f.sent.filter(x=>x.key==='match:4:reminder-1h')).toHaveLength(0); // Duplicate event blocked.
   }finally{f.db.close();}
  });
  it('emite puntos por usuario solo después de finalizar y calcular un puntaje definitivo; sin envío son cero',async()=>{
