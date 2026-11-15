@@ -70,7 +70,8 @@ async function send(env:Env,s:Subscription,notice:Notice,eventKey:string,ttlSeco
  const claimed=await env.DB.prepare(`INSERT INTO push_deliveries(subscription_id,event_key) VALUES(?,?)
  ON CONFLICT(subscription_id,event_key) DO UPDATE SET
  status='pending',attempts=attempts+1,attempted_at=datetime('now')
- WHERE status='failed' AND attempts<3 AND attempted_at<=datetime('now','-15 minutes')`).bind(s.id,eventKey).run();
+ WHERE status='failed' AND attempts<3 AND attempted_at<=datetime('now',?)`)
+ .bind(s.id,eventKey,eventKey.endsWith(':reminder-1h')?'-3 minutes':'-15 minutes').run();
  if(Number(claimed.meta.changes??0)!==1)return false;
  try {
   const publicKey=await vapidPublic(env);
