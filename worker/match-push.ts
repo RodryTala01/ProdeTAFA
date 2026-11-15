@@ -35,7 +35,11 @@ export async function sendMatchPushNotifications(db:D1Database,send:Deliver){
   CROSS JOIN push_subscriptions ps
   JOIN users u ON u.id=ps.user_id AND u.role='participant' AND u.is_active=1
   LEFT JOIN official_predictions o ON o.match_id=m.id AND o.user_id=ps.user_id
-  WHERE m.status IN ('NS','scheduled','TBD') AND m.is_void=0
+  LEFT JOIN push_deliveries d ON d.subscription_id=ps.id
+   AND d.event_key='match:'||m.id||':reminder-1h'
+  WHERE (d.id IS NULL OR (d.status='failed' AND d.attempts<3
+   AND d.attempted_at<=datetime('now','-3 minutes')))
+   AND m.status IN ('NS','scheduled','TBD') AND m.is_void=0
    AND m.result_finalized_at IS NULL
    AND julianday(m.kickoff_at)>=julianday('now','+55 minutes')
    AND julianday(m.kickoff_at)<=julianday('now','+65 minutes')
@@ -60,7 +64,11 @@ export async function sendMatchPushNotifications(db:D1Database,send:Deliver){
   JOIN users u ON u.id=ps.user_id AND u.role='participant' AND u.is_active=1
   LEFT JOIN official_predictions o ON o.match_id=m.id AND o.user_id=ps.user_id
   LEFT JOIN prediction_scores s ON s.prediction_id=o.id
-  WHERE m.status IN ('FT','AET','PEN') AND m.is_void=0
+  LEFT JOIN push_deliveries d ON d.subscription_id=ps.id
+   AND d.event_key='match:'||m.id||':final'
+  WHERE (d.id IS NULL OR (d.status='failed' AND d.attempts<3
+   AND d.attempted_at<=datetime('now','-15 minutes')))
+   AND m.status IN ('FT','AET','PEN') AND m.is_void=0
    AND m.result_finalized_at IS NOT NULL
    AND julianday(m.result_finalized_at)>=julianday('now','-6 hours')
    AND julianday(m.result_finalized_at)<=julianday('now')
