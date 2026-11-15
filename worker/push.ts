@@ -1,4 +1,5 @@
 import type { Env } from './index';
+import {sendMatchPushNotifications} from './match-push';
 
 // Implements RFC 8291 (aes128gcm) and RFC 8292 (VAPID) with Workers WebCrypto.
 // No browser subscription endpoints or auth secrets are returned by this API.
@@ -64,7 +65,7 @@ async function vapidPublic(env:Env){
  const row=await env.DB.prepare('SELECT public_key FROM push_config WHERE id=1').first<{public_key:string}>();
  return row?.public_key??null;
 }
-async function send(env:Env,s:Subscription,notice:Notice,eventKey:string){
+async function send(env:Env,s:Subscription,notice:Notice,eventKey:string,ttlSeconds=86400){
  if(!env.PUSH_VAPID_PRIVATE_KEY||!allowedEndpoint(s.endpoint))return false;
  const claimed=await env.DB.prepare(`INSERT INTO push_deliveries(subscription_id,event_key) VALUES(?,?)
  ON CONFLICT(subscription_id,event_key) DO UPDATE SET
@@ -79,7 +80,7 @@ async function send(env:Env,s:Subscription,notice:Notice,eventKey:string){
   if(body.length>4096)throw Error('Push payload too large');
   const result=await fetch(s.endpoint,{method:'POST',headers:{
    'Content-Type':'application/octet-stream','Content-Encoding':'aes128gcm',
-   'TTL':'86400',
+   'TTL':String(ttlSeconds),
    // Visible notifications should wake Android's push service even during Doze.
    // Without Urgency, RFC 8030 defaults to normal and delivery can be deferred.
    'Urgency':'high',
@@ -326,16 +327,12 @@ export async function sendDuePushNotifications(env:Env){
   if(!r.games)continue;
   const start=Date.parse(r.kickoff.endsWith('Z')?r.kickoff:r.kickoff.replace(' ','T')+'Z')+60_000;
   const sincePublished=r.published_at?now-Date.parse(r.published_at.replace(' ','T')+'Z'):Infinity;
-  const sinceFinished=r.finished_at?now-Date.parse(r.finished_at.replace(' ','T')+'Z'):Infinity;
   const until=start-now;
   const events:Array<{code:string;notice:Notice;onlyPending:boolean}>=[];
   if(r.status==='open'){
    if(sincePublished>=0&&sincePublished<24*3600_000)events.push({code:'published',onlyPending:false,notice:{title:'¡Nueva fecha en TAFA!',body:r.name+' ya está disponible. ¡Hacé tus pronósticos!',url:'/#/pronosticos',tag:'tafa-'+r.id+'-published'}});
    if(until<=24*3600_000&&until>23*3600_000)events.push({code:'reminder24',onlyPending:true,notice:{title:'Pronósticos pendientes',body:'Falta aproximadamente un día para el primer cierre de '+r.name+'. Revisá tu envío.',url:'/#/pronosticos',tag:'tafa-'+r.id+'-24h'}});
    if(until<=2*3600_000&&until>3600_000)events.push({code:'reminder2',onlyPending:true,notice:{title:'¡Último aviso de TAFA!',body:'Faltan unas dos horas para el primer cierre de '+r.name+'. ¿Ya enviaste?',url:'/#/pronosticos',tag:'tafa-'+r.id+'-2h'}});
-  }
-  if(r.status==='finished'&&Number(r.unfinished)===0&&sinceFinished>=0&&sinceFinished<24*3600_000){
-   events.push({code:'finished',onlyPending:false,notice:{title:'Terminó '+r.name,body:'Ya podés consultar tus puntos y la clasificación en Prode TAFA.',url:'/#/club/historial',tag:'tafa-'+r.id+'-finished'}});
   }
   for(const event of events){
    const eligibility=new Map<string,boolean>();
@@ -348,4 +345,6 @@ export async function sendDuePushNotifications(env:Env){
    }
   }
  }
+ // Send individual 1h warnings and personalized, definitively scored results.
+ await sendMatchPushNotifications(env.DB,(subscriber,notice,key,ttl)=>send(env,subscriber,notice,key,ttl));
 }
