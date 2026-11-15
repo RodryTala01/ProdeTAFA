@@ -18,7 +18,7 @@ function fixture(){
  const now=Date.now();
  const stamp=(minutes:number)=>new Date(now+minutes*60_000).toISOString();
  const insert=db.prepare("INSERT INTO matches VALUES (?,1,?,?,?,? ,0,?)");
- insert.run(1,'Arsenal','Chelsea',stamp(-300),'FT',stamp(-240));
+ insert.run(1,'Arsenal','Chelsea',stamp(-720),'FT',stamp(-600));
  insert.run(2,'Bayer','Borussia',stamp(-125),'FT',stamp(-4));
  insert.run(3,'Valencia','Real Madrid',stamp(-120),'FT',stamp(-110));
  insert.run(4,'Boca','River',stamp(60),'NS',null);
