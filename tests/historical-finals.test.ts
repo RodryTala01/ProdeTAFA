@@ -56,7 +56,7 @@ it('combina temporadas recientes con antiguas y la vista calendario conserva el 
  const captions=[...host.querySelectorAll('.totals-final-caption strong')].map(x=>x.textContent);
  expect(captions).toEqual(['T5','T4','T2']);
  expect(host.querySelectorAll('.totals-final-card')).toHaveLength(3);
- expect(host.querySelectorAll('img').length).toBeGreaterThanOrEqual(2);
+ expect(host.querySelectorAll('.totals-final-contender .asset-image').length).toBe(6);
  expect(html).toContain('Rodrigo Talarico');
  expect(html).toContain('href="#/historia/4/COPA_A"');
 });
