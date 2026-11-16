@@ -71,20 +71,29 @@ export function HonourCards({rows,overall,latest}:{rows:PalmarTotal[];overall:bo
   {overall?<div className="totals-card totals-registered"><dt><img src="/brand/tafa.png" alt=""/>Campeonatos registrados</dt><dd><strong>{rows.reduce((sum,r)=>sum+r.championships,0)}</strong></dd></div>:latest&&<div className="totals-card totals-gold"><dt><Icon name="trophy"/>Último campeón</dt><dd><strong>T{latest.seasonNumber}</strong><ul>{latest.name.split(' · ').map((name,i)=><li key={i}>{name}</li>)}</ul></dd></div>}
  </dl>;
 }
+function FinalContender({side,winner,season}:{side:HistoricalFinal['a'];winner:boolean;season:number}){
+ return <div className="totals-final-contender" data-winner={winner||undefined}>
+  {(side.members?.length?side.members:[side]).map(person=><div className="totals-final-person" key={person.userId??person.name}>
+   <ParticipantShield userId={person.userId??undefined} name={person.name} season={season} size={side.members?.length?'sm':'md'} decorative/>
+   <span>{person.name}</span>
+  </div>)}
+  {winner&&<span className="totals-final-winner">Campeón</span>}
+ </div>;
+}
 export function FinalsCalendar({finals}:{finals:HistoricalFinal[]}){
  return <section className="totals-finals" aria-label="Calendario de finales por temporada">
   <div className="totals-finals-heading"><div><h3>Finales por temporada</h3><p>De la temporada más reciente a la primera · seleccioná una final para ver su historial</p></div><span>{finals.length} {finals.length===1?'final registrada':'finales registradas'}</span></div>
   {finals.length?<div className="totals-finals-grid">{finals.map(final=><a
     className="totals-final-card" key={final.id}
     href={final.id.startsWith('official:')&&competitionSlugs[final.competitionCode]?competitionHref(final.competitionCode,final.seasonNumber):'#/historia/'+final.seasonNumber+'/'+final.competitionCode}
-    aria-label={'Final T'+final.seasonNumber+': '+final.a.name+' contra '+final.b.name}
+    aria-label={'Final T'+final.seasonNumber+': '+final.a.name+' contra '+final.b.name+(final.winner?' · Campeón: '+final[final.winner].name:'')}
    >
     <div className="totals-final-entries">
-     <div className="totals-final-contender"><ParticipantShield userId={final.a.userId??undefined} name={final.a.name} size="md" decorative/><span title={final.a.name}>{final.a.name}</span></div>
+     <FinalContender side={final.a} winner={final.winner==='a'} season={final.seasonNumber}/>
      <span className="totals-final-score" aria-label={final.pointsA===null||final.pointsB===null?'versus':final.pointsA+' a '+final.pointsB+' puntos'+(final.tieA!==undefined?' · Desempate '+final.tieA+' a '+final.tieB:'')}>
       {final.pointsA!==null&&final.pointsB!==null?<><strong>{final.pointsA}</strong>{final.tieA!==undefined&&<small>({final.tieA})</small>}<span>–</span>{final.tieB!==undefined&&<small>({final.tieB})</small>}<strong>{final.pointsB}</strong></>:<strong>vs.</strong>}
      </span>
-     <div className="totals-final-contender"><ParticipantShield userId={final.b.userId??undefined} name={final.b.name} size="md" decorative/><span title={final.b.name}>{final.b.name}</span></div>
+     <FinalContender side={final.b} winner={final.winner==='b'} season={final.seasonNumber}/>
     </div>
     <div className="totals-final-caption"><strong>T{final.seasonNumber}</strong><small>{final.encounters>1?final.encounters+' encuentros':'Final'}</small></div>
    </a>)}</div>:<p className="totals-finals-empty">Todavía no hay enfrentamientos de final registrados para esta competencia.</p>}
@@ -141,6 +150,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
  const [code,setCode]=useState(data.competitions[0]?.code??'');
  const selected=data.competitions.some(c=>c.code===code)?code:data.competitions[0]?.code??'';
  const rows=data.perCompetition[selected]??[];
+ const titledRows=rows.filter(row=>row.championships>0||row.runnerUps>0);
  const honours=tab==='competencia'?rows:official?data.palmaresOfficial:data.palmares;
  const iffhs=tab==='oficial'?data.iffhsOfficial.ranking:data.iffhsTotal;
  const family=competitionFamily(selected);
@@ -156,7 +166,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
     {tab==='oficial'&&<span className="totals-period">Últimas 5 temporadas</span>}</header>
    {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">{data.competitions.map(c=><button type="button" key={c.code} aria-pressed={selected===c.code} onClick={()=>setCode(c.code)}><CompetitionTrophy code={c.code} name={c.name}/>{c.name}</button>)}</div>}
    {tab==='palmares'&&<div className="totals-tabs" role="group" aria-label="Modalidad de palmarés"><button type="button" aria-pressed={official} onClick={()=>setOfficial(true)}>Palmarés Oficial</button><button type="button" aria-pressed={!official} onClick={()=>setOfficial(false)}>Palmarés Total</button></div>}
-   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/>{tab==='competencia'&&<>{finals.length>0&&<FinalsCalendar finals={finals}/>}<EditionPodiums editions={podiums}/></>}<Rows rows={honours}/></>}
+   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/><Rows rows={tab==='competencia'?titledRows:honours}/>{tab==='competencia'&&<>{finals.length>0&&<FinalsCalendar finals={finals}/>}<EditionPodiums editions={podiums}/></>}</>}
    {(tab==='oficial'||tab==='iffhs')&&<Indicators items={[
     ['Líder',leader(iffhs,r=>r.totalPoints,decimal)],['Puntos del líder',decimal(iffhs[0]?.totalPoints??null)],
     ['Temporadas consideradas',tab==='oficial'?data.iffhsOfficial.seasons.map(n=>'T'+n).join(' · '):iffhs[0]?.breakdown.length??0],

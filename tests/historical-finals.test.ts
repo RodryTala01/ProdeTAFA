@@ -98,3 +98,19 @@ it('muestra el tanteo del desempate registrado en el orden de los finalistas',()
  host.innerHTML=renderToStaticMarkup(createElement(FinalsCalendar,{finals}));
  expect(host.querySelector('.totals-final-score')?.textContent).toBe('9(3)–(8)9');
 });
+
+it('reconstruye una final de dúos de cuatro cruces y señala al campeón',()=>{
+ const duo=(m:ReturnType<typeof match>)=>({...m,competitionCode:'COPA_DUOS'});
+ const data=historical(6,[
+  duo(match('rn','Final',14,6,'r','n')),duo(match('rk','Final',14,6,'r','k')),
+  duo(match('ns','Final',6,14,'n','s')),duo(match('sk','Final',14,6,'s','k'))
+ ]);
+ data.participants.push({key:'s',name:'Rodrigo Soca',userId:'user-s',division:'A'});
+ const finals=archivedCompetitionFinals(data,key=>key);
+ expect(finals).toHaveLength(1);
+ expect(finals[0]).toMatchObject({pointsA:14,pointsB:6,winner:'a',a:{name:'Rodrigo Soca y Rodrigo Talarico'}});
+ const host=document.createElement('div');
+ host.innerHTML=renderToStaticMarkup(createElement(FinalsCalendar,{finals}));
+ expect(host.querySelectorAll('.totals-final-contender .asset-image')).toHaveLength(4);
+ expect(host.querySelector('[data-winner=true]')?.textContent).toContain('Campeón');
+});

@@ -261,6 +261,23 @@ export async function historicalTotals(request:Request,env:Env):Promise<TotalsDa
    CASE WHEN a.entry_type='INDIVIDUAL' THEN (SELECT mem.user_id FROM competition_entry_members mem WHERE mem.entry_id=a.id ORDER BY mem.id LIMIT 1) ELSE NULL END AS aUserId,
    CASE WHEN b.entry_type='INDIVIDUAL' THEN (SELECT mem.user_id FROM competition_entry_members mem WHERE mem.entry_id=b.id ORDER BY mem.id LIMIT 1) ELSE NULL END AS bUserId,
    en.score_a AS scoreA,en.score_b AS scoreB,en.entry_a_id AS entryAId,
+   CASE en.winner_entry_id WHEN a.id THEN 'a' WHEN b.id THEN 'b' END AS winner,
+   CASE WHEN a.entry_type='DUO' THEN (
+    SELECT json_group_array(json_object('userId',userId,'name',name)) FROM (
+     SELECT u.id AS userId,u.full_name AS name FROM competition_entry_members mem JOIN users u ON u.id=mem.user_id
+     WHERE mem.entry_id=a.id AND (mem.valid_from_round_id IS NULL OR mem.valid_from_round_id<=l.round_id)
+      AND (mem.valid_to_round_id IS NULL OR mem.valid_to_round_id>l.round_id)
+     ORDER BY mem.id
+    )
+   ) END AS aMembersJson,
+   CASE WHEN b.entry_type='DUO' THEN (
+    SELECT json_group_array(json_object('userId',userId,'name',name)) FROM (
+     SELECT u.id AS userId,u.full_name AS name FROM competition_entry_members mem JOIN users u ON u.id=mem.user_id
+     WHERE mem.entry_id=b.id AND (mem.valid_from_round_id IS NULL OR mem.valid_from_round_id<=l.round_id)
+      AND (mem.valid_to_round_id IS NULL OR mem.valid_to_round_id>l.round_id)
+     ORDER BY mem.id
+    )
+   ) END AS bMembersJson,
    (SELECT t.id FROM competition_tiebreaks t WHERE t.encounter_id=en.id AND t.status='resolved' ORDER BY t.id DESC LIMIT 1) AS tieId
   FROM competition_encounters en
   JOIN competition_stages st ON st.id=en.stage_id AND st.stage_type='KNOCKOUT'
@@ -268,9 +285,14 @@ export async function historicalTotals(request:Request,env:Env):Promise<TotalsDa
   JOIN tafa_seasons se ON se.id=c.season_id
   JOIN competition_entries a ON a.id=en.entry_a_id
   JOIN competition_entries b ON b.id=en.entry_b_id
+  LEFT JOIN competition_round_links l ON l.id=en.round_link_id
   WHERE se.status<>'draft' AND en.status='finished' AND en.admin_confirmed_at IS NOT NULL
    AND (LOWER(st.code) LIKE '%final%' OR LOWER(st.name) LIKE '%final%')
-  ORDER BY se.season_number DESC,en.id`).all<OfficialFinalRow&{tieId:number|null;entryAId:number}>()).results??[];
+  ORDER BY se.season_number DESC,en.id`).all<OfficialFinalRow&{tieId:number|null;entryAId:number;aMembersJson:string|null;bMembersJson:string|null}>()).results??[];
+ for(const final of finals){
+  if(final.aMembersJson)final.aMembers=JSON.parse(final.aMembersJson);
+  if(final.bMembersJson)final.bMembers=JSON.parse(final.bMembersJson);
+ }
  const leagueEditions=new Map<string,Award[]>();
  for(const award of awards){
   if(!['LIGA_A','LIGA_B'].includes(award.code))continue;
