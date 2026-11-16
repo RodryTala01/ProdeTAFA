@@ -1,3 +1,4 @@
+import {isWorldCupOverall,worldCupZone} from './historical-competition-family';
 import {archivedCompetitionFinals,type HistoricalFinal} from './historical-finals';
 import {documentedDuoPhases,documentedHistoryGroups,type ArchiveDuoPhase} from './historical-group-catalog';
 import {useEffect,useState,type ReactNode} from 'react';
@@ -181,36 +182,43 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
  const matches=data.matches.filter(r=>r.competitionCode===c.code);
  const links=detail.officialLinks.filter(l=>l.code===c.code);
  const roundNames=[...new Set(rounds.map(r=>r.round))];
- const isCup=c.kind==='CUP'||c.kind==='TOURNAMENT';
+ const worldOverall=isWorldCupOverall(c.code);
+ const worldZone=worldCupZone(c.code);
+ const hasWorldStandings=Boolean((worldOverall||worldZone)&&standings.length);
+ const worldTableTitle=worldOverall?'Prode Mundial':'Primera fase';
+ const isCup=!worldOverall&&(c.kind==='CUP'||c.kind==='TOURNAMENT');
  const duoPhases=c.code==='COPA_DUOS'?documentedDuoPhases(data):[];
  const leagueZones=c.kind==='LEAGUE'?documentedHistoryGroups(data,c.code):[];
  const groups=isCup?archiveHistoryGroups(data,c.code,matches):[];
  const cupBracket=isCup?historicalMatchLayout(matches):null;
  const canEliminate=Boolean(cupBracket?.bracket.length||cupBracket?.other.length||cupBracket?.additional.length);
- const hasPhaseTables=groups.length>0||duoPhases.length>0;
+ const hasPhaseTables=groups.length>0||duoPhases.length>0||hasWorldStandings;
  const [cupPhase,setCupPhase]=useState<'grupos'|'eliminatorias'>(hasPhaseTables?'grupos':'eliminatorias');
  const shownPhase=cupPhase==='grupos'&&hasPhaseTables?'grupos':'eliminatorias';
  return <div className="archive-competition">
-  <div className="archive-competition-heading"><Trophy code={c.code} name={c.name} season={summary.number}/><div><span className="archive-kicker">Competición · T{summary.number}</span><h2>{c.name}</h2></div></div>
-  <Podium detail={detail} code={c.code}/>
+  <div className="archive-competition-heading"><Trophy code={c.code} name={c.name} season={summary.number}/><div><span className="archive-kicker">Competición · T{summary.number}</span><h2>{worldOverall?worldTableTitle:c.name}</h2></div></div>
+  {!worldOverall&&<Podium detail={detail} code={c.code}/>}
+  {worldOverall&&hasWorldStandings&&<section className="archive-panel"><SectionHeading title="Tabla general"/><StatsTable data={data} rows={standings} positions label={worldTableTitle}/></section>}
   {leagueZones.length>0&&<section className="archive-panel"><SectionHeading title="Tablas por zona"/>
    {leagueZones.map(zone=><section key={zone.name}><h3>{zone.name}</h3><StatsTable data={data} label={zone.name} positions rows={zone.entries.map(row=>({
     ...row,position:row.position??undefined,fulls:row.stats?.[0]??null,partials:row.stats?.[1]??null,errors:row.stats?.[2]??null,extras:row.stats?.[3]??null,
    }))}/></section>)}
   </section>}
-  {!isCup&&!leagueZones.length&&<section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name} competition={c} source={summary.source}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>}
+  {!isCup&&!worldOverall&&!leagueZones.length&&<section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name} competition={c} source={summary.source}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>}
   {!isCup&&(roundNames.length>0||links.length>0)&&<section className="archive-panel"><SectionHeading title="Resultados por Fecha" detail={roundNames.length?roundNames.length+' Fechas':undefined}/>{roundNames.map(round=><details className="archive-round" key={round}><summary><span><Icon name="calendar"/>{round}</span><span>Ver resultados</span></summary><StatsTable data={data} rows={rounds.filter(r=>r.round===round)} label={c.name+' · '+round}/></details>)}{links.length>0&&<div className="archive-round-links">{links.map(l=><a className="button button--secondary" key={l.roundId} href={'#/club/historial/'+l.roundId}>{l.name}<Icon name="arrow"/></a>)}</div>}</section>}
   {isCup&&(hasPhaseTables||canEliminate)&&<>
    {hasPhaseTables&&canEliminate&&<nav className="archive-phase-tabs" aria-label={'Fases de '+c.name}>
-     <button type="button" aria-pressed={shownPhase==='grupos'} onClick={()=>setCupPhase('grupos')}>{duoPhases.length?'Tablas por fase':'Grupos'}</button>
+     <button type="button" aria-pressed={shownPhase==='grupos'} onClick={()=>setCupPhase('grupos')}>{duoPhases.length?'Tablas por fase':hasWorldStandings?'Primera fase':'Grupos'}</button>
      <button type="button" aria-pressed={shownPhase==='eliminatorias'} onClick={()=>setCupPhase('eliminatorias')}>Eliminatorias</button>
    </nav>}
-   {shownPhase==='grupos'?duoPhases.length?<DuoPhaseTables data={data} phases={duoPhases}/>:<ArchiveGroups detail={detail} competitionCode={c.code} matches={matches}/>
+   {shownPhase==='grupos'?hasWorldStandings
+     ?<section className="archive-panel"><SectionHeading title={worldTableTitle}/><StatsTable data={data} rows={standings} positions label={worldTableTitle}/></section>
+     :duoPhases.length?<DuoPhaseTables data={data} phases={duoPhases}/>:<ArchiveGroups detail={detail} competitionCode={c.code} matches={matches}/>
     :<ArchiveKnockout detail={detail} matches={matches}/>}
   </>}
   {!isCup&&matches.length>0&&<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{archivePublicDescription(m.stage)}{archivePublicDescription(m.round)&&<small>{archivePublicDescription(m.round)}</small>}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}
   {c.kind==='LEAGUE'&&promotionHomeLeague(data)?.code===c.code&&<LeaguePromotionHistory detail={detail}/>}
-  {!isCup&&(!roundNames.length&&!links.length||(!matches.length&&!groups.length))&&<p className="archive-availability">{!roundNames.length&&!links.length&&<span>Sin desglose por Fecha disponible.</span>}{!matches.length&&!groups.length&&<span>Sin enfrentamientos oficiales disponibles.</span>}</p>}
+  {!isCup&&!worldOverall&&(!roundNames.length&&!links.length||(!matches.length&&!groups.length))&&<p className="archive-availability">{!roundNames.length&&!links.length&&<span>Sin desglose por Fecha disponible.</span>}{!matches.length&&!groups.length&&<span>Sin enfrentamientos oficiales disponibles.</span>}</p>}
  </div>;
 }
 function Iffhs({detail}:{detail:HistoryDetail}){
@@ -230,9 +238,9 @@ export function SeasonDetail({detail,competition,view}:{detail:HistoryDetail;com
   {active==='resumen'?<>
    <div className="archive-metrics"><div><span>Participantes</span><strong>{display(summary.participantCount)}</strong></div><div><span>Competiciones</span><strong>{summary.competitions.length}</strong></div>{total('points')!==null&&<div><span>Puntos deportivos</span><strong>{total('points')}</strong></div>}{total('extras')!==null&&<div><span>Extras</span><strong>{total('extras')}</strong></div>}</div>
    <section><SectionHeading title="Protagonistas de la temporada"/><Podium detail={detail}/></section>
-   <section><SectionHeading title="Competiciones disputadas" detail={summary.competitions.length.toString()}/><div className="archive-competition-grid">{summary.competitions.map(c=><a className="archive-competition-link" key={c.code} href={root+'/'+c.code}><Trophy code={c.code} name={c.name} season={summary.number}/><span><strong>{c.name}</strong><small>{c.kind==='LEAGUE'?'Tabla y resultados':'Grupos y eliminatorias'}</small></span><Icon name="arrow"/></a>)}</div></section>
+   <section><SectionHeading title="Competiciones disputadas" detail={summary.competitions.length.toString()}/><div className="archive-competition-grid">{summary.competitions.map(c=><a className="archive-competition-link" key={c.code} href={root+'/'+c.code}><Trophy code={c.code} name={c.name} season={summary.number}/><span><strong>{isWorldCupOverall(c.code)?'Prode Mundial':c.name}</strong><small>{isWorldCupOverall(c.code)?'Tabla general':c.kind==='LEAGUE'?'Tabla y resultados':'Grupos y eliminatorias'}</small></span><Icon name="arrow"/></a>)}</div></section>
    <a className="archive-ranking-link" href={root+'?view=iffhs'}><span className="archive-emblem"><Icon name="list"/></span><span><strong>IFFHS de la temporada</strong><small>{data.iffhs.length?data.iffhs.length+' participantes · Ver clasificación':'Información no disponible'}</small></span><Icon name="arrow"/></a>
-  </>:active==='iffhs'?<Iffhs detail={detail}/>:<><nav className="archive-competition-tabs" aria-label="Competiciones de la temporada">{summary.competitions.map(c=><a key={c.code} aria-current={selected?.code===c.code?'page':undefined} href={root+'/'+c.code}>{c.name}</a>)}</nav>{selected?<CompetitionDetail key={selected.code} detail={detail} competition={selected}/>:<Empty>Competición sin información disponible.</Empty>}</>}
+  </>:active==='iffhs'?<Iffhs detail={detail}/>:<><nav className="archive-competition-tabs" aria-label="Competiciones de la temporada">{summary.competitions.map(c=><a key={c.code} aria-current={selected?.code===c.code?'page':undefined} href={root+'/'+c.code}>{isWorldCupOverall(c.code)?'Prode Mundial':c.name}</a>)}</nav>{selected?<CompetitionDetail key={selected.code} detail={detail} competition={selected}/>:<Empty>Competición sin información disponible.</Empty>}</>}
  </>;
 }
 export default function ParticipantArchive({route}:{route:string}){
@@ -250,6 +258,6 @@ export default function ParticipantArchive({route}:{route:string}){
  if(number&&detail)return <div className="participant-archive"><SeasonDetail detail={detail} competition={competition} view={view}/></div>;
  const filtered=seasons.filter(s=>(s.number+' '+s.name).toLocaleLowerCase().includes(search.toLocaleLowerCase())&&(!kind||s.competitions.some(c=>c.kind===kind))).sort((a,b)=>b.number-a.number);
  return <div className="participant-archive"><header className="archive-hero"><div className="archive-hero__row"><div><span className="archive-kicker">Archivo TAFA</span><h1>Historia</h1><p>Temporadas, títulos y estadísticas</p></div><span className="archive-hero__icon"><Icon name="book"/></span></div><div className="archive-meta"><span>{seasons.length} {seasons.length===1?'temporada disponible':'temporadas disponibles'}</span></div></header><div className="archive-filters"><label><span>Buscar temporada</span><input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Número o nombre"/></label><label><span>Tipo de competición</span><select value={kind} onChange={e=>setKind(e.target.value)}><option value="">Todas las competiciones</option><option value="LEAGUE">Liga</option><option value="CUP">Copa</option><option value="TOURNAMENT">Torneo</option></select></label></div>
-  {!filtered.length?<Empty>{seasons.length?'No hay temporadas para estos filtros.':'Todavía no hay temporadas históricas disponibles.'}</Empty>:<div className="archive-season-grid">{filtered.map(s=><article className="archive-season-card" key={s.number}><div className="archive-season-card__heading"><span className="archive-season-number">T{s.number}</span><span className="archive-source">{s.source==='official'?'Oficial':s.source==='mixed'?'Histórica / oficial':'Histórica'}</span></div><h2><a href={'#/historia/'+s.number}>{s.name}</a></h2><div className="archive-season-facts"><span>{s.competitions.length} {s.competitions.length===1?'competición':'competiciones'}</span>{s.participantCount!==null&&<span>{s.participantCount} participantes</span>}</div><ul className="archive-season-cups">{s.competitions.map(c=><li key={c.code}><Trophy code={c.code} name={c.name} season={s.number}/><span><strong>{c.name}</strong>{c.champions.length>0?<small><span className="archive-champion-label">Campeón</span>{c.champions.join(' · ')}</small>:<small>Sin campeón declarado</small>}</span></li>)}</ul><a className="archive-season-cta" href={'#/historia/'+s.number}>Ver temporada<Icon name="arrow"/></a></article>)}</div>}
+  {!filtered.length?<Empty>{seasons.length?'No hay temporadas para estos filtros.':'Todavía no hay temporadas históricas disponibles.'}</Empty>:<div className="archive-season-grid">{filtered.map(s=><article className="archive-season-card" key={s.number}><div className="archive-season-card__heading"><span className="archive-season-number">T{s.number}</span><span className="archive-source">{s.source==='official'?'Oficial':s.source==='mixed'?'Histórica / oficial':'Histórica'}</span></div><h2><a href={'#/historia/'+s.number}>{s.name}</a></h2><div className="archive-season-facts"><span>{s.competitions.length} {s.competitions.length===1?'competición':'competiciones'}</span>{s.participantCount!==null&&<span>{s.participantCount} participantes</span>}</div><ul className="archive-season-cups">{s.competitions.map(c=><li key={c.code}><Trophy code={c.code} name={c.name} season={s.number}/><span><strong>{isWorldCupOverall(c.code)?'Prode Mundial':c.name}</strong>{isWorldCupOverall(c.code)?<small>Tabla general</small>:c.champions.length>0?<small><span className="archive-champion-label">Campeón</span>{c.champions.join(' · ')}</small>:<small>Sin campeón declarado</small>}</span></li>)}</ul><a className="archive-season-cta" href={'#/historia/'+s.number}>Ver temporada<Icon name="arrow"/></a></article>)}</div>}
  </div>;
 }
