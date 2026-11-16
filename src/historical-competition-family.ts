@@ -4,12 +4,14 @@ export const worldCupZones = {
  MUNDIAL_BRONCE: 'Bronce',
 } as const;
 
+export const isHistoricalFriendly=(code:string)=>code==='COPA_CLASICO';
+
 export function isWorldCupOverall(code:string){
  return code==='MUNDIAL_QATAR_2022';
 }
 
 export const competitionFamily=(code:string)=>{
- const zone=code.match(/^(?:MUNDIAL(?:_QATAR)?(?:_2022)?(?:_ZONA)?|ZONA)_(ORO|PLATA|BRONCE)(?:_2022)?$/);
+ const zone=/^(?:MUNDIAL|QATAR|ZONA)_/.test(code)?code.match(/(?:^|_)(ORO|PLATA|BRONCE)(?:_|$)/):null;
  if(zone)return 'MUNDIAL_'+zone[1];
  const base=code.replace(/_(?:19|20)\d{2}$/,'');
  switch(base){

@@ -1,3 +1,4 @@
+import {isHistoricalFriendly} from './historical-competition-family';
 import {scoringAverage} from './scoring-average';
 import {Fragment,useMemo,useState} from 'react';
 import {ParticipantShield,CompetitionImage} from './AssetImage';
@@ -89,7 +90,7 @@ export function TeamHistory({matches,identity}:{matches:TeamMatch[];identity?:Te
      {[...r.matches].sort((a,b)=>b.seasonNumber-a.seasonNumber||(a.id<0&&b.id<0?a.id-b.id:b.id-a.id)).map(m=>{
       const outcome=matchOutcome(m),label=outcome==='win'?'Victoria':outcome==='loss'?'Derrota':'Empate';
       return <article className="equipo-encounter" key={m.id+'-'+m.opponentId}>
-       <div className="equipo-encounter-meta"><strong>{phaseName(archivePublicDescription(m.stageName))} · T{m.seasonNumber} · <a href={competitionHref(m.competitionCode,m.seasonNumber)}>{m.competitionName}</a></strong></div>
+       <div className="equipo-encounter-meta"><strong>{phaseName(archivePublicDescription(m.stageName))} · T{m.seasonNumber} · <a href={isHistoricalFriendly(m.competitionCode)?'#/historia/'+m.seasonNumber:competitionHref(m.competitionCode,m.seasonNumber)}>{m.competitionName}</a></strong></div>
        <div className="equipo-encounter-score">{person(identity?.id,identity?.teamName??'Equipo consultado',identity?.participantName,identity?.shieldUrl)}<strong>{m.ownPoints} <span>–</span> {m.rivalPoints}</strong>{person(r.id,r.name,r.participantName,r.shieldUrl)}</div>
        <div className={'equipo-outcome equipo-outcome-'+outcome}>{label}{m.resolution==='tiebreak'&&<small>{m.outcome==='win'?identity?.teamName:m.outcome==='loss'?r.name:null}{m.outcome&&m.outcome!=='draw'?' avanzó por TAFA':' · TAFA confirmado'}</small>}</div>
       </article>;

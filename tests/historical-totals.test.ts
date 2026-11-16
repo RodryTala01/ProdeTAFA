@@ -135,3 +135,10 @@ it('separa las zonas del Mundial y contabiliza solo Oro en el palmarés oficial'
  expect(totals.palmares).toHaveLength(3);
  expect(totals.palmaresOfficial.map(r=>r.userId)).toEqual(['Q1']);
 });
+
+it('no cuenta el Clásico amistoso como competición ni como título',()=>{
+ const friendly={seasonNumber:9,code:'COPA_CLASICO',name:'Copa Clásico',userId:'A',fullName:'Ana',resultCode:'CHAMPION'};
+ const totals=composeHistoricalTotals([],[],[friendly],[friendly],[]);
+ expect(totals.competitions).toEqual([]);
+ expect(totals.palmares).toEqual([]);
+});

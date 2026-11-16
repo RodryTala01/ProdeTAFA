@@ -1,5 +1,5 @@
 import type {ArchivePayload,ArchiveMatch} from './historical-schema';
-import {competitionFamily} from './historical-competition-family';
+import {competitionFamily,isHistoricalFriendly} from './historical-competition-family';
 
 type FinalPerson={userId:string|null;name:string};
 type FinalSide=FinalPerson&{members?:FinalPerson[]};
@@ -90,7 +90,7 @@ export function archivedCompetitionFinals(
  const isTie=(match:ArchiveMatch)=>/desempate|tiebreak/.test(norm(match.stage+' '+(match.round??'')));
  const items=finalMatches.filter(m=>!isTie(m)).flatMap(m=>{
   const a=data.participants.find(p=>p.key===m.aKey),b=data.participants.find(p=>p.key===m.bKey);
-  if(!a||!b||m.competitionCode==='PROMOCION')return [];
+  if(!a||!b||(m.competitionCode==='PROMOCION'||isHistoricalFriendly(m.competitionCode)))return [];
   const id='archive:'+data.season.number+':'+(m.matchId??data.matches.indexOf(m));
   priorities.set(id,choose(m.stage+' '+(m.round??'')));
   const ties=finalMatches.filter(t=>isTie(t)&&competitionFamily(t.competitionCode)===competitionFamily(m.competitionCode)&&t.scoreBasis===m.scoreBasis
@@ -137,7 +137,7 @@ export function combineCompetitionFinals(archiveFinals:HistoricalFinal[],officia
  const result:Record<string,HistoricalFinal[]>={};
  for(const item of [...archiveFinals,...officialFinals.filter(f=>!existing.has(f.seasonNumber+':'+competitionFamily(f.competitionCode)))]){
   const family=competitionFamily(item.competitionCode);
-  if(family==='PROMOCION')continue;
+  if(family==='PROMOCION'||isHistoricalFriendly(family))continue;
   (result[family]??=[]).push(item);
  }
  for(const group of Object.values(result))group.sort((a,b)=>b.seasonNumber-a.seasonNumber||a.a.name.localeCompare(b.a.name,'es'));

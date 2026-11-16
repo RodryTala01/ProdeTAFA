@@ -1,4 +1,4 @@
-import {isWorldCupOverall,worldCupZone} from './historical-competition-family';
+import {isHistoricalFriendly,isWorldCupOverall,worldCupZone} from './historical-competition-family';
 import {archivedCompetitionFinals,type HistoricalFinal} from './historical-finals';
 import {documentedDuoPhases,documentedHistoryGroups,type ArchiveDuoPhase} from './historical-group-catalog';
 import {useEffect,useState,type ReactNode} from 'react';
@@ -34,7 +34,7 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
  const {data,summary}=detail;
  const groups=new Map<string,ArchivePayload['results']>();
  for(const award of data.results){
-  if((code&&award.competitionCode!==code)||!['CHAMPION','RUNNER_UP'].includes(award.resultCode))continue;
+  if(isHistoricalFriendly(award.competitionCode)||(code&&award.competitionCode!==code)||!['CHAMPION','RUNNER_UP'].includes(award.resultCode))continue;
   const list=groups.get(award.competitionCode)??[];
   list.push(award);
   groups.set(award.competitionCode,list);
@@ -229,6 +229,7 @@ export function SeasonDetail({detail,competition,view}:{detail:HistoryDetail;com
  const {data,summary}=detail;
  const active=view||(competition?'competiciones':'resumen');
  const available=visibleArchiveCompetitions(data.competitions);
+ const friendlies=data.matches.filter(m=>isHistoricalFriendly(m.competitionCode));
  const selected=available.find(c=>c.code===competition)||available.find(c=>c.code===promotionHomeLeague(data)?.code)||available[0];
  const root='#/historia/'+summary.number;
  const total=(key:'points'|'extras')=>data.statistics.length&&data.statistics.every(r=>r[key]!==null)?data.statistics.reduce((n,r)=>n+(r[key]??0),0):null;
@@ -238,6 +239,7 @@ export function SeasonDetail({detail,competition,view}:{detail:HistoryDetail;com
   {active==='resumen'?<>
    <div className="archive-metrics"><div><span>Participantes</span><strong>{display(summary.participantCount)}</strong></div><div><span>Competiciones</span><strong>{summary.competitions.length}</strong></div>{total('points')!==null&&<div><span>Puntos deportivos</span><strong>{total('points')}</strong></div>}{total('extras')!==null&&<div><span>Extras</span><strong>{total('extras')}</strong></div>}</div>
    <section><SectionHeading title="Protagonistas de la temporada"/><Podium detail={detail}/></section>
+   {friendlies.length>0&&<section className="archive-panel" id="amistosos"><SectionHeading title="Amistosos"/><h3>Clásico</h3><ArchiveMatchCards detail={detail} matches={friendlies.map(m=>({...m,round:null}))}/></section>}
    <section><SectionHeading title="Competiciones disputadas" detail={summary.competitions.length.toString()}/><div className="archive-competition-grid">{summary.competitions.map(c=><a className="archive-competition-link" key={c.code} href={root+'/'+c.code}><Trophy code={c.code} name={c.name} season={summary.number}/><span><strong>{isWorldCupOverall(c.code)?'Prode Mundial':c.name}</strong><small>{isWorldCupOverall(c.code)?'Tabla general':c.kind==='LEAGUE'?'Tabla y resultados':'Grupos y eliminatorias'}</small></span><Icon name="arrow"/></a>)}</div></section>
    <a className="archive-ranking-link" href={root+'?view=iffhs'}><span className="archive-emblem"><Icon name="list"/></span><span><strong>IFFHS de la temporada</strong><small>{data.iffhs.length?data.iffhs.length+' participantes · Ver clasificación':'Información no disponible'}</small></span><Icon name="arrow"/></a>
   </>:active==='iffhs'?<Iffhs detail={detail}/>:<><nav className="archive-competition-tabs" aria-label="Competiciones de la temporada">{summary.competitions.map(c=><a key={c.code} aria-current={selected?.code===c.code?'page':undefined} href={root+'/'+c.code}>{isWorldCupOverall(c.code)?'Prode Mundial':c.name}</a>)}</nav>{selected?<CompetitionDetail key={selected.code} detail={detail} competition={selected}/>:<Empty>Competición sin información disponible.</Empty>}</>}
