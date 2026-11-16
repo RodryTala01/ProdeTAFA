@@ -14,7 +14,9 @@ export type OfficialFinalRow={
 const norm=(value:string)=>value.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 export function isFinalStage(stage:string){
  const name=norm(stage);
- return /final/.test(name)&&!/semifinal|semi-final|cuartos|tercer puesto/.test(name);
+ // An Octavos de final or a generic "fase final" is NOT a final match.
+ return /(?:^|[\s_\u00b7-])final(?:$|[\s_\u00b7-])/.test(name)
+  &&!/semifinal|semi-final|octav|cuart|dieciseisav|treintaidosav|ronda de|tercer puesto|fase final|round.of.(?:16|32|64)|r(?:16|32|64)\b/.test(name);
 }
 function choose(source:string){
  const value=norm(source);
@@ -25,7 +27,7 @@ function choose(source:string){
 function consolidate(items:HistoricalFinal[],priorities:Map<string,number>){
  const finals=new Map<string,HistoricalFinal>();
  for(const item of items){
-  const pair=[item.a.name,item.b.name].map(norm).sort().join('|');
+  const pair=[item.a,item.b].map(team=>team.userId?team.userId:'name:'+norm(team.name)).sort().join('|');
   const key=item.seasonNumber+':'+competitionFamily(item.competitionCode)+':'+pair;
   const previous=finals.get(key);
   if(!previous){finals.set(key,{...item});continue;}
