@@ -109,3 +109,20 @@ it('separa las participaciones y títulos oficiales de los totales sin duplicar 
  expect(totals.palmares[0]).toMatchObject({championships:2,participations:2});
  expect(totals.perCompetition.MUNDIAL_DE_CLUBES[0].championships).toBe(1);
 });
+
+it('conserva los puntos del podio de liga y cada edición del palmarés',()=>{
+ const d=dataset();
+ expect(d.podiumsByCompetition.LIGA_A[0]).toMatchObject({
+  seasonNumber:4,entrants:[{name:'Ana',champion:true,points:32}]
+ });
+ expect(d.palmaresOfficial.find(r=>r.userId==='A')?.awards).toEqual([
+  {code:'COPA_A',name:'Copa A',seasonNumber:4,champion:true},
+  {code:'COPA_A',name:'Copa A',seasonNumber:3,champion:false}
+ ]);
+});
+it('excluye del IFFHS oficial a un participante sin puntos registrados en la ventana',()=>{
+ const d=composeHistoricalTotals([archive] as never,[],[],[],[],[],[],[9]);
+ expect(d.iffhsOfficial.seasons).toEqual([9,8,7,6,5]);
+ expect(d.iffhsOfficial.ranking).toEqual([]);
+ expect(d.iffhsTotal).toHaveLength(2);
+});

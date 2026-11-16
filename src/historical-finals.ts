@@ -4,12 +4,12 @@ import {competitionFamily} from './historical-competition-family';
 export type HistoricalFinal={
  id:string;seasonNumber:number;competitionCode:string;
  a:{userId:string|null;name:string};b:{userId:string|null;name:string};
- pointsA:number|null;pointsB:number|null;encounters:number;stage:string;
+ pointsA:number|null;pointsB:number|null;tieA?:number;tieB?:number;encounters:number;stage:string;
 };
 export type OfficialFinalRow={
  encounterId:number;seasonNumber:number;competitionCode:string;stageCode:string;stageName:string;
  aName:string;bName:string;aUserId:string|null;bUserId:string|null;
- scoreA:number|null;scoreB:number|null;
+ scoreA:number|null;scoreB:number|null;tieA?:number;tieB?:number;
 };
 const norm=(value:string)=>value.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 export function isFinalStage(stage:string){
@@ -20,8 +20,8 @@ export function isFinalStage(stage:string){
 }
 function choose(source:string){
  const value=norm(source);
- if(/\bliga\b/.test(value))return 3;
  if(/desempate/.test(value))return 1;
+ if(/\bliga\b/.test(value))return 3;
  return 2;
 }
 function consolidate(items:HistoricalFinal[],priorities:Map<string,number>){
@@ -40,14 +40,21 @@ export function archivedCompetitionFinals(
  data:ArchivePayload,identify:(participantKey:string)=>string
 ):HistoricalFinal[]{
  const priorities=new Map<string,number>();
- const items=data.matches.filter((match:ArchiveMatch)=>isFinalStage(match.stage)).flatMap(m=>{
+ const finalMatches=data.matches.filter((match:ArchiveMatch)=>isFinalStage(match.stage));
+ const isTie=(match:ArchiveMatch)=>/desempate|tiebreak/.test(norm(match.stage+' '+(match.round??'')));
+ const items=finalMatches.filter(m=>!isTie(m)).flatMap(m=>{
   const a=data.participants.find(p=>p.key===m.aKey),b=data.participants.find(p=>p.key===m.bKey);
   if(!a||!b||m.competitionCode==='PROMOCION')return [];
   const id='archive:'+data.season.number+':'+(m.matchId??data.matches.indexOf(m));
   priorities.set(id,choose(m.stage+' '+(m.round??'')));
+  const ties=finalMatches.filter(t=>isTie(t)&&competitionFamily(t.competitionCode)===competitionFamily(m.competitionCode)&&t.scoreBasis===m.scoreBasis
+   &&((t.aKey===m.aKey&&t.bKey===m.bKey)||(t.aKey===m.bKey&&t.bKey===m.aKey)));
+  const tie=ties.length===1?ties[0]:null;
   return [{id,seasonNumber:data.season.number,competitionCode:m.competitionCode,
    a:{userId:identify(m.aKey),name:a.name},b:{userId:identify(m.bKey),name:b.name},
-   pointsA:m.pointsA,pointsB:m.pointsB,encounters:1,stage:m.stage}];
+   pointsA:m.pointsA,pointsB:m.pointsB,
+   ...(tie&&m.pointsA===m.pointsB?{tieA:tie.aKey===m.aKey?tie.pointsA:tie.pointsB,tieB:tie.aKey===m.aKey?tie.pointsB:tie.pointsA}:{}),
+   encounters:1,stage:m.stage}];
  });
  return consolidate(items,priorities);
 }
@@ -58,7 +65,7 @@ export function officialCompetitionFinals(rows:OfficialFinalRow[]):HistoricalFin
   priorities.set(id,choose(r.stageCode+' '+r.stageName));
   return {id,seasonNumber:r.seasonNumber,competitionCode:r.competitionCode,
    a:{userId:r.aUserId,name:r.aName},b:{userId:r.bUserId,name:r.bName},
-   pointsA:r.scoreA,pointsB:r.scoreB,encounters:1,stage:r.stageName};
+   pointsA:r.scoreA,pointsB:r.scoreB,tieA:r.tieA,tieB:r.tieB,encounters:1,stage:r.stageName};
  });
  return consolidate(finals,priorities);
 }

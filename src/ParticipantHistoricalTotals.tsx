@@ -1,9 +1,10 @@
+import {competitionHref,competitionSlugs} from './participant-competitions';
 import {competitionFamily} from './historical-competition-family';
 import {historicalTrophies} from './historical-trophies';
 import {useState} from 'react';
 import {AssetImage,CompetitionImage,ParticipantShield} from './AssetImage';
 import {useParticipantRead,ParticipantState} from './ParticipantState';
-import type {PalmarTotal,GeneralTotal,IffhsTotal,TotalsData} from './historical-totals-types';
+import type {PalmarTotal,GeneralTotal,IffhsTotal,TotalsData,PalmarAward,EditionPodium} from './historical-totals-types';
 import type {HistoricalFinal} from './historical-finals';
 import {Icon} from './ui';
 import './historical-totals.css';
@@ -28,10 +29,14 @@ function CompetitionTrophy({code,name}:{code:string;name:string}){
   ?<AssetImage name={name} src={trophy?.image} size="sm" decorative fallback={<Icon name="trophy"/>}/>
   :<CompetitionImage code={code} name={name} variant="trophy" size="sm" decorative/>;
 }
-function Awards({count,kind}:{count:number;kind:'gold'|'silver'}){
- return <span className={'totals-awards totals-'+kind} aria-label={count+' '+(kind==='gold'?'campeonatos':'subcampeonatos')}>
-  {Array.from({length:Math.min(count,2)},(_,i)=><Icon key={i} name="trophy"/>)}<strong>{count>2?'+'+(count-2):count}</strong>{count>2&&<small>({count} total)</small>}
- </span>;
+function Awards({count,kind,awards=[]}:{count:number;kind:'gold'|'silver';awards?:PalmarAward[]}){
+ return <div className={'totals-awards totals-'+kind}>
+  <strong aria-label={count+' '+(kind==='gold'?'campeonatos':'subcampeonatos')}>{count}</strong>
+  {awards.length>0&&<ul>{awards.map(award=><li key={award.code+':'+award.seasonNumber}>
+   <CompetitionTrophy code={award.code} name={award.name}/>
+   <span>{award.name} <small>T{award.seasonNumber}</small></span>
+  </li>)}</ul>}
+ </div>;
 }
 function leader<T extends {fullName:string}>(rows:T[],metric:(r:T)=>number|null,format=fmt){
  const valid=rows.filter(r=>metric(r)!=null);
@@ -71,13 +76,13 @@ export function FinalsCalendar({finals}:{finals:HistoricalFinal[]}){
   <div className="totals-finals-heading"><div><h3>Finales por temporada</h3><p>De la temporada más reciente a la primera · seleccioná una final para ver su historial</p></div><span>{finals.length} {finals.length===1?'final registrada':'finales registradas'}</span></div>
   {finals.length?<div className="totals-finals-grid">{finals.map(final=><a
     className="totals-final-card" key={final.id}
-    href={'#/historia/'+final.seasonNumber+'/'+final.competitionCode}
+    href={final.id.startsWith('official:')&&competitionSlugs[final.competitionCode]?competitionHref(final.competitionCode,final.seasonNumber):'#/historia/'+final.seasonNumber+'/'+final.competitionCode}
     aria-label={'Final T'+final.seasonNumber+': '+final.a.name+' contra '+final.b.name}
    >
     <div className="totals-final-entries">
      <div className="totals-final-contender"><ParticipantShield userId={final.a.userId??undefined} name={final.a.name} size="md" decorative/><span title={final.a.name}>{final.a.name}</span></div>
-     <span className="totals-final-score" aria-label={final.pointsA===null||final.pointsB===null?'versus':final.pointsA+' a '+final.pointsB+' puntos'}>
-      {final.pointsA!==null&&final.pointsB!==null?<><strong>{final.pointsA}</strong><span>–</span><strong>{final.pointsB}</strong></>:<strong>vs.</strong>}
+     <span className="totals-final-score" aria-label={final.pointsA===null||final.pointsB===null?'versus':final.pointsA+' a '+final.pointsB+' puntos'+(final.tieA!==undefined?' · Desempate '+final.tieA+' a '+final.tieB:'')}>
+      {final.pointsA!==null&&final.pointsB!==null?<><strong>{final.pointsA}</strong>{final.tieA!==undefined&&<small>({final.tieA})</small>}<span>–</span>{final.tieB!==undefined&&<small>({final.tieB})</small>}<strong>{final.pointsB}</strong></>:<strong>vs.</strong>}
      </span>
      <div className="totals-final-contender"><ParticipantShield userId={final.b.userId??undefined} name={final.b.name} size="md" decorative/><span title={final.b.name}>{final.b.name}</span></div>
     </div>
@@ -85,11 +90,25 @@ export function FinalsCalendar({finals}:{finals:HistoricalFinal[]}){
    </a>)}</div>:<p className="totals-finals-empty">Todavía no hay enfrentamientos de final registrados para esta competencia.</p>}
  </section>;
 }
+function EditionPodiums({editions}:{editions:EditionPodium[]}){
+ if(!editions.length)return null;
+ return <section className="totals-finals" aria-label="Resultados por temporada">
+  <div className="totals-finals-heading"><h3>Resultados por temporada</h3></div>
+  <div className="totals-podiums-grid">{editions.map(edition=><article className="totals-edition" key={edition.seasonNumber}>
+   <ul>{edition.entrants.map(person=><li key={person.userId}>
+    <span>{person.champion?'Campeón':'Subcampeón'}</span>
+    <Player userId={person.userId} name={person.name}/>
+    {person.points!==null&&<strong>{fmt(person.points)} PTS</strong>}
+   </li>)}</ul>
+   <div className="totals-final-caption"><strong>T{edition.seasonNumber}</strong></div>
+  </article>)}</div>
+ </section>;
+}
 function Rows({rows}:{rows:PalmarTotal[]}){
  return <div className="totals-table-wrap" tabIndex={0} role="region" aria-label="Palmarés de participantes">
   <table className="totals-table totals-table--honours">
    <thead><tr><th>Pos.</th><th>Participante</th><th>Campeonatos</th><th>Subcampeonatos</th><th>Participaciones</th></tr></thead>
-   <tbody>{rows.map(r=><tr key={r.userId} data-podium={r.position<=3?r.position:undefined}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th><td><Awards count={r.championships} kind="gold"/></td><td><Awards count={r.runnerUps} kind="silver"/></td><td>{r.participations}</td></tr>)}</tbody>
+   <tbody>{rows.map(r=><tr key={r.userId} data-podium={r.position<=3?r.position:undefined}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th><td><Awards count={r.championships} kind="gold" awards={r.awards?.filter(a=>a.champion)}/></td><td><Awards count={r.runnerUps} kind="silver" awards={r.awards?.filter(a=>!a.champion)}/></td><td>{r.participations}</td></tr>)}</tbody>
   </table>
  </div>;
 }
@@ -124,7 +143,11 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
  const rows=data.perCompetition[selected]??[];
  const honours=tab==='competencia'?rows:official?data.palmaresOfficial:data.palmares;
  const iffhs=tab==='oficial'?data.iffhsOfficial.ranking:data.iffhsTotal;
- const latest=data.latestChampions[competitionFamily(selected)];
+ const family=competitionFamily(selected);
+ const latest=data.latestChampions[family];
+ const finals=family.startsWith('LIGA_')?[]:data.finalsByCompetition?.[family]??[];
+ const finalsSeasons=new Set(finals.map(f=>f.seasonNumber));
+ const podiums=(data.podiumsByCompetition?.[family]??[]).filter(edition=>!finalsSeasons.has(edition.seasonNumber));
  return <div className="historical-totals">
   <div className="totals-header"><div><span className="totals-back">Estadísticas históricas de TAFA</span><h1>TABLAS TOTALES</h1></div><span className="totals-period">Todas las temporadas registradas</span></div>
   <nav className="totals-tabs" aria-label="Tablas Totales">{tabs.map(item=><button type="button" key={item.id} aria-pressed={item.id===tab} onClick={()=>setTab(item.id)}>{item.name}</button>)}</nav>
@@ -133,7 +156,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
     {tab==='oficial'&&<span className="totals-period">Últimas 5 temporadas</span>}</header>
    {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">{data.competitions.map(c=><button type="button" key={c.code} aria-pressed={selected===c.code} onClick={()=>setCode(c.code)}><CompetitionTrophy code={c.code} name={c.name}/>{c.name}</button>)}</div>}
    {tab==='palmares'&&<div className="totals-tabs" role="group" aria-label="Modalidad de palmarés"><button type="button" aria-pressed={official} onClick={()=>setOfficial(true)}>Palmarés Oficial</button><button type="button" aria-pressed={!official} onClick={()=>setOfficial(false)}>Palmarés Total</button></div>}
-   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/>{tab==='competencia'&&<FinalsCalendar finals={data.finalsByCompetition?.[competitionFamily(selected)]??[]}/>}<Rows rows={honours}/></>}
+   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/>{tab==='competencia'&&<>{finals.length>0&&<FinalsCalendar finals={finals}/>}<EditionPodiums editions={podiums}/></>}<Rows rows={honours}/></>}
    {(tab==='oficial'||tab==='iffhs')&&<Indicators items={[
     ['Líder',leader(iffhs,r=>r.totalPoints,decimal)],['Puntos del líder',decimal(iffhs[0]?.totalPoints??null)],
     ['Temporadas consideradas',tab==='oficial'?data.iffhsOfficial.seasons.map(n=>'T'+n).join(' · '):iffhs[0]?.breakdown.length??0],

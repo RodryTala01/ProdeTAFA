@@ -1,3 +1,5 @@
+import {documentedHistoryGroups} from '../src/historical-group-catalog';
+import {archiveMatchStage,archivePublicDescription} from '../src/archive-history-view';
 import {scoringAverage} from '../src/scoring-average';
 import type {Env} from './index';
 import {activeHistoricalArchives,archivedUserKey,historicalStats} from './historical-archive';
@@ -187,12 +189,29 @@ async function teamRead(db:D1Database,id:string){
     ownPoints:a===id?m.pointsA:m.pointsB,rivalPoints:a===id?m.pointsB:m.pointsA,plenos:a===id?m.plenosA:m.plenosB,
     scoreBasis:m.scoreBasis,resolution:null}];
  }));
+ function archivedCompetitionResults(data:(typeof archives)[number]['data'],participantKey:string){
+  const results=data.results.filter(r=>r.participantKey===participantKey).map(r=>({
+   ...r,competitionName:data.competitions.find(c=>c.code===r.competitionCode)?.name??r.competitionCode,
+  }));
+  for(const competition of data.competitions){
+   if(competition.kind==='LEAGUE'||results.some(r=>r.competitionCode===competition.code))continue;
+   const matches=data.matches.filter(m=>m.competitionCode===competition.code&&(m.aKey===participantKey||m.bKey===participantKey));
+   const stages=matches.map(m=>archiveMatchStage(archivePublicDescription(m.stage))).filter(s=>s.category==='bracket').sort((a,b)=>b.rank-a.rank);
+   const inGroup=documentedHistoryGroups(data,competition.code).some(g=>g.entries.some(e=>e.participantKey===participantKey));
+   const hasStanding=data.standings.some(r=>r.competitionCode===competition.code&&r.participantKey===participantKey);
+   const hasRound=data.rounds.some(r=>r.competitionCode===competition.code&&r.participantKey===participantKey);
+   if(!matches.length&&!inGroup&&!hasStanding&&!hasRound)continue;
+   results.push({participantKey,competitionCode:competition.code,competitionName:competition.name,position:null,teamLabel:null,
+    resultCode:stages[0]?.label??(inGroup?'Grupos':'Participación registrada')});
+  }
+  return results;
+ }
  const historicalSeasons=archives.flatMap(({data})=>data.participants.filter(p=>p.userId===id).map(p=>({
    seasonNumber:data.season.number,seasonName:data.season.name,kind:data.season.kind,name:p.name,division:p.division,
    statistics:data.statistics.find(s=>s.participantKey===p.key)??null,
    standings:data.standings.filter(s=>s.participantKey===p.key).map(s=>({...s,competitionName:data.competitions.find(c=>c.code===s.competitionCode)?.name??s.competitionCode})),
    rounds:data.rounds.filter(s=>s.participantKey===p.key),
-   results:data.results.filter(s=>s.participantKey===p.key).map(s=>({...s,competitionName:data.competitions.find(c=>c.code===s.competitionCode)?.name??s.competitionCode})),
+   results:archivedCompetitionResults(data,p.key),
    movements:data.movements.filter(s=>s.participantKey===p.key),
    iffhs:data.iffhs.find(s=>s.participantKey===p.key)??null,
  }))).sort((a,b)=>b.seasonNumber-a.seasonNumber);

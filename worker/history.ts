@@ -63,7 +63,7 @@ export async function handleHistory(request: Request, env: Env): Promise<Respons
   const user = await sessionUser(request, env);
   if (!user || user.role !== 'participant') return error('Acceso de participante requerido', 403);
 
-  if (totalsPath) return json(await historicalTotals(env.DB));
+  if (totalsPath) return json(await historicalTotals(request,env));
 
   if (allTime) {
     // One official score per match, independent of how many competitions use a round.

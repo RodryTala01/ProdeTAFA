@@ -7,7 +7,7 @@ import {MiEquipoProfile,TeamHistory,groupOfficialRivals,type TeamPageData,type T
 import {participantRoute,participantSections} from '../src/participant-navigation';
 import {rankedPositions,iffhsPositions} from '../worker/team-page';
 
-const fake:TeamMatch={id:1,seasonNumber:32,competitionCode:'COPA_TOTAL',competitionName:'Copa Total',stageName:'Semifinal',roundName:'Fecha 4',opponentId:'B',opponentName:'Los Primos',ownPoints:18,rivalPoints:14,plenos:3};
+const fake:TeamMatch={id:1,seasonNumber:32,competitionCode:'COPA_TOTAL',competitionName:'Copa Total',stageName:'Semifinal · partido registrado en LIGA · Fuente: hoja LIGA',roundName:'Fecha 4',opponentId:'B',opponentName:'Los Primos',ownPoints:18,rivalPoints:14,plenos:3};
 const team:TeamPageData={identity:{id:'A',participantName:'Ana',teamName:'Equipo de Ana',shieldUrl:null,foundedSeason:32},division:null,
  stats:{dates:1,points:18,fulls:3,partials:6,errors:3,extras:1,predictions:12},
  titles:[{code:'COPA_TOTAL',name:'Copa Total',seasonNumber:32}],
@@ -37,13 +37,14 @@ describe('Mi Equipo minimalista',()=>{
   try{
    await act(async()=>{root.render(createElement(TeamHistory,{matches:team.encounters}));});
    expect(host.querySelectorAll('.equipo-detail')).toHaveLength(0);
-   const btn=host.querySelector('button')!;
+   const btn=host.querySelector<HTMLButtonElement>('tbody button')!;
    expect(btn.getAttribute('aria-expanded')).toBe('false');
    await act(async()=>{btn.click();});
    const opened=host.querySelector('.equipo-detail')!;
    expect(opened).toBeTruthy();
    expect(opened.previousElementSibling?.textContent).toContain('Los Primos');
-   expect(opened.textContent).toContain('Semifinal');
+   expect(opened.textContent).toContain('Semifinal · T32 · Copa Total');
+   expect(opened.textContent).not.toMatch(/partido registrado|Fuente:|Fecha 4/);
    expect(opened.textContent).toContain('T31');
    expect(btn.getAttribute('aria-expanded')).toBe('true');
    await act(async()=>{btn.click();});
@@ -83,3 +84,23 @@ it('IFFHS does not retain a stale position after leaving the five-season window'
   expect(rival).toMatchObject({difference:1,wins:2,draws:1,losses:1,points:12,otherPoints:12});
   expect(rival.matches.length).toBe(rival.wins+rival.draws+rival.losses);
  });
+
+
+it('permite invertir el orden de cualquier columna de datos manteniendo las fichas junto a cada rival',async()=>{
+ Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});
+ const host=document.createElement('div');
+ const root=createRoot(host);
+ const matches=[...team.encounters,{...fake,id:3,opponentId:'C',opponentName:'Zeta',ownPoints:5,rivalPoints:1}];
+ try{
+  await act(async()=>{root.render(createElement(TeamHistory,{matches}));});
+  const first=()=>host.querySelector('tbody tr th')?.textContent;
+  expect(first()).toContain('Los Primos');
+  const dif=host.querySelectorAll<HTMLButtonElement>('thead button')[1];
+  await act(async()=>{dif.click();});
+  expect(first()).toContain('Zeta');
+  expect(dif.parentElement?.getAttribute('aria-sort')).toBe('descending');
+  await act(async()=>{dif.click();});
+  expect(first()).toContain('Los Primos');
+  expect(dif.parentElement?.getAttribute('aria-sort')).toBe('ascending');
+ }finally{await act(async()=>{root.unmount();});}
+});

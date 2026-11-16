@@ -88,3 +88,13 @@ it('no inventa finales cuando una competencia aún no tiene cruces documentados'
  expect(html).toContain('Todavía no hay enfrentamientos de final registrados');
  expect(html).not.toContain('totals-final-card');
 });
+
+it('muestra el tanteo del desempate registrado en el orden de los finalistas',()=>{
+ const data=historical(4,[match('f','Final',9,9),match('t','Desempate de final',8,3,'n','r')]);
+ const finals=archivedCompetitionFinals(data,key=>key);
+ expect(finals).toHaveLength(1);
+ expect(finals[0]).toMatchObject({pointsA:9,pointsB:9,tieA:3,tieB:8});
+ const host=document.createElement('div');
+ host.innerHTML=renderToStaticMarkup(createElement(FinalsCalendar,{finals}));
+ expect(host.querySelector('.totals-final-score')?.textContent).toBe('9(3)–(8)9');
+});

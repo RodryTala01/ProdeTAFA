@@ -41,8 +41,8 @@ export function groupOfficialRivals(matches:TeamMatch[]):Rival[]{
 const fmt=(x:number)=>x.toLocaleString('es-AR');
 const fmtAverage=(x:number|null|undefined)=>x==null?'—':x.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
 export const historicalSeasonAverage=scoringAverage;
-const historicResultLabels:Record<string,string>={CHAMPION:'Campeón',RUNNER_UP:'Subcampeón',RUNNERUP:'Subcampeón',ROUND_OF_16:'Octavos de final',ROUND_OF_32:'Dieciseisavos',QUARTER_FINAL:'Cuartos de final',SEMI_FINAL:'Semifinales',SEMIFINAL:'Semifinales',FINAL:'Finalista',ELIMINATED:'Eliminado',THIRD:'Tercero'};
-const historicResult=(code:string)=>historicResultLabels[code]??code.toLocaleLowerCase('es').replaceAll('_',' ');
+const historicResultLabels:Record<string,string>={CHAMPION:'Campeón',RUNNER_UP:'Subcampeón',RUNNERUP:'Subcampeón',ROUND_OF_16:'Octavos de final',ROUND_OF_32:'Dieciseisavos',QUARTER_FINAL:'Cuartos de final',QUARTERFINAL:'Cuartos de final',SEMI_FINAL:'Semifinales',SEMIFINAL:'Semifinales',FINAL:'Finalista',ELIMINATED:'Eliminado',THIRD:'Tercero'};
+const historicResult=(code:string)=>historicResultLabels[code.toUpperCase()]??(code===code.toUpperCase()?code.toLocaleLowerCase('es').replaceAll('_',' '):code);
 const rank=(n:number|null)=>n===null?'—':n+'.º';
 function Ranking({name,info}:{name:string;info:{current:number|null;best:{position:number;seasonNumber:number}|null}}){
  return <section className="equipo-ranking"><strong>{rank(info.current)}</strong><span>{name}</span><small>{info.best?'Mejor '+rank(info.best.position)+' · T'+info.best.seasonNumber:'Mejor posición no disponible'}</small></section>;
@@ -50,15 +50,34 @@ function Ranking({name,info}:{name:string;info:{current:number|null;best:{positi
 function matchOutcome(m:TeamMatch){
  return m.outcome??(m.ownPoints>m.rivalPoints?'win':m.ownPoints<m.rivalPoints?'loss':'draw');
 }
+const rivalColumns = [
+ ['Rival', (r:Rival)=>r.name], ['DIF', (r:Rival)=>r.difference],
+ ['PJ', (r:Rival)=>r.matches.length], ['PG', (r:Rival)=>r.wins],
+ ['PE', (r:Rival)=>r.draws], ['PP', (r:Rival)=>r.losses],
+ ['PF', (r:Rival)=>r.points], ['PC', (r:Rival)=>r.otherPoints],
+] as const;
+
 export function TeamHistory({matches,identity}:{matches:TeamMatch[];identity?:TeamPageData['identity']}){
  const [expanded,setExpanded]=useState<string[]>([]);
- const rivals=useMemo(()=>groupOfficialRivals(matches),[matches]);
+ const [sort,setSort]=useState<{column:number;ascending:boolean}>({column:2,ascending:false});
+ const rivals=useMemo(()=>{
+  const column=rivalColumns[sort.column][1];
+  return groupOfficialRivals(matches).sort((a,b)=>{
+   const left=column(a),right=column(b);
+   const order=typeof left==='number'&&typeof right==='number'?left-right:String(left).localeCompare(String(right),'es');
+   return order*(sort.ascending?1:-1)||a.name.localeCompare(b.name,'es');
+  });
+ },[matches,sort]);
  const person=(id:string|undefined,name:string,participantName?:string,shieldUrl?:string|null)=><span className="equipo-rival"><ParticipantShield userId={id?.startsWith('hist:')?undefined:id} name={participantName??name} shieldUrl={shieldUrl} size="sm" decorative/><span>{name}</span></span>;
  return <section className="equipo-history" id="club-historiales" aria-label="Historial de enfrentamientos oficiales">
   <h2>Historial de enfrentamientos</h2>
   <p>DIF = victorias − derrotas · PF/PC = puntos a favor/en contra</p>
   {!rivals.length?<p>Todavía no hay enfrentamientos oficiales confirmados para este equipo.</p>:<div className="equipo-table-scroll"><table className="equipo-table">
-   <thead><tr>{['RIVAL','DIF','PJ','PG','PE','PP','PF','PC','FICHA'].map(label=><th scope="col" key={label}>{label}</th>)}</tr></thead>
+   <thead><tr>{rivalColumns.map(([label],column)=><th scope="col" key={label} aria-sort={sort.column===column?(sort.ascending?'ascending':'descending'):undefined}>
+    <button type="button" className="equipo-sort" onClick={()=>setSort(current=>({column,ascending:current.column===column?!current.ascending:column===0}))}>
+     {label}{sort.column===column&&<span aria-hidden="true">{sort.ascending?' ↑':' ↓'}</span>}
+    </button>
+   </th>)}<th scope="col">FICHA</th></tr></thead>
    <tbody>{rivals.map(r=>{
     const open=expanded.includes(r.id);
     return <Fragment key={r.id}><tr>
@@ -70,7 +89,7 @@ export function TeamHistory({matches,identity}:{matches:TeamMatch[];identity?:Te
      {[...r.matches].sort((a,b)=>b.seasonNumber-a.seasonNumber||(a.id<0&&b.id<0?a.id-b.id:b.id-a.id)).map(m=>{
       const outcome=matchOutcome(m),label=outcome==='win'?'Victoria':outcome==='loss'?'Derrota':'Empate';
       return <article className="equipo-encounter" key={m.id+'-'+m.opponentId}>
-       <div className="equipo-encounter-meta"><strong>T{m.seasonNumber} · <a href={competitionHref(m.competitionCode,m.seasonNumber)}>{m.competitionName}</a></strong><small>{phaseName(m.stageName)}{m.roundName?' · '+m.roundName:''}</small>{m.scoreBasis==='DUO'&&<small>Marcador de la pareja</small>}</div>
+       <div className="equipo-encounter-meta"><strong>{phaseName(archivePublicDescription(m.stageName))} · T{m.seasonNumber} · <a href={competitionHref(m.competitionCode,m.seasonNumber)}>{m.competitionName}</a></strong></div>
        <div className="equipo-encounter-score">{person(identity?.id,identity?.teamName??'Equipo consultado',identity?.participantName,identity?.shieldUrl)}<strong>{m.ownPoints} <span>–</span> {m.rivalPoints}</strong>{person(r.id,r.name,r.participantName,r.shieldUrl)}</div>
        <div className={'equipo-outcome equipo-outcome-'+outcome}>{label}{m.resolution==='tiebreak'&&<small>{m.outcome==='win'?identity?.teamName:m.outcome==='loss'?r.name:null}{m.outcome&&m.outcome!=='draw'?' avanzó por TAFA':' · TAFA confirmado'}</small>}</div>
       </article>;

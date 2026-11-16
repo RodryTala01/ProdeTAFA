@@ -106,3 +106,17 @@
  .totals-final-entries{padding:12px 5px 10px;gap:3px}
 }
 @media(prefers-reduced-motion:reduce){.totals-final-card{transition:none}.totals-final-card:hover{transform:none}}
+
+.totals-table .totals-awards { display: inline-grid; justify-items: end; gap: 5px; white-space: normal; }
+.totals-awards ul { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 24rem; list-style: none; padding: 0; margin: 0; }
+.totals-awards li { display: flex; align-items: center; gap: 4px; padding: 2px 5px; border: 1px solid var(--border); border-radius: var(--radius-control); color: var(--text); font-size: .7rem; text-align: left; }
+.totals-awards li small { white-space: nowrap; }
+.totals-final-score small { font-size: .58em; color: var(--text-muted); }
+.totals-final-score { white-space: nowrap; gap: 2px; }
+.totals-podiums-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%, 15rem),1fr)); gap: 10px; }
+.totals-edition { border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--surface-raised); }
+.totals-edition ul { display: grid; gap: 9px; list-style: none; margin: 0; padding: 10px; }
+.totals-edition li { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 3px 8px; align-items: center; }
+.totals-edition li > span:first-child { grid-column: 1/-1; color: var(--text-muted); font-size: .72rem; }
+.totals-edition .totals-person { min-width: 0; font-size: .8rem; }
+.totals-edition li > strong { font-size: .75rem; color: var(--home-fluor); }
