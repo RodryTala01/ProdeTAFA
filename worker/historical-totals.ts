@@ -1,7 +1,7 @@
 import type {Env} from './index';
 import {handleCompetitionLeagues} from './competition-leagues';
 import {evaluateTiebreak} from './competition-tiebreak';
-import {competitionFamily} from '../src/historical-competition-family';
+import {competitionFamily,isHistoricalFriendly,isWorldCupOverall} from '../src/historical-competition-family';
 import type {GeneralTotal,PalmarTotal,IffhsTotal,TotalsData,PalmarAward,EditionPodium} from '../src/historical-totals-types';
 import {scoringAverage} from '../src/scoring-average';
 import {activeHistoricalArchives,archivedUserKey} from './historical-archive';
@@ -15,8 +15,8 @@ type Member={seasonNumber:number;code:string;name:string;userId:string;fullName:
 type IffhsScore={seasonNumber:number;userId:string;fullName:string;pointsScaled:number};
 const champions=new Set(['CHAMPION']);
 const runners=new Set(['RUNNER_UP','RUNNERUP','SUBCAMPEON','SUBCHAMPION']);
-const officialCodes=new Set(['LIGA_A','COPA_TOTAL','COPA_A','COPA_AMERICA','EUROCOPA','MUNDIAL','COPA_EUROAMERICA','COPA_CAMPEONES','COPA_PAPA']);
-const meaningful=(code:string)=>code!=='PROMOCION';
+const officialCodes=new Set(['LIGA_A','COPA_TOTAL','COPA_A','COPA_AMERICA','EUROCOPA','MUNDIAL','MUNDIAL_ORO','COPA_EUROAMERICA','COPA_CAMPEONES','COPA_PAPA']);
+const meaningful=(code:string)=>code!=='PROMOCION'&&!isWorldCupOverall(code)&&!isHistoricalFriendly(code);
 const key=(season:number,code:string,user:string)=>season+':'+code+':'+user;
 const n=(value:number|null|undefined)=>Number(value??0);
 const rankSort=<T extends {fullName:string;userId:string}>(items:T[],metric:(r:T)=>number):Array<T&{position:number}>=>{

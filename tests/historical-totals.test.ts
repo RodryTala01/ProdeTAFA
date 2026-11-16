@@ -126,3 +126,19 @@ it('excluye del IFFHS oficial a un participante sin puntos registrados en la ven
  expect(d.iffhsOfficial.ranking).toEqual([]);
  expect(d.iffhsTotal).toHaveLength(2);
 });
+
+it('separa las zonas del Mundial y contabiliza solo Oro en el palmarés oficial',()=>{
+ const codes=['MUNDIAL_QATAR_2022','MUNDIAL_QATAR_2022_ORO','MUNDIAL_QATAR_2022_PLATA','MUNDIAL_QATAR_2022_BRONCE'];
+ const awards=codes.map((code,index)=>({seasonNumber:10,code,name:code,userId:'Q'+index,fullName:'Jugador '+index,resultCode:'CHAMPION'}));
+ const totals=composeHistoricalTotals([],[],awards,awards,[]);
+ expect(totals.competitions.map(c=>c.code)).toEqual(codes.slice(1));
+ expect(totals.palmares).toHaveLength(3);
+ expect(totals.palmaresOfficial.map(r=>r.userId)).toEqual(['Q1']);
+});
+
+it('no cuenta el Clásico amistoso como competición ni como título',()=>{
+ const friendly={seasonNumber:9,code:'COPA_CLASICO',name:'Copa Clásico',userId:'A',fullName:'Ana',resultCode:'CHAMPION'};
+ const totals=composeHistoricalTotals([],[],[friendly],[friendly],[]);
+ expect(totals.competitions).toEqual([]);
+ expect(totals.palmares).toEqual([]);
+});

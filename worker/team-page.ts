@@ -1,3 +1,4 @@
+import {isHistoricalFriendly} from '../src/historical-competition-family';
 import {documentedHistoryGroups} from '../src/historical-group-catalog';
 import {archiveMatchStage,archivePublicDescription} from '../src/archive-history-view';
 import {scoringAverage} from '../src/scoring-average';
@@ -89,7 +90,7 @@ async function teamRead(db:D1Database,id:string){
     predictions:Number(stat?.predictions??0)+(archiveUser?.predictions??0),
  };
  const averagePoints=archiveScoringUnknown?null:scoringAverage(combinedStats);
- const historicTitles=archives.flatMap(({data})=>data.results.filter(r=>r.resultCode==='CHAMPION'&&archivedUserKey(data,r.participantKey)===id).map(row=>{
+ const historicTitles=archives.flatMap(({data})=>data.results.filter(r=>r.resultCode==='CHAMPION'&&!isHistoricalFriendly(r.competitionCode)&&archivedUserKey(data,r.participantKey)===id).map(row=>{
    const competition=data.competitions.find(c=>c.code===row.competitionCode);
    return {code:row.competitionCode,name:competition?.name??row.competitionCode,seasonNumber:data.season.number};
  }));
@@ -184,16 +185,17 @@ async function teamRead(db:D1Database,id:string){
    const other=a===id?m.bKey:m.aKey,otherId=a===id?b:a;
    const person=data.participants.find(p=>p.key===other);
    return [{id:-100000*data.season.number-index-1,seasonNumber:data.season.number,competitionCode:m.competitionCode,
-    competitionName:data.competitions.find(c=>c.code===m.competitionCode)?.name??m.competitionCode,stageName:m.stage,roundName:m.round,
+    competitionName:isHistoricalFriendly(m.competitionCode)?'Clásico':data.competitions.find(c=>c.code===m.competitionCode)?.name??m.competitionCode,stageName:isHistoricalFriendly(m.competitionCode)?'Amistoso':m.stage,roundName:m.round,
     opponentId:otherId,opponentName:person?.name??other,opponentParticipantName:person?.name??other,opponentShieldUrl:null,
     ownPoints:a===id?m.pointsA:m.pointsB,rivalPoints:a===id?m.pointsB:m.pointsA,plenos:a===id?m.plenosA:m.plenosB,
     scoreBasis:m.scoreBasis,resolution:null}];
  }));
  function archivedCompetitionResults(data:(typeof archives)[number]['data'],participantKey:string){
-  const results=data.results.filter(r=>r.participantKey===participantKey).map(r=>({
+  const results=data.results.filter(r=>r.participantKey===participantKey&&!isHistoricalFriendly(r.competitionCode)).map(r=>({
    ...r,competitionName:data.competitions.find(c=>c.code===r.competitionCode)?.name??r.competitionCode,
   }));
   for(const competition of data.competitions){
+   if(isHistoricalFriendly(competition.code))continue;
    if(competition.kind==='LEAGUE'||results.some(r=>r.competitionCode===competition.code))continue;
    const matches=data.matches.filter(m=>m.competitionCode===competition.code&&(m.aKey===participantKey||m.bKey===participantKey));
    const stages=matches.map(m=>archiveMatchStage(archivePublicDescription(m.stage))).filter(s=>s.category==='bracket').sort((a,b)=>b.rank-a.rank);
