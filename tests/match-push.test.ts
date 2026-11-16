@@ -97,3 +97,17 @@ describe('Notificaciones automáticas por partido',()=>{
   }finally{f.db.close();}
  });
 });
+
+it('recupera un aviso final pendiente si el intento anterior quedó interrumpido',async()=>{
+ const f=fixture();
+ try{
+  f.db.exec("INSERT INTO push_deliveries(subscription_id,event_key,status,attempts,attempted_at) SELECT id,'match:2:final','pending',1,datetime('now','-20 minutes') FROM push_subscriptions WHERE user_id='A'");
+  f.db.exec("INSERT INTO push_deliveries(subscription_id,event_key,status,attempts,attempted_at) SELECT id,'match:2:final','pending',1,datetime('now') FROM push_subscriptions WHERE user_id='B'");
+  const selected:string[]=[];
+  await sendMatchPushNotifications(f.D1,async(s,_notice,key)=>{
+   if(key==='match:2:final')selected.push(s.user_id);
+   return true;
+  });
+  expect(selected).toEqual(['A','A']);
+ }finally{f.db.close();}
+});
