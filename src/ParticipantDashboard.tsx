@@ -57,7 +57,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
       <section ref={content} className="participant-content" tabIndex={-1} aria-label="Contenido del participante">
         {route === 'configuracion' ? <section className="participant-settings"><h1>Configuración</h1><p>Notificaciones y permisos de este dispositivo.</p><PushNotifications userId={user.id} mode="settings"/></section>
         : route === 'pronosticos' ? <ParticipantRound />
-          : route === 'historia/totales' ? <ParticipantHistoricalTotals/>
+          : route === 'tablas-totales' ? <ParticipantHistoricalTotals/>
           : route.startsWith('historia') ? <ParticipantArchive route={route}/>
           : route === 'club/historicos' ? <ParticipantAllTime userId={user.id}/>
           : route.startsWith('club/historial') ? <ParticipantHistory key={route} user={user} route={route}/>
