@@ -94,7 +94,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
  const iffhs=tab==='oficial'?data.iffhsOfficial.ranking:data.iffhsTotal;
  const latest=data.latestChampions[competitionFamily(selected)];
  return <div className="historical-totals">
-  <div className="totals-header"><div><a href="#/historia" className="totals-back">Historia / Estadísticas históricas</a><h1>TABLAS TOTALES</h1></div><span className="totals-period">Todas las temporadas registradas</span></div>
+  <div className="totals-header"><div><span className="totals-back">Estadísticas históricas de TAFA</span><h1>TABLAS TOTALES</h1></div><span className="totals-period">Todas las temporadas registradas</span></div>
   <nav className="totals-tabs" aria-label="Tablas Totales">{tabs.map(item=><button type="button" key={item.id} aria-pressed={item.id===tab} onClick={()=>setTab(item.id)}>{item.name}</button>)}</nav>
   <section className="totals-panel">
    <header className="totals-panel-title"><span className="totals-panel-icon">{tab==='palmares'||tab==='competencia'?<img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="28" height="44"/>:tab==='general'?'▥':'◉'}</span><div><h2>{tab==='palmares'?(official?'PALMARÉS OFICIAL':'PALMARÉS TOTAL'):tab==='competencia'?'PALMARÉS POR COMPETENCIA':tab==='oficial'?'IFFHS OFICIAL':tab==='iffhs'?'IFFHS TOTAL':'TABLA GENERAL TOTAL'}</h2><p>{tab==='palmares'?'Campeonatos y subcampeonatos de todas las temporadas':tab==='competencia'?'Elegí la competencia para consultar sus campeones':tab==='oficial'?'Ranking de las últimas cinco temporadas':tab==='iffhs'?'Ranking IFFHS acumulado de todas las temporadas':'Estadísticas acumuladas, ordenadas por puntos totales'}</p></div>

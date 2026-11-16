@@ -84,3 +84,20 @@
 .participant-settings>p {margin:0;color:var(--text-muted);}
 .participant-settings .push-settings {max-width:100%;margin:0;}
 @media(max-width:950px){.participant-profile-avatar{width:54px;height:54px}.participant-profile-avatar .asset-image{width:54px!important;height:54px!important}}
+
+/* Tablas Totales is a top-level section, including the fixed mobile menu.
+   Six equal touch areas fit the smallest supported phones without clipping. */
+@media (max-width: 950px) {
+  .participant-header .participant-nav { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .participant-header .participant-nav a {
+    font-size: .625rem;
+    line-height: 1.14;
+    text-align: center;
+    letter-spacing: -.01em;
+    overflow-wrap: anywhere;
+  }
+  .participant-header .participant-nav a span { max-width: 100%; }
+}
+@media (max-width: 700px) {
+  .participant-nav { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
