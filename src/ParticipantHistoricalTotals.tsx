@@ -176,7 +176,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
    {tab==='competencia'&&activeWorld&&worlds.length>1&&<div className="totals-competitions" role="group" aria-label="Zonas del Mundial">
     {['Oro','Plata','Bronce'].flatMap(zone=>{
      const world=worlds.find(c=>worldCupZone(c.code)===zone);
-     return world?[<button type="button" key={world.code} aria-pressed={world.code===selected} onClick={()=>setCode(world.code)}>{zone} · {zone==='Oro'?'Oficial':'No oficial'}</button>]:[];
+     return world?[<button type="button" key={world.code} aria-pressed={world.code===selected} onClick={()=>setCode(world.code)}><CompetitionTrophy code={world.code} name={zone}/>{zone} · {zone==='Oro'?'Oficial':'No oficial'}</button>]:[];
     })}
    </div>}
    {tab==='palmares'&&<div className="totals-tabs" role="group" aria-label="Modalidad de palmarés"><button type="button" aria-pressed={official} onClick={()=>setOfficial(true)}>Palmarés Oficial</button><button type="button" aria-pressed={!official} onClick={()=>setOfficial(false)}>Palmarés Total</button></div>}
