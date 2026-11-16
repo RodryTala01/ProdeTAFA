@@ -1,5 +1,5 @@
 import {archivedCompetitionFinals,type HistoricalFinal} from './historical-finals';
-import {documentedDuoPhases,type ArchiveDuoPhase,type PhaseDecision} from './historical-group-catalog';
+import {documentedDuoPhases,type ArchiveDuoPhase} from './historical-group-catalog';
 import {useEffect,useState,type ReactNode} from 'react';
 import {AssetImage,ParticipantShield} from './AssetImage';
 import {competitionAsset} from './competition-assets';
@@ -20,9 +20,9 @@ function Trophy({code,name,season,large=false}:{code:string;name:string;season:n
  const asset=competitionAsset(code,season);
  return <span className={'archive-emblem'+(large?' archive-emblem--large':'')}><AssetImage src={asset.trophy||asset.logo} name={name} size={large?'lg':'md'} fallback={<Icon name="trophy"/>}/></span>;
 }
-function Person({data,id,showHistoricalShield=false}:{data:ArchivePayload;id:string;showHistoricalShield?:boolean}){
+function Person({data,id}:{data:ArchivePayload;id:string}){
  const p=data.participants.find(p=>p.key===id);
- return <span className="archive-person">{p&&(p.userId||showHistoricalShield)?<ParticipantShield userId={p.userId??undefined} name={p.name} season={data.season.number} size="sm" decorative/>:<span className="archive-avatar" aria-hidden="true"><Icon name="user"/></span>}{p?.userId?<a href={'#/club/participante/'+encodeURIComponent(p.userId)}>{p.name}</a>:<span>{p?.name||'Participante no disponible'}</span>}</span>;
+ return <span className="archive-person">{p?<ParticipantShield userId={p.userId??undefined} name={p.name} season={data.season.number} size="sm" decorative/>:<span className="archive-avatar" aria-hidden="true"><Icon name="user"/></span>}{p?.userId?<a href={'#/club/participante/'+encodeURIComponent(p.userId)}>{p.name}</a>:<span>{p?.name||'Participante no disponible'}</span>}</span>;
 }
 function Empty({children='Información no disponible.'}:{children?:ReactNode}){return <div className="archive-empty"><Icon name="book"/><p>{children}</p></div>;}
 function SectionHeading({title,detail}:{title:string;detail?:string}){return <div className="archive-section-heading"><h2>{title}</h2>{detail&&<span>{detail}</span>}</div>;}
@@ -31,11 +31,36 @@ function StatsTable({data,rows,label,positions=false,competition,source='importe
 }
 function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
  const {data,summary}=detail;
- const awards=data.results.filter(r=>(!code||r.competitionCode===code)&&['CHAMPION','RUNNER_UP'].includes(r.resultCode)).sort((a,b)=>(a.resultCode==='CHAMPION'?0:1)-(b.resultCode==='CHAMPION'?0:1));
- return awards.length?<div className="archive-podium">{awards.map((r,i)=>{
-  const c=data.competitions.find(c=>c.code===r.competitionCode),row=data.standings.find(s=>s.competitionCode===r.competitionCode&&s.participantKey===r.participantKey);
-  const champion=r.resultCode==='CHAMPION';
-  return <article className={'archive-award'+(champion?' archive-award--champion':'')} key={r.competitionCode+':'+r.participantKey+':'+i}><Trophy code={r.competitionCode} name={c?.name||r.competitionCode} season={summary.number} large/><div className="archive-award__body"><span className="archive-award__label">{resultNames[r.resultCode]}</span><h3>{c?.name||r.competitionCode}</h3><Person data={data} id={r.participantKey}/>{r.teamLabel&&<p>{r.teamLabel}</p>}</div>{row&&<div className="archive-award__points"><strong>{row.points}</strong><span>puntos</span></div>}</article>;
+ const groups=new Map<string,ArchivePayload['results']>();
+ for(const award of data.results){
+  if((code&&award.competitionCode!==code)||!['CHAMPION','RUNNER_UP'].includes(award.resultCode))continue;
+  const list=groups.get(award.competitionCode)??[];
+  list.push(award);
+  groups.set(award.competitionCode,list);
+ }
+ return groups.size?<div className="archive-podium">{[...groups].map(([competition,awards])=>{
+  const name=data.competitions.find(c=>c.code===competition)?.name??competition;
+  const champion=awards.some(r=>r.resultCode==='CHAMPION');
+  return <article className={'archive-award'+(champion?' archive-award--champion':'')} key={competition}>
+   <Trophy code={competition} name={name} season={summary.number} large/>
+   <div className="archive-award__body">
+    <h3>{name}</h3>
+    {(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
+     const entrants=awards.filter(r=>r.resultCode===resultCode);
+     if(!entrants.length)return null;
+     return <div className="archive-award-result" data-champion={resultCode==='CHAMPION'} key={resultCode}>
+      <span className="archive-award__label">{resultNames[resultCode]}</span>
+      {entrants.map(r=>{
+       const points=data.standings.find(row=>row.competitionCode===competition&&row.participantKey===r.participantKey)?.points;
+       return <div className="archive-award-entrant" key={r.participantKey}>
+        <div><Person data={data} id={r.participantKey}/>{r.teamLabel&&competition!=='COPA_DUOS'&&<small>{r.teamLabel}</small>}</div>
+        {points!==undefined&&<span className="archive-award__points"><strong>{points}</strong><span>puntos</span></span>}
+       </div>;
+      })}
+     </div>;
+    })}
+   </div>
+  </article>;
  })}</div>:<Empty>Sin resultados finales declarados.</Empty>;
 }
 // The bracket renders only persisted match scores. It intentionally does not
@@ -50,14 +75,10 @@ function ArchiveMatchCards({detail,matches}:{detail:HistoryDetail;matches:Archiv
 function ArchiveDuoFinal({data,final}:{data:ArchivePayload;final:HistoricalFinal}){
  return <article className="archive-match-card archive-duo-final">
   {(['a','b'] as const).map(side=><div key={side} className="archive-match-entry" data-winner={final.winner===side||undefined}>
-   <div className="archive-duo-members">{final[side].members?.map(member=><Person key={member.userId} data={data} id={member.userId!} showHistoricalShield/>)}</div>
+   <div className="archive-duo-members">{final[side].members?.map(member=><Person key={member.userId} data={data} id={member.userId!}/>)}</div>
    <strong>{side==='a'?final.pointsA:final.pointsB}</strong>
   </div>)}
  </article>;
-}
-
-function PhaseStatus({decision}:{decision?:PhaseDecision|null}){
- return decision?<small className="archive-phase-status">{decision==='qualified'?'Clasificado':'Eliminado'}</small>:null;
 }
 
 function DuoPhaseTables({data,phases}:{data:ArchivePayload;phases:ArchiveDuoPhase[]}){
@@ -72,10 +93,10 @@ function DuoPhaseTables({data,phases}:{data:ArchivePayload;phases:ArchiveDuoPhas
      return <div className="archive-group-table" key={type}>
       <table><caption>{type==='pairs'?'Por pareja':'Individual'}</caption>
        <thead><tr>{type==='pairs'&&<th scope="col">Pos.</th>}<th scope="col">{type==='pairs'?'Pareja':'Participante'}</th>
-        {['PTS','Plenos','Parciales','Errores','Extras'].map(label=><th key={label} scope="col">{label}</th>)}</tr></thead>
+        {['Pts','Plenos','Parciales','Errores','Extras'].map(label=><th key={label} scope="col">{label}</th>)}</tr></thead>
        <tbody>{rows.map((row,i)=><tr key={i} data-phase-decision={row.decision}>
         {'position' in row&&<td>{row.position}</td>}
-        <th scope="row">{'participantKey' in row?<Person data={data} id={row.participantKey}/>:row.name}<PhaseStatus decision={row.decision}/></th>
+        <th scope="row">{'participantKey' in row?<Person data={data} id={row.participantKey}/>:<div className="archive-duo-members">{row.members.map(id=><Person key={id} data={data} id={id}/>)}</div>}</th>
         {row.stats.map((value,j)=><td key={j} className={j===0?'archive-points':undefined}>{value??'—'}</td>)}
        </tr>)}</tbody>
       </table>
@@ -121,10 +142,10 @@ function ArchiveGroups({detail,competitionCode,matches}:{detail:HistoryDetail;co
   <div className="archive-group-grid">{groups.map(g=><section className="archive-group" key={g.name}>
    <h3>{g.name}<small>{g.entries.length} participantes</small></h3>
    <div className="archive-group-table">
-    <table><thead><tr>{g.entries.some(e=>e.position!==null)&&<th scope="col">Pos.</th>}<th scope="col">Participante</th><th scope="col">PTS</th></tr></thead>
+    <table><thead><tr>{g.entries.some(e=>e.position!==null)&&<th scope="col">Pos.</th>}<th scope="col">Participante</th><th scope="col">Pts</th></tr></thead>
      <tbody>{g.entries.map(e=><tr key={e.participantKey} data-phase-decision={e.decision??undefined}>
       {g.entries.some(x=>x.position!==null)&&<td>{e.position??'—'}</td>}
-      <th scope="row"><Person data={detail.data} id={e.participantKey}/><PhaseStatus decision={e.decision}/></th>
+      <th scope="row"><Person data={detail.data} id={e.participantKey}/></th>
       <td className="archive-points">{Number.isFinite(e.points)?e.points:'—'}</td>
      </tr>)}</tbody>
     </table>
@@ -144,16 +165,10 @@ function LeaguePromotionHistory({detail}:{detail:HistoryDetail}){
  const codes=new Set(data.competitions.filter(isHistoricalPromotion).map(c=>c.code));
  codes.add('PROMOCION');
  const matches=data.matches.filter(m=>codes.has(m.competitionCode));
- const movements=data.movements.filter(m=>['ASCENSO','DESCENSO','PERMANENCIA'].includes(m.type));
- if(!matches.length&&!movements.length)return null;
+ if(!matches.length)return null;
  return <section className="archive-panel archive-league-promotion">
-  <SectionHeading title="Promoción · Ascensos y descensos" detail={matches.length?matches.length+' enfrentamientos':undefined}/>
-  <p className="archive-bracket-note">Definiciones ligadas a la Liga. No constituyen una copa ni otorgan un campeón.</p>
-  {matches.length>0&&<div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{archivePublicDescription(m.stage)}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div>}
-  {movements.length>0&&<ul className="archive-movements">{movements.map((m,i)=><li key={m.participantKey+':'+i}><Person data={data} id={m.participantKey}/>
-    <span className={'archive-movement-type archive-movement--'+m.type.toLowerCase()}>{m.type}</span>
-    <span>{m.fromDivision||'—'} → {m.toDivision||'—'}</span>{archivePublicDescription(m.detail)&&<small>{archivePublicDescription(m.detail)}</small>}
-  </li>)}</ul>}
+  <SectionHeading title="Promoción" detail={matches.length+' enfrentamientos'}/>
+  <div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{archivePublicDescription(m.stage)}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div>
  </section>;
 }
 
@@ -210,7 +225,6 @@ export function SeasonDetail({detail,competition,view}:{detail:HistoryDetail;com
    <section><SectionHeading title="Protagonistas de la temporada"/><Podium detail={detail}/></section>
    <section><SectionHeading title="Competiciones disputadas" detail={summary.competitions.length.toString()}/><div className="archive-competition-grid">{summary.competitions.map(c=><a className="archive-competition-link" key={c.code} href={root+'/'+c.code}><Trophy code={c.code} name={c.name} season={summary.number}/><span><strong>{c.name}</strong><small>{c.kind==='LEAGUE'?'Tabla y resultados':'Grupos y eliminatorias'}</small></span><Icon name="arrow"/></a>)}</div></section>
    <a className="archive-ranking-link" href={root+'?view=iffhs'}><span className="archive-emblem"><Icon name="list"/></span><span><strong>IFFHS de la temporada</strong><small>{data.iffhs.length?data.iffhs.length+' participantes · Ver clasificación':'Información no disponible'}</small></span><Icon name="arrow"/></a>
-   {data.movements.length>0&&<section className="archive-panel"><SectionHeading title="Ascensos y descensos"/><ul className="archive-movements">{data.movements.map((m,i)=><li key={i}><Person data={data} id={m.participantKey}/><span className="archive-movement-type">{m.type}</span><span>{m.fromDivision||'—'} → {m.toDivision||'—'}</span>{archivePublicDescription(m.detail)&&<small>{archivePublicDescription(m.detail)}</small>}</li>)}</ul></section>}
   </>:active==='iffhs'?<Iffhs detail={detail}/>:<><nav className="archive-competition-tabs" aria-label="Competiciones de la temporada">{summary.competitions.map(c=><a key={c.code} aria-current={selected?.code===c.code?'page':undefined} href={root+'/'+c.code}>{c.name}</a>)}</nav>{selected?<CompetitionDetail key={selected.code} detail={detail} competition={selected}/>:<Empty>Competición sin información disponible.</Empty>}</>}
  </>;
 }
@@ -227,7 +241,7 @@ export default function ParticipantArchive({route}:{route:string}){
  if(loading)return <div className="participant-archive"><div className="archive-loading" role="status"><Icon name="book"/><h1>Historia</h1><p>Cargando temporadas y resultados…</p></div></div>;
  if(error)return <div className="participant-archive"><section className="archive-panel archive-error"><Icon name="book"/><h1>Historia</h1><p role="alert">{error}</p><div><button className="button button--primary" onClick={()=>setRevision(n=>n+1)}>Reintentar</button><a className="button button--secondary" href="#/historia">Volver a Historia</a></div></section></div>;
  if(number&&detail)return <div className="participant-archive"><SeasonDetail detail={detail} competition={competition} view={view}/></div>;
- const filtered=seasons.filter(s=>(s.number+' '+s.name).toLocaleLowerCase().includes(search.toLocaleLowerCase())&&(!kind||s.competitions.some(c=>c.kind===kind)));
+ const filtered=seasons.filter(s=>(s.number+' '+s.name).toLocaleLowerCase().includes(search.toLocaleLowerCase())&&(!kind||s.competitions.some(c=>c.kind===kind))).sort((a,b)=>b.number-a.number);
  return <div className="participant-archive"><header className="archive-hero"><div className="archive-hero__row"><div><span className="archive-kicker">Archivo TAFA</span><h1>Historia</h1><p>Temporadas, títulos y estadísticas</p></div><span className="archive-hero__icon"><Icon name="book"/></span></div><div className="archive-meta"><span>{seasons.length} {seasons.length===1?'temporada disponible':'temporadas disponibles'}</span></div></header><div className="archive-filters"><label><span>Buscar temporada</span><input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Número o nombre"/></label><label><span>Tipo de competición</span><select value={kind} onChange={e=>setKind(e.target.value)}><option value="">Todas las competiciones</option><option value="LEAGUE">Liga</option><option value="CUP">Copa</option><option value="TOURNAMENT">Torneo</option></select></label></div>
   {!filtered.length?<Empty>{seasons.length?'No hay temporadas para estos filtros.':'Todavía no hay temporadas históricas disponibles.'}</Empty>:<div className="archive-season-grid">{filtered.map(s=><article className="archive-season-card" key={s.number}><div className="archive-season-card__heading"><span className="archive-season-number">T{s.number}</span><span className="archive-source">{s.source==='official'?'Oficial':s.source==='mixed'?'Histórica / oficial':'Histórica'}</span></div><h2><a href={'#/historia/'+s.number}>{s.name}</a></h2><div className="archive-season-facts"><span>{s.competitions.length} {s.competitions.length===1?'competición':'competiciones'}</span>{s.participantCount!==null&&<span>{s.participantCount} participantes</span>}</div><ul className="archive-season-cups">{s.competitions.map(c=><li key={c.code}><Trophy code={c.code} name={c.name} season={s.number}/><span><strong>{c.name}</strong>{c.champions.length>0?<small><span className="archive-champion-label">Campeón</span>{c.champions.join(' · ')}</small>:<small>Sin campeón declarado</small>}</span></li>)}</ul><a className="archive-season-cta" href={'#/historia/'+s.number}>Ver temporada<Icon name="arrow"/></a></article>)}</div>}
  </div>;

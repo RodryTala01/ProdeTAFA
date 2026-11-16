@@ -94,10 +94,9 @@ it('Promoción no es torneo con campeón: se muestra debajo de Liga, no en tarje
  expect(summary.competitions.map(c=>c.code)).toEqual(['LIGA_A','COPA_A']);
  expect(visibleArchiveCompetitions(historyLeague.data.competitions).map(c=>c.code)).toEqual(['LIGA_A','COPA_A']);
  const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:{...historyLeague,summary},competition:'LIGA_A'}));
- expect(html).toContain('Promoción · Ascensos y descensos');
- expect(html).toContain('No constituyen una copa ni otorgan un campeón');
+ expect(html).toContain('>Promoción<');
  expect(html).toContain('Promoción 1');
- expect(html).toContain('>Descenso<');
+ expect(html).not.toContain('archive-movements');
  expect(html).not.toContain('href="#/historia/4/PROMOCION"');
  const catalog=renderToStaticMarkup(createElement(SeasonDetail,{detail:{...historyLeague,summary},view:'resumen'}));
  expect(catalog).not.toContain('href="#/historia/4/PROMOCION"');
@@ -194,7 +193,7 @@ it('la descripción pública omite fuentes Excel, nombres de hojas y aclaracione
   movements:historyLeague.data.movements.map(m=>({...m,detail:m.participantKey==='dani'?'Ascenso a Primera División (lista oficial de TEMPORADA 4.xlsx, LIGA, columna CK)':m.detail}))
  }};
  const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:changed,competition:'LIGA_A'}));
- expect(html).toContain('Ascenso a Primera División');
+ expect(html).not.toContain('Ascenso a Primera División');
  expect(html).not.toContain('TEMPORADA 4.xlsx');
  expect(html).not.toContain('columna CK');
  expect(html).not.toContain('Descenso confirmado');
@@ -221,4 +220,19 @@ it('muestra la final archivada de Dúos como un solo partido 20–18',()=>{
  expect(finals[0].querySelectorAll('.asset-image')).toHaveLength(4);
  expect([...finals[0].querySelectorAll('.archive-match-entry strong')].map(s=>s.textContent)).toEqual(['20','18']);
  expect(host.querySelector('.archive-bracket-stage h3 small')?.textContent).toBe('1 cruce');
+});
+
+it('reúne campeón y subcampeón en la misma tarjeta de la competición',()=>{
+ const archived:HistoryDetail={...historyLeague,data:{...historyLeague.data,results:[
+  ...historyLeague.data.results,
+  {competitionCode:'LIGA_A',participantKey:'beto',position:2,resultCode:'RUNNER_UP',teamLabel:null},
+ ]}};
+ const host=document.createElement('div');
+ host.innerHTML=renderToStaticMarkup(createElement(SeasonDetail,{detail:archived}));
+ const cards=host.querySelectorAll('.archive-award');
+ expect(cards).toHaveLength(1);
+ expect(cards[0].textContent).toContain('Campeón');
+ expect(cards[0].textContent).toContain('Subcampeón');
+ expect(cards[0].textContent).toContain('beto');
+ expect(host.textContent).not.toContain('Ascensos y descensos');
 });

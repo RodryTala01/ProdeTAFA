@@ -9,7 +9,7 @@ export type PhaseDecision='qualified'|'eliminated';
 type PhaseScores=[number|null,number|null,number|null,number|null,number|null];
 export type ArchiveDuoPhase={
  name:string;
- pairs:Array<{position:number;name:string;stats:PhaseScores;decision?:PhaseDecision}>;
+ pairs:Array<{position:number;name:string;members:string[];stats:PhaseScores;decision?:PhaseDecision}>;
  individuals:Array<{participantKey:string;stats:PhaseScores;decision?:PhaseDecision}>;
 };
 type SeasonPhases={groups:Record<string,HistoricalGroupTable[]>;duos:ArchiveDuoPhase[]};
