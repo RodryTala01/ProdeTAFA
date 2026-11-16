@@ -3,6 +3,7 @@ import type {GeneralTotal,PalmarTotal,IffhsTotal,TotalsData} from '../src/histor
 import {scoringAverage} from '../src/scoring-average';
 import {activeHistoricalArchives,archivedUserKey} from './historical-archive';
 import {documentedHistoryGroups} from '../src/historical-group-catalog';
+import {archivedCompetitionFinals,combineCompetitionFinals,officialCompetitionFinals,type HistoricalFinal,type OfficialFinalRow} from '../src/historical-finals';
 
 type Archive=Awaited<ReturnType<typeof activeHistoricalArchives>>;
 type OfficialScore={userId:string;fullName:string;dates:number;points:number;fulls:number;partials:number;errors:number;extras:number;predictions:number};
@@ -29,7 +30,8 @@ export function composeHistoricalTotals(
  officialAwards:Award[],
  officialMembers:Member[],
  officialIffhs:IffhsScore[],
- officialSeasons:Array<{seasonNumber:number;userId:string}>=[]
+ officialSeasons:Array<{seasonNumber:number;userId:string}>=[],
+ officialFinalRows:OfficialFinalRow[]=[]
 ):TotalsData{
  const historicRefs=new Map<string,{names:Set<string>;ids:Set<string>;count:number}>();
  const normal=(value:string)=>value.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
@@ -72,6 +74,7 @@ export function composeHistoricalTotals(
   addName(a.userId,a.fullName);addCompetition(a.code,a.name);
   participation.add(key(a.seasonNumber,competitionFamily(a.code),a.userId));
  }
+ const importedFinals:HistoricalFinal[]=[];
  const general=new Map<string,Omit<GeneralTotal,'position'|'averagePoints'|'averageFulls'|'averagePartials'|'averageErrors'|'averageExtras'>>();
  for(const score of officialScores){
   addName(score.userId,score.fullName);
@@ -85,6 +88,7 @@ export function composeHistoricalTotals(
  }
  for(const {data} of archives){
   for(const c of data.competitions)addCompetition(c.code,c.name);
+  importedFinals.push(...archivedCompetitionFinals(data,personKey=>archiveId(data,personKey)));
   for(const person of data.participants)addName(archiveId(data,person.key),person.name);
   const participant=(participantKey:string)=>data.participants.find(p=>p.key===participantKey);
   const display=(participantKey:string)=>participant(participantKey)?.name??participantKey;
@@ -193,7 +197,7 @@ export function composeHistoricalTotals(
    averageErrors:r.dates&&r.dates>0&&r.errors!==null?r.errors/r.dates:null,
    averageExtras:r.dates&&r.dates>0&&r.extras!==null?r.extras/r.dates:null}));
  return {seasons,competitions:[...competitionNames].filter(([code],index,all)=>all.findIndex(([other])=>competitionFamily(other)===competitionFamily(code))===index).map(([code,name])=>({code,name:competitionFamily(code)==='COPA_AMERICA'?'Copa América':name})),
-  palmares,palmaresOfficial,latestChampions,perCompetition,
+  palmares,palmaresOfficial,latestChampions,perCompetition,finalsByCompetition:combineCompetitionFinals(importedFinals,officialCompetitionFinals(officialFinalRows)),
   iffhsOfficial:{seasons:officialWindow,ranking:rankedIffhs(officialWindow)},
   iffhsTotal:rankedIffhs([...new Set([...seasons,...iffhsSeasons])].sort((a,b)=>b-a)),general:overall};
 }
@@ -204,5 +208,20 @@ export async function historicalTotals(db:D1Database):Promise<TotalsData>{
  const members=(await db.prepare("SELECT DISTINCT s.season_number AS seasonNumber,c.code,c.display_name AS name,m.user_id AS userId,u.full_name AS fullName FROM competition_entry_members m JOIN competition_entries e ON e.id=m.entry_id JOIN competitions c ON c.id=e.competition_id JOIN tafa_seasons s ON s.id=c.season_id JOIN users u ON u.id=m.user_id WHERE c.code<>'PROMOCION'").all<Member>()).results??[];
  const iffhs=(await db.prepare("SELECT t.season_number AS seasonNumber,t.user_id AS userId,u.full_name AS fullName,t.total_points_scaled AS pointsScaled FROM iffhs_season_totals t JOIN users u ON u.id=t.user_id").all<IffhsScore>()).results??[];
  const linked=(await db.prepare("SELECT DISTINCT s.season_number AS seasonNumber,rs.user_id AS userId FROM round_submissions rs JOIN rounds r ON r.id=rs.round_id AND r.status='finished' JOIN competition_round_links l ON l.round_id=r.id JOIN competitions c ON c.id=l.competition_id JOIN tafa_seasons s ON s.id=c.season_id").all<{seasonNumber:number;userId:string}>()).results??[];
- return composeHistoricalTotals(archives,scores,awards,members,iffhs,linked);
+ const finals=(await db.prepare(`SELECT en.id AS encounterId,se.season_number AS seasonNumber,c.code AS competitionCode,
+   st.code AS stageCode,st.name AS stageName,
+   a.display_name AS aName,b.display_name AS bName,
+   CASE WHEN a.entry_type='INDIVIDUAL' THEN (SELECT mem.user_id FROM competition_entry_members mem WHERE mem.entry_id=a.id ORDER BY mem.id LIMIT 1) ELSE NULL END AS aUserId,
+   CASE WHEN b.entry_type='INDIVIDUAL' THEN (SELECT mem.user_id FROM competition_entry_members mem WHERE mem.entry_id=b.id ORDER BY mem.id LIMIT 1) ELSE NULL END AS bUserId,
+   en.score_a AS scoreA,en.score_b AS scoreB
+  FROM competition_encounters en
+  JOIN competition_stages st ON st.id=en.stage_id AND st.stage_type='KNOCKOUT'
+  JOIN competitions c ON c.id=st.competition_id
+  JOIN tafa_seasons se ON se.id=c.season_id
+  JOIN competition_entries a ON a.id=en.entry_a_id
+  JOIN competition_entries b ON b.id=en.entry_b_id
+  WHERE en.status='finished' AND en.admin_confirmed_at IS NOT NULL
+   AND (LOWER(st.code) LIKE '%final%' OR LOWER(st.name) LIKE '%final%')
+  ORDER BY se.season_number DESC,en.id`).all<OfficialFinalRow>()).results??[];
+ return composeHistoricalTotals(archives,scores,awards,members,iffhs,linked,finals);
 }
