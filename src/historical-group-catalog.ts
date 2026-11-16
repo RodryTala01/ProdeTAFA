@@ -1,4 +1,4 @@
-// T6/T7 original sheets: COPA A, COPA B and COPA DUOS. Phase scores stay outside totals.
+// T6–T8 phase tables from the original workbooks. Phase scores stay outside totals.
 import historicalPhases from './historical-phase-data.json';
 import type {ArchivePayload} from './historical-schema';
 
@@ -22,7 +22,7 @@ export function documentedDuoPhases(data:ArchivePayload){
  return phases;
 }
 
-export type HistoricalGroupEntry={participantKey:string;points:number;position:number|null;decision?:PhaseDecision|null};
+export type HistoricalGroupEntry={participantKey:string;points:number;position:number|null;decision?:PhaseDecision|null;stats?:[number|null,number|null,number|null,number|null]};
 export type HistoricalGroupTable={name:string;entries:HistoricalGroupEntry[]};
 
 // Data format: groupName:key|officialPoints|position(optional),...

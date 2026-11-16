@@ -1,5 +1,5 @@
 import {archivedCompetitionFinals,type HistoricalFinal} from './historical-finals';
-import {documentedDuoPhases,type ArchiveDuoPhase} from './historical-group-catalog';
+import {documentedDuoPhases,documentedHistoryGroups,type ArchiveDuoPhase} from './historical-group-catalog';
 import {useEffect,useState,type ReactNode} from 'react';
 import {AssetImage,ParticipantShield} from './AssetImage';
 import {competitionAsset} from './competition-assets';
@@ -142,11 +142,12 @@ function ArchiveGroups({detail,competitionCode,matches}:{detail:HistoryDetail;co
   <div className="archive-group-grid">{groups.map(g=><section className="archive-group" key={g.name}>
    <h3>{g.name}<small>{g.entries.length} participantes</small></h3>
    <div className="archive-group-table">
-    <table><thead><tr>{g.entries.some(e=>e.position!==null)&&<th scope="col">Pos.</th>}<th scope="col">Participante</th><th scope="col">Pts</th></tr></thead>
+    <table><thead><tr>{g.entries.some(e=>e.position!==null)&&<th scope="col">Pos.</th>}<th scope="col">Participante</th><th scope="col">Pts</th>{g.entries.some(e=>e.stats)&&['Plenos','Parciales','Errores','Extras'].map(label=><th key={label} scope="col">{label}</th>)}</tr></thead>
      <tbody>{g.entries.map(e=><tr key={e.participantKey} data-phase-decision={e.decision??undefined}>
       {g.entries.some(x=>x.position!==null)&&<td>{e.position??'—'}</td>}
       <th scope="row"><Person data={detail.data} id={e.participantKey}/></th>
       <td className="archive-points">{Number.isFinite(e.points)?e.points:'—'}</td>
+      {g.entries.some(row=>row.stats)&&Array.from({length:4},(_,index)=><td key={index}>{e.stats?.[index]??'—'}</td>)}
      </tr>)}</tbody>
     </table>
    </div>
@@ -182,6 +183,7 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
  const roundNames=[...new Set(rounds.map(r=>r.round))];
  const isCup=c.kind==='CUP'||c.kind==='TOURNAMENT';
  const duoPhases=c.code==='COPA_DUOS'?documentedDuoPhases(data):[];
+ const leagueZones=c.kind==='LEAGUE'?documentedHistoryGroups(data,c.code):[];
  const groups=isCup?archiveHistoryGroups(data,c.code,matches):[];
  const cupBracket=isCup?historicalMatchLayout(matches):null;
  const canEliminate=Boolean(cupBracket?.bracket.length||cupBracket?.other.length||cupBracket?.additional.length);
@@ -191,7 +193,12 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
  return <div className="archive-competition">
   <div className="archive-competition-heading"><Trophy code={c.code} name={c.name} season={summary.number}/><div><span className="archive-kicker">Competición · T{summary.number}</span><h2>{c.name}</h2></div></div>
   <Podium detail={detail} code={c.code}/>
-  {!isCup&&<section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name} competition={c} source={summary.source}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>}
+  {leagueZones.length>0&&<section className="archive-panel"><SectionHeading title="Tablas por zona"/>
+   {leagueZones.map(zone=><section key={zone.name}><h3>{zone.name}</h3><StatsTable data={data} label={zone.name} positions rows={zone.entries.map(row=>({
+    ...row,position:row.position??undefined,fulls:row.stats?.[0]??null,partials:row.stats?.[1]??null,errors:row.stats?.[2]??null,extras:row.stats?.[3]??null,
+   }))}/></section>)}
+  </section>}
+  {!isCup&&!leagueZones.length&&<section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name} competition={c} source={summary.source}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>}
   {!isCup&&(roundNames.length>0||links.length>0)&&<section className="archive-panel"><SectionHeading title="Resultados por Fecha" detail={roundNames.length?roundNames.length+' Fechas':undefined}/>{roundNames.map(round=><details className="archive-round" key={round}><summary><span><Icon name="calendar"/>{round}</span><span>Ver resultados</span></summary><StatsTable data={data} rows={rounds.filter(r=>r.round===round)} label={c.name+' · '+round}/></details>)}{links.length>0&&<div className="archive-round-links">{links.map(l=><a className="button button--secondary" key={l.roundId} href={'#/club/historial/'+l.roundId}>{l.name}<Icon name="arrow"/></a>)}</div>}</section>}
   {isCup&&(hasPhaseTables||canEliminate)&&<>
    {hasPhaseTables&&canEliminate&&<nav className="archive-phase-tabs" aria-label={'Fases de '+c.name}>

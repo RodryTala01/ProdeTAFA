@@ -109,7 +109,7 @@ function EditionPodiums({editions}:{editions:EditionPodium[]}){
     <Player userId={person.userId} name={person.name}/>
     {person.points!==null&&<strong>{fmt(person.points)} PTS</strong>}
    </li>)}</ul>
-   <div className="totals-final-caption"><strong>T{edition.seasonNumber}</strong></div>
+   <div className="totals-final-caption"><strong>Temporada {edition.seasonNumber}</strong></div>
   </article>)}</div>
  </section>;
 }

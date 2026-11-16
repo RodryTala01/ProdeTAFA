@@ -6,6 +6,7 @@ import {SeasonDetail,historicalExtras} from '../src/ParticipantArchive';
 import {participantRoute} from '../src/participant-navigation';
 import {archiveStandingZone,archiveHistoryGroups,archivePublicDescription,historicalMatchLayout,visibleArchiveCompetitions} from '../src/archive-history-view';
 import {importedSummary} from '../worker/season-history';
+import historicalPhases from '../src/historical-phase-data.json';
 import type {HistoryDetail} from '../src/history-types';
 const detail:HistoryDetail={summary:{number:1,name:'Brasil 2021',source:'imported',participantCount:1,competitions:[{code:'COPA_AMERICA_2021',name:'Copa América',kind:'TOURNAMENT',champions:[]}]},data:{version:1,season:{number:1,name:'Brasil 2021',kind:'TOURNAMENT',notes:''},participants:[{key:'p',name:'Nombre real',userId:'public-user',division:null}],competitions:[{code:'COPA_AMERICA_2021',name:'Copa América',kind:'TOURNAMENT'}],standings:[{competitionCode:'COPA_AMERICA_2021',participantKey:'p',position:1,points:51,fulls:10,partials:10,errors:null,extras:null}],results:[],rounds:[],matches:[],movements:[],iffhs:[],statistics:[]},officialLinks:[],unavailable:[]};
 it('Tablas Totales tiene ruta independiente del archivo de Historia y admite enlaces viejos',()=>{
@@ -235,4 +236,28 @@ it('reúne campeón y subcampeón en la misma tarjeta de la competición',()=>{
  expect(cards[0].textContent).toContain('Subcampeón');
  expect(cards[0].textContent).toContain('beto');
  expect(host.textContent).not.toContain('Ascensos y descensos');
+});
+
+it('muestra las tablas de T8 cuando la importación solo trae cruces',()=>{
+ const catalog=historicalPhases['8'];
+ const keys=new Set([
+  ...Object.values(catalog.groups).flatMap(groups=>groups.flatMap(group=>group.entries.map(row=>row.participantKey))),
+  ...catalog.duos.flatMap(phase=>phase.individuals.map(row=>row.participantKey)),
+ ]);
+ const competitions=[
+  {code:'COPA_A',name:'Copa A',kind:'CUP' as const},
+  {code:'COPA_B',name:'Copa B',kind:'CUP' as const},
+  {code:'COPA_DUOS',name:'Copa Dúos',kind:'CUP' as const},
+  {code:'LIGA_B',name:'Liga B',kind:'LEAGUE' as const},
+ ];
+ const data={...detail.data,season:{...detail.data.season,number:8},competitions,standings:[],
+  participants:[...keys].map(key=>({key,name:key,userId:null,division:null})),
+ };
+ const archived={...detail,data,summary:importedSummary(data)};
+ const render=(competition:string)=>renderToStaticMarkup(createElement(SeasonDetail,{detail:archived,competition}));
+ expect(render('COPA_A')).toContain('Grupo 7');
+ expect(render('COPA_B')).toContain('data-phase-decision="qualified"');
+ expect(render('COPA_DUOS')).toContain('Desempate de fase 3');
+ expect(render('LIGA_B')).toContain('Zona B');
+ expect(catalog.duos.flatMap(phase=>phase.individuals).reduce((sum,row)=>sum+(row.stats[0]??0),0)).toBe(849);
 });
