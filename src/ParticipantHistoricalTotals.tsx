@@ -29,12 +29,12 @@ function CompetitionTrophy({code,name}:{code:string;name:string}){
   ?<AssetImage name={name} src={trophy?.image} size="sm" decorative fallback={<Icon name="trophy"/>}/>
   :<CompetitionImage code={code} name={name} variant="trophy" size="sm" decorative/>;
 }
-function Awards({count,kind,awards=[],showSeason}:{count:number;kind:'gold'|'silver';awards?:PalmarAward[];showSeason:boolean}){
+function Awards({count,kind,awards=[]}:{count:number;kind:'gold'|'silver';awards?:PalmarAward[]}){
  return <div className={'totals-awards totals-'+kind}>
   <strong aria-label={count+' '+(kind==='gold'?'campeonatos':'subcampeonatos')}>{count}</strong>
   {awards.length>0&&<ul>{awards.map(award=><li key={award.code+':'+award.seasonNumber} title={award.name+' · T'+award.seasonNumber} aria-label={award.name+' · T'+award.seasonNumber}>
    <CompetitionTrophy code={award.code} name={award.name}/>
-   {showSeason&&<small aria-hidden="true">T{award.seasonNumber}</small>}
+   <small aria-hidden="true">T{award.seasonNumber}</small>
   </li>)}</ul>}
  </div>;
 }
@@ -113,11 +113,11 @@ function EditionPodiums({editions}:{editions:EditionPodium[]}){
   </article>)}</div>
  </section>;
 }
-function Rows({rows,showAwardSeason}:{rows:PalmarTotal[];showAwardSeason:boolean}){
+function Rows({rows}:{rows:PalmarTotal[]}){
  return <div className="totals-table-wrap" tabIndex={0} role="region" aria-label="Palmarés de participantes">
   <table className="totals-table totals-table--honours">
    <thead><tr><th>Pos.</th><th>Participante</th><th>Campeonatos</th><th>Subcampeonatos</th><th>Participaciones</th></tr></thead>
-   <tbody>{rows.map(r=><tr key={r.userId} data-podium={r.position<=3?r.position:undefined}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th><td><Awards count={r.championships} kind="gold" showSeason={showAwardSeason} awards={r.awards?.filter(a=>a.champion)}/></td><td><Awards count={r.runnerUps} kind="silver" showSeason={showAwardSeason} awards={r.awards?.filter(a=>!a.champion)}/></td><td>{r.participations}</td></tr>)}</tbody>
+   <tbody>{rows.map(r=><tr key={r.userId} data-podium={r.position<=3?r.position:undefined}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th><td><Awards count={r.championships} kind="gold" awards={r.awards?.filter(a=>a.champion)}/></td><td><Awards count={r.runnerUps} kind="silver" awards={r.awards?.filter(a=>!a.champion)}/></td><td>{r.participations}</td></tr>)}</tbody>
   </table>
  </div>;
 }
@@ -166,7 +166,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
     {tab==='oficial'&&<span className="totals-period">Últimas 5 temporadas</span>}</header>
    {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">{data.competitions.map(c=><button type="button" key={c.code} aria-pressed={selected===c.code} onClick={()=>setCode(c.code)}><CompetitionTrophy code={c.code} name={c.name}/>{c.name}</button>)}</div>}
    {tab==='palmares'&&<div className="totals-tabs" role="group" aria-label="Modalidad de palmarés"><button type="button" aria-pressed={official} onClick={()=>setOfficial(true)}>Palmarés Oficial</button><button type="button" aria-pressed={!official} onClick={()=>setOfficial(false)}>Palmarés Total</button></div>}
-   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/><Rows rows={tab==='competencia'?titledRows:honours} showAwardSeason={tab==='competencia'}/>{tab==='competencia'&&<>{finals.length>0&&<FinalsCalendar finals={finals}/>}<EditionPodiums editions={podiums}/></>}</>}
+   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/><Rows rows={tab==='competencia'?titledRows:honours}/>{tab==='competencia'&&<>{finals.length>0&&<FinalsCalendar finals={finals}/>}<EditionPodiums editions={podiums}/></>}</>}
    {(tab==='oficial'||tab==='iffhs')&&<Indicators items={[
     ['Líder',leader(iffhs,r=>r.totalPoints,decimal)],['Puntos del líder',decimal(iffhs[0]?.totalPoints??null)],
     ['Temporadas consideradas',tab==='oficial'?data.iffhsOfficial.seasons.map(n=>'T'+n).join(' · '):iffhs[0]?.breakdown.length??0],
