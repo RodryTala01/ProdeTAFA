@@ -25,6 +25,36 @@ async function deliverBatch<T extends MatchPushSubscription>(items:T[],send:Deli
  return accepted;
 }
 export async function sendMatchPushNotifications(db:D1Database,send:Deliver){
+ // No provisional scores. Retry next cron if an official prediction hasn't
+ // been scored yet. Never guess from a draft or from a live match result.
+ const finals=(await db.prepare(`
+  SELECT ps.id,ps.user_id,ps.endpoint,ps.p256dh,ps.auth,
+   m.id AS match_id,m.home_team_name,m.away_team_name,
+   o.id AS prediction_id,s.prediction_id AS score_prediction_id,
+   s.total_points,s.is_provisional
+  FROM matches m
+  JOIN rounds r ON r.id=m.round_id AND r.status IN ('open','finished')
+  CROSS JOIN push_subscriptions ps
+  JOIN users u ON u.id=ps.user_id AND u.role='participant' AND u.is_active=1
+  LEFT JOIN official_predictions o ON o.match_id=m.id AND o.user_id=ps.user_id
+  LEFT JOIN prediction_scores s ON s.prediction_id=o.id
+  LEFT JOIN push_deliveries d ON d.subscription_id=ps.id
+   AND d.event_key='match:'||m.id||':final'
+  WHERE (d.id IS NULL OR (d.status IN ('failed','pending') AND d.attempts<3
+   AND d.attempted_at<=datetime('now','-15 minutes')))
+   AND m.status IN ('FT','AET','PEN') AND m.is_void=0
+   AND m.result_finalized_at IS NOT NULL
+   AND julianday(m.result_finalized_at)>=julianday('now','-6 hours')
+   AND julianday(m.result_finalized_at)<=julianday('now')
+   AND (o.id IS NULL OR (s.prediction_id IS NOT NULL AND s.is_provisional=0
+     AND julianday(s.calculated_at)>=julianday(m.result_finalized_at)))
+  ORDER BY m.result_finalized_at,m.id,ps.id
+ `).all<FinalRow>()).results??[];
+ const finalAccepted=await deliverBatch(finals,send,row=>[
+  finalForMatch(row.home_team_name,row.away_team_name,row.match_id,
+   row.prediction_id===null?0:Number(row.total_points),row.prediction_id!==null),
+  'match:'+row.match_id+':final'
+ ]);
  // The user may have submitted previous matches, but not the fourth or fifth.
  // Only official_predictions count as sent; autosaved drafts never do.
  const reminders=(await db.prepare(`
@@ -50,36 +80,6 @@ export async function sendMatchPushNotifications(db:D1Database,send:Deliver){
   reminderForMatch(row.home_team_name,row.away_team_name,row.match_id),
   'match:'+row.match_id+':reminder-1h',
   3300 // Avoid delayed reminders after kickoff.
- ]);
- // No provisional scores. Retry next cron if an official prediction hasn't
- // been scored yet. Never guess from a draft or from a live match result.
- const finals=(await db.prepare(`
-  SELECT ps.id,ps.user_id,ps.endpoint,ps.p256dh,ps.auth,
-   m.id AS match_id,m.home_team_name,m.away_team_name,
-   o.id AS prediction_id,s.prediction_id AS score_prediction_id,
-   s.total_points,s.is_provisional
-  FROM matches m
-  JOIN rounds r ON r.id=m.round_id AND r.status IN ('open','finished')
-  CROSS JOIN push_subscriptions ps
-  JOIN users u ON u.id=ps.user_id AND u.role='participant' AND u.is_active=1
-  LEFT JOIN official_predictions o ON o.match_id=m.id AND o.user_id=ps.user_id
-  LEFT JOIN prediction_scores s ON s.prediction_id=o.id
-  LEFT JOIN push_deliveries d ON d.subscription_id=ps.id
-   AND d.event_key='match:'||m.id||':final'
-  WHERE (d.id IS NULL OR (d.status='failed' AND d.attempts<3
-   AND d.attempted_at<=datetime('now','-15 minutes')))
-   AND m.status IN ('FT','AET','PEN') AND m.is_void=0
-   AND m.result_finalized_at IS NOT NULL
-   AND julianday(m.result_finalized_at)>=julianday('now','-6 hours')
-   AND julianday(m.result_finalized_at)<=julianday('now')
-   AND (o.id IS NULL OR (s.prediction_id IS NOT NULL AND s.is_provisional=0
-     AND julianday(s.calculated_at)>=julianday(m.result_finalized_at)))
-  ORDER BY m.result_finalized_at,m.id,ps.id
- `).all<FinalRow>()).results??[];
- const finalAccepted=await deliverBatch(finals,send,row=>[
-  finalForMatch(row.home_team_name,row.away_team_name,row.match_id,
-   row.prediction_id===null?0:Number(row.total_points),row.prediction_id!==null),
-  'match:'+row.match_id+':final'
  ]);
  return {reminders:reminders.length,reminderAccepted,finals:finals.length,finalAccepted};
 }

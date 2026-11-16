@@ -70,7 +70,10 @@ async function send(env:Env,s:Subscription,notice:Notice,eventKey:string,ttlSeco
  const claimed=await env.DB.prepare(`INSERT INTO push_deliveries(subscription_id,event_key) VALUES(?,?)
  ON CONFLICT(subscription_id,event_key) DO UPDATE SET
  status='pending',attempts=attempts+1,attempted_at=datetime('now')
- WHERE status='failed' AND attempts<3 AND attempted_at<=datetime('now',?)`)
+ WHERE attempts<3 AND (
+  (status='failed' AND attempted_at<=datetime('now',?))
+  OR (status='pending' AND attempted_at<=datetime('now','-15 minutes'))
+ )`)
  .bind(s.id,eventKey,eventKey.endsWith(':reminder-1h')?'-3 minutes':'-15 minutes').run();
  if(Number(claimed.meta.changes??0)!==1)return false;
  try {
@@ -317,6 +320,7 @@ export async function sendDuePushNotifications(env:Env){
  if(!env.PUSH_VAPID_PRIVATE_KEY||!(await vapidPublic(env)))return;
  const subscriptions=(await env.DB.prepare(`SELECT ps.* FROM push_subscriptions ps JOIN users u ON u.id=ps.user_id WHERE u.is_active=1 AND u.role='participant'`).all<Subscription>()).results??[];
  if(!subscriptions.length)return;
+ await sendMatchPushNotifications(env.DB,(subscriber,notice,key,ttl)=>send(env,subscriber,notice,key,ttl));
  const rounds=(await env.DB.prepare(`SELECT r.id,r.name,r.status,r.published_at,r.finished_at,
  MIN(m.kickoff_at) AS kickoff,COUNT(m.id) AS games,
  SUM(CASE WHEN m.result_finalized_at IS NOT NULL OR m.is_void=1 THEN 0 ELSE 1 END) AS unfinished
@@ -335,6 +339,10 @@ export async function sendDuePushNotifications(env:Env){
    if(until<=24*3600_000&&until>23*3600_000)events.push({code:'reminder24',onlyPending:true,notice:{title:'Pronósticos pendientes',body:'Falta aproximadamente un día para el primer cierre de '+r.name+'. Revisá tu envío.',url:'/#/pronosticos',tag:'tafa-'+r.id+'-24h'}});
    if(until<=2*3600_000&&until>3600_000)events.push({code:'reminder2',onlyPending:true,notice:{title:'¡Último aviso de TAFA!',body:'Faltan unas dos horas para el primer cierre de '+r.name+'. ¿Ya enviaste?',url:'/#/pronosticos',tag:'tafa-'+r.id+'-2h'}});
   }
+  const sinceFinished=r.finished_at?now-Date.parse(r.finished_at.endsWith('Z')?r.finished_at:r.finished_at.replace(' ','T')+'Z'):Infinity;
+  if(r.status==='finished'&&Number(r.unfinished)===0&&sinceFinished>=0&&sinceFinished<24*3600_000){
+   events.push({code:'finished',onlyPending:false,notice:{title:'Terminó '+r.name,body:'Ya podés consultar tus puntos y la clasificación en Prode TAFA.',url:'/#/club/historial',tag:'tafa-'+r.id+'-finished'}});
+  }
   for(const event of events){
    const eligibility=new Map<string,boolean>();
    for(const s of subscriptions){
@@ -346,6 +354,4 @@ export async function sendDuePushNotifications(env:Env){
    }
   }
  }
- // Send individual 1h warnings and personalized, definitively scored results.
- await sendMatchPushNotifications(env.DB,(subscriber,notice,key,ttl)=>send(env,subscriber,notice,key,ttl));
 }
