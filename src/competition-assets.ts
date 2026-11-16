@@ -4,6 +4,8 @@ export const competitionCodes = ['LIGA_A','LIGA_B','COPA_A','COPA_B','COPA_TOTAL
 export type CompetitionAsset = { logo?:string; trophy?:string; accent?:`--${string}` };
 // Only register supplied assets. No speculative URLs or requests for missing files.
 export const competitionAssets: Record<string,CompetitionAsset> = Object.fromEntries(competitionCodes.map(code=>[code,{trophy:`/competitions/${code.toLowerCase()}.png`}]));
+competitionAssets.LIGA_C={trophy:'/competitions/liga_c.png'};
+competitionAssets.COPA_C={trophy:'/competitions/copa_c.png'};
 competitionAssets.MUNDIAL={trophy:'/competitions/mundial_oro.png'};
 competitionAssets.MUNDIAL_ORO=competitionAssets.MUNDIAL;
 competitionAssets.MUNDIAL_QATAR_2022=competitionAssets.MUNDIAL;
