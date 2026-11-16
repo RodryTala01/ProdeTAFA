@@ -68,3 +68,41 @@
 .totals-table--honours tbody tr[data-podium]{background:color-mix(in srgb,var(--podium) 8%,var(--surface))}
 .totals-table--honours tbody tr[data-podium]>td:first-child{box-shadow:inset 2px 0 var(--podium);color:var(--podium);font-weight:800}
 @media(max-width:540px){.totals-honour-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.totals-honour-cards .totals-card{padding:9px}.totals-card .totals-person{gap:4px}}
+
+/* A compact honours leader card: only two names until expanded. */
+.totals-honour-cards .totals-card--participations dd{min-width:0}
+.totals-card-more{margin-top:8px;border-top:1px solid var(--border);padding-top:8px}
+.totals-card-more summary{cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-size:.73rem;font-weight:750;color:var(--home-violet);padding:5px 1px;outline-offset:4px}
+.totals-card-more summary:hover,.totals-card-more summary:focus-visible{color:var(--text)}
+.totals-card-more ul{margin-top:8px}
+.totals-card--participations>dd>ul{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;justify-content:start}
+.totals-card--participations li{width:fit-content;max-width:100%}
+/* Final calendar: matches and crests above, season below; recent first. */
+.totals-finals{min-width:0;margin:16px 0 19px;padding:14px;border:1px solid var(--border-strong);border-radius:var(--radius-panel);background:var(--bg)}
+.totals-finals-heading{display:flex;justify-content:space-between;align-items:start;gap:14px;margin-bottom:14px}
+.totals-finals-heading h3{font:800 1rem/1.2 var(--font-display);color:var(--text);margin:0}
+.totals-finals-heading p{margin:4px 0 0;color:var(--text-muted);font-size:.74rem}
+.totals-finals-heading>span{font-size:.69rem;color:var(--text-muted);white-space:nowrap;font-variant-numeric:tabular-nums;padding:4px 7px;border:1px solid var(--border);border-radius:var(--radius-control)}
+.totals-finals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:10px;align-items:stretch}
+.totals-final-card{display:grid;grid-template-rows:minmax(0,1fr) auto;min-width:0;text-decoration:none;color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-control);background:var(--surface);overflow:hidden;transition:border-color .15s ease,transform .15s ease,background-color .15s ease}
+.totals-final-card:hover{border-color:var(--home-violet);background:var(--surface-hover);transform:translateY(-2px)}
+.totals-final-card:focus-visible{outline:2px solid var(--home-violet);outline-offset:3px}
+.totals-final-entries{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start;gap:5px;padding:13px 7px 10px}
+.totals-final-contender{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;text-align:center}
+.totals-final-contender>.asset-image{flex-shrink:0}
+.totals-final-contender>span:last-child{font-size:.68rem;line-height:1.2;max-width:100%;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.totals-final-score{display:flex;gap:2px;align-items:center;justify-content:center;min-height:40px;font-variant-numeric:tabular-nums;font-size:.73rem;color:var(--text);white-space:nowrap}
+.totals-final-score strong{font-weight:800}
+.totals-final-score>span{color:var(--text-muted)}
+.totals-final-caption{display:flex;justify-content:space-between;align-items:center;gap:8px;background:color-mix(in srgb,var(--home-violet) 10%,var(--surface));border-top:1px solid var(--border);padding:8px 10px}
+.totals-final-caption strong{color:var(--home-fluor);font:800 .84rem/1 var(--font-display)}
+.totals-final-caption small{font-size:.66rem;color:var(--text-muted);text-align:right;line-height:1.15}
+.totals-finals-empty{color:var(--text-muted);margin:0;padding:10px 0;font-size:.8rem}
+@media(max-width:700px){
+ .totals-finals{padding:10px;margin:12px 0 14px}
+ .totals-finals-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .totals-finals-heading{flex-wrap:wrap;gap:7px}
+ .totals-finals-heading>span{white-space:normal}
+ .totals-final-entries{padding:12px 5px 10px;gap:3px}
+}
+@media(prefers-reduced-motion:reduce){.totals-final-card{transition:none}.totals-final-card:hover{transform:none}}
