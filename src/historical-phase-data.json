@@ -1,0 +1,683 @@
+{
+  "6": {
+    "groups": {
+      "COPA_A": [
+        {
+          "name": "Grupo 1",
+          "entries": [
+            {"participantKey": "t5-fabrizio-escolano", "points": 38, "position": 1, "decision": "qualified"},
+            {"participantKey": "t1-jhose", "points": 28, "position": 2, "decision": "qualified"},
+            {"participantKey": "t1-rodrigo-talarico", "points": 27, "position": 3, "decision": "eliminated"},
+            {"participantKey": "t1-nahuel-scocier", "points": 22, "position": 4, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 2",
+          "entries": [
+            {"participantKey": "t1-mario-talarico", "points": 36, "position": 1, "decision": "qualified"},
+            {"participantKey": "t1-gabriel-talarico", "points": 28, "position": 2, "decision": "qualified"},
+            {"participantKey": "t1-joel-marasco", "points": 23, "position": 3, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 3",
+          "entries": [
+            {"participantKey": "t2-nico-avalos", "points": 39, "position": 1, "decision": "qualified"},
+            {"participantKey": "t1-kevin-sivori", "points": 30, "position": 2, "decision": "qualified"},
+            {"participantKey": "t3-bruno-alonso", "points": 28, "position": 3, "decision": "eliminated"},
+            {"participantKey": "t1-pancho-muzzio", "points": 25, "position": 4, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 4",
+          "entries": [
+            {"participantKey": "t1-lautaro-scocier", "points": 35, "position": 1, "decision": "qualified"},
+            {"participantKey": "t4-nico-luchetti-r", "points": 28, "position": 2, "decision": "qualified"},
+            {"participantKey": "t1-matheo-olivera", "points": 26, "position": 3, "decision": "eliminated"},
+            {"participantKey": "t1-rodri-sebastian", "points": 19, "position": 4, "decision": "eliminated"}
+          ]
+        }
+      ],
+      "COPA_B": [
+        {
+          "name": "Grupo 1",
+          "entries": [
+            {"participantKey": "t3-fede-gerez", "points": 24, "position": 1, "decision": "qualified"},
+            {"participantKey": "t5-rodrigo-soca", "points": 24, "position": 2, "decision": "qualified"},
+            {"participantKey": "t1-joaco-fernandez", "points": 24, "position": 3, "decision": "qualified"},
+            {"participantKey": "t4-juli-boetsch", "points": 20, "position": 4, "decision": "qualified"}
+          ]
+        },
+        {
+          "name": "Grupo 2",
+          "entries": [
+            {"participantKey": "t1-matias-varela", "points": 28, "position": 1, "decision": "qualified"},
+            {"participantKey": "t4-eze", "points": 23, "position": 2, "decision": "qualified"},
+            {"participantKey": "t5-koke", "points": 15, "position": 3, "decision": "qualified"},
+            {"participantKey": "t6-ramiro-caruso", "points": 4, "position": 4, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 3",
+          "entries": [
+            {"participantKey": "t6-lucas-insua", "points": 23, "position": 1, "decision": "qualified"},
+            {"participantKey": "t1-anubis", "points": 23, "position": 2, "decision": "qualified"},
+            {"participantKey": "t5-veronica-lucchesi", "points": 17, "position": 3, "decision": "qualified"},
+            {"participantKey": "t2-martin-bustos", "points": 15, "position": 4, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 4",
+          "entries": [
+            {"participantKey": "t6-moreno-perez", "points": 20, "position": 1, "decision": "qualified"},
+            {"participantKey": "t1-el-diego", "points": 19, "position": 2, "decision": "qualified"},
+            {"participantKey": "t4-tomas-hon", "points": 16, "position": 3, "decision": "qualified"},
+            {"participantKey": "t4-natanael", "points": 14, "position": 4, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 5",
+          "entries": [
+            {"participantKey": "t3-santi", "points": 29, "position": 1, "decision": "qualified"},
+            {"participantKey": "t5-matias-diaz", "points": 26, "position": 2, "decision": "qualified"},
+            {"participantKey": "t6-ramiro-vita", "points": 21, "position": 3, "decision": "qualified"},
+            {"participantKey": "t1-luciano-hufschmid", "points": 18, "position": 4, "decision": "eliminated"},
+            {"participantKey": "t3-valentina-scocier", "points": 16, "position": 5, "decision": "eliminated"}
+          ]
+        }
+      ]
+    },
+    "duos": [
+      {
+        "name": "Fase 1",
+        "pairs": [
+          {"position": 1, "name": "Rodri S. // ((Gabriel))", "stats": [28, 7, 7, 10, 0], "decision": "eliminated"},
+          {"position": 2, "name": "Matías V. // Gabriel", "stats": [27, 7, 6, 11, 0], "decision": "qualified"},
+          {"position": 3, "name": "Fabrizio // Lucas", "stats": [23, 5, 8, 11, 0], "decision": "qualified"},
+          {"position": 4, "name": "Lautaro // Martín", "stats": [22, 4, 10, 10, 0], "decision": "qualified"},
+          {"position": 5, "name": "Verónica // Bruno", "stats": [22, 4, 10, 10, 0], "decision": "qualified"},
+          {"position": 6, "name": "Mario // Nico L.", "stats": [22, 3, 13, 8, 0], "decision": "qualified"},
+          {"position": 7, "name": "Pollo // Santiago", "stats": [22, 3, 13, 8, 0], "decision": "qualified"},
+          {"position": 8, "name": "R. Talarico // Joaco", "stats": [21, 4, 9, 11, 0], "decision": "qualified"},
+          {"position": 9, "name": "Nico A. // Koke", "stats": [21, 3, 12, 9, 0], "decision": "qualified"},
+          {"position": 10, "name": "Ramiro V. // Tomás", "stats": [21, 3, 12, 9, 0], "decision": "qualified"},
+          {"position": 11, "name": "Moreno // Fede", "stats": [19, 3, 10, 11, 0], "decision": "qualified"},
+          {"position": 12, "name": "Nahuel // Jhose", "stats": [18, 3, 9, 12, 0], "decision": "qualified"},
+          {"position": 13, "name": "Kevin // Anubis", "stats": [17, 1, 14, 9, 0], "decision": "qualified"},
+          {"position": 14, "name": "Matheo // Eze", "stats": [17, 1, 14, 9, 0], "decision": "qualified"},
+          {"position": 15, "name": "Luciano // Juli", "stats": [16, 1, 13, 10, 0], "decision": "qualified"},
+          {"position": 16, "name": "Valentina // Joel", "stats": [15, 1, 12, 11, 0], "decision": "qualified"},
+          {"position": 17, "name": "Pancho // Matías D.", "stats": [13, 0, 13, 11, 0], "decision": "eliminated"},
+          {"position": 18, "name": "Diego // Natanael", "stats": [12, 3, 3, 18, 0], "decision": "eliminated"},
+          {"position": 19, "name": "Ramiro C. // R. Soca", "stats": [9, 1, 6, 17, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t1-el-diego", "stats": [6, 2, 0, 10, 0], "decision": "eliminated"},
+          {"participantKey": "t4-natanael", "stats": [6, 1, 3, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t5-fabrizio-escolano", "stats": [14, 3, 5, 4, 0], "decision": "qualified"},
+          {"participantKey": "t6-lucas-insua", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t1-kevin-sivori", "stats": [9, 1, 6, 5, 0], "decision": "qualified"},
+          {"participantKey": "t1-anubis", "stats": [8, 0, 8, 4, 0], "decision": "qualified"},
+          {"participantKey": "t1-lautaro-scocier", "stats": [14, 3, 5, 4, 0], "decision": "qualified"},
+          {"participantKey": "t2-martin-bustos", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-luciano-hufschmid", "stats": [9, 1, 6, 5, 0], "decision": "qualified"},
+          {"participantKey": "t4-juli-boetsch", "stats": [7, 0, 7, 5, 0], "decision": "qualified"},
+          {"participantKey": "t1-mario-talarico", "stats": [10, 1, 7, 4, 0], "decision": "qualified"},
+          {"participantKey": "t4-nico-luchetti-r", "stats": [12, 2, 6, 4, 0], "decision": "qualified"},
+          {"participantKey": "t1-matheo-olivera", "stats": [9, 1, 6, 5, 0], "decision": "qualified"},
+          {"participantKey": "t4-eze", "stats": [8, 0, 8, 4, 0], "decision": "qualified"},
+          {"participantKey": "t1-matias-varela", "stats": [12, 3, 3, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [15, 4, 3, 5, 0], "decision": "qualified"},
+          {"participantKey": "t6-moreno-perez", "stats": [11, 2, 5, 5, 0], "decision": "qualified"},
+          {"participantKey": "t3-fede-gerez", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-nahuel-scocier", "stats": [9, 1, 6, 5, 0], "decision": "qualified"},
+          {"participantKey": "t1-jhose", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t2-nico-avalos", "stats": [15, 3, 6, 3, 0], "decision": "qualified"},
+          {"participantKey": "t5-koke", "stats": [6, 0, 6, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-pancho-muzzio", "stats": [6, 0, 6, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t5-matias-diaz", "stats": [7, 0, 7, 5, 0], "decision": "eliminated"},
+          {"participantKey": "t4-pollo", "stats": [7, 0, 7, 5, 0], "decision": "qualified"},
+          {"participantKey": "t3-santi", "stats": [15, 3, 6, 3, 0], "decision": "qualified"},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [11, 2, 5, 5, 0], "decision": "qualified"},
+          {"participantKey": "t1-joaco-fernandez", "stats": [10, 2, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t6-ramiro-caruso", "stats": [1, 0, 1, 11, 0], "decision": "eliminated"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t6-ramiro-vita", "stats": [15, 3, 6, 3, 0], "decision": "qualified"},
+          {"participantKey": "t4-tomas-hon", "stats": [6, 0, 6, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-rodri-sebastian", "stats": [13, 3, 4, 5, 0], "decision": "qualified"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [9, 2, 3, 5, 0], "decision": "qualified"},
+          {"participantKey": "t3-valentina-scocier", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-joel-marasco", "stats": [7, 0, 7, 5, 0], "decision": "qualified"},
+          {"participantKey": "t5-veronica-lucchesi", "stats": [9, 1, 6, 5, 0], "decision": "qualified"},
+          {"participantKey": "t3-bruno-alonso", "stats": [13, 3, 4, 5, 0], "decision": "qualified"}
+        ]
+      },
+      {
+        "name": "Fase 2",
+        "pairs": [
+          {"position": 1, "name": "Fabrizio // Lucas", "stats": [29, 6, 10, 8, 1], "decision": "qualified"},
+          {"position": 2, "name": "Kevin // Anubis", "stats": [28, 6, 10, 8, 0], "decision": "qualified"},
+          {"position": 3, "name": "Moreno // Fede", "stats": [25, 6, 6, 12, 1], "decision": "qualified"},
+          {"position": 4, "name": "Mario // Nico L.", "stats": [25, 4, 12, 8, 1], "decision": "qualified"},
+          {"position": 5, "name": "Nico A. // Koke", "stats": [24, 5, 8, 11, 1], "decision": "qualified"},
+          {"position": 6, "name": "Pollo // Santiago", "stats": [23, 4, 10, 10, 1], "decision": "eliminated"},
+          {"position": 7, "name": "R. Talarico // Joaco", "stats": [23, 4, 10, 10, 1], "decision": "qualified"},
+          {"position": 8, "name": "Matías V. // Gabriel", "stats": [23, 3, 13, 8, 1], "decision": "qualified"},
+          {"position": 9, "name": "Rodrigos S.", "stats": [22, 5, 6, 13, 1], "decision": "eliminated"},
+          {"position": 10, "name": "Luciano // Juli", "stats": [22, 4, 10, 10, 0], "decision": "eliminated"},
+          {"position": 11, "name": "Matheo // Eze", "stats": [21, 4, 9, 11, 0], "decision": "qualified"},
+          {"position": 12, "name": "Valentina // Joel", "stats": [18, 3, 9, 12, 0], "decision": "qualified"},
+          {"position": 13, "name": "Lautaro // Martín", "stats": [18, 2, 11, 11, 1], "decision": "eliminated"},
+          {"position": 14, "name": "Nahuel // Jhose", "stats": [16, 3, 7, 14, 0], "decision": "eliminated"},
+          {"position": 15, "name": "Ramiro V. // Tomás", "stats": [16, 3, 7, 14, 0], "decision": "eliminated"},
+          {"position": 16, "name": "Verónica // Bruno", "stats": [15, 3, 6, 15, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t5-fabrizio-escolano", "stats": [15, 3, 5, 4, 1], "decision": "qualified"},
+          {"participantKey": "t6-lucas-insua", "stats": [14, 3, 5, 4, 0], "decision": "qualified"},
+          {"participantKey": "t1-kevin-sivori", "stats": [13, 2, 7, 3, 0], "decision": "qualified"},
+          {"participantKey": "t1-anubis", "stats": [15, 4, 3, 5, 0], "decision": "qualified"},
+          {"participantKey": "t1-lautaro-scocier", "stats": [11, 2, 5, 5, 0], "decision": "eliminated"},
+          {"participantKey": "t2-martin-bustos", "stats": [7, 0, 6, 6, 1], "decision": "eliminated"},
+          {"participantKey": "t1-luciano-hufschmid", "stats": [9, 1, 6, 5, 0], "decision": "qualified"},
+          {"participantKey": "t4-juli-boetsch", "stats": [13, 3, 4, 5, 0], "decision": "eliminated"},
+          {"participantKey": "t1-mario-talarico", "stats": [16, 4, 4, 4, 0], "decision": "qualified"},
+          {"participantKey": "t4-nico-luchetti-r", "stats": [9, 0, 8, 4, 1], "decision": "qualified"},
+          {"participantKey": "t1-matheo-olivera", "stats": [6, 1, 3, 8, 0], "decision": "qualified"},
+          {"participantKey": "t4-eze", "stats": [15, 3, 6, 3, 0], "decision": "qualified"},
+          {"participantKey": "t1-matias-varela", "stats": [16, 3, 6, 3, 1], "decision": "qualified"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [7, 0, 7, 5, 0], "decision": "qualified"},
+          {"participantKey": "t6-moreno-perez", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t3-fede-gerez", "stats": [16, 4, 3, 5, 1], "decision": "qualified"},
+          {"participantKey": "t1-nahuel-scocier", "stats": [9, 2, 3, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t1-jhose", "stats": [7, 1, 4, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t2-nico-avalos", "stats": [16, 4, 3, 5, 1], "decision": "qualified"},
+          {"participantKey": "t5-koke", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t4-pollo", "stats": [9, 1, 6, 5, 0], "decision": "eliminated"},
+          {"participantKey": "t3-santi", "stats": [14, 3, 4, 5, 1], "decision": "qualified"},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t1-joaco-fernandez", "stats": [14, 2, 7, 3, 1], "decision": "qualified"},
+          {"participantKey": "t6-ramiro-vita", "stats": [6, 1, 3, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t4-tomas-hon", "stats": [10, 2, 4, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t1-rodri-sebastian", "stats": [6, 1, 3, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [16, 4, 3, 5, 1], "decision": "qualified"},
+          {"participantKey": "t3-valentina-scocier", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-joel-marasco", "stats": [10, 2, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t5-veronica-lucchesi", "stats": [8, 1, 5, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t3-bruno-alonso", "stats": [7, 2, 1, 9, 0], "decision": "eliminated"}
+        ]
+      },
+      {
+        "name": "Fase 3",
+        "pairs": [
+          {"position": 1, "name": "Mario // Nico L.", "stats": [17, 4, 5, 13, 0], "decision": "qualified"},
+          {"position": 2, "name": "Matheo // Eze", "stats": [17, 3, 8, 11, 0], "decision": "qualified"},
+          {"position": 3, "name": "Kevin // Anubis", "stats": [15, 3, 6, 13, 0], "decision": "qualified"},
+          {"position": 4, "name": "Valentina // Joel", "stats": [13, 2, 7, 13, 0], "decision": "qualified"},
+          {"position": 5, "name": "R. Talarico // Joaco", "stats": [13, 1, 10, 11, 0], "decision": "qualified"},
+          {"position": 6, "name": "Rodrigo Soca", "stats": [12, 2, 6, 14, 0], "decision": "qualified"},
+          {"position": 7, "name": "Santiago", "stats": [12, 2, 6, 14, 0], "decision": "qualified"},
+          {"position": 8, "name": "Moreno // Fede", "stats": [12, 1, 9, 12, 0], "decision": "qualified"},
+          {"position": 9, "name": "Nico A. // Koke", "stats": [12, 1, 9, 12, 0], "decision": "eliminated"},
+          {"position": 10, "name": "Fabrizio // Lucas", "stats": [11, 2, 5, 15, 0], "decision": "eliminated"},
+          {"position": 11, "name": "Matías V. // Gabriel", "stats": [11, 1, 8, 13, 0], "decision": "eliminated"},
+          {"position": 12, "name": "Luciano Hufschmid", "stats": [10, 0, 10, 12, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t5-fabrizio-escolano", "stats": [9, 2, 3, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t6-lucas-insua", "stats": [2, 0, 2, 9, 0], "decision": "eliminated"},
+          {"participantKey": "t1-kevin-sivori", "stats": [8, 2, 2, 7, 0], "decision": "qualified"},
+          {"participantKey": "t1-anubis", "stats": [7, 1, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-luciano-hufschmid", "stats": [5, 0, 5, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t1-luciano-hufschmid", "stats": [5, 0, 5, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t1-mario-talarico", "stats": [10, 3, 1, 7, 0], "decision": "qualified"},
+          {"participantKey": "t4-nico-luchetti-r", "stats": [7, 1, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-matheo-olivera", "stats": [11, 2, 5, 4, 0], "decision": "qualified"},
+          {"participantKey": "t4-eze", "stats": [6, 1, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t1-matias-varela", "stats": [5, 0, 5, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [6, 1, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t6-moreno-perez", "stats": [4, 0, 4, 7, 0], "decision": "qualified"},
+          {"participantKey": "t3-fede-gerez", "stats": [8, 1, 5, 5, 0], "decision": "qualified"},
+          {"participantKey": "t2-nico-avalos", "stats": [8, 1, 5, 5, 0], "decision": "eliminated"},
+          {"participantKey": "t5-koke", "stats": [4, 0, 4, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [7, 1, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-joaco-fernandez", "stats": [6, 0, 6, 5, 0], "decision": "qualified"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [6, 1, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [6, 1, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t3-santi", "stats": [6, 1, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t3-santi", "stats": [6, 1, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t3-valentina-scocier", "stats": [7, 1, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-joel-marasco", "stats": [6, 1, 3, 7, 0], "decision": "qualified"}
+        ]
+      },
+      {
+        "name": "Fase 4",
+        "pairs": [
+          {"position": 1, "name": "Rodri S. // Rodrigo S.", "stats": [27, 5, 12, 7, 0], "decision": "qualified"},
+          {"position": 2, "name": "Valentina // Joel", "stats": [24, 4, 12, 8, 0], "decision": "qualified"},
+          {"position": 3, "name": "Santiago // Gabriel", "stats": [20, 4, 8, 12, 0], "decision": "qualified"},
+          {"position": 4, "name": "Matheo // Eze", "stats": [19, 3, 10, 10, 0], "decision": "qualified"},
+          {"position": 5, "name": "Kevin // Anubis", "stats": [16, 2, 10, 12, 0], "decision": "eliminated"},
+          {"position": 6, "name": "R. Talarico // Joaco", "stats": [13, 2, 7, 15, 0], "decision": "eliminated"},
+          {"position": 7, "name": "Mario // Nico L.", "stats": [13, 1, 10, 13, 0], "decision": "eliminated"},
+          {"position": 8, "name": "Moreno // Fede", "stats": [9, 0, 9, 15, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t1-kevin-sivori", "stats": [11, 2, 5, 5, 0], "decision": "eliminated"},
+          {"participantKey": "t1-anubis", "stats": [5, 0, 5, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t1-mario-talarico", "stats": [7, 1, 4, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t4-nico-luchetti-r", "stats": [6, 0, 6, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t1-matheo-olivera", "stats": [12, 2, 6, 4, 0], "decision": "qualified"},
+          {"participantKey": "t4-eze", "stats": [7, 1, 4, 7, 0], "decision": "qualified"},
+          {"participantKey": "t6-moreno-perez", "stats": [5, 0, 5, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t3-fede-gerez", "stats": [3, 0, 3, 9, 0], "decision": "eliminated"},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [6, 1, 3, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t1-joaco-fernandez", "stats": [7, 1, 4, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t1-rodri-sebastian", "stats": [13, 2, 7, 3, 0], "decision": "qualified"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [14, 3, 5, 4, 0], "decision": "qualified"},
+          {"participantKey": "t3-santi", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [11, 2, 5, 5, 0], "decision": "qualified"},
+          {"participantKey": "t3-valentina-scocier", "stats": [13, 2, 7, 3, 0], "decision": "qualified"},
+          {"participantKey": "t1-joel-marasco", "stats": [11, 2, 5, 5, 0], "decision": "qualified"}
+        ]
+      },
+      {
+        "name": "Fase 5",
+        "pairs": [
+          {"position": 1, "name": "Rodri S. // Rodrigo S.", "stats": [22, 5, 7, 12, 0], "decision": "qualified"},
+          {"position": 2, "name": "Santiago // Gabriel", "stats": [21, 5, 6, 13, 0], "decision": "qualified"},
+          {"position": 3, "name": "Valentina // Joel", "stats": [21, 5, 6, 13, 0], "decision": "eliminated"},
+          {"position": 4, "name": "Matheo // Eze", "stats": [18, 3, 9, 12, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t1-matheo-olivera", "stats": [9, 2, 3, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t4-eze", "stats": [9, 1, 6, 5, 0], "decision": "eliminated"},
+          {"participantKey": "t1-rodri-sebastian", "stats": [13, 3, 4, 5, 0], "decision": "qualified"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t3-santi", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [12, 3, 3, 6, 0], "decision": "qualified"},
+          {"participantKey": "t3-valentina-scocier", "stats": [9, 2, 3, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t1-joel-marasco", "stats": [12, 3, 3, 6, 0], "decision": "eliminated"}
+        ]
+      },
+      {
+        "name": "Desempate de fase 5",
+        "pairs": [
+          {"position": 1, "name": "Santiago // Gabriel", "stats": [4, 1, 1, 2, 0], "decision": "qualified"},
+          {"position": 2, "name": "Valentina // Joel", "stats": [0, 0, 0, 4, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t3-santi", "stats": [0, 0, 0, 2, 0], "decision": "qualified"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [4, 1, 1, 0, 0], "decision": "qualified"},
+          {"participantKey": "t3-valentina-scocier", "stats": [0, 0, 0, 2, 0], "decision": "eliminated"},
+          {"participantKey": "t1-joel-marasco", "stats": [0, 0, 0, 2, 0], "decision": "eliminated"}
+        ]
+      },
+      {
+        "name": "Final",
+        "pairs": [],
+        "individuals": [
+          {"participantKey": "t1-rodri-sebastian", "stats": [3, 0, 3, 9, 0]},
+          {"participantKey": "t5-rodrigo-soca", "stats": [11, 3, 2, 7, 0]},
+          {"participantKey": "t3-santi", "stats": [2, 0, 2, 10, 0]},
+          {"participantKey": "t1-gabriel-talarico", "stats": [4, 1, 1, 10, 0]}
+        ]
+      }
+    ]
+  },
+  "7": {
+    "groups": {
+      "COPA_A": [
+        {
+          "name": "Grupo 1",
+          "entries": [
+            {"participantKey": "t4-nico-luchetti-r", "points": 25, "position": 1, "decision": "qualified"},
+            {"participantKey": "t1-lautaro-scocier", "points": 24, "position": 2, "decision": "eliminated"},
+            {"participantKey": "t6-ramiro-vita", "points": 24, "position": 3, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 2",
+          "entries": [
+            {"participantKey": "t1-gabriel-talarico", "points": 27, "position": 1, "decision": "qualified"},
+            {"participantKey": "t5-matias-diaz", "points": 27, "position": 2, "decision": "eliminated"},
+            {"participantKey": "t1-pancho-muzzio", "points": 25, "position": 3, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 3",
+          "entries": [
+            {"participantKey": "t1-joel-marasco", "points": 32, "position": 1, "decision": "qualified"},
+            {"participantKey": "t6-moreno-perez", "points": 24, "position": 2, "decision": "eliminated"},
+            {"participantKey": "t2-nico-avalos", "points": 21, "position": 3, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 4",
+          "entries": [
+            {"participantKey": "t5-rodrigo-soca", "points": 31, "position": 1, "decision": "qualified"},
+            {"participantKey": "t1-jhose", "points": 31, "position": 2, "decision": "qualified"},
+            {"participantKey": "t1-nahuel-scocier", "points": 16, "position": 3, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 5",
+          "entries": [
+            {"participantKey": "t5-veronica-lucchesi", "points": 35, "position": 1, "decision": "qualified"},
+            {"participantKey": "t1-kevin-sivori", "points": 30, "position": 2, "decision": "eliminated"},
+            {"participantKey": "t1-matheo-olivera", "points": 30, "position": 3, "decision": "qualified"}
+          ]
+        },
+        {
+          "name": "Grupo 6",
+          "entries": [
+            {"participantKey": "t5-fabrizio-escolano", "points": 27, "position": 1, "decision": "qualified"},
+            {"participantKey": "t3-bruno-alonso", "points": 24, "position": 2, "decision": "eliminated"},
+            {"participantKey": "t1-rodri-sebastian", "points": 20, "position": 3, "decision": "eliminated"}
+          ]
+        }
+      ],
+      "COPA_B": [
+        {
+          "name": "Grupo 1",
+          "entries": [
+            {"participantKey": "t4-eze", "points": 28, "position": 1, "decision": "qualified"},
+            {"participantKey": "t1-mario-talarico", "points": 19, "position": 2, "decision": "qualified"},
+            {"participantKey": "t6-tomas-gonzalez", "points": 18, "position": 3, "decision": "qualified"},
+            {"participantKey": "t7-nacho-soto", "points": 16, "position": 4, "decision": "eliminated"},
+            {"participantKey": "t7-joaquin-sampadaro", "points": 11, "position": 5, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 2",
+          "entries": [
+            {"participantKey": "t7-daniel-bazan", "points": 18, "position": 1, "decision": "qualified"},
+            {"participantKey": "t4-natanael", "points": 13, "position": 2, "decision": "qualified"},
+            {"participantKey": "t1-anubis", "points": 13, "position": 3, "decision": "qualified"},
+            {"participantKey": "t7-agustin", "points": 11, "position": 4, "decision": "eliminated"},
+            {"participantKey": "t3-valentina-scocier", "points": 9, "position": 5, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 3",
+          "entries": [
+            {"participantKey": "t3-fede-gerez", "points": 21, "position": 1, "decision": "qualified"},
+            {"participantKey": "t7-anto-lopez", "points": 21, "position": 2, "decision": "qualified"},
+            {"participantKey": "t1-rodrigo-talarico", "points": 19, "position": 3, "decision": "qualified"},
+            {"participantKey": "t3-santi", "points": 16, "position": 4, "decision": "qualified"},
+            {"participantKey": "t7-santino-mercado", "points": 11, "position": 5, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 4",
+          "entries": [
+            {"participantKey": "t7-lucas-aguilera", "points": 23, "position": 1, "decision": "qualified"},
+            {"participantKey": "t6-ian-gangai", "points": 20, "position": 2, "decision": "qualified"},
+            {"participantKey": "t7-tomas-torcasio", "points": 20, "position": 3, "decision": "qualified"},
+            {"participantKey": "t2-martin-bustos", "points": 12, "position": 4, "decision": "eliminated"},
+            {"participantKey": "t1-joaco-fernandez", "points": 10, "position": 5, "decision": "eliminated"}
+          ]
+        },
+        {
+          "name": "Grupo 5",
+          "entries": [
+            {"participantKey": "t6-tomas-delgado", "points": 23, "position": 1, "decision": "qualified"},
+            {"participantKey": "t6-lucas-insua", "points": 15, "position": 2, "decision": "qualified"},
+            {"participantKey": "t1-luciano-hufschmid", "points": 15, "position": 3, "decision": "qualified"},
+            {"participantKey": "t1-matias-varela", "points": 13, "position": 4, "decision": "eliminated"}
+          ]
+        }
+      ]
+    },
+    "duos": [
+      {
+        "name": "Fase 1",
+        "pairs": [
+          {"position": 1, "name": "Joaco // Rodrigo So", "stats": [26, 7, 4, 13, 1], "decision": "qualified"},
+          {"position": 2, "name": "Jhose // Daniel", "stats": [24, 6, 5, 13, 1], "decision": "qualified"},
+          {"position": 3, "name": "Matheo // Verónica", "stats": [24, 5, 9, 10, 0], "decision": "qualified"},
+          {"position": 4, "name": "Pancho // Gabriel", "stats": [24, 5, 8, 11, 1], "decision": "qualified"},
+          {"position": 5, "name": "Rodrigo T // Tomás D", "stats": [22, 4, 9, 11, 1], "decision": "qualified"},
+          {"position": 6, "name": "Tomás G // Tomás T", "stats": [22, 3, 13, 8, 0], "decision": "qualified"},
+          {"position": 7, "name": "Lucas A // Nico A", "stats": [22, 5, 7, 12, 0], "decision": "qualified"},
+          {"position": 8, "name": "Luciano // Eze", "stats": [20, 4, 7, 13, 1], "decision": "qualified"},
+          {"position": 9, "name": "Moreno // Mario", "stats": [19, 3, 9, 12, 1], "decision": "qualified"},
+          {"position": 10, "name": "Rodri Seb // Anto", "stats": [19, 3, 9, 12, 1], "decision": "qualified"},
+          {"position": 11, "name": "Lautaro // Martín", "stats": [18, 5, 3, 16, 0], "decision": "qualified"},
+          {"position": 12, "name": "Lucas I // Ian", "stats": [18, 4, 5, 15, 1], "decision": "qualified"},
+          {"position": 13, "name": "Fede // Santiago", "stats": [17, 3, 8, 13, 0], "decision": "qualified"},
+          {"position": 14, "name": "Joaquin // Fabrizio", "stats": [17, 3, 6, 15, 2], "decision": "qualified"},
+          {"position": 15, "name": "Santino // Joel", "stats": [17, 2, 11, 11, 0], "decision": "qualified"},
+          {"position": 16, "name": "Kevin // Agustin", "stats": [16, 4, 4, 16, 0], "decision": "qualified"},
+          {"position": 17, "name": "Anubis // Bruno", "stats": [15, 2, 9, 13, 0], "decision": "eliminated"},
+          {"position": 18, "name": "Ramiro // Matías V", "stats": [14, 3, 4, 17, 1], "decision": "eliminated"},
+          {"position": 19, "name": "Valentina // Nico L", "stats": [13, 2, 5, 17, 2], "decision": "eliminated"},
+          {"position": 20, "name": "Nacho // Natanael", "stats": [12, 1, 7, 16, 2], "decision": "eliminated"},
+          {"position": 21, "name": "Matías D // Nahuel", "stats": [10, 0, 10, 14, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t1-anubis", "stats": [5, 0, 5, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t3-bruno-alonso", "stats": [10, 2, 4, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t3-fede-gerez", "stats": [13, 3, 4, 5, 0], "decision": "qualified"},
+          {"participantKey": "t3-santi", "stats": [4, 0, 4, 8, 0], "decision": "qualified"},
+          {"participantKey": "t1-jhose", "stats": [16, 4, 3, 5, 1], "decision": "qualified"},
+          {"participantKey": "t7-daniel-bazan", "stats": [8, 2, 2, 8, 0], "decision": "qualified"},
+          {"participantKey": "t1-joaco-fernandez", "stats": [10, 2, 3, 7, 1], "decision": "qualified"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [16, 5, 1, 6, 0], "decision": "qualified"},
+          {"participantKey": "t7-joaquin-sampadaro", "stats": [2, 0, 1, 11, 1], "decision": "qualified"},
+          {"participantKey": "t5-fabrizio-escolano", "stats": [15, 3, 5, 4, 1], "decision": "qualified"},
+          {"participantKey": "t1-kevin-sivori", "stats": [14, 4, 2, 6, 0], "decision": "qualified"},
+          {"participantKey": "t7-agustin", "stats": [2, 0, 2, 10, 0], "decision": "qualified"},
+          {"participantKey": "t1-lautaro-scocier", "stats": [14, 4, 2, 6, 0], "decision": "qualified"},
+          {"participantKey": "t2-martin-bustos", "stats": [4, 1, 1, 10, 0], "decision": "qualified"},
+          {"participantKey": "t7-lucas-aguilera", "stats": [15, 4, 3, 5, 0], "decision": "qualified"},
+          {"participantKey": "t2-nico-avalos", "stats": [7, 1, 4, 7, 0], "decision": "qualified"},
+          {"participantKey": "t6-lucas-insua", "stats": [6, 1, 3, 8, 0], "decision": "qualified"},
+          {"participantKey": "t6-ian-gangai", "stats": [12, 3, 2, 7, 1], "decision": "qualified"},
+          {"participantKey": "t1-luciano-hufschmid", "stats": [7, 1, 4, 7, 0], "decision": "qualified"},
+          {"participantKey": "t4-eze", "stats": [13, 3, 3, 6, 1], "decision": "qualified"},
+          {"participantKey": "t1-matheo-olivera", "stats": [11, 2, 5, 5, 0], "decision": "qualified"},
+          {"participantKey": "t5-veronica-lucchesi", "stats": [13, 3, 4, 5, 0], "decision": "qualified"},
+          {"participantKey": "t5-matias-diaz", "stats": [6, 0, 6, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t1-nahuel-scocier", "stats": [4, 0, 4, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t6-moreno-perez", "stats": [8, 1, 4, 7, 1], "decision": "qualified"},
+          {"participantKey": "t1-mario-talarico", "stats": [10, 2, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t7-nacho-soto", "stats": [8, 1, 4, 7, 1], "decision": "eliminated"},
+          {"participantKey": "t4-natanael", "stats": [4, 0, 3, 9, 1], "decision": "eliminated"},
+          {"participantKey": "t1-pancho-muzzio", "stats": [11, 2, 4, 6, 1], "decision": "qualified"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [13, 3, 4, 5, 0], "decision": "qualified"},
+          {"participantKey": "t6-ramiro-vita", "stats": [7, 1, 3, 8, 1], "decision": "eliminated"},
+          {"participantKey": "t1-matias-varela", "stats": [7, 2, 1, 9, 0], "decision": "eliminated"},
+          {"participantKey": "t1-rodri-sebastian", "stats": [5, 0, 5, 7, 0], "decision": "qualified"},
+          {"participantKey": "t7-anto-lopez", "stats": [14, 3, 4, 5, 1], "decision": "qualified"},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [9, 1, 5, 6, 1], "decision": "qualified"},
+          {"participantKey": "t6-tomas-delgado", "stats": [13, 3, 4, 5, 0], "decision": "qualified"},
+          {"participantKey": "t7-santino-mercado", "stats": [4, 0, 4, 8, 0], "decision": "qualified"},
+          {"participantKey": "t1-joel-marasco", "stats": [13, 2, 7, 3, 0], "decision": "qualified"},
+          {"participantKey": "t6-tomas-gonzalez", "stats": [9, 1, 6, 5, 0], "decision": "qualified"},
+          {"participantKey": "t7-tomas-torcasio", "stats": [13, 2, 7, 3, 0], "decision": "qualified"},
+          {"participantKey": "t3-valentina-scocier", "stats": [7, 1, 3, 8, 1], "decision": "eliminated"},
+          {"participantKey": "t4-nico-luchetti-r", "stats": [6, 1, 2, 9, 1], "decision": "eliminated"}
+        ]
+      },
+      {
+        "name": "Fase 2",
+        "pairs": [
+          {"position": 1, "name": "Luciano // Eze", "stats": [23, 4, 10, 10, 1], "decision": "qualified"},
+          {"position": 2, "name": "Matheo // Verónica", "stats": [21, 3, 10, 11, 2], "decision": "qualified"},
+          {"position": 3, "name": "Fede // Santiago", "stats": [20, 4, 8, 12, 0], "decision": "qualified"},
+          {"position": 4, "name": "Rodrigo T // Tomás D", "stats": [20, 2, 13, 9, 1], "decision": "qualified"},
+          {"position": 5, "name": "Jhose // Daniel", "stats": [20, 2, 12, 10, 2], "decision": "qualified"},
+          {"position": 6, "name": "Pancho // Gabriel", "stats": [20, 2, 12, 10, 2], "decision": "qualified"},
+          {"position": 7, "name": "Kevin // Agustin", "stats": [19, 2, 11, 11, 2], "decision": "qualified"},
+          {"position": 8, "name": "Moreno // Mario", "stats": [19, 2, 11, 11, 2], "decision": "qualified"},
+          {"position": 9, "name": "Lucas I // Ian", "stats": [17, 3, 7, 14, 1], "decision": "qualified"},
+          {"position": 10, "name": "Santino // Joel", "stats": [15, 2, 7, 15, 2], "decision": "qualified"},
+          {"position": 11, "name": "Tomás G // Tomás T", "stats": [15, 1, 11, 12, 1], "decision": "qualified"},
+          {"position": 12, "name": "Rodri Seb // Anto", "stats": [15, 0, 13, 11, 2], "decision": "eliminated"},
+          {"position": 13, "name": "Joaquin // Fabrizio", "stats": [14, 1, 10, 13, 1], "decision": "eliminated"},
+          {"position": 14, "name": "Lautaro // Martín", "stats": [14, 1, 9, 14, 2], "decision": "eliminated"},
+          {"position": 15, "name": "Lucas A // Nico A", "stats": [14, 1, 9, 14, 2], "decision": "eliminated"},
+          {"position": 16, "name": "Joaco // Rodrigo So", "stats": [10, 1, 6, 17, 1], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t3-fede-gerez", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t3-santi", "stats": [12, 3, 3, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-jhose", "stats": [10, 1, 6, 5, 1], "decision": "qualified"},
+          {"participantKey": "t7-daniel-bazan", "stats": [10, 1, 6, 5, 1], "decision": "qualified"},
+          {"participantKey": "t1-joaco-fernandez", "stats": [0, 0, 0, 12, 0], "decision": "eliminated"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [10, 1, 6, 5, 1], "decision": "qualified"},
+          {"participantKey": "t7-joaquin-sampadaro", "stats": [9, 1, 5, 6, 1], "decision": "eliminated"},
+          {"participantKey": "t5-fabrizio-escolano", "stats": [5, 0, 5, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t1-kevin-sivori", "stats": [10, 1, 6, 5, 1], "decision": "qualified"},
+          {"participantKey": "t7-agustin", "stats": [9, 1, 5, 6, 1], "decision": "qualified"},
+          {"participantKey": "t1-lautaro-scocier", "stats": [6, 0, 5, 7, 1], "decision": "eliminated"},
+          {"participantKey": "t2-martin-bustos", "stats": [8, 1, 4, 7, 1], "decision": "eliminated"},
+          {"participantKey": "t7-lucas-aguilera", "stats": [8, 1, 4, 7, 1], "decision": "eliminated"},
+          {"participantKey": "t2-nico-avalos", "stats": [6, 0, 5, 7, 1], "decision": "eliminated"},
+          {"participantKey": "t6-lucas-insua", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t6-ian-gangai", "stats": [8, 1, 4, 7, 1], "decision": "qualified"},
+          {"participantKey": "t1-luciano-hufschmid", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t4-eze", "stats": [15, 3, 5, 4, 1], "decision": "qualified"},
+          {"participantKey": "t1-matheo-olivera", "stats": [9, 1, 5, 6, 1], "decision": "qualified"},
+          {"participantKey": "t5-veronica-lucchesi", "stats": [12, 2, 5, 5, 1], "decision": "qualified"},
+          {"participantKey": "t6-moreno-perez", "stats": [9, 1, 5, 6, 1], "decision": "qualified"},
+          {"participantKey": "t1-mario-talarico", "stats": [10, 1, 6, 5, 1], "decision": "qualified"},
+          {"participantKey": "t1-pancho-muzzio", "stats": [10, 1, 6, 5, 1], "decision": "qualified"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [10, 1, 6, 5, 1], "decision": "qualified"},
+          {"participantKey": "t1-rodri-sebastian", "stats": [8, 0, 7, 5, 1], "decision": "eliminated"},
+          {"participantKey": "t7-anto-lopez", "stats": [7, 0, 6, 6, 1], "decision": "eliminated"},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [10, 1, 7, 4, 0], "decision": "qualified"},
+          {"participantKey": "t6-tomas-delgado", "stats": [10, 1, 6, 5, 1], "decision": "qualified"},
+          {"participantKey": "t7-santino-mercado", "stats": [7, 1, 3, 8, 1], "decision": "qualified"},
+          {"participantKey": "t1-joel-marasco", "stats": [8, 1, 4, 7, 1], "decision": "qualified"},
+          {"participantKey": "t6-tomas-gonzalez", "stats": [9, 1, 5, 6, 1], "decision": "qualified"},
+          {"participantKey": "t7-tomas-torcasio", "stats": [6, 0, 6, 6, 0], "decision": "qualified"}
+        ]
+      },
+      {
+        "name": "Repechaje",
+        "pairs": [
+          {"position": 1, "name": "Renzo // Rodrigo So", "stats": [22, 4, 10, 10, 0], "decision": "qualified"}
+        ],
+        "individuals": []
+      },
+      {
+        "name": "Fase 3",
+        "pairs": [
+          {"position": 1, "name": "Matheo // Verónica", "stats": [20, 4, 8, 12, 0], "decision": "qualified"},
+          {"position": 2, "name": "Rodrigo T // Tomás D", "stats": [20, 3, 11, 10, 0], "decision": "qualified"},
+          {"position": 3, "name": "Moreno // Mario", "stats": [17, 3, 8, 13, 0], "decision": "qualified"},
+          {"position": 4, "name": "Santino // Joel", "stats": [17, 3, 8, 13, 0], "decision": "eliminated"},
+          {"position": 5, "name": "Luciano // Eze", "stats": [13, 1, 10, 13, 0], "decision": "qualified"},
+          {"position": 6, "name": "Fede // Santiago", "stats": [12, 1, 9, 14, 0], "decision": "qualified"},
+          {"position": 7, "name": "Kevin // Agustin", "stats": [12, 1, 9, 14, 0], "decision": "eliminated"},
+          {"position": 8, "name": "Renzo // Rodrigo So", "stats": [12, 1, 9, 14, 0], "decision": "qualified"},
+          {"position": 9, "name": "Jhose // Daniel", "stats": [11, 1, 8, 15, 0], "decision": "qualified"},
+          {"position": 10, "name": "Pancho // Gabriel", "stats": [9, 0, 9, 15, 0], "decision": "eliminated"},
+          {"position": 11, "name": "Tomás G // Tomás T", "stats": [9, 0, 9, 15, 0], "decision": "eliminated"},
+          {"position": 12, "name": "Lucas I // Ian", "stats": [7, 0, 7, 17, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t3-fede-gerez", "stats": [4, 0, 4, 8, 0], "decision": "qualified"},
+          {"participantKey": "t3-santi", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-jhose", "stats": [5, 0, 5, 7, 0], "decision": "qualified"},
+          {"participantKey": "t7-daniel-bazan", "stats": [6, 1, 3, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t1-kevin-sivori", "stats": [6, 0, 6, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t7-agustin", "stats": [6, 1, 3, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t6-lucas-insua", "stats": [3, 0, 3, 9, 0], "decision": "eliminated"},
+          {"participantKey": "t6-ian-gangai", "stats": [4, 0, 4, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t1-luciano-hufschmid", "stats": [5, 1, 2, 9, 0], "decision": "qualified"},
+          {"participantKey": "t4-eze", "stats": [8, 0, 8, 4, 0], "decision": "qualified"},
+          {"participantKey": "t1-matheo-olivera", "stats": [10, 2, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t5-veronica-lucchesi", "stats": [10, 2, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t6-moreno-perez", "stats": [7, 0, 7, 5, 0], "decision": "qualified"},
+          {"participantKey": "t1-mario-talarico", "stats": [10, 3, 1, 8, 0], "decision": "qualified"},
+          {"participantKey": "t1-pancho-muzzio", "stats": [5, 0, 5, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t1-gabriel-talarico", "stats": [4, 0, 4, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t7-renzo-badano", "stats": [7, 1, 4, 7, 0], "decision": "qualified"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [5, 0, 5, 7, 0], "decision": "qualified"},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [12, 2, 6, 4, 0], "decision": "qualified"},
+          {"participantKey": "t6-tomas-delgado", "stats": [8, 1, 5, 6, 0], "decision": "qualified"},
+          {"participantKey": "t7-santino-mercado", "stats": [7, 1, 4, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t1-joel-marasco", "stats": [10, 2, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t6-tomas-gonzalez", "stats": [7, 0, 7, 5, 0], "decision": "eliminated"},
+          {"participantKey": "t7-tomas-torcasio", "stats": [2, 0, 2, 10, 0], "decision": "eliminated"}
+        ]
+      },
+      {
+        "name": "Desempate de fase 3",
+        "pairs": [
+          {"position": 1, "name": "Fede // Santiago", "stats": [33, 6, 15, 27, 0], "decision": "qualified"},
+          {"position": 2, "name": "Renzo // Rodrigo So", "stats": [26, 3, 17, 28, 0], "decision": "qualified"},
+          {"position": 3, "name": "Kevin // Agustin", "stats": [23, 2, 17, 29, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t3-fede-gerez", "stats": [14, 2, 8, 14, 0], "decision": "qualified"},
+          {"participantKey": "t3-santi", "stats": [19, 4, 7, 13, 0], "decision": "qualified"},
+          {"participantKey": "t1-kevin-sivori", "stats": [13, 1, 10, 13, 0], "decision": "eliminated"},
+          {"participantKey": "t7-agustin", "stats": [10, 1, 7, 16, 0], "decision": "eliminated"},
+          {"participantKey": "t7-renzo-badano", "stats": [10, 1, 7, 16, 0], "decision": "qualified"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [16, 2, 10, 12, 0], "decision": "qualified"}
+        ]
+      },
+      {
+        "name": "Fase 4",
+        "pairs": [
+          {"position": 1, "name": "Luciano // Eze", "stats": [28, 7, 7, 10, 0], "decision": "qualified"},
+          {"position": 2, "name": "Matheo // Verónica", "stats": [20, 4, 8, 12, 0], "decision": "qualified"},
+          {"position": 3, "name": "Rodrigo T // Tomás D", "stats": [19, 3, 10, 11, 0], "decision": "qualified"},
+          {"position": 4, "name": "Renzo // Rodrigo So", "stats": [16, 4, 4, 16, 0], "decision": "qualified"},
+          {"position": 5, "name": "Moreno // Mario", "stats": [14, 3, 5, 16, 0], "decision": "eliminated"},
+          {"position": 6, "name": "Fede // Santiago", "stats": [13, 3, 4, 17, 0], "decision": "eliminated"},
+          {"position": 7, "name": "Jhose // Joel", "stats": [12, 1, 9, 14, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t3-fede-gerez", "stats": [6, 1, 3, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t3-santi", "stats": [7, 2, 1, 9, 0], "decision": "eliminated"},
+          {"participantKey": "t1-jhose", "stats": [4, 0, 4, 8, 0], "decision": "eliminated"},
+          {"participantKey": "t1-joel-marasco", "stats": [8, 1, 5, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t1-luciano-hufschmid", "stats": [18, 5, 3, 4, 0], "decision": "qualified"},
+          {"participantKey": "t4-eze", "stats": [10, 2, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t1-matheo-olivera", "stats": [11, 2, 5, 5, 0], "decision": "qualified"},
+          {"participantKey": "t5-veronica-lucchesi", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t6-moreno-perez", "stats": [10, 2, 4, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t1-mario-talarico", "stats": [4, 1, 1, 10, 0], "decision": "eliminated"},
+          {"participantKey": "t7-renzo-badano", "stats": [5, 1, 2, 9, 0], "decision": "qualified"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [11, 3, 2, 7, 0], "decision": "qualified"},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t6-tomas-delgado", "stats": [10, 1, 7, 4, 0], "decision": "qualified"}
+        ]
+      },
+      {
+        "name": "Fase 5",
+        "pairs": [
+          {"position": 1, "name": "Rodrigo T // Tomás D", "stats": [22, 4, 10, 10, 0], "decision": "qualified"},
+          {"position": 2, "name": "Matheo // Verónica", "stats": [20, 4, 8, 12, 0], "decision": "qualified"},
+          {"position": 3, "name": "Renzo // Rodrigo So", "stats": [17, 3, 8, 13, 0], "decision": "eliminated"},
+          {"position": 4, "name": "Luciano // Eze", "stats": [17, 2, 11, 11, 0], "decision": "eliminated"}
+        ],
+        "individuals": [
+          {"participantKey": "t1-luciano-hufschmid", "stats": [11, 2, 5, 5, 0], "decision": "eliminated"},
+          {"participantKey": "t4-eze", "stats": [6, 0, 6, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t1-matheo-olivera", "stats": [10, 2, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t5-veronica-lucchesi", "stats": [10, 2, 4, 6, 0], "decision": "qualified"},
+          {"participantKey": "t7-renzo-badano", "stats": [10, 2, 4, 6, 0], "decision": "eliminated"},
+          {"participantKey": "t5-rodrigo-soca", "stats": [7, 1, 4, 7, 0], "decision": "eliminated"},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [9, 2, 3, 7, 0], "decision": "qualified"},
+          {"participantKey": "t6-tomas-delgado", "stats": [13, 2, 7, 3, 0], "decision": "qualified"}
+        ]
+      },
+      {
+        "name": "Final",
+        "pairs": [],
+        "individuals": [
+          {"participantKey": "t1-matheo-olivera", "stats": [7, 1, 4, 7, 0]},
+          {"participantKey": "t5-veronica-lucchesi", "stats": [13, 2, 7, 3, 0]},
+          {"participantKey": "t1-rodrigo-talarico", "stats": [5, 1, 2, 9, 0]},
+          {"participantKey": "t6-tomas-delgado", "stats": [13, 3, 4, 5, 0]}
+        ]
+      }
+    ]
+  }
+}

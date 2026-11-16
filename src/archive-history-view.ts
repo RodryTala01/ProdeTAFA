@@ -109,7 +109,10 @@ export function archiveHistoryGroups(data:ArchivePayload,competitionCode:string,
  const fromWorkbook=documentedHistoryGroups(data,competitionCode);
  const names=new Map<string,{name:string;entries:HistoricalGroupEntry[];matches:ArchiveMatch[]}>();
  for(const g of fromWorkbook)names.set(clean(g.name),{...g,matches:[]});
- const groupMatches=historicalMatchLayout(matches).groups;
+ const {groups:groupMatches,bracket}=historicalMatchLayout(matches);
+ const advanced=new Set(bracket.filter(s=>!s.key.startsWith('tie:')).flatMap(s=>s.matches.flatMap(m=>[m.aKey,m.bKey])));
+ const results=data.results.filter(r=>r.competitionCode===competitionCode);
+
  for(const m of groupMatches){
   const label=(m.round??'')+' '+m.stage;
   const found=label.match(/\bgrupo\s*([0-9a-z]+)/i);
@@ -129,7 +132,13 @@ export function archiveHistoryGroups(data:ArchivePayload,competitionCode:string,
   const an=Number(a.name.match(/\d+/)?.[0]??Number.MAX_SAFE_INTEGER);
   const bn=Number(b.name.match(/\d+/)?.[0]??Number.MAX_SAFE_INTEGER);
   return an-bn||a.name.localeCompare(b.name,'es');
- }).map(g=>({...g,entries:[...g.entries].sort((a,b)=>
+ }).map(g=>({...g,entries:g.entries.map(e=>{
+  if(e.decision)return e;
+  const result=results.find(r=>r.participantKey===e.participantKey)?.resultCode;
+  if(advanced.has(e.participantKey)||result==='QUALIFIED')return {...e,decision:'qualified' as const};
+  if(result==='ELIMINATED'||result==='GROUP_STAGE')return {...e,decision:'eliminated' as const};
+  return e;
+ }).sort((a,b)=>
   a.position!==null&&b.position!==null?a.position-b.position: (Number.isFinite(b.points)?b.points:-Infinity)-(Number.isFinite(a.points)?a.points:-Infinity)
  )}));
 }

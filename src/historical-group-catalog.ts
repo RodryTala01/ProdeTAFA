@@ -1,9 +1,28 @@
+// T6/T7 original sheets: COPA A, COPA B and COPA DUOS. Phase scores stay outside totals.
+import historicalPhases from './historical-phase-data.json';
 import type {ArchivePayload} from './historical-schema';
 
 /** Read-only historical group tables transcribed from the original T3/T4
  * workbooks supplied by the administrator. Supplemental sheets were not
  * persisted by the original archive importer. These are NOT added to totals. */
-export type HistoricalGroupEntry={participantKey:string;points:number;position:number|null};
+export type PhaseDecision='qualified'|'eliminated';
+type PhaseScores=[number|null,number|null,number|null,number|null,number|null];
+export type ArchiveDuoPhase={
+ name:string;
+ pairs:Array<{position:number;name:string;stats:PhaseScores;decision?:PhaseDecision}>;
+ individuals:Array<{participantKey:string;stats:PhaseScores;decision?:PhaseDecision}>;
+};
+type SeasonPhases={groups:Record<string,HistoricalGroupTable[]>;duos:ArchiveDuoPhase[]};
+const phaseCatalog=historicalPhases as unknown as Record<string,SeasonPhases>;
+
+export function documentedDuoPhases(data:ArchivePayload){
+ const phases=phaseCatalog[data.season.number]?.duos??[];
+ const participants=new Set(data.participants.map(p=>p.key));
+ if(!phases[0]?.individuals.every(p=>participants.has(p.participantKey)))return [];
+ return phases;
+}
+
+export type HistoricalGroupEntry={participantKey:string;points:number;position:number|null;decision?:PhaseDecision|null};
 export type HistoricalGroupTable={name:string;entries:HistoricalGroupEntry[]};
 
 // Data format: groupName:key|officialPoints|position(optional),...
@@ -35,6 +54,9 @@ const documented:Record<string,string>={
  ].join(';')
 };
 export function documentedHistoryGroups(data:ArchivePayload,competitionCode:string):HistoricalGroupTable[]{
+ const catalog=phaseCatalog[data.season.number]?.groups[competitionCode];
+ const lookup=new Set(data.participants.map(p=>p.key));
+ if(catalog?.every(group=>group.entries.every(row=>lookup.has(row.participantKey))))return catalog;
  const raw=documented[data.season.number+':'+competitionCode];
  if(!raw)return [];
  const participants=new Set(data.participants.map(p=>p.key));

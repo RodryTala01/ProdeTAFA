@@ -52,3 +52,6 @@
 .sport-zone-legend .sport-zone-relegation { border-color:var(--danger); }
 .sport-footnote { color:var(--text-muted); font-size:.75rem; }
 .sport-table tbody th { text-transform:none; letter-spacing:normal; font-size:.875rem; }
+
+.sport-table tr[data-phase-decision=qualified] { background:color-mix(in srgb,var(--success,var(--accent)) 10%,transparent); }
+.sport-table tr[data-phase-decision=eliminated] { background:color-mix(in srgb,var(--danger) 10%,transparent); }

@@ -270,3 +270,14 @@
  .archive-bracket-encounters {gap:8px;}
  .archive-bracket-scroll {max-height:680px;}
 }
+
+.archive-duo-members { display:grid; gap:5px; }
+.archive-duo-final .archive-match-entry[data-winner=true] { color:var(--warning); }
+.archive-duo-tables { display:grid; gap:14px; padding:10px 0; }
+.archive-duo-tables caption { text-align:left; font-weight:750; padding:8px 10px; color:var(--text); }
+.archive-duo-tables th[scope=row] { min-width:9rem; }
+.archive-duo-tables :is(th,td) { white-space:nowrap; }
+.archive-group-table [data-phase-decision=qualified] { --phase-color:var(--success,var(--accent)); }
+.archive-group-table [data-phase-decision=eliminated] { --phase-color:var(--danger); }
+.archive-group-table tr[data-phase-decision] { background:color-mix(in srgb,var(--phase-color) 10%,transparent); }
+.archive-phase-status { display:block; margin-top:3px; color:var(--phase-color); font-size:.68rem; }

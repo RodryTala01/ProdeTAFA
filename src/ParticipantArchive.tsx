@@ -1,3 +1,5 @@
+import {archivedCompetitionFinals,type HistoricalFinal} from './historical-finals';
+import {documentedDuoPhases,type ArchiveDuoPhase,type PhaseDecision} from './historical-group-catalog';
 import {useEffect,useState,type ReactNode} from 'react';
 import {AssetImage,ParticipantShield} from './AssetImage';
 import {competitionAsset} from './competition-assets';
@@ -18,9 +20,9 @@ function Trophy({code,name,season,large=false}:{code:string;name:string;season:n
  const asset=competitionAsset(code,season);
  return <span className={'archive-emblem'+(large?' archive-emblem--large':'')}><AssetImage src={asset.trophy||asset.logo} name={name} size={large?'lg':'md'} fallback={<Icon name="trophy"/>}/></span>;
 }
-function Person({data,id}:{data:ArchivePayload;id:string}){
+function Person({data,id,showHistoricalShield=false}:{data:ArchivePayload;id:string;showHistoricalShield?:boolean}){
  const p=data.participants.find(p=>p.key===id);
- return <span className="archive-person">{p?.userId?<ParticipantShield userId={p.userId} name={p.name} size="sm" decorative/>:<span className="archive-avatar" aria-hidden="true"><Icon name="user"/></span>}{p?.userId?<a href={'#/club/participante/'+encodeURIComponent(p.userId)}>{p.name}</a>:<span>{p?.name||'Participante no disponible'}</span>}</span>;
+ return <span className="archive-person">{p&&(p.userId||showHistoricalShield)?<ParticipantShield userId={p.userId??undefined} name={p.name} season={data.season.number} size="sm" decorative/>:<span className="archive-avatar" aria-hidden="true"><Icon name="user"/></span>}{p?.userId?<a href={'#/club/participante/'+encodeURIComponent(p.userId)}>{p.name}</a>:<span>{p?.name||'Participante no disponible'}</span>}</span>;
 }
 function Empty({children='Información no disponible.'}:{children?:ReactNode}){return <div className="archive-empty"><Icon name="book"/><p>{children}</p></div>;}
 function SectionHeading({title,detail}:{title:string;detail?:string}){return <div className="archive-section-heading"><h2>{title}</h2>{detail&&<span>{detail}</span>}</div>;}
@@ -45,17 +47,59 @@ function ArchiveMatchCards({detail,matches}:{detail:HistoryDetail;matches:Archiv
   {(archivePublicDescription(m.round)||m.scoreBasis==='DUO')&&<div className="archive-match-caption">{archivePublicDescription(m.round)&&<small>{archivePublicDescription(m.round)}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</div>}
  </article>)}</div>;
 }
+function ArchiveDuoFinal({data,final}:{data:ArchivePayload;final:HistoricalFinal}){
+ return <article className="archive-match-card archive-duo-final">
+  {(['a','b'] as const).map(side=><div key={side} className="archive-match-entry" data-winner={final.winner===side||undefined}>
+   <div className="archive-duo-members">{final[side].members?.map(member=><Person key={member.userId} data={data} id={member.userId!} showHistoricalShield/>)}</div>
+   <strong>{side==='a'?final.pointsA:final.pointsB}</strong>
+  </div>)}
+ </article>;
+}
+
+function PhaseStatus({decision}:{decision?:PhaseDecision|null}){
+ return decision?<small className="archive-phase-status">{decision==='qualified'?'Clasificado':'Eliminado'}</small>:null;
+}
+
+function DuoPhaseTables({data,phases}:{data:ArchivePayload;phases:ArchiveDuoPhase[]}){
+ return <section className="archive-panel">
+  <SectionHeading title="Tablas por fase"/>
+  {phases.map((phase,index)=><details key={phase.name} className="archive-round" open={index===0||undefined}>
+   <summary>{phase.name}</summary>
+   <div className="archive-duo-tables">
+    {(['pairs','individuals'] as const).map(type=>{
+     const rows=phase[type];
+     if(!rows.length)return null;
+     return <div className="archive-group-table" key={type}>
+      <table><caption>{type==='pairs'?'Por pareja':'Individual'}</caption>
+       <thead><tr>{type==='pairs'&&<th scope="col">Pos.</th>}<th scope="col">{type==='pairs'?'Pareja':'Participante'}</th>
+        {['PTS','Plenos','Parciales','Errores','Extras'].map(label=><th key={label} scope="col">{label}</th>)}</tr></thead>
+       <tbody>{rows.map((row,i)=><tr key={i} data-phase-decision={row.decision}>
+        {'position' in row&&<td>{row.position}</td>}
+        <th scope="row">{'participantKey' in row?<Person data={data} id={row.participantKey}/>:row.name}<PhaseStatus decision={row.decision}/></th>
+        {row.stats.map((value,j)=><td key={j} className={j===0?'archive-points':undefined}>{value??'—'}</td>)}
+       </tr>)}</tbody>
+      </table>
+     </div>;
+    })}
+   </div>
+  </details>)}
+ </section>;
+}
 function ArchiveKnockout({detail,matches}:{detail:HistoryDetail;matches:ArchivePayload['matches']}){
  const {bracket,other,additional}=historicalMatchLayout(matches);
+ const duoFinals=matches.some(m=>m.competitionCode==='COPA_DUOS')
+  ?archivedCompetitionFinals({...detail.data,matches},key=>key).filter(f=>f.a.members?.length===2&&f.b.members?.length===2)
+  :[];
+ const rounds=bracket.map(stage=>({...stage,count:stage.key==='Final'&&duoFinals.length?duoFinals.length:stage.matches.length}));
  return <>
   {bracket.length>0&&<section className="archive-panel archive-bracket-panel">
-   <SectionHeading title="Llave de eliminación directa" detail={bracket.reduce((n,s)=>n+s.matches.length,0)+' cruces'}/>
+   <SectionHeading title="Llave de eliminación directa" detail={rounds.reduce((n,s)=>n+s.count,0)+' cruces'}/>
    <p className="archive-bracket-note">Rondas ordenadas de izquierda a derecha. Deslizá para recorrer la llave.</p>
    <div className="archive-bracket-scroll" tabIndex={0} role="region" aria-label="Llave histórica de la competición">
     <div className="archive-bracket">
-     {bracket.map(stage=><section className="archive-bracket-stage" key={stage.key}>
-       <h3>{stage.label}<small>{stage.matches.length} {stage.matches.length===1?'cruce':'cruces'}</small></h3>
-       <div className="archive-bracket-encounters">{stage.matches.map((m,j)=><div className="archive-bracket-node" key={m.matchId??j}>
+     {rounds.map(stage=><section className="archive-bracket-stage" key={stage.key}>
+       <h3>{stage.label}<small>{stage.count} {stage.count===1?'cruce':'cruces'}</small></h3>
+       <div className="archive-bracket-encounters">{stage.key==='Final'&&duoFinals.length?duoFinals.map(final=><div className="archive-bracket-node" key={final.id}><ArchiveDuoFinal data={detail.data} final={final}/></div>):stage.matches.map((m,j)=><div className="archive-bracket-node" key={m.matchId??j}>
         <ArchiveMatchCards detail={detail} matches={[m]}/>
        </div>)}</div>
      </section>)}
@@ -78,9 +122,9 @@ function ArchiveGroups({detail,competitionCode,matches}:{detail:HistoryDetail;co
    <h3>{g.name}<small>{g.entries.length} participantes</small></h3>
    <div className="archive-group-table">
     <table><thead><tr>{g.entries.some(e=>e.position!==null)&&<th scope="col">Pos.</th>}<th scope="col">Participante</th><th scope="col">PTS</th></tr></thead>
-     <tbody>{g.entries.map(e=><tr key={e.participantKey}>
+     <tbody>{g.entries.map(e=><tr key={e.participantKey} data-phase-decision={e.decision??undefined}>
       {g.entries.some(x=>x.position!==null)&&<td>{e.position??'—'}</td>}
-      <th scope="row"><Person data={detail.data} id={e.participantKey}/></th>
+      <th scope="row"><Person data={detail.data} id={e.participantKey}/><PhaseStatus decision={e.decision}/></th>
       <td className="archive-points">{Number.isFinite(e.points)?e.points:'—'}</td>
      </tr>)}</tbody>
     </table>
@@ -122,22 +166,24 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
  const links=detail.officialLinks.filter(l=>l.code===c.code);
  const roundNames=[...new Set(rounds.map(r=>r.round))];
  const isCup=c.kind==='CUP'||c.kind==='TOURNAMENT';
+ const duoPhases=c.code==='COPA_DUOS'?documentedDuoPhases(data):[];
  const groups=isCup?archiveHistoryGroups(data,c.code,matches):[];
  const cupBracket=isCup?historicalMatchLayout(matches):null;
  const canEliminate=Boolean(cupBracket?.bracket.length||cupBracket?.other.length||cupBracket?.additional.length);
- const [cupPhase,setCupPhase]=useState<'grupos'|'eliminatorias'>(groups.length?'grupos':'eliminatorias');
- const shownPhase=cupPhase==='grupos'&&groups.length?'grupos':'eliminatorias';
+ const hasPhaseTables=groups.length>0||duoPhases.length>0;
+ const [cupPhase,setCupPhase]=useState<'grupos'|'eliminatorias'>(hasPhaseTables?'grupos':'eliminatorias');
+ const shownPhase=cupPhase==='grupos'&&hasPhaseTables?'grupos':'eliminatorias';
  return <div className="archive-competition">
   <div className="archive-competition-heading"><Trophy code={c.code} name={c.name} season={summary.number}/><div><span className="archive-kicker">Competición · T{summary.number}</span><h2>{c.name}</h2></div></div>
   <Podium detail={detail} code={c.code}/>
   {!isCup&&<section className="archive-panel"><SectionHeading title="Tabla final" detail={standings.length?standings.length+' participantes':undefined}/>{standings.length?<StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name} competition={c} source={summary.source}/>:results.length?<div className="archive-table" role="region" aria-label={'Puestos de '+c.name} tabIndex={0}><table><thead><tr><th scope="col">Posición</th><th scope="col">Participante</th><th scope="col">Fase alcanzada</th></tr></thead><tbody>{[...results].sort((a,b)=>(a.position??Infinity)-(b.position??Infinity)).map((r,i)=><tr key={i}><td><span className="archive-position">{display(r.position)}</span></td><th scope="row"><Person data={data} id={r.participantKey}/></th><td>{resultNames[r.resultCode]||r.resultCode}</td></tr>)}</tbody></table></div>:<Empty>Tabla final no disponible.</Empty>}</section>}
   {!isCup&&(roundNames.length>0||links.length>0)&&<section className="archive-panel"><SectionHeading title="Resultados por Fecha" detail={roundNames.length?roundNames.length+' Fechas':undefined}/>{roundNames.map(round=><details className="archive-round" key={round}><summary><span><Icon name="calendar"/>{round}</span><span>Ver resultados</span></summary><StatsTable data={data} rows={rounds.filter(r=>r.round===round)} label={c.name+' · '+round}/></details>)}{links.length>0&&<div className="archive-round-links">{links.map(l=><a className="button button--secondary" key={l.roundId} href={'#/club/historial/'+l.roundId}>{l.name}<Icon name="arrow"/></a>)}</div>}</section>}
-  {isCup&&(groups.length>0||canEliminate)&&<>
-   {groups.length>0&&canEliminate&&<nav className="archive-phase-tabs" aria-label={'Fases de '+c.name}>
-     <button type="button" aria-pressed={shownPhase==='grupos'} onClick={()=>setCupPhase('grupos')}>Grupos</button>
+  {isCup&&(hasPhaseTables||canEliminate)&&<>
+   {hasPhaseTables&&canEliminate&&<nav className="archive-phase-tabs" aria-label={'Fases de '+c.name}>
+     <button type="button" aria-pressed={shownPhase==='grupos'} onClick={()=>setCupPhase('grupos')}>{duoPhases.length?'Tablas por fase':'Grupos'}</button>
      <button type="button" aria-pressed={shownPhase==='eliminatorias'} onClick={()=>setCupPhase('eliminatorias')}>Eliminatorias</button>
    </nav>}
-   {shownPhase==='grupos'?<ArchiveGroups detail={detail} competitionCode={c.code} matches={matches}/>
+   {shownPhase==='grupos'?duoPhases.length?<DuoPhaseTables data={data} phases={duoPhases}/>:<ArchiveGroups detail={detail} competitionCode={c.code} matches={matches}/>
     :<ArchiveKnockout detail={detail} matches={matches}/>}
   </>}
   {!isCup&&matches.length>0&&<section className="archive-panel"><SectionHeading title="Enfrentamientos oficiales" detail={matches.length+' cruces'}/><div className="archive-other-matches">{matches.map((m,i)=><div key={m.matchId??i}><h3>{archivePublicDescription(m.stage)}{archivePublicDescription(m.round)&&<small>{archivePublicDescription(m.round)}</small>}</h3><ArchiveMatchCards detail={detail} matches={[m]}/></div>)}</div></section>}

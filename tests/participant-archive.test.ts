@@ -200,3 +200,25 @@ it('la descripción pública omite fuentes Excel, nombres de hojas y aclaracione
  expect(html).not.toContain('Descenso confirmado');
  expect(html).not.toContain('Permanencia confirmada');
 });
+
+it('muestra la final archivada de Dúos como un solo partido 20–18',()=>{
+ const competition={code:'COPA_DUOS',name:'Copa Dúos',kind:'CUP' as const};
+ const archived:HistoryDetail={
+  ...detail,summary:{...detail.summary,number:7,competitions:[{...competition,champions:[]}]},
+  data:{
+   ...detail.data,season:{...detail.data.season,number:7},competitions:[competition],standings:[],
+   participants:['Rodrigo Talarico','Tomás Delgado','Matheo Olivera','Verónica Lucchesi'].map((name,i)=>({key:String(i),name,userId:null,division:null})),
+   matches:[['0','2'],['0','3'],['1','2'],['1','3']].map(([aKey,bKey])=>({
+    matchId:aKey+bKey,competitionCode:competition.code,stage:'Final',round:'6',aKey,bKey,
+    pointsA:18,pointsB:20,plenosA:null,plenosB:null,scoreBasis:'DUO'
+   }))
+  }
+ };
+ const host=document.createElement('div');
+ host.innerHTML=renderToStaticMarkup(createElement(SeasonDetail,{detail:archived,competition:competition.code,view:'competiciones'}));
+ const finals=host.querySelectorAll('.archive-duo-final');
+ expect(finals).toHaveLength(1);
+ expect(finals[0].querySelectorAll('.asset-image')).toHaveLength(4);
+ expect([...finals[0].querySelectorAll('.archive-match-entry strong')].map(s=>s.textContent)).toEqual(['20','18']);
+ expect(host.querySelector('.archive-bracket-stage h3 small')?.textContent).toBe('1 cruce');
+});
