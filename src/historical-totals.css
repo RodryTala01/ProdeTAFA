@@ -92,7 +92,6 @@
 .totals-final-person{display:grid;justify-items:center;align-content:start;gap:5px;min-width:0;width:100%}
 .totals-final-person>span:last-child{font-size:.68rem;line-height:1.2;max-width:100%;overflow-wrap:anywhere}
 .totals-final-contender[data-winner=true]{color:var(--warning);font-weight:750}
-.totals-final-contender[data-winner=true] .asset-image{outline:1px solid var(--warning);outline-offset:2px;border-radius:var(--radius-control)}
 .totals-final-winner{margin-top:2px;padding:2px 4px;border-radius:var(--radius-control);background:color-mix(in srgb,var(--warning) 14%,var(--surface));font-size:.62rem;line-height:1.15;max-width:100%;overflow-wrap:anywhere}
 .totals-final-score{display:flex;gap:2px;align-items:center;justify-content:center;min-height:40px;font-variant-numeric:tabular-nums;font-size:.73rem;color:var(--text);white-space:nowrap}
 .totals-final-score strong{font-weight:800}
@@ -112,7 +111,7 @@
 
 .totals-table .totals-awards { display: inline-grid; justify-items: end; gap: 5px; white-space: normal; }
 .totals-awards ul { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 24rem; list-style: none; padding: 0; margin: 0; }
-.totals-awards li { display: flex; align-items: center; gap: 4px; padding: 2px 5px; border: 1px solid var(--border); border-radius: var(--radius-control); color: var(--text); font-size: .7rem; text-align: left; }
+.totals-awards li { display: flex; align-items: center; gap: 3px; color: var(--text); font-size: .7rem; }
 .totals-awards li small { white-space: nowrap; }
 .totals-final-score small { font-size: .58em; color: var(--text-muted); }
 .totals-final-score { white-space: nowrap; gap: 2px; }
