@@ -124,3 +124,18 @@
 .totals-edition li > strong { font-size: .75rem; color: var(--home-fluor); }
 
 .totals-final-entries>.totals-final-score { align-self:center; }
+@media(max-width:640px){
+ .totals-table--general{display:block;min-width:0;white-space:normal}
+ .totals-table--general thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .totals-table--general tbody{display:grid;gap:8px}
+ .totals-table--general tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--border);padding:6px}
+ .totals-table--general tr>:nth-child(2){grid-column:2/-1}
+ .totals-table--general td,.totals-table--general th{padding:6px;text-align:left;white-space:normal}
+ .totals-table--general td:nth-child(n+3)::before{display:block;color:var(--text-muted);font-size:.7rem}
+ .totals-table--general td:nth-child(3)::before{content:'PTS'}
+ .totals-table--general td:nth-child(4)::before{content:'Plenos'}
+ .totals-table--general td:nth-child(5)::before{content:'Parciales'}
+ .totals-table--general td:nth-child(6)::before{content:'Errores'}
+ .totals-table--general td:nth-child(7)::before{content:'Extras'}
+ .totals-table--general td:nth-child(8)::before{content:'Promedio por partido'}
+}

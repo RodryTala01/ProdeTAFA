@@ -135,7 +135,7 @@ function IffhsRows({rows,seasons,official}:{rows:IffhsTotal[];seasons:number[];o
 function GeneralRows({rows}:{rows:GeneralTotal[]}){
  return <div className="totals-table-wrap" role="region" aria-label="Tabla general histórica" tabIndex={0}>
   <table className="totals-table totals-table--general">
-   <thead><tr><th>#</th><th>Participante</th><th>PTS</th><th>Plenos</th><th>Parciales</th><th>Errores</th><th>Extras</th><th>Promedio</th></tr></thead>
+   <thead><tr><th>#</th><th>Participante</th><th>PTS</th><th>Plenos</th><th>Parciales</th><th>Errores</th><th>Extras</th><th>Promedio por partido</th></tr></thead>
    <tbody>{rows.map(r=><tr key={r.userId}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th>
     <td className="totals-highlight">{fmt(r.points)}</td><td>{r.fulls===null?'—':fmt(r.fulls)}</td><td>{r.partials===null?'—':fmt(r.partials)}</td>
     <td>{r.errors===null?'—':fmt(r.errors)}</td><td>{r.extras===null?'—':fmt(r.extras)}</td>
