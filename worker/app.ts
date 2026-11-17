@@ -45,7 +45,7 @@ export default {
       if(!mutationAllowed(request))return jsonError('Origen de solicitud no permitido',403);
       return (await handleHistoricalArchive(request,env))??jsonError('Archivo no encontrado',404);
     }
-    if(/^\/api\/(participant|admin)\/teams\//.test(pathname)){
+    if(pathname==='/api/participant/directory'||/^\/api\/(participant|admin)\/teams\//.test(pathname)){
       if(!mutationAllowed(request))return jsonError('Origen de solicitud no permitido',403);
       const teamResponse=await handleTeamPage(request,env);
       return teamResponse??jsonError('Equipo no encontrado',404);
