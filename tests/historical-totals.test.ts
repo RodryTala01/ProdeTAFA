@@ -142,3 +142,11 @@ it('no cuenta el Clásico amistoso como competición ni como título',()=>{
  expect(totals.competitions).toEqual([]);
  expect(totals.palmares).toEqual([]);
 });
+
+it('cuenta la Supercopa Euroamérica como oficial y agrupa sus nombres históricos',()=>{
+ const awards=['SUPERCOPA_EUROCOPA','SUPERCOPA_EURO_AMERICA'].map(code=>({
+  code,name:'Supercopa Euroamérica',seasonNumber:20,userId:'A',fullName:'Ana',resultCode:'CHAMPION'
+ }));
+ const totals=composeHistoricalTotals([],[],awards,awards,[]);
+ expect(totals.palmaresOfficial[0]).toMatchObject({userId:'A',championships:1,participations:1});
+});
