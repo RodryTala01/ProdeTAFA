@@ -55,7 +55,7 @@ describe('Mi Equipo minimalista',()=>{
   const page=html(MiEquipoProfile,{data:{...team,titles:[],encounters:[],rankings:{general:{current:null,best:null},iffhs:{current:null,best:null,throughSeason:null}}}});
   expect(page).toContain('todavía no tiene títulos confirmados');
   expect(page).toContain('Todavía no hay enfrentamientos oficiales');
-  expect(page).toContain('Mejor posición no disponible');
+  expect(page).not.toContain('Mejor posición no disponible');
  });
 });
 describe('Rankings históricos sin inventar resultados',()=>{

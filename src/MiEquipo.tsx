@@ -46,7 +46,7 @@ const historicResultLabels:Record<string,string>={CHAMPION:'Campeón',RUNNER_UP:
 const historicResult=(code:string)=>historicResultLabels[code.toUpperCase()]??(code===code.toUpperCase()?code.toLocaleLowerCase('es').replaceAll('_',' '):code);
 const rank=(n:number|null)=>n===null?'—':n+'.º';
 function Ranking({name,info}:{name:string;info:{current:number|null;best:{position:number;seasonNumber:number}|null}}){
- return <section className="equipo-ranking"><strong>{rank(info.current)}</strong><span>{name}</span><small>{info.best?'Mejor '+rank(info.best.position)+' · T'+info.best.seasonNumber:'Mejor posición no disponible'}</small></section>;
+ return <section className="equipo-ranking"><strong>{rank(info.current)}</strong><span>{name}</span>{info.best&&<small>Mejor {rank(info.best.position)} · T{info.best.seasonNumber}</small>}</section>;
 }
 function matchOutcome(m:TeamMatch){
  return m.outcome??(m.ownPoints>m.rivalPoints?'win':m.ownPoints<m.rivalPoints?'loss':'draw');
