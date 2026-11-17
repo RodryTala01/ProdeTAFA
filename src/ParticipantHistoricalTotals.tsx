@@ -144,14 +144,19 @@ function GeneralRows({rows}:{rows:GeneralTotal[]}){
   </table>
  </div>;
 }
+const regularCodes=['LIGA_A','LIGA_B','COPA_TOTAL','COPA_A','COPA_B','COPA_CAMPEONES','COPA_DUOS','COPA_PAPA'];
+
 export function HistoricalTotalsView({data}:{data:TotalsData}){
  const [tab,setTab]=useState<Tab>('palmares');
  const [official,setOfficial]=useState(true);
- const [code,setCode]=useState(data.competitions[0]?.code??'');
+ const regular=regularCodes.flatMap(code=>data.competitions.filter(c=>competitionFamily(c.code)===code));
+ const other=data.competitions.filter(c=>!regularCodes.includes(competitionFamily(c.code)));
+ const [code,setCode]=useState(regular[0]?.code??other[0]?.code??'');
  const selected=data.competitions.some(c=>c.code===code)?code:data.competitions[0]?.code??'';
  const worlds=data.competitions.filter(c=>worldCupZone(c.code));
  const activeWorld=Boolean(worldCupZone(selected));
  const preferredWorld=worlds.find(c=>competitionFamily(c.code)==='MUNDIAL_ORO')??worlds[0];
+ const inOther=other.some(c=>c.code===selected);
  const rows=data.perCompetition[selected]??[];
  const honours=tab==='competencia'?rows:official?data.palmaresOfficial:data.palmares;
  const iffhs=tab==='oficial'?data.iffhsOfficial.ranking:data.iffhsTotal;
@@ -166,12 +171,21 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
   <section className="totals-panel">
    <header className="totals-panel-title"><span className="totals-panel-icon">{tab==='palmares'||tab==='competencia'?<img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="28" height="44"/>:tab==='general'?'▥':'◉'}</span><div><h2>{tab==='palmares'?(official?'PALMARÉS OFICIAL':'PALMARÉS TOTAL'):tab==='competencia'?'PALMARÉS POR COMPETENCIA':tab==='oficial'?'IFFHS OFICIAL':tab==='iffhs'?'IFFHS TOTAL':'TABLA GENERAL TOTAL'}</h2><p>{tab==='palmares'?'Campeonatos y subcampeonatos de todas las temporadas':tab==='competencia'?'Elegí la competencia para consultar sus campeones':tab==='oficial'?'Ranking de las últimas cinco temporadas':tab==='iffhs'?'Ranking IFFHS acumulado de todas las temporadas':'Estadísticas acumuladas, ordenadas por puntos totales'}</p></div>
     {tab==='oficial'&&<span className="totals-period">Últimas 5 temporadas</span>}</header>
-   {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">{data.competitions.filter(c=>!worldCupZone(c.code)||c.code===preferredWorld?.code).map(c=>{
-    const world=c.code===preferredWorld?.code;
-    return <button type="button" key={c.code} aria-pressed={world?activeWorld:selected===c.code} onClick={()=>setCode(c.code)}>
-     <CompetitionTrophy code={c.code} name={world?'Mundial':c.name}/>{world?'Mundial':c.name}
-    </button>;
-   })}</div>}
+   {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">
+    {regular.map(c=><button type="button" key={c.code} aria-pressed={selected===c.code} onClick={()=>setCode(c.code)}>
+     <CompetitionTrophy code={c.code} name={c.name}/>{c.name}
+    </button>)}
+    {other.length>0&&<button type="button" aria-pressed={inOther} onClick={()=>{if(!inOther)setCode(preferredWorld?.code??other[0].code)}}>Otras</button>}
+   </div>}
+   {tab==='competencia'&&inOther&&<div className="totals-competitions" role="group" aria-label="Otras competiciones">
+    {other.filter(c=>!worldCupZone(c.code)||c.code===preferredWorld?.code).map(c=>{
+     const world=c.code===preferredWorld?.code;
+     const name=world?'Mundial':c.name;
+     return <button type="button" key={c.code} aria-pressed={world?activeWorld:selected===c.code} onClick={()=>setCode(c.code)}>
+      <CompetitionTrophy code={c.code} name={name}/>{name}
+     </button>;
+    })}
+   </div>}
    {tab==='competencia'&&activeWorld&&worlds.length>1&&<div className="totals-competitions" role="group" aria-label="Zonas del Mundial">
     {['Oro','Plata','Bronce'].flatMap(zone=>{
      const world=worlds.find(c=>worldCupZone(c.code)===zone);

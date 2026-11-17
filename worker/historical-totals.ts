@@ -16,7 +16,7 @@ type IffhsScore={seasonNumber:number;userId:string;fullName:string;pointsScaled:
 const champions=new Set(['CHAMPION']);
 const runners=new Set(['RUNNER_UP','RUNNERUP','SUBCAMPEON','SUBCHAMPION']);
 const officialCodes=new Set(['LIGA_A','COPA_TOTAL','COPA_A','COPA_AMERICA','EUROCOPA','MUNDIAL','MUNDIAL_ORO','COPA_EUROAMERICA','COPA_CAMPEONES','COPA_PAPA']);
-const meaningful=(code:string)=>code!=='PROMOCION'&&!isWorldCupOverall(code)&&!isHistoricalFriendly(code);
+
 const key=(season:number,code:string,user:string)=>season+':'+code+':'+user;
 const n=(value:number|null|undefined)=>Number(value??0);
 const rankSort=<T extends {fullName:string;userId:string}>(items:T[],metric:(r:T)=>number):Array<T&{position:number}>=>{
@@ -40,6 +40,15 @@ export function composeHistoricalTotals(
  officialFinalRows:OfficialFinalRow[]=[],
  completedSeasons:number[]=[]
 ):TotalsData{
+ const historyOnly=(value:string)=>/^(AMISTOSO_NO_OFICIAL|DESAFIO_DE_CAMPEONES|DESAFIO_CAMPEONES)(?:_|$)/.test(
+  value.normalize('NFD').replace(/\p{M}/gu,'').trim().toUpperCase().replace(/[^A-Z0-9]+/g,'_')
+ );
+ const excluded=new Set([
+  ...archives.flatMap(({data})=>data.competitions),
+  ...officialAwards,...officialMembers
+ ].filter(c=>historyOnly(c.name)).map(c=>competitionFamily(c.code)));
+ const meaningful=(code:string)=>code!=='PROMOCION'&&!isWorldCupOverall(code)&&!isHistoricalFriendly(code)
+  &&!historyOnly(code)&&!excluded.has(competitionFamily(code));
  const archiveId=historicalIdentityResolver(archives);
  const names=new Map<string,string>();
  const participation=new Set<string>();
@@ -240,7 +249,7 @@ export function composeHistoricalTotals(
    averageErrors:r.dates&&r.dates>0&&r.errors!==null?r.errors/r.dates:null,
    averageExtras:r.dates&&r.dates>0&&r.extras!==null?r.extras/r.dates:null}));
  return {seasons,competitions:[...competitionNames].filter(([code],index,all)=>all.findIndex(([other])=>competitionFamily(other)===competitionFamily(code))===index).map(([code,name])=>({code,name:competitionFamily(code)==='COPA_AMERICA'?'Copa América':competitionFamily(code)==='COPA_CAMPEONES'?'Copa Campeones':name})),
-  palmares,palmaresOfficial,latestChampions,perCompetition,podiumsByCompetition,finalsByCompetition:combineCompetitionFinals(importedFinals,officialCompetitionFinals(officialFinalRows)),
+  palmares,palmaresOfficial,latestChampions,perCompetition,podiumsByCompetition,finalsByCompetition:combineCompetitionFinals(importedFinals.filter(f=>meaningful(f.competitionCode)),officialCompetitionFinals(officialFinalRows).filter(f=>meaningful(f.competitionCode))),
   iffhsOfficial:{seasons:officialWindow,ranking:rankedIffhs(officialWindow)},
   iffhsTotal:rankedIffhs([...new Set([...seasons,...iffhsSeasons])].sort((a,b)=>b-a)),general:overall};
 }
