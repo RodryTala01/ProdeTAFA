@@ -6,11 +6,20 @@ export const worldCupZones = {
 
 export const isHistoricalFriendly=(code:string)=>code==='COPA_CLASICO';
 
+export function isHistoryOnlyCompetition(code:string,name=code){
+ const pattern=/^(AMISTOSO_NO_OFICIAL|DESAFIO_DE_CAMPEONES|DESAFIO_CAMPEONES)(?:_|$)/;
+ const normalize=(value:string)=>value.normalize('NFD').replace(/\p{M}/gu,'').trim().toUpperCase().replace(/[^A-Z0-9]+/g,'_');
+ return isHistoricalFriendly(code)||pattern.test(normalize(code))||pattern.test(normalize(name));
+}
+export const historicalCompetitionName=(name:string)=>name.replace(/^(Prode Pago)\s*\(no oficial\)$/i,'$1');
+
 export function isWorldCupOverall(code:string){
  return code==='MUNDIAL_QATAR_2022';
 }
 
 export const competitionFamily=(code:string)=>{
+ const clubWorld=/^(?:COPA_)?MUNDIAL_(?:DE_)?CLUBES(?:_|$)/.test(code);
+ if(clubWorld)return /(?:^|_)PLATA(?:_|$)/.test(code)?'MUNDIAL_DE_CLUBES_PLATA':/(?:^|_)ORO(?:_|$)/.test(code)?'MUNDIAL_DE_CLUBES_ORO':'MUNDIAL_DE_CLUBES';
  const zone=/^(?:MUNDIAL|QATAR|ZONA)_/.test(code)?code.match(/(?:^|_)(ORO|PLATA|BRONCE)(?:_|$)/):null;
  if(zone)return 'MUNDIAL_'+zone[1];
  const base=code.replace(/_(?:19|20)\d{2}$/,'');

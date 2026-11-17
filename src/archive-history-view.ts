@@ -1,4 +1,4 @@
-import {isHistoricalFriendly} from './historical-competition-family';
+import {isHistoryOnlyCompetition} from './historical-competition-family';
 import type {ArchiveCompetition,ArchiveMatch,ArchivePayload,ArchiveStanding} from './historical-schema';
 import {leagueZone} from '../worker/league-display-zones';
 import {documentedHistoryGroups,type HistoricalGroupEntry} from './historical-group-catalog';
@@ -7,8 +7,8 @@ import {documentedHistoryGroups,type HistoricalGroupEntry} from './historical-gr
 export function isHistoricalPromotion(c:{code:string;kind?:string}){
  return c.kind==='PROMOTION'||c.code==='PROMOCION';
 }
-export function visibleArchiveCompetitions<T extends {code:string;kind:string}>(competitions:T[]){
- return competitions.filter(c=>!isHistoricalPromotion(c)&&!isHistoricalFriendly(c.code));
+export function visibleArchiveCompetitions<T extends {code:string;kind:string;name?:string}>(competitions:T[]){
+ return competitions.filter(c=>!isHistoricalPromotion(c)&&!isHistoryOnlyCompetition(c.code,c.name));
 }
 export function promotionHomeLeague(data:ArchivePayload){
  const leagues=data.competitions.filter(c=>c.kind==='LEAGUE');

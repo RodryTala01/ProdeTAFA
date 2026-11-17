@@ -16,6 +16,9 @@ competitionAssets.COPA_EUROAMERICA={trophy:'/competitions/copa_euroamerica.png'}
 competitionAssets.SUPERCOPA_EUROAMERICA={trophy:'/competitions/supercopa.png'};
 competitionAssets.PRODE_PAGO={trophy:'/competitions/prode_pago.png'};
 competitionAssets.EUROCOPA={trophy:'/competitions/eurocopa.svg'};
+competitionAssets.MUNDIAL_DE_CLUBES={trophy:'/competitions/mundial_clubes_oro.png'};
+competitionAssets.MUNDIAL_DE_CLUBES_ORO=competitionAssets.MUNDIAL_DE_CLUBES;
+competitionAssets.MUNDIAL_DE_CLUBES_PLATA={trophy:'/competitions/mundial_clubes_plata.png'};
 // Optional historical overrides: season -> competition code -> original asset.
 export const historicalCompetitionAssets: Record<number,Record<string,CompetitionAsset>> = {};
 export function competitionAsset(code:string,season?:number):CompetitionAsset {

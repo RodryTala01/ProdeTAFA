@@ -1,4 +1,4 @@
-import {competitionFamily,isHistoricalFriendly,isWorldCupOverall,worldCupZone} from './historical-competition-family';
+import {competitionFamily,isHistoryOnlyCompetition,isWorldCupOverall,worldCupZone} from './historical-competition-family';
 import {archivedCompetitionFinals,type HistoricalFinal} from './historical-finals';
 import {documentedDuoPhases,documentedHistoryGroups,type ArchiveDuoPhase} from './historical-group-catalog';
 import {useEffect,useState,type ReactNode} from 'react';
@@ -34,12 +34,12 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
  const {data,summary}=detail;
  const groups=new Map<string,ArchivePayload['results']>();
  const finals=archivedCompetitionFinals(data,key=>key).filter(final=>
-  (!code||final.competitionCode===code)&&!competitionFamily(final.competitionCode).startsWith('LIGA_')
+  (!code||final.competitionCode===code)&&!isHistoryOnlyCompetition(final.competitionCode,data.competitions.find(c=>c.code===final.competitionCode)?.name)&&!competitionFamily(final.competitionCode).startsWith('LIGA_')
   &&data.competitions.find(c=>c.code===final.competitionCode)?.kind!=='LEAGUE'
   &&final.pointsA!==null&&final.pointsB!==null&&final.a.userId&&final.b.userId
  );
  for(const award of data.results){
-  if(isHistoricalFriendly(award.competitionCode)||(code&&award.competitionCode!==code)||!['CHAMPION','RUNNER_UP'].includes(award.resultCode))continue;
+  if(isHistoryOnlyCompetition(award.competitionCode,data.competitions.find(c=>c.code===award.competitionCode)?.name)||(code&&award.competitionCode!==code)||!['CHAMPION','RUNNER_UP'].includes(award.resultCode))continue;
   const list=groups.get(award.competitionCode)??[];
   list.push(award);
   groups.set(award.competitionCode,list);
@@ -256,7 +256,7 @@ export function SeasonDetail({detail,competition,view}:{detail:HistoryDetail;com
  const {data,summary}=detail;
  const active=view||(competition?'competiciones':'resumen');
  const available=visibleArchiveCompetitions(data.competitions);
- const friendlies=data.matches.filter(m=>isHistoricalFriendly(m.competitionCode));
+ const friendlies=data.matches.filter(m=>isHistoryOnlyCompetition(m.competitionCode,data.competitions.find(c=>c.code===m.competitionCode)?.name));
  const selected=available.find(c=>c.code===competition)||available.find(c=>c.code===promotionHomeLeague(data)?.code)||available[0];
  const root='#/historia/'+summary.number;
  const total=(key:'points'|'extras')=>data.statistics.length&&data.statistics.every(r=>r[key]!==null)?data.statistics.reduce((n,r)=>n+(r[key]??0),0):null;

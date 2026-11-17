@@ -1,7 +1,7 @@
 import type {Env} from './index';
 import {handleCompetitionLeagues} from './competition-leagues';
 import {evaluateTiebreak} from './competition-tiebreak';
-import {competitionFamily,isHistoricalFriendly,isWorldCupOverall} from '../src/historical-competition-family';
+import {competitionFamily,historicalCompetitionName,isHistoryOnlyCompetition,isWorldCupOverall} from '../src/historical-competition-family';
 import type {GeneralTotal,PalmarTotal,IffhsTotal,TotalsData,PalmarAward,EditionPodium} from '../src/historical-totals-types';
 import {scoringAverage} from '../src/scoring-average';
 import {activeHistoricalArchives,historicalIdentityResolver} from './historical-archive';
@@ -47,7 +47,7 @@ export function composeHistoricalTotals(
   ...archives.flatMap(({data})=>data.competitions),
   ...officialAwards,...officialMembers
  ].filter(c=>historyOnly(c.name)).map(c=>competitionFamily(c.code)));
- const meaningful=(code:string)=>code!=='PROMOCION'&&!isWorldCupOverall(code)&&!isHistoricalFriendly(code)
+ const meaningful=(code:string)=>code!=='PROMOCION'&&!isWorldCupOverall(code)&&!isHistoryOnlyCompetition(code)
   &&!historyOnly(code)&&!excluded.has(competitionFamily(code));
  const archiveId=historicalIdentityResolver(archives);
  const names=new Map<string,string>();
@@ -58,7 +58,7 @@ export function composeHistoricalTotals(
  const competitionNames=new Map<string,string>();
  const officialSeasonUsers=new Set(officialSeasons.map(s=>s.seasonNumber+':'+s.userId));
  const addName=(id:string,name:string)=>{if(!names.has(id))names.set(id,name);};
- const addCompetition=(code:string,name:string)=>{if(meaningful(code)&&!competitionNames.has(code))competitionNames.set(code,name);};
+ const addCompetition=(code:string,name:string)=>{if(meaningful(code)&&!competitionNames.has(code))competitionNames.set(code,historicalCompetitionName(name));};
  const addAward=(a:Award)=>{
   if(!meaningful(a.code)||(!champions.has(a.resultCode)&&!runners.has(a.resultCode)))return;
   addName(a.userId,a.fullName);addCompetition(a.code,a.name);
@@ -160,7 +160,7 @@ export function composeHistoricalTotals(
  for(const award of awards.values()){
   const family=competitionFamily(award.code),champion=champions.has(award.resultCode);
   const list=awardDetails.get(award.userId)??[];
-  list.push({seasonNumber:award.seasonNumber,code:award.code,name:family==='COPA_AMERICA'?'Copa América':family==='COPA_CAMPEONES'?'Copa Campeones':award.name,champion});
+  list.push({seasonNumber:award.seasonNumber,code:award.code,name:family==='COPA_AMERICA'?'Copa América':family==='COPA_CAMPEONES'?'Copa Campeones':historicalCompetitionName(award.name),champion});
   awardDetails.set(award.userId,list);
  }
  for(const award of [...awards.values(),...podiumFallbacks]){
