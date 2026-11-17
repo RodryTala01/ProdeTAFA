@@ -2,13 +2,13 @@ import {isHistoricalFriendly} from '../src/historical-competition-family';
 import type {Env} from './index';
 import type {ArchivePayload} from '../src/historical-schema';
 import type {HistorySummary,HistoryDetail} from '../src/history-types';
-import {activeHistoricalArchives} from './historical-archive';
+import {activeHistoricalArchives,historicalIdentityResolver} from './historical-archive';
 import {handleCompetitionLeagues} from './competition-leagues';
 
 const rows=async <T>(db:D1Database,sql:string,...args:(string|number)[]) => (await db.prepare(sql).bind(...args).all<T>()).results??[];
 export function importedSummary(data:ArchivePayload):HistorySummary{
- return {number:data.season.number,name:data.season.name,source:'imported',participantCount:data.participants.length,
- competitions:data.competitions.filter(c=>c.kind!=='PROMOTION'&&c.code!=='PROMOCION'&&!isHistoricalFriendly(c.code)).map(c=>({...c,champions:data.results.filter(r=>r.competitionCode===c.code&&r.resultCode==='CHAMPION').map(r=>r.teamLabel||data.participants.find(p=>p.key===r.participantKey)?.name||'Participante no disponible')}))};
+ return {number:data.season.number,name:data.season.name.replace(/Qatar 2022/i,'Mundial 2022'),source:'imported',participantCount:data.participants.length,
+ competitions:data.competitions.filter(c=>c.kind!=='PROMOTION'&&c.code!=='PROMOCION'&&!isHistoricalFriendly(c.code)).map(c=>({...c,name:c.name.replace(/Qatar 2022/i,'Mundial 2022').replace(/^Copa de Campeones$/i,'Copa Campeones'),champions:data.results.filter(r=>r.competitionCode===c.code&&r.resultCode==='CHAMPION').map(r=>r.teamLabel||data.participants.find(p=>p.key===r.participantKey)?.name||'Participante no disponible')}))};
 }
 export async function historySummaries(db:D1Database){
  const imported=(await activeHistoricalArchives(db)).map(({data})=>importedSummary(data));
@@ -22,7 +22,7 @@ export async function historySummaries(db:D1Database){
   const competitions=await rows<{code:string;name:string;kind:string}>(db,`SELECT c.code,c.display_name AS name,c.family AS kind FROM competitions c JOIN tafa_seasons s ON s.id=c.season_id WHERE s.season_number=? AND (EXISTS(SELECT 1 FROM competition_results r WHERE r.competition_id=c.id) OR EXISTS(SELECT 1 FROM competition_round_links l JOIN rounds rd ON rd.id=l.round_id WHERE l.competition_id=c.id AND rd.status='finished')) ORDER BY c.sort_order,c.id`,s.number);
   const visibleCompetitions=competitions.filter(c=>c.kind!=='PROMOTION'&&c.code!=='PROMOCION'&&!isHistoricalFriendly(c.code));
   const champions=await rows<{code:string;name:string}>(db,`SELECT c.code,e.display_name AS name FROM competition_results r JOIN competitions c ON c.id=r.competition_id JOIN tafa_seasons s ON s.id=c.season_id JOIN competition_entries e ON e.id=r.entry_id WHERE s.season_number=? AND r.result_code='CHAMPION'`,s.number);
-  const official={...s,source:'official' as const,competitions:visibleCompetitions.map(c=>({...c,champions:champions.filter(x=>x.code===c.code).map(x=>x.name)}))};
+  const official={...s,source:'official' as const,competitions:visibleCompetitions.map(c=>({...c,name:c.name.replace(/Qatar 2022/i,'Mundial 2022').replace(/^Copa de Campeones$/i,'Copa Campeones'),champions:champions.filter(x=>x.code===c.code).map(x=>x.name)}))};
   if(importedIndex<0)result.push(official);
   else {
    const old=result[importedIndex];
@@ -36,13 +36,15 @@ export async function historySummaries(db:D1Database){
 }
 export async function historyDetail(request:Request,env:Env,number:number):Promise<HistoryDetail|null>{
  const summary=(await historySummaries(env.DB)).find(s=>s.number===number);if(!summary)return null;
+ const archives=summary.source==='official'?[]:await activeHistoricalArchives(env.DB);
+ const resolve=historicalIdentityResolver(archives);
  if(summary.source==='imported'){
-  const data=(await activeHistoricalArchives(env.DB)).find(x=>x.seasonNumber===number)!.data;
+  const data=archives.find(x=>x.seasonNumber===number)!.data;
   // Explicit public projection: never return source file, audit records or payload metadata.
-  return {summary,data:{...data,season:{...data.season,notes:''}},officialLinks:[],unavailable:[]};
+  return {summary,data:{...data,season:{...data.season,name:summary.name,notes:''},competitions:data.competitions.map(c=>({...c,name:summary.competitions.find(item=>item.code===c.code)?.name??c.name})),participants:data.participants.map(p=>({...p,userId:resolve(data,p.key)}))},officialLinks:[],unavailable:[]};
  }
  const db=env.DB;
- const imported=summary.source==='mixed'?(await activeHistoricalArchives(db)).find(x=>x.seasonNumber===number)!.data:null;
+ const imported=summary.source==='mixed'?archives.find(x=>x.seasonNumber===number)!.data:null;
  const data:ArchivePayload={version:1,season:{number,name:summary.name,kind:'OFICIAL',notes:''},participants:[],competitions:summary.competitions.map(c=>({code:c.code,name:c.name,kind:c.kind as 'LEAGUE'|'CUP'|'PROMOTION'})),statistics:[],standings:[],rounds:[],results:[],matches:[],movements:[],iffhs:[]};
  const entries=await rows<{id:number;name:string;userId:string|null;fullName:string|null}>(db,`SELECT e.id,e.display_name AS name,CASE WHEN e.entry_type='INDIVIDUAL' THEN m.user_id END AS userId,u.full_name AS fullName FROM competition_entries e JOIN competitions c ON c.id=e.competition_id JOIN tafa_seasons s ON s.id=c.season_id LEFT JOIN competition_entry_members m ON m.entry_id=e.id AND e.entry_type='INDIVIDUAL' LEFT JOIN users u ON u.id=m.user_id WHERE s.season_number=? GROUP BY e.id`,number);
  data.participants=entries.map(e=>({key:'entry:'+e.id,name:e.fullName||e.name,userId:e.userId,division:null}));
@@ -81,7 +83,7 @@ export async function historyDetail(request:Request,env:Env,number:number):Promi
  if(imported){
   const officialCodes=new Set((await rows<{code:string}>(db,`SELECT DISTINCT c.code FROM competitions c JOIN tafa_seasons s ON s.id=c.season_id WHERE s.season_number=? AND (EXISTS(SELECT 1 FROM competition_results r WHERE r.competition_id=c.id) OR EXISTS(SELECT 1 FROM competition_round_links l JOIN rounds rd ON rd.id=l.round_id WHERE l.competition_id=c.id AND rd.status='finished'))`,number)).map(c=>c.code));
   const key=(k:string)=>'imported:'+k;
-  data.participants.push(...imported.participants.map(p=>({...p,key:key(p.key)})));
+  data.participants.push(...imported.participants.map(p=>({...p,key:key(p.key),userId:resolve(imported,p.key)})));
   data.standings.push(...imported.standings.filter(r=>!officialCodes.has(r.competitionCode)).map(r=>({...r,participantKey:key(r.participantKey)})));
   data.rounds.push(...imported.rounds.filter(r=>r.competitionCode&&!officialCodes.has(r.competitionCode)).map(r=>({...r,participantKey:key(r.participantKey)})));
   data.results.push(...imported.results.filter(r=>!officialCodes.has(r.competitionCode)).map(r=>({...r,participantKey:key(r.participantKey)})));

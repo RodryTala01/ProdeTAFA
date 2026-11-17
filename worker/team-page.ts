@@ -3,7 +3,7 @@ import {documentedHistoryGroups} from '../src/historical-group-catalog';
 import {archiveMatchStage,archivePublicDescription} from '../src/archive-history-view';
 import {scoringAverage} from '../src/scoring-average';
 import type {Env} from './index';
-import {activeHistoricalArchives,archivedUserKey,historicalStats} from './historical-archive';
+import {activeHistoricalArchives,archivedUserKey,historicalIdentityResolver,historicalStats} from './historical-archive';
 
 type Who={id:string;role:string};
 type RivalRow={id:number;seasonNumber:number;competitionCode:string;competitionName:string;stageName:string;roundName:string|null;opponentId:string;opponentName:string;opponentParticipantName:string;opponentShieldUrl:string|null;scoreBasis:string;resolution:string|null;outcome?:'win'|'draw'|'loss'|null;ownPoints:number;rivalPoints:number;plenos:number|null};
@@ -60,14 +60,20 @@ export function iffhsPositions(rows:Scored[],target:string,participants:string[]
  return {current,best,throughSeason,missingSeasons};
 }
 async function teamRead(db:D1Database,id:string){
- const identity=await db.prepare(`SELECT u.id,u.full_name AS participantName,p.team_name AS teamName,p.shield_url AS shieldUrl,
+ const archives=await activeHistoricalArchives(db);
+ const resolve=historicalIdentityResolver(archives);
+ const identities=archives.flatMap(({data})=>data.participants.map(p=>({data,p,id:resolve(data,p.key)})));
+ const alias=identities.find(({data,p})=>archivedUserKey(data,p.key)===id);
+ id=alias?.id??id;
+ const historical=identities.find(p=>p.id===id);
+ const account=await db.prepare(`SELECT u.id,u.full_name AS participantName,p.team_name AS teamName,p.shield_url AS shieldUrl,
  (SELECT MIN(s.season_number) FROM tafa_seasons s JOIN season_division_members m ON m.season_id=s.id WHERE m.user_id=u.id AND s.status<>'draft') AS foundedSeason
  FROM users u LEFT JOIN team_profiles p ON p.user_id=u.id WHERE u.id=? AND u.role='participant'`).bind(id).first<{id:string;participantName:string;teamName:string|null;shieldUrl:string|null;foundedSeason:number|null}>();
+ const identity=account??(historical?{id,participantName:historical.p.name,teamName:null,shieldUrl:null,foundedSeason:historical.data.season.number}:null);
  if(!identity)return null;
- const archives=await activeHistoricalArchives(db);
  const archiveTotals=historicalStats(archives);
  const archiveUser=archiveTotals.get(id);
- const archiveSeasonNumbers=archives.filter(a=>a.data.participants.some(p=>p.userId===id)).map(a=>a.seasonNumber);
+ const archiveSeasonNumbers=archives.filter(a=>a.data.participants.some(p=>resolve(a.data,p.key)===id)).map(a=>a.seasonNumber);
  const stat=await db.prepare(`SELECT COUNT(DISTINCT rs.round_id) AS dates,
  COALESCE(SUM(ps.total_points),0) AS points,
  COALESCE(SUM(CASE WHEN ps.base_points=3 THEN 1 ELSE 0 END),0) AS fulls,
@@ -79,7 +85,7 @@ async function teamRead(db:D1Database,id:string){
  LEFT JOIN official_predictions op ON op.user_id=rs.user_id AND op.match_id=m.id
  LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id AND ps.is_provisional=0
  WHERE rs.user_id=?`).bind(id).first();
- const archiveScoringUnknown=archives.some(({data})=>data.statistics.some(s=>archivedUserKey(data,s.participantKey)===id&&(s.fulls==null||s.partials==null||s.errors==null)));
+ const archiveScoringUnknown=archives.some(({data})=>data.statistics.some(s=>resolve(data,s.participantKey)===id&&(s.fulls==null||s.partials==null||s.errors==null)));
  const combinedStats={
     dates:Number(stat?.dates??0)+(archiveUser?.dates??0),
     points:Number(stat?.points??0)+(archiveUser?.points??0),
@@ -90,7 +96,7 @@ async function teamRead(db:D1Database,id:string){
     predictions:Number(stat?.predictions??0)+(archiveUser?.predictions??0),
  };
  const averagePoints=archiveScoringUnknown?null:scoringAverage(combinedStats);
- const historicTitles=archives.flatMap(({data})=>data.results.filter(r=>r.resultCode==='CHAMPION'&&!isHistoricalFriendly(r.competitionCode)&&archivedUserKey(data,r.participantKey)===id).map(row=>{
+ const historicTitles=archives.flatMap(({data})=>data.results.filter(r=>r.resultCode==='CHAMPION'&&!isHistoricalFriendly(r.competitionCode)&&resolve(data,r.participantKey)===id).map(row=>{
    const competition=data.competitions.find(c=>c.code===row.competitionCode);
    return {code:row.competitionCode,name:competition?.name??row.competitionCode,seasonNumber:data.season.number};
  }));
@@ -143,7 +149,7 @@ async function teamRead(db:D1Database,id:string){
  const iffhsRows=[...(iffhs.results??[])];
  const iffhsAlready=new Set(iffhsRows.map(x=>x.seasonNumber+':'+x.userId));
  for(const {data} of archives)for(const r of data.iffhs){
-   const uid=archivedUserKey(data,r.participantKey),key=data.season.number+':'+uid;
+   const uid=resolve(data,r.participantKey),key=data.season.number+':'+uid;
    if(!iffhsAlready.has(key)){iffhsRows.push({userId:uid,seasonNumber:data.season.number,points:Math.round(r.points*100)});iffhsAlready.add(key);}
  }
  const currentPosition=combinedGeneral.findIndex(r=>r.userId===id);
@@ -152,7 +158,7 @@ async function teamRead(db:D1Database,id:string){
  const linkedCoverage=await db.prepare(`SELECT COUNT(*) AS total, COUNT(CASE WHEN (SELECT COUNT(DISTINCT s.season_number) FROM competition_round_links l JOIN competitions c ON c.id=l.competition_id JOIN tafa_seasons s ON s.id=c.season_id WHERE l.round_id=r.id)=1 THEN 1 END) AS linked
  FROM rounds r WHERE r.status='finished'`).first<{total:number;linked:number}>();
  const historicalSeasonal:Scored[]=archives.flatMap(({data})=>data.statistics.map(s=>({
-   userId:archivedUserKey(data,s.participantKey),seasonNumber:data.season.number,points:s.points,fulls:s.fulls??0,partials:s.partials??0,errors:s.errors??0,extras:s.extras??0,
+   userId:resolve(data,s.participantKey),seasonNumber:data.season.number,points:s.points,fulls:s.fulls??0,partials:s.partials??0,errors:s.errors??0,extras:s.extras??0,
    fullName:data.participants.find(p=>p.key===s.participantKey)?.name??s.participantKey,
  })));
  const generalBest=Number(linkedCoverage?.total??0)===Number(linkedCoverage?.linked??-1)
@@ -180,8 +186,8 @@ async function teamRead(db:D1Database,id:string){
  GROUP BY e.id,enemy.user_id
  ORDER BY s.season_number DESC,e.id DESC`).bind(id).all<RivalRow>();
  const historicMatches=archives.flatMap(({data})=>data.matches.flatMap((m,index)=>{
-   const a=archivedUserKey(data,m.aKey),b=archivedUserKey(data,m.bKey);
-   if(a!==id&&b!==id)return [];
+   const a=resolve(data,m.aKey),b=resolve(data,m.bKey);
+   if(a===b||(a!==id&&b!==id))return [];
    const other=a===id?m.bKey:m.aKey,otherId=a===id?b:a;
    const person=data.participants.find(p=>p.key===other);
    return [{id:-100000*data.season.number-index-1,seasonNumber:data.season.number,competitionCode:m.competitionCode,
@@ -208,7 +214,7 @@ async function teamRead(db:D1Database,id:string){
   }
   return results;
  }
- const historicalSeasons=archives.flatMap(({data})=>data.participants.filter(p=>p.userId===id).map(p=>({
+ const historicalSeasons=archives.flatMap(({data})=>data.participants.filter(p=>resolve(data,p.key)===id).map(p=>({
    seasonNumber:data.season.number,seasonName:data.season.name,kind:data.season.kind,name:p.name,division:p.division,
    statistics:data.statistics.find(s=>s.participantKey===p.key)??null,
    standings:data.standings.filter(s=>s.participantKey===p.key).map(s=>({...s,competitionName:data.competitions.find(c=>c.code===s.competitionCode)?.name??s.competitionCode})),
@@ -217,8 +223,8 @@ async function teamRead(db:D1Database,id:string){
    movements:data.movements.filter(s=>s.participantKey===p.key),
    iffhs:data.iffhs.find(s=>s.participantKey===p.key)??null,
  }))).sort((a,b)=>b.seasonNumber-a.seasonNumber);
-  const historicMovements=archives.flatMap(({data})=>data.movements.filter(m=>archivedUserKey(data,m.participantKey)===id).map(m=>({...m,seasonNumber:data.season.number})));
- const historicDivisions=archives.flatMap(({data})=>data.participants.filter(p=>p.userId===id&&p.division).map(p=>({name:'Liga '+p.division,seasonNumber:data.season.number}))).sort((a,b)=>b.seasonNumber-a.seasonNumber);
+  const historicMovements=archives.flatMap(({data})=>data.movements.filter(m=>resolve(data,m.participantKey)===id).map(m=>({...m,seasonNumber:data.season.number})));
+ const historicDivisions=archives.flatMap(({data})=>data.participants.filter(p=>resolve(data,p.key)===id&&p.division).map(p=>({name:'Liga '+p.division,seasonNumber:data.season.number}))).sort((a,b)=>b.seasonNumber-a.seasonNumber);
  const latestDivision=await db.prepare(`SELECT d.name AS name,s.season_number AS seasonNumber FROM season_division_members m
  JOIN tafa_seasons s ON s.id=m.season_id JOIN season_divisions d ON d.id=m.division_id
  WHERE m.user_id=? AND s.status<>'draft' ORDER BY s.season_number DESC LIMIT 1`).bind(id).first();
@@ -232,6 +238,18 @@ async function teamRead(db:D1Database,id:string){
 }
 export async function handleTeamPage(request:Request,env:Env):Promise<Response|null>{
  const pathname=new URL(request.url).pathname;
+ if(pathname==='/api/participant/directory'&&request.method==='GET'){
+  if(!await session(request,env.DB))return fail('No autorizado',401);
+  const archives=await activeHistoricalArchives(env.DB);
+  const resolve=historicalIdentityResolver(archives);
+  const accounts=(await env.DB.prepare("SELECT u.id,u.full_name AS name,p.shield_url AS shieldUrl FROM users u LEFT JOIN team_profiles p ON p.user_id=u.id WHERE u.role='participant'").all<{id:string;name:string;shieldUrl:string|null}>()).results??[];
+  const people=new Map(accounts.map(p=>[p.id,p]));
+  for(const {data} of archives)for(const person of data.participants){
+   const id=resolve(data,person.key);
+   if(!people.has(id))people.set(id,{id,name:person.name,shieldUrl:null});
+  }
+  return json({people:[...people.values()].sort((a,b)=>a.name.localeCompare(b.name,'es'))});
+ }
  const publicMatch=pathname.match(/^\/api\/participant\/teams\/([^/]+)$/);
  const adminMatch=pathname.match(/^\/api\/admin\/teams\/([^/]+)$/);
  if(!publicMatch&&!adminMatch)return null;

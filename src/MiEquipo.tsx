@@ -82,7 +82,7 @@ export function TeamHistory({matches,identity}:{matches:TeamMatch[];identity?:Te
    <tbody>{rivals.map(r=>{
     const open=expanded.includes(r.id);
     return <Fragment key={r.id}><tr>
-     <th scope="row">{r.id.startsWith('hist:')?person(undefined,r.name):<a href={'#/club/participante/'+encodeURIComponent(r.id)}>{person(r.id,r.name,r.participantName,r.shieldUrl)}</a>}</th>
+     <th scope="row"><a href={'#/club/participante/'+encodeURIComponent(r.id)}>{person(r.id,r.name,r.participantName,r.shieldUrl)}</a></th>
      <td className={r.difference>0?'equipo-positive':r.difference<0?'equipo-negative':''}>{r.difference>0?'+':''}{r.difference}</td>
      <td>{r.matches.length}</td><td>{r.wins}</td><td>{r.draws}</td><td>{r.losses}</td><td>{r.points}</td><td>{r.otherPoints}</td>
      <td><button type="button" aria-expanded={open} aria-controls={'equipo-rival-'+encodeURIComponent(r.id)} aria-label={(open?'Cerrar':'Ver')+' enfrentamientos contra '+r.name} onClick={()=>setExpanded(old=>open?old.filter(x=>x!==r.id):[...old,r.id])}>{open?'−':'+'}</button></td>

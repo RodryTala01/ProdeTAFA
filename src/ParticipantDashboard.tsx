@@ -1,3 +1,4 @@
+import ParticipantDirectory from './ParticipantDirectory';
 import ParticipantArchive from './ParticipantArchive';
 import ParticipantHistoricalTotals from './ParticipantHistoricalTotals';
 import PushNotifications from './PushNotifications';
@@ -64,6 +65,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
           : route.startsWith('club/enfrentamientos') ? <><a href={new URLSearchParams(route.split('?')[1]).get('user')?`#/club/participante/${encodeURIComponent(new URLSearchParams(route.split('?')[1]).get('user')!)}`:'#/club'} className="button button--ghost">Volver al perfil</a><HeadToHead/></>
           : route === 'club/envios' ? <><a href="#/club" className="button button--ghost">Volver a Mi Club</a><PredictionHistoryBrowser own/></>
           : route === 'club' ? <ParticipantClubPage key={route} user={user} route={route}/>
+          : route==='participantes' ? <ParticipantDirectory/>
           : route.startsWith('club/participante/') ? <ParticipantClubPage key={route} user={user} route={route}/>
           : route === 'competiciones/liga' ? <><a className="button button--ghost" href="#/competiciones">Volver a Competiciones</a><LeagueView /></>
           : route.startsWith('competiciones') ? <ParticipantCompetitionsPage route={route}/>

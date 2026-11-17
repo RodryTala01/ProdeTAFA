@@ -1,5 +1,5 @@
 import type { Env } from './index';
-import {activeHistoricalArchives,archivedUserKey} from './historical-archive';
+import {activeHistoricalArchives,historicalIdentityResolver} from './historical-archive';
 import { calculateIffhsSeason } from './iffhs-calculator';
 
 type SessionUser = {
@@ -82,8 +82,9 @@ async function ranking(request: Request, env: Env) {
 
   const url = new URL(request.url);
   const archives=await activeHistoricalArchives(env.DB);
+  const resolve=historicalIdentityResolver(archives);
   const archiveIffhs=archives.flatMap(({data})=>data.iffhs.map(row=>({
-    seasonNumber:data.season.number,userId:archivedUserKey(data,row.participantKey),
+    seasonNumber:data.season.number,userId:resolve(data,row.participantKey),
     name:data.participants.find(p=>p.key===row.participantKey)?.name??row.participantKey,points:Math.round(row.points*100),
   })));
   const requestedThroughSeason = Number(url.searchParams.get('throughSeason'));

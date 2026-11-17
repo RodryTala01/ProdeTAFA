@@ -20,7 +20,7 @@ const decimal=(value:number|null)=>value===null?'—':value.toLocaleString('es-A
 function Player({userId,name}:{userId:string;name:string}){
  return <span className="totals-person">
   <ParticipantShield userId={userId.startsWith('hist:')?undefined:userId} name={name} size="sm" decorative/>
-  {userId.startsWith('hist:')?<span>{name}</span>:<a href={'#/club/participante/'+encodeURIComponent(userId)}>{name}</a>}
+  <a href={'#/club/participante/'+encodeURIComponent(userId)}>{name}</a>
  </span>;
 }
 function CompetitionTrophy({code,name}:{code:string;name:string}){
@@ -99,7 +99,7 @@ export function FinalsCalendar({finals}:{finals:HistoricalFinal[]}){
    </a>)}</div>:<p className="totals-finals-empty">Todavía no hay enfrentamientos de final registrados para esta competencia.</p>}
  </section>;
 }
-function EditionPodiums({editions}:{editions:EditionPodium[]}){
+function EditionPodiums({editions,showPoints=true}:{editions:EditionPodium[];showPoints?:boolean}){
  if(!editions.length)return null;
  return <section className="totals-finals" aria-label="Resultados por temporada">
   <div className="totals-finals-heading"><h3>Resultados por temporada</h3></div>
@@ -107,7 +107,7 @@ function EditionPodiums({editions}:{editions:EditionPodium[]}){
    <ul>{edition.entrants.map(person=><li key={person.userId}>
     <span>{person.champion?'Campeón':'Subcampeón'}</span>
     <Player userId={person.userId} name={person.name}/>
-    {person.points!==null&&<strong>{fmt(person.points)} PTS</strong>}
+    {showPoints&&person.points!==null&&<strong>{fmt(person.points)} PTS</strong>}
    </li>)}</ul>
    <div className="totals-final-caption"><strong>Temporada {edition.seasonNumber}</strong></div>
   </article>)}</div>
@@ -153,7 +153,6 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
  const activeWorld=Boolean(worldCupZone(selected));
  const preferredWorld=worlds.find(c=>competitionFamily(c.code)==='MUNDIAL_ORO')??worlds[0];
  const rows=data.perCompetition[selected]??[];
- const titledRows=rows.filter(row=>row.championships>0||row.runnerUps>0);
  const honours=tab==='competencia'?rows:official?data.palmaresOfficial:data.palmares;
  const iffhs=tab==='oficial'?data.iffhsOfficial.ranking:data.iffhsTotal;
  const family=competitionFamily(selected);
@@ -180,7 +179,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
     })}
    </div>}
    {tab==='palmares'&&<div className="totals-tabs" role="group" aria-label="Modalidad de palmarés"><button type="button" aria-pressed={official} onClick={()=>setOfficial(true)}>Palmarés Oficial</button><button type="button" aria-pressed={!official} onClick={()=>setOfficial(false)}>Palmarés Total</button></div>}
-   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/><Rows rows={tab==='competencia'?titledRows:honours}/>{tab==='competencia'&&<>{finals.length>0&&<FinalsCalendar finals={finals}/>}<EditionPodiums editions={podiums}/></>}</>}
+   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/><Rows rows={honours.filter(row=>row.championships>0||row.runnerUps>0)}/>{tab==='competencia'&&<>{finals.length>0&&<FinalsCalendar finals={finals}/>}<EditionPodiums editions={podiums} showPoints={!activeWorld}/></>}</>}
    {(tab==='oficial'||tab==='iffhs')&&<Indicators items={[
     ['Líder',leader(iffhs,r=>r.totalPoints,decimal)],['Puntos del líder',decimal(iffhs[0]?.totalPoints??null)],
     ['Temporadas consideradas',tab==='oficial'?data.iffhsOfficial.seasons.map(n=>'T'+n).join(' · '):iffhs[0]?.breakdown.length??0],

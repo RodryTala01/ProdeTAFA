@@ -46,13 +46,13 @@ export default function ParticipantClubPage({user,route}:{user:{id:string;fullNa
   try { if(encoded)id=decodeURIComponent(encoded); } catch { /* Invalid route is reported as unavailable. */ }
   const own=id===user.id;
   const season=new URLSearchParams(route.split('?')[1]??'').get('season');
-  const profile=useParticipantRead<PublicProfile>(`/api/participant/profiles/${encodeURIComponent(id)}`,'No pudimos cargar este perfil. Puede no estar disponible.');
+  const profile=useParticipantRead<PublicProfile>(id.startsWith('hist:')?null:`/api/participant/profiles/${encodeURIComponent(id)}`,'No pudimos cargar este perfil. Puede no estar disponible.');
   const team=useParticipantRead<TeamPageData>(`/api/participant/teams/${encodeURIComponent(id)}`,'No pudimos cargar la ficha institucional del club.');
   const overview=useParticipantRead<Overview>(`/api/competition-engine/overview${season?`?season=${encodeURIComponent(season)}`:''}`,'No pudimos cargar las competiciones.');
   const division=overview.data?.season?.people.find(p=>p.userId===id)?.division;
   const league=useParticipantRead<LeagueData>(division?`/api/competition-engine/leagues/LIGA_${division}/standings?season=${overview.data!.season!.seasonNumber}`:null,'No pudimos cargar la posición en Liga.');
+  if(id.startsWith('hist:'))return <><ParticipantState loading={team.loading} error={team.error} retry={team.retry}/>{team.data&&<MiEquipoProfile data={team.data}/>}</>;
   return <>
-    {encoded&&<nav className="club-links" aria-label="Volver"><a href={division?competitionHref(`LIGA_${division}`,overview.data?.season?.seasonNumber):'#/competiciones'}>Volver a {division?'Liga':'Competiciones'}</a>{own&&<a href="#/club">Ir a Mi Club</a>}</nav>}
     <ParticipantState loading={profile.loading||overview.loading||team.loading} error={profile.error||overview.error||team.error} retry={()=>{profile.retry();overview.retry();team.retry();}}/>
     {profile.data&&profile.data.participant.id===id&&overview.data&&team.data&&team.data.identity.id===id&&<><ParticipantState loading={league.loading} error={league.error} retry={league.retry}/><ClubProfile own={own} team={team.data} data={{profile:profile.data,overview:overview.data,league:league.data}}/></>}
   </>;

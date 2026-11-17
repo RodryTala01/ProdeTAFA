@@ -198,13 +198,37 @@ export function archivedUserKey(data:ArchivePayload,key:string){
  const p=data.participants.find(p=>p.key===key);
  return p?.userId??('hist:'+data.season.number+':'+key);
 }
+// The archive participant key is the shared reference. Account links must agree.
+export function historicalIdentityResolver(archives:Awaited<ReturnType<typeof activeHistoricalArchives>>){
+ const refs=new Map<string,Set<string>>();
+ const names=new Map<string,Set<string>>();
+ for(const {data} of archives)for(const person of data.participants){
+  const accounts=refs.get(person.key)??new Set<string>();
+  if(person.userId)accounts.add(person.userId);
+  refs.set(person.key,accounts);
+  const labels=names.get(person.key)??new Set<string>();
+  const label=person.name.normalize('NFD').replace(/\p{M}/gu,'').trim().toLocaleLowerCase('es');
+  labels.add(person.key==='t1-el-diego'&&label==='diego'?'el diego':label);
+  names.set(person.key,labels);
+ }
+ return (data:ArchivePayload,key:string)=>{
+  const person=data.participants.find(p=>p.key===key);
+  if(!person)return archivedUserKey(data,key);
+  const accounts=refs.get(key);
+  if(person.userId)return person.userId;
+  if(names.get(key)?.size!==1)return archivedUserKey(data,key);
+  if(accounts?.size===1)return [...accounts][0];
+  return accounts?.size===0?'hist:'+key:archivedUserKey(data,key);
+ };
+}
 export function historicalStats(archives:Awaited<ReturnType<typeof activeHistoricalArchives>>){
+ const resolve=historicalIdentityResolver(archives);
  const totals=new Map<string,{userId:string;fullName:string;points:number;fulls:number;partials:number;errors:number;extras:number;dates:number;predictions:number;seasons:number[]}>();
  for(const {data} of archives){
   for(const s of data.statistics){
    const p=data.participants.find(p=>p.key===s.participantKey);
    if(!p)continue;
-   const uid=archivedUserKey(data,s.participantKey);
+   const uid=resolve(data,s.participantKey);
    const total=totals.get(uid)??{userId:uid,fullName:p.name,points:0,fulls:0,partials:0,errors:0,extras:0,dates:0,predictions:0,seasons:[]};
    total.points+=s.points;total.fulls+=s.fulls??0;total.partials+=s.partials??0;total.errors+=s.errors??0;
    total.extras+=s.extras??0;total.dates+=s.dates??0;total.predictions+=s.predictions??0;
@@ -236,8 +260,9 @@ export async function handleHistoricalArchive(request:Request,env:Env):Promise<R
   if(request.method!=='GET')return error('Método inválido',405);
   let id='';try{id=decodeURIComponent(path.split('/').at(-1)??'');}catch{return error('ID inválido');}
   const archives=await activeHistoricalArchives(env.DB);
+  const resolve=historicalIdentityResolver(archives);
   const seasons=archives.flatMap(({data})=>{
-    const participants=data.participants.filter(p=>archivedUserKey(data,p.key)===id);
+    const participants=data.participants.filter(p=>resolve(data,p.key)===id||archivedUserKey(data,p.key)===id);
     return participants.map(p=>({seasonNumber:data.season.number,seasonName:data.season.name,
       participantName:p.name,division:p.division,
       stats:data.statistics.find(s=>s.participantKey===p.key)??null,

@@ -4,7 +4,7 @@ import {evaluateTiebreak} from './competition-tiebreak';
 import {competitionFamily,isHistoricalFriendly,isWorldCupOverall} from '../src/historical-competition-family';
 import type {GeneralTotal,PalmarTotal,IffhsTotal,TotalsData,PalmarAward,EditionPodium} from '../src/historical-totals-types';
 import {scoringAverage} from '../src/scoring-average';
-import {activeHistoricalArchives,archivedUserKey} from './historical-archive';
+import {activeHistoricalArchives,historicalIdentityResolver} from './historical-archive';
 import {documentedHistoryGroups} from '../src/historical-group-catalog';
 import {archivedCompetitionFinals,combineCompetitionFinals,officialCompetitionFinals,type HistoricalFinal,type OfficialFinalRow} from '../src/historical-finals';
 
@@ -37,24 +37,7 @@ export function composeHistoricalTotals(
  officialFinalRows:OfficialFinalRow[]=[],
  completedSeasons:number[]=[]
 ):TotalsData{
- const historicRefs=new Map<string,{names:Set<string>;ids:Set<string>;count:number}>();
- const normal=(value:string)=>value.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
- for(const {data} of archives)for(const p of data.participants){
-  const v=historicRefs.get(p.key)??{names:new Set<string>(),ids:new Set<string>(),count:0};
-  v.names.add(normal(p.name));if(p.userId)v.ids.add(p.userId);v.count++;
-  historicRefs.set(p.key,v);
- }
- // Stable participantKey is an explicit identity reference across seasons.
- // Never merge on name alone, or when a key points at different names/accounts.
- const archiveId=(data:Archive[number]['data'],participantKey:string)=>{
-  const p=data.participants.find(x=>x.key===participantKey);
-  if(!p)return 'hist:'+data.season.number+':'+participantKey;
-  if(p.userId)return p.userId;
-  const known=historicRefs.get(participantKey);
-  if(known?.names.size===1&&known.ids.size===1)return [...known.ids][0];
-  if(known?.names.size===1&&known.count>1&&known.ids.size===0)return 'hist:'+participantKey;
-  return archivedUserKey(data,participantKey);
- };
+ const archiveId=historicalIdentityResolver(archives);
  const names=new Map<string,string>();
  const participation=new Set<string>();
  const awards=new Map<string,Award>();
@@ -154,7 +137,7 @@ export function composeHistoricalTotals(
  for(const award of awards.values()){
   const family=competitionFamily(award.code),champion=champions.has(award.resultCode);
   const list=awardDetails.get(award.userId)??[];
-  list.push({seasonNumber:award.seasonNumber,code:award.code,name:family==='COPA_AMERICA'?'Copa América':award.name,champion});
+  list.push({seasonNumber:award.seasonNumber,code:award.code,name:family==='COPA_AMERICA'?'Copa América':family==='COPA_CAMPEONES'?'Copa Campeones':award.name,champion});
   awardDetails.set(award.userId,list);
  }
  for(const award of [...awards.values(),...podiumFallbacks]){
@@ -242,7 +225,7 @@ export function composeHistoricalTotals(
    averagePartials:r.dates&&r.dates>0&&r.partials!==null?r.partials/r.dates:null,
    averageErrors:r.dates&&r.dates>0&&r.errors!==null?r.errors/r.dates:null,
    averageExtras:r.dates&&r.dates>0&&r.extras!==null?r.extras/r.dates:null}));
- return {seasons,competitions:[...competitionNames].filter(([code],index,all)=>all.findIndex(([other])=>competitionFamily(other)===competitionFamily(code))===index).map(([code,name])=>({code,name:competitionFamily(code)==='COPA_AMERICA'?'Copa América':name})),
+ return {seasons,competitions:[...competitionNames].filter(([code],index,all)=>all.findIndex(([other])=>competitionFamily(other)===competitionFamily(code))===index).map(([code,name])=>({code,name:competitionFamily(code)==='COPA_AMERICA'?'Copa América':competitionFamily(code)==='COPA_CAMPEONES'?'Copa Campeones':name})),
   palmares,palmaresOfficial,latestChampions,perCompetition,podiumsByCompetition,finalsByCompetition:combineCompetitionFinals(importedFinals,officialCompetitionFinals(officialFinalRows)),
   iffhsOfficial:{seasons:officialWindow,ranking:rankedIffhs(officialWindow)},
   iffhsTotal:rankedIffhs([...new Set([...seasons,...iffhsSeasons])].sort((a,b)=>b-a)),general:overall};
