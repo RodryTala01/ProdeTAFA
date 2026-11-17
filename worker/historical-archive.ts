@@ -200,25 +200,26 @@ export function archivedUserKey(data:ArchivePayload,key:string){
 }
 // The archive participant key is the shared reference. Account links must agree.
 export function historicalIdentityResolver(archives:Awaited<ReturnType<typeof activeHistoricalArchives>>){
+ const canonicalKey=(key:string)=>key==='t10-leandro-montes'?'t3-leandro-montes':key;
  const refs=new Map<string,Set<string>>();
  const names=new Map<string,Set<string>>();
  for(const {data} of archives)for(const person of data.participants){
-  const accounts=refs.get(person.key)??new Set<string>();
+  const accounts=refs.get(canonicalKey(person.key))??new Set<string>();
   if(person.userId)accounts.add(person.userId);
-  refs.set(person.key,accounts);
-  const labels=names.get(person.key)??new Set<string>();
+  refs.set(canonicalKey(person.key),accounts);
+  const labels=names.get(canonicalKey(person.key))??new Set<string>();
   const label=person.name.normalize('NFD').replace(/\p{M}/gu,'').trim().toLocaleLowerCase('es');
   labels.add(person.key==='t1-el-diego'&&label==='diego'?'el diego':label);
-  names.set(person.key,labels);
+  names.set(canonicalKey(person.key),labels);
  }
  return (data:ArchivePayload,key:string)=>{
   const person=data.participants.find(p=>p.key===key);
   if(!person)return archivedUserKey(data,key);
-  const accounts=refs.get(key);
+  const accounts=refs.get(canonicalKey(key));
   if(person.userId)return person.userId;
-  if(names.get(key)?.size!==1)return archivedUserKey(data,key);
+  if(names.get(canonicalKey(key))?.size!==1)return archivedUserKey(data,key);
   if(accounts?.size===1)return [...accounts][0];
-  return accounts?.size===0?'hist:'+key:archivedUserKey(data,key);
+  return accounts?.size===0?'hist:'+canonicalKey(key):archivedUserKey(data,key);
  };
 }
 export function historicalStats(archives:Awaited<ReturnType<typeof activeHistoricalArchives>>){

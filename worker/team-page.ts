@@ -63,7 +63,7 @@ async function teamRead(db:D1Database,id:string){
  const archives=await activeHistoricalArchives(db);
  const resolve=historicalIdentityResolver(archives);
  const identities=archives.flatMap(({data})=>data.participants.map(p=>({data,p,id:resolve(data,p.key)})));
- const alias=identities.find(({data,p})=>archivedUserKey(data,p.key)===id);
+ const alias=identities.find(({data,p})=>archivedUserKey(data,p.key)===id||id==='hist:t10-leandro-montes'&&p.key==='t10-leandro-montes');
  id=alias?.id??id;
  const historical=identities.find(p=>p.id===id);
  const account=await db.prepare(`SELECT u.id,u.full_name AS participantName,p.team_name AS teamName,p.shield_url AS shieldUrl,
