@@ -29,6 +29,19 @@ export type HistoricalGroupTable={name:string;entries:HistoricalGroupEntry[]};
 // T3 contains original group membership and official points; "order" in the
 // source file was not a verified ranking, so no position is invented.
 const documented:Record<string,string>={
+ // T12, hoja COPA TOTAL, columnas de Posición y PTS de la tabla de grupos.
+ '12:COPA_TOTAL':[
+  '1:t1-rodri-sebastian|8|1,t7-alexis-segovia|8|2,t7-lucas-aguilera|6|3,t1-pancho-muzzio|2|4,t10-leandro-montes|1|5',
+  '2:t4-eze|10|1,t7-anto-lopez|9|2,t4-nico-luchetti-r|7|3,t10-mariano-gallucci|1|4,t2-nico-avalos|1|5',
+  '3:t8-joel-alcalde|10|1,t7-daniel-bazan|6|2,t6-ian-gangai|5|3,t3-bruno-alonso|4|4,t6-ramiro-vita|3|5',
+  '4:t5-rodrigo-soca|9|1,t7-gonzalo-nunez|7|2,t1-jhose|4|3,t10-ignacio-cejas|4|4,t4-natanael|4|5',
+  '5:t6-lucas-insua|10|1,t1-nahuel-scocier|8|2,t1-rodrigo-talarico|4|3,t8-benja|4|4,t10-fede-salatino|1|5',
+  '6:t5-fabrizio-escolano|10|1,t10-franco-przepiorka|6|2,t7-nacho-soto|5|3,t1-luciano-hufschmid|4|4,t1-gabriel-talarico|3|5',
+  '7:t10-azul-quispe|10|1,t1-mario-talarico|7|2,t1-kevin-sivori|5|3,t7-renzo-badano|2|4,t9-facundo-marchese|2|5',
+  '8:t2-martin-bustos|10|1,t10-bautista-coria|7|2,t6-moreno-perez|6|3,t7-tomas-torcasio|6|4,t3-santi|0|5',
+  '9:t7-kraiizer|10|1,t1-joel-marasco|7|2,t6-tomas-delgado|4|3,t7-joaquin-sampadaro|3|4,t3-valentina-scocier|3|5',
+  '10:t1-matheo-olivera|8|1,t10-felipe-galante|7|2,t1-lautaro-scocier|6|3,t9-axel|4|4,t1-anubis|2|5'
+ ].join(';'),
  '3:COPA_TOTAL':[
   '1:t3-leandro-montes|10,t2-nico-avalos|7,t3-pablo-aquino|14,t1-rodri-sebastian|11',
   '2:t1-aylen-benedetti|8,t1-pancho-muzzio|14,t1-matias-varela|13',
