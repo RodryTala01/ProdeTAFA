@@ -56,6 +56,9 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
     <h3>{name}</h3>
     {matches.map(final=>{
      const caption=final.tieA!==undefined&&final.tieB!==undefined?'Final · Desempate '+final.tieA+'–'+final.tieB:'Final';
+     if(final.legs?.length&&!final.a.members&&!final.b.members)return final.legs.map((leg,index)=>
+      <ArchiveEncounter key={final.id+':'+index} data={data} players={[final.a.userId!,final.b.userId!]} scores={[leg.pointsA,leg.pointsB]} caption={'Final · '+leg.label}/>
+     );
      return final.a.members&&final.b.members
       ?<ArchiveDuoFinal key={final.id} data={data} final={final} caption={caption}/>
       :<ArchiveEncounter key={final.id} data={data} players={[final.a.userId!,final.b.userId!]} scores={[final.pointsA!,final.pointsB!]} caption={caption}/>;

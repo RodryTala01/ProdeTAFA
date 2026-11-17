@@ -91,9 +91,9 @@ export function FinalsCalendar({finals}:{finals:HistoricalFinal[]}){
    >
     <div className="totals-final-entries">
      <FinalContender side={final.a} winner={final.winner==='a'} season={final.seasonNumber}/>
-     <span className="totals-final-score" aria-label={final.pointsA===null||final.pointsB===null?'versus':final.pointsA+' a '+final.pointsB+' puntos'+(final.tieA!==undefined?' · Desempate '+final.tieA+' a '+final.tieB:'')}>
+     {final.legs?.length?<div className="totals-final-score">{final.legs.map((leg,index)=><div key={index}><small>{leg.label}</small><div><strong>{leg.pointsA}–{leg.pointsB}</strong></div></div>)}</div>:<span className="totals-final-score" aria-label={final.pointsA===null||final.pointsB===null?'versus':final.pointsA+' a '+final.pointsB+' puntos'+(final.tieA!==undefined?' · Desempate '+final.tieA+' a '+final.tieB:'')}>
       {final.pointsA!==null&&final.pointsB!==null?<><strong>{final.pointsA}</strong>{final.tieA!==undefined&&<small>({final.tieA})</small>}<span>–</span>{final.tieB!==undefined&&<small>({final.tieB})</small>}<strong>{final.pointsB}</strong></>:<strong>vs.</strong>}
-     </span>
+     </span>}
      <FinalContender side={final.b} winner={final.winner==='b'} season={final.seasonNumber}/>
     </div>
     <div className="totals-final-caption"><strong>T{final.seasonNumber}</strong><small>{final.encounters>1?final.encounters+' encuentros':'Final'}</small></div>

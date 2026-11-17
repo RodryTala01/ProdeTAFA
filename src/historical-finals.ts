@@ -1,12 +1,13 @@
 import type {ArchivePayload,ArchiveMatch} from './historical-schema';
 import {competitionFamily,isHistoricalFriendly} from './historical-competition-family';
 
+type FinalLeg={label:'Ida'|'Vuelta';pointsA:number;pointsB:number};
 type FinalPerson={userId:string|null;name:string};
 type FinalSide=FinalPerson&{members?:FinalPerson[]};
 export type HistoricalFinal={
  id:string;seasonNumber:number;competitionCode:string;
  a:FinalSide;b:FinalSide;winner?:'a'|'b';
- pointsA:number|null;pointsB:number|null;tieA?:number;tieB?:number;encounters:number;stage:string;
+ pointsA:number|null;pointsB:number|null;tieA?:number;tieB?:number;encounters:number;stage:string;legs?:FinalLeg[];
 };
 export type OfficialFinalRow={
  encounterId:number;seasonNumber:number;competitionCode:string;stageCode:string;stageName:string;
@@ -35,7 +36,11 @@ function consolidate(items:HistoricalFinal[],priorities:Map<string,number>){
   const previous=finals.get(key);
   if(!previous){finals.set(key,{...item});continue;}
   const better=(priorities.get(item.id)??0)>(priorities.get(previous.id)??0);
-  finals.set(key,{...(better?item:previous),encounters:previous.encounters+item.encounters});
+  const chosen=better?item:previous;
+  const legs=[previous,item].flatMap(candidate=>(candidate.legs??[]).map(leg=>
+   candidate.a.userId===chosen.a.userId?leg:{...leg,pointsA:leg.pointsB,pointsB:leg.pointsA}
+  )).sort((a,b)=>a.label==='Ida'&&b.label==='Vuelta'?-1:a.label===b.label?0:1);
+  finals.set(key,{...chosen,legs:legs.length?legs:undefined,encounters:previous.encounters+item.encounters});
  }
  return [...finals.values()].sort((a,b)=>b.seasonNumber-a.seasonNumber||a.a.name.localeCompare(b.a.name,'es'));
 }
@@ -96,9 +101,12 @@ export function archivedCompetitionFinals(
   const ties=finalMatches.filter(t=>isTie(t)&&competitionFamily(t.competitionCode)===competitionFamily(m.competitionCode)&&t.scoreBasis===m.scoreBasis
    &&((t.aKey===m.aKey&&t.bKey===m.bKey)||(t.aKey===m.bKey&&t.bKey===m.aKey)));
   const tie=ties.length===1?ties[0]:null;
+  const leg=norm(m.stage+' '+(m.round??'')).match(/\b(ida|vuelta)\b/);
+  const label=leg?.[1]==='ida'?'Ida' as const:leg?'Vuelta' as const:null;
   return [{id,seasonNumber:data.season.number,competitionCode:m.competitionCode,
    a:{userId:identify(m.aKey),name:a.name},b:{userId:identify(m.bKey),name:b.name},
    pointsA:m.pointsA,pointsB:m.pointsB,
+   ...(label?{legs:[{label,pointsA:m.pointsA,pointsB:m.pointsB}]}:{}),
    ...(tie&&m.pointsA===m.pointsB?{tieA:tie.aKey===m.aKey?tie.pointsA:tie.pointsB,tieB:tie.aKey===m.aKey?tie.pointsB:tie.pointsA}:{}),
    encounters:1,stage:m.stage}];
  });
