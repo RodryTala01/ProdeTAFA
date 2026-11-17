@@ -46,6 +46,8 @@ export function archivePublicDescription(raw:string|null|undefined):string {
   .replace(/\b(?:según|tomado de)\s+(?:archivo|planilla|hoja|excel)\b.*$/i,'')
   .replace(/\b(?:temporada\s*\d+\.xlsx|archivo\s+excel|\S+\.xlsx)\b.*$/i,'')
   .replace(/\b(ascenso|descenso|permanencia)\s+confirmad[oa]\b/gi,'$1')
+  .replace(/\bdesempate_+/gi,'Desempate ')
+  .replace(/_/g,' ')
   .replace(/\s+/g,' ')
   .replace(/[\s,;:·—–-]+$/g,'')
   .trim();

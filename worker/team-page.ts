@@ -98,7 +98,7 @@ async function teamRead(db:D1Database,id:string){
  const averagePoints=archiveScoringUnknown?null:scoringAverage(combinedStats);
  const historicTitles=archives.flatMap(({data})=>data.results.filter(r=>r.resultCode==='CHAMPION'&&!isHistoricalFriendly(r.competitionCode)&&resolve(data,r.participantKey)===id).map(row=>{
    const competition=data.competitions.find(c=>c.code===row.competitionCode);
-   return {code:row.competitionCode,name:competition?.name??row.competitionCode,seasonNumber:data.season.number};
+   return {code:row.competitionCode,name:(competition?.name??row.competitionCode).replace(/^Copa de Campeones$/i,'Copa Campeones'),seasonNumber:data.season.number};
  }));
  const titles=await db.prepare(`SELECT c.code,c.display_name AS name,s.season_number AS seasonNumber
  FROM competition_results cr JOIN competition_entries e ON e.id=cr.entry_id
@@ -115,7 +115,7 @@ async function teamRead(db:D1Database,id:string){
          AND last_win.winner_entry_id=e.id AND last_win.admin_confirmed_at IS NOT NULL AND last_win.status='finished')
        AND (m.valid_from_round_id IS NULL OR m.valid_from_round_id<=wl.round_id)
        AND (m.valid_to_round_id IS NULL OR m.valid_to_round_id>wl.round_id))))
- GROUP BY c.id,c.code,c.display_name,s.season_number ORDER BY s.season_number DESC,c.sort_order`).bind(id).all();
+ GROUP BY c.id,c.code,c.display_name,s.season_number ORDER BY s.season_number DESC,c.sort_order`).bind(id).all<{code:string;name:string;seasonNumber:number}>();
  const general=await db.prepare(`WITH totals AS (
  SELECT u.id,u.full_name,COALESCE(SUM(ps.total_points),0) AS points,
  SUM(CASE WHEN ps.base_points=3 THEN 1 ELSE 0 END) AS fulls,SUM(CASE WHEN ps.base_points=1 THEN 1 ELSE 0 END) AS partials,
@@ -231,7 +231,7 @@ async function teamRead(db:D1Database,id:string){
  const founding=[identity.foundedSeason,...archiveSeasonNumbers].filter(x=>x!=null).map(Number).sort((a,b)=>a-b)[0]??null;
  const division=latestDivision&&Number((latestDivision as {seasonNumber:number}).seasonNumber)>=(historicDivisions[0]?.seasonNumber??0)?latestDivision:historicDivisions[0]??latestDivision;
  return {identity:{...identity,foundedSeason:founding,teamName:identity.teamName??'Equipo de '+identity.participantName},division,
-   stats:{...combinedStats,averagePoints},titles:[...(titles.results??[]),...historicTitles],
+   stats:{...combinedStats,averagePoints},titles:[...(titles.results??[]),...historicTitles].map(t=>({...t,name:t.name.replace(/^Copa de Campeones$/i,'Copa Campeones')})),
    rankings:{general:{current:generalEntry?Number(generalEntry.position):null,best:generalBest},iffhs:iffhsRank},
    encounters:[...(encounters.results??[]),...historicMatches],historicalMovements:historicMovements,historicalSeasons};
 

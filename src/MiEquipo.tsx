@@ -90,7 +90,7 @@ export function TeamHistory({matches,identity}:{matches:TeamMatch[];identity?:Te
      {[...r.matches].sort((a,b)=>b.seasonNumber-a.seasonNumber||(a.id<0&&b.id<0?a.id-b.id:b.id-a.id)).map(m=>{
       const outcome=matchOutcome(m),label=outcome==='win'?'Victoria':outcome==='loss'?'Derrota':'Empate';
       return <article className="equipo-encounter" key={m.id+'-'+m.opponentId}>
-       <div className="equipo-encounter-meta"><strong>{phaseName(archivePublicDescription(m.stageName))} · T{m.seasonNumber} · <a href={isHistoricalFriendly(m.competitionCode)?'#/historia/'+m.seasonNumber:competitionHref(m.competitionCode,m.seasonNumber)}>{m.competitionName}</a></strong></div>
+       <div className="equipo-encounter-meta"><strong>{phaseName(archivePublicDescription(m.stageName))} · T{m.seasonNumber} · <a href={isHistoricalFriendly(m.competitionCode)?'#/historia/'+m.seasonNumber:competitionHref(m.competitionCode,m.seasonNumber)}>{m.competitionName.replace(/\bCopa de Campeones\b/gi,'Copa Campeones')}</a></strong></div>
        <div className="equipo-encounter-score">{person(identity?.id,identity?.teamName??'Equipo consultado',identity?.participantName,identity?.shieldUrl)}<strong>{m.ownPoints} <span>–</span> {m.rivalPoints}</strong>{person(r.id,r.name,r.participantName,r.shieldUrl)}</div>
        <div className={'equipo-outcome equipo-outcome-'+outcome}>{label}{m.resolution==='tiebreak'&&<small>{m.outcome==='win'?identity?.teamName:m.outcome==='loss'?r.name:null}{m.outcome&&m.outcome!=='draw'?' avanzó por TAFA':' · TAFA confirmado'}</small>}</div>
       </article>;
@@ -144,14 +144,14 @@ export function MiEquipoProfile({data}:{data:TeamPageData}){
       {(s.standings.length>0||s.results.length>0)&&<div className="equipo-season-columns">
        {s.standings.length>0&&<section className="equipo-season-column"><h3>Tablas</h3>
          <div className="equipo-season-list">{s.standings.map((row,i)=><div className="equipo-season-row" key={i}>
-           <CompetitionImage code={row.competitionCode} name={row.competitionName} season={s.seasonNumber} variant="trophy" size="xs" decorative/>
-           <strong>{row.competitionName}</strong><span>{row.position}°</span><b>{row.points} PTS</b>
+           <CompetitionImage code={row.competitionCode} name={row.competitionName.replace(/\bCopa de Campeones\b/gi,'Copa Campeones')} season={s.seasonNumber} variant="trophy" size="xs" decorative/>
+           <strong>{row.competitionName.replace(/\bCopa de Campeones\b/gi,'Copa Campeones')}</strong><span>{row.position}°</span><b>{row.points} PTS</b>
          </div>)}</div>
        </section>}
        {s.results.length>0&&<section className="equipo-season-column"><h3>Competiciones</h3>
          <div className="equipo-season-list">{s.results.map((row,i)=><div className="equipo-season-row" key={i}>
-           <CompetitionImage code={row.competitionCode} name={row.competitionName} season={s.seasonNumber} variant="trophy" size="xs" decorative/>
-           <strong>{row.competitionName}</strong><span className={'equipo-season-status'+(row.resultCode==='CHAMPION'?' equipo-season-status--champion':row.resultCode==='RUNNER_UP'?' equipo-season-status--runner':'')}>{historicResult(row.resultCode)}</span>
+           <CompetitionImage code={row.competitionCode} name={row.competitionName.replace(/\bCopa de Campeones\b/gi,'Copa Campeones')} season={s.seasonNumber} variant="trophy" size="xs" decorative/>
+           <strong>{row.competitionName.replace(/\bCopa de Campeones\b/gi,'Copa Campeones')}</strong><span className={'equipo-season-status'+(row.resultCode==='CHAMPION'?' equipo-season-status--champion':row.resultCode==='RUNNER_UP'?' equipo-season-status--runner':'')}>{historicResult(row.resultCode)}</span>
            {row.position&&<b>{row.position}°</b>}
          </div>)}</div>
        </section>}

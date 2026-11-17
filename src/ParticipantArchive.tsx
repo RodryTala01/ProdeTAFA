@@ -1,4 +1,4 @@
-import {isHistoricalFriendly,isWorldCupOverall,worldCupZone} from './historical-competition-family';
+import {competitionFamily,isHistoricalFriendly,isWorldCupOverall,worldCupZone} from './historical-competition-family';
 import {archivedCompetitionFinals,type HistoricalFinal} from './historical-finals';
 import {documentedDuoPhases,documentedHistoryGroups,type ArchiveDuoPhase} from './historical-group-catalog';
 import {useEffect,useState,type ReactNode} from 'react';
@@ -33,6 +33,7 @@ function StatsTable({data,rows,label,positions=false,competition,source='importe
 function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
  const {data,summary}=detail;
  const groups=new Map<string,ArchivePayload['results']>();
+ const finals=archivedCompetitionFinals(data,key=>key);
  for(const award of data.results){
   if(isHistoricalFriendly(award.competitionCode)||(code&&award.competitionCode!==code)||!['CHAMPION','RUNNER_UP'].includes(award.resultCode))continue;
   const list=groups.get(award.competitionCode)??[];
@@ -41,18 +42,21 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
  }
  return groups.size?<div className="archive-podium">{[...groups].map(([competition,awards])=>{
   const name=data.competitions.find(c=>c.code===competition)?.name??competition;
+  const mundial=competitionFamily(competition).match(/^MUNDIAL(?:_|$)/)&&competitionFamily(competition)!=='MUNDIAL_DE_CLUBES';
+  const final=mundial?finals.find(f=>f.competitionCode===competition):undefined;
   const champion=awards.some(r=>r.resultCode==='CHAMPION');
   return <article className={'archive-award'+(champion?' archive-award--champion':'')} key={competition}>
    <Trophy code={competition} name={name} season={summary.number} large/>
    <div className="archive-award__body">
     <h3>{name}</h3>
+    {final&&final.pointsA!==null&&final.pointsB!==null&&<p>Final: {final.a.name} {final.pointsA}–{final.pointsB} {final.b.name}{final.tieA!==undefined&&final.tieB!==undefined&&<> · Desempate {final.tieA}–{final.tieB}</>}</p>}
     {(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
      const entrants=awards.filter(r=>r.resultCode===resultCode);
      if(!entrants.length)return null;
      return <div className="archive-award-result" data-champion={resultCode==='CHAMPION'} key={resultCode}>
       <span className="archive-award__label">{resultNames[resultCode]}</span>
       {entrants.map(r=>{
-       const points=data.standings.find(row=>row.competitionCode===competition&&row.participantKey===r.participantKey)?.points;
+       const points=mundial?undefined:data.standings.find(row=>row.competitionCode===competition&&row.participantKey===r.participantKey)?.points;
        return <div className="archive-award-entrant" key={r.participantKey}>
         <div><Person data={data} id={r.participantKey}/>{r.teamLabel&&competition!=='COPA_DUOS'&&<small>{r.teamLabel}</small>}</div>
         {points!==undefined&&<span className="archive-award__points"><strong>{points}</strong><span>puntos</span></span>}
