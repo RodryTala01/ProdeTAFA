@@ -49,6 +49,7 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
   const name=data.competitions.find(c=>c.code===competition)?.name??competition;
   const league=competitionFamily(competition).startsWith('LIGA_')||data.competitions.find(c=>c.code===competition)?.kind==='LEAGUE';
   const matches=finals.filter(f=>f.competitionCode===competition);
+  const showClubStandings=!code&&competitionFamily(competition).startsWith('MUNDIAL_DE_CLUBES');
   const champion=awards.some(r=>r.resultCode==='CHAMPION');
   return <article className={'archive-award'+(champion?' archive-award--champion':'')} key={competition}>
    <Trophy code={competition} name={name} season={summary.number} large/>
@@ -63,16 +64,16 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
       ?<ArchiveDuoFinal key={final.id} data={data} final={final} caption={caption}/>
       :<ArchiveEncounter key={final.id} data={data} players={[final.a.userId!,final.b.userId!]} scores={[final.pointsA!,final.pointsB!]} caption={caption}/>;
     })}
-    {!matches.length&&(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
+    {(!matches.length||showClubStandings)&&(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
      const entrants=awards.filter(r=>r.resultCode===resultCode);
      if(!entrants.length)return null;
      return <div className="archive-award-result" data-champion={resultCode==='CHAMPION'} key={resultCode}>
       <span className="archive-award__label">{resultNames[resultCode]}</span>
       {entrants.map(r=>{
-       const points=league?data.standings.find(row=>row.competitionCode===competition&&row.participantKey===r.participantKey)?.points:undefined;
+       const points=league||showClubStandings?data.standings.find(row=>row.competitionCode===competition&&row.participantKey===r.participantKey)?.points:undefined;
        return <div className="archive-award-entrant" key={r.participantKey}>
         <div><Person data={data} id={r.participantKey}/>{historicalTeamLabel(r.teamLabel)&&competition!=='COPA_DUOS'&&<small>{historicalTeamLabel(r.teamLabel)}</small>}</div>
-        {points!==undefined&&<span className="archive-award__points"><strong>{points}</strong><span>puntos</span></span>}
+        {points!==undefined&&<span className="archive-award__points"><strong>{points}</strong><span>{showClubStandings?'puntos de tabla':'puntos'}</span></span>}
        </div>;
       })}
      </div>;
