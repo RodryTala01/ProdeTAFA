@@ -1,4 +1,4 @@
-import {historicalCompetitionName,isHistoryOnlyCompetition} from '../src/historical-competition-family';
+import {historicalCompetitionName,historicalTeamLabel,isHistoryOnlyCompetition} from '../src/historical-competition-family';
 import type {Env} from './index';
 import type {ArchivePayload} from '../src/historical-schema';
 import type {HistorySummary,HistoryDetail} from '../src/history-types';
@@ -8,7 +8,7 @@ import {handleCompetitionLeagues} from './competition-leagues';
 const rows=async <T>(db:D1Database,sql:string,...args:(string|number)[]) => (await db.prepare(sql).bind(...args).all<T>()).results??[];
 export function importedSummary(data:ArchivePayload):HistorySummary{
  return {number:data.season.number,name:data.season.name.replace(/Qatar 2022/i,'Mundial 2022'),source:'imported',participantCount:data.participants.length,
- competitions:data.competitions.filter(c=>c.kind!=='PROMOTION'&&c.code!=='PROMOCION'&&!isHistoryOnlyCompetition(c.code,c.name)).map(c=>({...c,name:historicalCompetitionName(c.name).replace(/Qatar 2022/i,'Mundial 2022').replace(/^Copa de Campeones$/i,'Copa Campeones'),champions:data.results.filter(r=>r.competitionCode===c.code&&r.resultCode==='CHAMPION').map(r=>r.teamLabel||data.participants.find(p=>p.key===r.participantKey)?.name||'Participante no disponible')}))};
+ competitions:data.competitions.filter(c=>c.kind!=='PROMOTION'&&c.code!=='PROMOCION'&&!isHistoryOnlyCompetition(c.code,c.name)).map(c=>({...c,name:historicalCompetitionName(c.name).replace(/Qatar 2022/i,'Mundial 2022').replace(/^Copa de Campeones$/i,'Copa Campeones'),champions:data.results.filter(r=>r.competitionCode===c.code&&r.resultCode==='CHAMPION').map(r=>historicalTeamLabel(r.teamLabel)||data.participants.find(p=>p.key===r.participantKey)?.name||'Participante no disponible')}))};
 }
 export async function historySummaries(db:D1Database){
  const imported=(await activeHistoricalArchives(db)).map(({data})=>importedSummary(data));

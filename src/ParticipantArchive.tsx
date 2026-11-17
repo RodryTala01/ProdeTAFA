@@ -1,4 +1,4 @@
-import {competitionFamily,isHistoryOnlyCompetition,isWorldCupOverall,worldCupZone} from './historical-competition-family';
+import {competitionFamily,historicalTeamLabel,isHistoryOnlyCompetition,isWorldCupOverall,worldCupZone} from './historical-competition-family';
 import {archivedCompetitionFinals,type HistoricalFinal} from './historical-finals';
 import {documentedDuoPhases,documentedHistoryGroups,type ArchiveDuoPhase} from './historical-group-catalog';
 import {useEffect,useState,type ReactNode} from 'react';
@@ -71,7 +71,7 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
       {entrants.map(r=>{
        const points=league?data.standings.find(row=>row.competitionCode===competition&&row.participantKey===r.participantKey)?.points:undefined;
        return <div className="archive-award-entrant" key={r.participantKey}>
-        <div><Person data={data} id={r.participantKey}/>{r.teamLabel&&competition!=='COPA_DUOS'&&<small>{r.teamLabel}</small>}</div>
+        <div><Person data={data} id={r.participantKey}/>{historicalTeamLabel(r.teamLabel)&&competition!=='COPA_DUOS'&&<small>{historicalTeamLabel(r.teamLabel)}</small>}</div>
         {points!==undefined&&<span className="archive-award__points"><strong>{points}</strong><span>puntos</span></span>}
        </div>;
       })}

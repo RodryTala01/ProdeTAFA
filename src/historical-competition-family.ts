@@ -38,3 +38,8 @@ export function worldCupZone(code:string){
  if(family==='MUNDIAL')return 'Oro';
  return worldCupZones[family as keyof typeof worldCupZones];
 }
+
+export function historicalTeamLabel(label:string|null|undefined){
+ const value=label?.trim();
+ return value&&!/^(?:oro|plata|bronce|no[\s_-]+oficial)$/i.test(value)?value:null;
+}
