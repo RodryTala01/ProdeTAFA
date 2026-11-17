@@ -64,7 +64,7 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
       ?<ArchiveDuoFinal key={final.id} data={data} final={final} caption={caption}/>
       :<ArchiveEncounter key={final.id} data={data} players={[final.a.userId!,final.b.userId!]} scores={[final.pointsA!,final.pointsB!]} caption={caption}/>;
     })}
-    {(!matches.length||showClubStandings)&&(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
+    {!matches.length&&(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
      const entrants=awards.filter(r=>r.resultCode===resultCode);
      if(!entrants.length)return null;
      return <div className="archive-award-result" data-champion={resultCode==='CHAMPION'} key={resultCode}>
