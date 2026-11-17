@@ -25,7 +25,7 @@ function Player({userId,name}:{userId:string;name:string}){
 }
 function CompetitionTrophy({code,name}:{code:string;name:string}){
  const family=competitionFamily(code),trophy=historicalTrophies[family];
- return trophy||family==='COPA_EUROAMERICA'
+ return trophy
   ?<AssetImage name={name} src={trophy?.image} size="sm" decorative fallback={<Icon name="trophy"/>}/>
   :<CompetitionImage code={code} name={name} variant="trophy" size="sm" decorative/>;
 }

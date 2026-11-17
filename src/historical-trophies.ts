@@ -1,4 +1,3 @@
 export const historicalTrophies:Record<string,{image:string;source:string;author:string;license:string}>={
- EUROCOPA:{image:'https://upload.wikimedia.org/wikipedia/commons/6/6b/2016_UEFA_Euro_Trophy_CR7Museum.jpg',source:'2016_UEFA_Euro_Trophy_CR7Museum.jpg',author:'Tkotw12',license:'4.0'},
  MUNDIAL_DE_CLUBES:{image:'https://upload.wikimedia.org/wikipedia/commons/8/8b/CWC_Trophy_2025.png',source:'CWC_Trophy_2025.png',author:'User34790',license:'4.0'},
 };
