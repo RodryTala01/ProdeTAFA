@@ -10,11 +10,11 @@ it('all participant routes share one header with their real parent section activ
   const host=document.createElement('div');host.innerHTML=html;
   expect(host.querySelectorAll('header')).toHaveLength(1);
   expect(host.querySelectorAll('.participant-nav')).toHaveLength(1);
-  expect(host.querySelectorAll('.participant-nav a')).toHaveLength(7);
-  expect(host.querySelector('header nav a[aria-current=page]')?.getAttribute('href')).toBe('#/'+parent);
+  expect(host.querySelectorAll('.participant-nav a')).toHaveLength(6);
+  expect(host.querySelector('header nav a[aria-current=page]')?.getAttribute('href')).toBe(parent==='club'?undefined:'#/'+parent);
   expect(host.querySelector('header .participant-brand')?.getAttribute('href')).toBe('#/inicio');
   expect(host.querySelector('header img')?.getAttribute('src')).toBe('/brand/tafa.png');
-  expect(Array.from(host.querySelectorAll('.participant-nav a')).map(a=>a.textContent)).toEqual(['Inicio','Pronósticos','Competiciones','Mi Club','Tablas Totales','Historia','Participantes']);
+  expect(Array.from(host.querySelectorAll('.participant-nav a')).map(a=>a.textContent)).toEqual(['Inicio','Pronósticos','Competiciones','Tablas Totales','Historia','Participantes']);
  }
  window.location.hash='';
 });

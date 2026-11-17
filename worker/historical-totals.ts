@@ -27,6 +27,9 @@ const rankSort=<T extends {fullName:string;userId:string}>(items:T[],metric:(r:T
 function numberSum(current:number|null,value:number|null|undefined):number|null{
  return current===null||value==null?null:current+Number(value);
 }
+function knownSum(current:number|null,value:number|null|undefined){
+ return value==null?current:(current??0)+value;
+}
 export function composeHistoricalTotals(
  archives:Archive,
  officialScores:OfficialScore[],
@@ -65,9 +68,19 @@ export function composeHistoricalTotals(
   participation.add(key(a.seasonNumber,competitionFamily(a.code),a.userId));
  }
  const importedFinals:HistoricalFinal[]=[];
+ // Use the same complete records for both sides of the average.
+ const scored=new Map<string,{points:number;matches:number}>();
+ function addScored(id:string,row:{points:number;fulls:number|null;partials:number|null;errors:number|null}){
+  if(scoringAverage(row)===null)return;
+  const entry=scored.get(id)??{points:0,matches:0};
+  entry.points+=row.points;
+  entry.matches+=row.fulls!+row.partials!+row.errors!;
+  scored.set(id,entry);
+ }
  const general=new Map<string,Omit<GeneralTotal,'position'|'averagePoints'|'averageFulls'|'averagePartials'|'averageErrors'|'averageExtras'>>();
  for(const score of officialScores){
   addName(score.userId,score.fullName);
+  addScored(score.userId,score);
   general.set(score.userId,{userId:score.userId,fullName:score.fullName,
    points:n(score.points),fulls:n(score.fulls),partials:n(score.partials),errors:n(score.errors),
    extras:n(score.extras),dates:n(score.dates)});
@@ -120,11 +133,12 @@ export function composeHistoricalTotals(
   for(const r of data.statistics){
    const userId=archiveId(data,r.participantKey);
    if(officialSeasonUsers.has(data.season.number+':'+userId))continue;
+   addScored(userId,r);
    const prev=general.get(userId)??{userId,fullName:display(r.participantKey),
-     points:0,fulls:0,partials:0,errors:0,extras:0,dates:0};
+     points:0,fulls:null,partials:null,errors:null,extras:null,dates:0};
    general.set(userId,{...prev,points:prev.points+r.points,
-     fulls:numberSum(prev.fulls,r.fulls),partials:numberSum(prev.partials,r.partials),
-     errors:numberSum(prev.errors,r.errors),extras:numberSum(prev.extras,r.extras),
+     fulls:knownSum(prev.fulls,r.fulls),partials:knownSum(prev.partials,r.partials),
+     errors:knownSum(prev.errors,r.errors),extras:knownSum(prev.extras,r.extras),
      dates:numberSum(prev.dates,r.dates)});
   }
   for(const r of data.iffhs){
@@ -220,7 +234,7 @@ export function composeHistoricalTotals(
   return rankSort([...perUser.values()],r=>r.totalPoints).map(r=>({...r,average:r.seasons?r.totalPoints/r.seasons:0}));
  }
  const overall=rankSort([...general.values()].map(r=>({...r,fullName:names.get(r.userId)??r.fullName})),r=>r.points)
-  .map(r=>({...r,averagePoints:scoringAverage(r),
+  .map(r=>({...r,averagePoints:scored.has(r.userId)?scored.get(r.userId)!.points/scored.get(r.userId)!.matches:null,
    averageFulls:r.dates&&r.dates>0&&r.fulls!==null?r.fulls/r.dates:null,
    averagePartials:r.dates&&r.dates>0&&r.partials!==null?r.partials/r.dates:null,
    averageErrors:r.dates&&r.dates>0&&r.errors!==null?r.errors/r.dates:null,

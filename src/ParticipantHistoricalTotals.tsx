@@ -196,7 +196,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
     ['Mejor promedio',leader(data.general,r=>r.averagePoints,decimal)],
     ['Más plenos',leader(data.general,r=>r.fulls)],
     ['Participantes',data.general.length]
-   ]}/><p className="totals-note">Promedio de puntos por pronóstico puntuable.</p><GeneralRows rows={data.general}/></>}
+   ]}/><p className="totals-note">Las estadísticas suman los valores disponibles. El promedio usa las temporadas con plenos, parciales y errores registrados.</p><GeneralRows rows={data.general}/></>}
    {((tab==='palmares'&&!honours.length)||(tab==='competencia'&&!rows.length)||(tab==='oficial'&&!data.iffhsOfficial.ranking.length)||(tab==='iffhs'&&!data.iffhsTotal.length)||(tab==='general'&&!data.general.length))&&<p className="totals-empty">Todavía no hay datos históricos disponibles para este ranking.</p>}
   </section>
  </div>;

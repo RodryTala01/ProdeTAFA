@@ -1,6 +1,6 @@
 export const participantSections = [
  {id:'inicio',label:'Inicio',icon:'home'},{id:'pronosticos',label:'Pronósticos',icon:'list'},
- {id:'competiciones',label:'Competiciones',icon:'trophy'},{id:'club',label:'Mi Club',icon:'user'},
+ {id:'competiciones',label:'Competiciones',icon:'trophy'},
  {id:'tablas-totales',label:'Tablas Totales',icon:'chart'},{id:'historia',label:'Historia',icon:'book'},{id:'participantes',label:'Participantes',icon:'user'},
 ] as const;
 export type ParticipantRoute = string;
