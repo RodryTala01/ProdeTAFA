@@ -49,8 +49,10 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
    <Trophy code={competition} name={name} season={summary.number} large/>
    <div className="archive-award__body">
     <h3>{name}</h3>
-    {final&&final.pointsA!==null&&final.pointsB!==null&&<p>Final: {final.a.name} {final.pointsA}–{final.pointsB} {final.b.name}{final.tieA!==undefined&&final.tieB!==undefined&&<> · Desempate {final.tieA}–{final.tieB}</>}</p>}
-    {(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
+    {final&&final.pointsA!==null&&final.pointsB!==null&&final.a.userId&&final.b.userId&&
+     <ArchiveEncounter data={data} players={[final.a.userId,final.b.userId]} scores={[final.pointsA,final.pointsB]}
+      caption={final.tieA!==undefined&&final.tieB!==undefined?'Final · Desempate '+final.tieA+'–'+final.tieB:'Final'}/>}
+    {!final&&(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
      const entrants=awards.filter(r=>r.resultCode===resultCode);
      if(!entrants.length)return null;
      return <div className="archive-award-result" data-champion={resultCode==='CHAMPION'} key={resultCode}>
@@ -70,12 +72,21 @@ function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
 }
 // The bracket renders only persisted match scores. It intentionally does not
 // infer advancement or match winners from totals; historical tiebreak rules differ.
+function ArchiveEncounter({data,players,scores,caption,duo=false}:{
+ data:ArchivePayload;players:[string,string];scores:[number,number];caption:string;duo?:boolean;
+}){
+ return <article className="archive-match-card">
+  {players.map((id,index)=><div className="archive-match-entry" key={index}>
+   <Person data={data} id={id}/><strong>{scores[index]}</strong>
+  </div>)}
+  {(caption||duo)&&<div className="archive-match-caption">{caption&&<small>{caption}</small>}{duo&&<small>Puntaje de dúo</small>}</div>}
+ </article>;
+}
 function ArchiveMatchCards({detail,matches}:{detail:HistoryDetail;matches:ArchivePayload['matches']}){
- return <div className="archive-match-stack">{matches.map((m,i)=><article className="archive-match-card" key={m.matchId??i}>
-  <div className="archive-match-entry"><Person data={detail.data} id={m.aKey}/><strong>{m.pointsA}</strong></div>
-  <div className="archive-match-entry"><Person data={detail.data} id={m.bKey}/><strong>{m.pointsB}</strong></div>
-  {(archivePublicDescription(m.round)||m.scoreBasis==='DUO')&&<div className="archive-match-caption">{archivePublicDescription(m.round)&&<small>{archivePublicDescription(m.round)}</small>}{m.scoreBasis==='DUO'&&<small>Puntaje de dúo</small>}</div>}
- </article>)}</div>;
+ return <div className="archive-match-stack">{matches.map((m,i)=>
+  <ArchiveEncounter key={m.matchId??i} data={detail.data} players={[m.aKey,m.bKey]} scores={[m.pointsA,m.pointsB]}
+   caption={archivePublicDescription(m.round)} duo={m.scoreBasis==='DUO'}/>
+ )}</div>;
 }
 function ArchiveDuoFinal({data,final}:{data:ArchivePayload;final:HistoricalFinal}){
  return <article className="archive-match-card archive-duo-final">
