@@ -1,3 +1,4 @@
+import {downloadRankingPng} from './export-ranking-png';
 import {competitionHref,competitionSlugs} from './participant-competitions';
 import {competitionFamily,worldCupZone} from './historical-competition-family';
 import {historicalTrophies} from './historical-trophies';
@@ -148,6 +149,8 @@ const regularCodes=['LIGA_A','LIGA_B','COPA_TOTAL','COPA_A','COPA_B','COPA_CAMPE
 
 export function HistoricalTotalsView({data}:{data:TotalsData}){
  const [tab,setTab]=useState<Tab>('palmares');
+ const [exporting,setExporting]=useState(false);
+ const [exportError,setExportError]=useState(false);
  const [official,setOfficial]=useState(true);
  const regular=regularCodes.flatMap(code=>data.competitions.filter(c=>competitionFamily(c.code)===code));
  const other=data.competitions.filter(c=>!regularCodes.includes(competitionFamily(c.code)));
@@ -165,12 +168,34 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
  const finals=family.startsWith('LIGA_')?[]:data.finalsByCompetition?.[family]??[];
  const finalsSeasons=new Set(finals.map(f=>f.seasonNumber));
  const podiums=(data.podiumsByCompetition?.[family]??[]).filter(edition=>!finalsSeasons.has(edition.seasonNumber));
+ const titled=honours.filter(row=>row.championships>0||row.runnerUps>0);
+ const title=tab==='palmares'?(official?'Palmarés Oficial':'Palmarés Total')
+  :tab==='competencia'?(activeWorld?'Mundial · Zona '+worldCupZone(selected):data.competitions.find(c=>c.code===selected)?.name??'Por competencia')
+  :tab==='oficial'?'IFFHS Oficial':tab==='iffhs'?'IFFHS Total':'Tabla General Total';
+ const identity=(row:{position:number;fullName:string})=>[String(row.position),row.fullName];
+ const exportRows=tab==='general'
+  ?data.general.map(r=>[...identity(r),fmt(r.points),...[r.fulls,r.partials,r.errors,r.extras].map(n=>n==null?'—':fmt(n)),decimal(r.averagePoints)])
+  :tab==='iffhs'||tab==='oficial'
+   ?iffhs.map(r=>[...identity(r),...(tab==='oficial'?data.iffhsOfficial.seasons.map(n=>decimal(r.breakdown.find(b=>b.seasonNumber===n)?.points??null)):[]),decimal(r.totalPoints),...(tab==='iffhs'?[String(r.seasons),decimal(r.average)]:[])])
+   :titled.map(r=>[...identity(r),fmt(r.championships),fmt(r.runnerUps),fmt(r.participations)]);
+ const metrics=tab==='general'?['PTS','Plenos','Parciales','Errores','Extras','Prom. / partido']
+  :tab==='oficial'?[...data.iffhsOfficial.seasons.map(n=>'T'+n),'PTS IFFHS']
+  :tab==='iffhs'?['PTS IFFHS','Temporadas','Prom. / temp.']:['Campeonatos','Subcampeonatos','Participaciones'];
+ async function exportPng(){
+  setExporting(true);
+  setExportError(false);
+  try{await downloadRankingPng(title,['Pos.','Participante',...metrics],exportRows);}
+  catch{setExportError(true);}
+  finally{setExporting(false);}
+ }
  return <div className="historical-totals">
   <div className="totals-header"><div><span className="totals-back">Estadísticas históricas de TAFA</span><h1>TABLAS TOTALES</h1></div><span className="totals-period">Todas las temporadas registradas</span></div>
   <nav className="totals-tabs" aria-label="Tablas Totales">{tabs.map(item=><button type="button" key={item.id} aria-pressed={item.id===tab} onClick={()=>setTab(item.id)}>{item.name}</button>)}</nav>
   <section className="totals-panel">
    <header className="totals-panel-title"><span className="totals-panel-icon">{tab==='palmares'||tab==='competencia'?<img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="28" height="44"/>:tab==='general'?'▥':'◉'}</span><div><h2>{tab==='palmares'?(official?'PALMARÉS OFICIAL':'PALMARÉS TOTAL'):tab==='competencia'?'PALMARÉS POR COMPETENCIA':tab==='oficial'?'IFFHS OFICIAL':tab==='iffhs'?'IFFHS TOTAL':'TABLA GENERAL TOTAL'}</h2><p>{tab==='palmares'?'Campeonatos y subcampeonatos de todas las temporadas':tab==='competencia'?'Elegí la competencia para consultar sus campeones':tab==='oficial'?'Ranking de las últimas cinco temporadas':tab==='iffhs'?'Ranking IFFHS acumulado de todas las temporadas':'Estadísticas acumuladas, ordenadas por puntos totales'}</p></div>
     {tab==='oficial'&&<span className="totals-period">Últimas 5 temporadas</span>}</header>
+   <button type="button" className="button button--secondary" disabled={exporting||!exportRows.length} onClick={()=>void exportPng()}>{exporting?'Preparando PNG…':'Descargar tabla en PNG'}</button>
+   {exportError&&<p role="alert">No pudimos preparar la imagen. Volvé a intentarlo.</p>}
    {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">
     {regular.map(c=><button type="button" key={c.code} aria-pressed={selected===c.code} onClick={()=>setCode(c.code)}>
      <CompetitionTrophy code={c.code} name={c.name}/>{c.name}
@@ -193,7 +218,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
     })}
    </div>}
    {tab==='palmares'&&<div className="totals-tabs" role="group" aria-label="Modalidad de palmarés"><button type="button" aria-pressed={official} onClick={()=>setOfficial(true)}>Palmarés Oficial</button><button type="button" aria-pressed={!official} onClick={()=>setOfficial(false)}>Palmarés Total</button></div>}
-   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/><Rows rows={honours.filter(row=>row.championships>0||row.runnerUps>0)}/>{tab==='competencia'&&<>{finals.length>0&&<FinalsCalendar finals={finals}/>}<EditionPodiums editions={podiums} showPoints={!activeWorld}/></>}</>}
+   {(tab==='palmares'||tab==='competencia')&&<><HonourCards rows={honours} overall={tab==='palmares'} latest={latest}/><Rows rows={titled}/>{tab==='competencia'&&<>{finals.length>0&&<FinalsCalendar finals={finals}/>}<EditionPodiums editions={podiums} showPoints={!activeWorld}/></>}</>}
    {(tab==='oficial'||tab==='iffhs')&&<Indicators items={[
     ['Líder',leader(iffhs,r=>r.totalPoints,decimal)],['Puntos del líder',decimal(iffhs[0]?.totalPoints??null)],
     ['Temporadas consideradas',tab==='oficial'?data.iffhsOfficial.seasons.map(n=>'T'+n).join(' · '):iffhs[0]?.breakdown.length??0],
