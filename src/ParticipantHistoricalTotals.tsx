@@ -144,11 +144,18 @@ function GeneralRows({rows}:{rows:GeneralTotal[]}){
   </table>
  </div>;
 }
+const otherCompetitionFamilies=new Set(['COPA_AMERICA','EUROCOPA','COPA_EUROAMERICA','SUPERCOPA_EUROAMERICA','PRODE_PAGO']);
+const isOtherCompetition=(code:string)=>otherCompetitionFamilies.has(competitionFamily(code));
+
 export function HistoricalTotalsView({data}:{data:TotalsData}){
  const [tab,setTab]=useState<Tab>('palmares');
  const [official,setOfficial]=useState(true);
  const [code,setCode]=useState(data.competitions[0]?.code??'');
+ const [showOther,setShowOther]=useState(false);
+ const otherCompetitions=data.competitions.filter(c=>isOtherCompetition(c.code));
+ const standardCompetitions=data.competitions.filter(c=>!isOtherCompetition(c.code));
  const selected=data.competitions.some(c=>c.code===code)?code:data.competitions[0]?.code??'';
+ const activeOther=otherCompetitions.length>0&&(showOther||isOtherCompetition(selected));
  const worlds=data.competitions.filter(c=>worldCupZone(c.code));
  const activeWorld=Boolean(worldCupZone(selected));
  const preferredWorld=worlds.find(c=>competitionFamily(c.code)==='MUNDIAL_ORO')??worlds[0];
@@ -166,12 +173,24 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
   <section className="totals-panel">
    <header className="totals-panel-title"><span className="totals-panel-icon">{tab==='palmares'||tab==='competencia'?<img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="28" height="44"/>:tab==='general'?'▥':'◉'}</span><div><h2>{tab==='palmares'?(official?'PALMARÉS OFICIAL':'PALMARÉS TOTAL'):tab==='competencia'?'PALMARÉS POR COMPETENCIA':tab==='oficial'?'IFFHS OFICIAL':tab==='iffhs'?'IFFHS TOTAL':'TABLA GENERAL TOTAL'}</h2><p>{tab==='palmares'?'Campeonatos y subcampeonatos de todas las temporadas':tab==='competencia'?'Elegí la competencia para consultar sus campeones':tab==='oficial'?'Ranking de las últimas cinco temporadas':tab==='iffhs'?'Ranking IFFHS acumulado de todas las temporadas':'Estadísticas acumuladas, ordenadas por puntos totales'}</p></div>
     {tab==='oficial'&&<span className="totals-period">Últimas 5 temporadas</span>}</header>
-   {tab==='competencia'&&<div className="totals-competitions" role="group" aria-label="Elegir competición">{data.competitions.filter(c=>!worldCupZone(c.code)||c.code===preferredWorld?.code).map(c=>{
-    const world=c.code===preferredWorld?.code;
-    return <button type="button" key={c.code} aria-pressed={world?activeWorld:selected===c.code} onClick={()=>setCode(c.code)}>
-     <CompetitionTrophy code={c.code} name={world?'Mundial':c.name}/>{world?'Mundial':c.name}
-    </button>;
-   })}</div>}
+   {tab==='competencia'&&<>
+    <div className="totals-competitions" role="group" aria-label="Elegir competición">
+     {standardCompetitions.filter(c=>!worldCupZone(c.code)||c.code===preferredWorld?.code).map(c=>{
+      const world=c.code===preferredWorld?.code;
+      return <button type="button" key={c.code} aria-pressed={world?activeWorld:selected===c.code} onClick={()=>{setShowOther(false);setCode(c.code);}}>
+       <CompetitionTrophy code={c.code} name={world?'Mundial':c.name}/>{world?'Mundial':c.name}
+      </button>;
+     })}
+     {otherCompetitions.length>0&&<button type="button" aria-pressed={activeOther} onClick={()=>{setShowOther(true);if(!isOtherCompetition(selected))setCode(otherCompetitions[0].code);}}>
+      <Icon name="trophy"/>OTRAS
+     </button>}
+    </div>
+    {activeOther&&<div className="totals-competitions" role="group" aria-label="Competencias especiales">
+     {otherCompetitions.map(c=><button type="button" key={c.code} aria-pressed={selected===c.code} onClick={()=>setCode(c.code)}>
+      <CompetitionTrophy code={c.code} name={c.name}/>{c.name} · {competitionFamily(c.code)==='PRODE_PAGO'?'No oficial':'Oficial'}
+     </button>)}
+    </div>}
+   </>}
    {tab==='competencia'&&activeWorld&&worlds.length>1&&<div className="totals-competitions" role="group" aria-label="Zonas del Mundial">
     {['Oro','Plata','Bronce'].flatMap(zone=>{
      const world=worlds.find(c=>worldCupZone(c.code)===zone);
