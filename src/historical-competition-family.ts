@@ -18,6 +18,7 @@ export const competitionFamily=(code:string)=>{
   case 'COPA_AMERICA': case 'EUROCOPA': case 'MUNDIAL': return base;
   case 'MUNDIAL_CLUBES': case 'MUNDIAL_DE_CLUBES': case 'COPA_MUNDIAL_DE_CLUBES': return 'MUNDIAL_DE_CLUBES';
   case 'COPA_DE_CAMPEONES': case 'COPA_CAMPEONES': return 'COPA_CAMPEONES';
+  case 'SUPERCOPA_EUROAMERICA': case 'SUPERCOPA_EURO_AMERICA': return 'SUPERCOPA_EUROAMERICA';
   case 'EUROAMERICA': case 'COPA_EUROAMERICA': return 'COPA_EUROAMERICA';
   default:return code;
  }

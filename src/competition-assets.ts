@@ -13,7 +13,7 @@ competitionAssets.MUNDIAL_PLATA={trophy:'/competitions/mundial_plata.png'};
 competitionAssets.MUNDIAL_BRONCE={trophy:'/competitions/mundial_bronce.png'};
 competitionAssets.COPA_AMERICA={trophy:'/competitions/copa_america.png'};
 competitionAssets.COPA_EUROAMERICA={trophy:'/competitions/copa_euroamerica.png'};
-competitionAssets.SUPERCOPA={trophy:'/competitions/supercopa.png'};
+competitionAssets.SUPERCOPA_EUROAMERICA={trophy:'/competitions/supercopa.png'};
 competitionAssets.PRODE_PAGO={trophy:'/competitions/prode_pago.png'};
 competitionAssets.EUROCOPA={trophy:'/competitions/eurocopa.svg'};
 // Optional historical overrides: season -> competition code -> original asset.
