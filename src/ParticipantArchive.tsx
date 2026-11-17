@@ -33,32 +33,40 @@ function StatsTable({data,rows,label,positions=false,competition,source='importe
 function Podium({detail,code}:{detail:HistoryDetail;code?:string}){
  const {data,summary}=detail;
  const groups=new Map<string,ArchivePayload['results']>();
- const finals=archivedCompetitionFinals(data,key=>key);
+ const finals=archivedCompetitionFinals(data,key=>key).filter(final=>
+  (!code||final.competitionCode===code)&&!competitionFamily(final.competitionCode).startsWith('LIGA_')
+  &&data.competitions.find(c=>c.code===final.competitionCode)?.kind!=='LEAGUE'
+  &&final.pointsA!==null&&final.pointsB!==null&&final.a.userId&&final.b.userId
+ );
  for(const award of data.results){
   if(isHistoricalFriendly(award.competitionCode)||(code&&award.competitionCode!==code)||!['CHAMPION','RUNNER_UP'].includes(award.resultCode))continue;
   const list=groups.get(award.competitionCode)??[];
   list.push(award);
   groups.set(award.competitionCode,list);
  }
+ for(const final of finals)if(code&&!groups.has(final.competitionCode))groups.set(final.competitionCode,[]);
  return groups.size?<div className="archive-podium">{[...groups].map(([competition,awards])=>{
   const name=data.competitions.find(c=>c.code===competition)?.name??competition;
-  const mundial=competitionFamily(competition).match(/^MUNDIAL(?:_|$)/)&&competitionFamily(competition)!=='MUNDIAL_DE_CLUBES';
-  const final=mundial?finals.find(f=>f.competitionCode===competition):undefined;
+  const league=competitionFamily(competition).startsWith('LIGA_')||data.competitions.find(c=>c.code===competition)?.kind==='LEAGUE';
+  const matches=finals.filter(f=>f.competitionCode===competition);
   const champion=awards.some(r=>r.resultCode==='CHAMPION');
   return <article className={'archive-award'+(champion?' archive-award--champion':'')} key={competition}>
    <Trophy code={competition} name={name} season={summary.number} large/>
    <div className="archive-award__body">
     <h3>{name}</h3>
-    {final&&final.pointsA!==null&&final.pointsB!==null&&final.a.userId&&final.b.userId&&
-     <ArchiveEncounter data={data} players={[final.a.userId,final.b.userId]} scores={[final.pointsA,final.pointsB]}
-      caption={final.tieA!==undefined&&final.tieB!==undefined?'Final · Desempate '+final.tieA+'–'+final.tieB:'Final'}/>}
-    {!final&&(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
+    {matches.map(final=>{
+     const caption=final.tieA!==undefined&&final.tieB!==undefined?'Final · Desempate '+final.tieA+'–'+final.tieB:'Final';
+     return final.a.members&&final.b.members
+      ?<ArchiveDuoFinal key={final.id} data={data} final={final} caption={caption}/>
+      :<ArchiveEncounter key={final.id} data={data} players={[final.a.userId!,final.b.userId!]} scores={[final.pointsA!,final.pointsB!]} caption={caption}/>;
+    })}
+    {!matches.length&&(['CHAMPION','RUNNER_UP'] as const).map(resultCode=>{
      const entrants=awards.filter(r=>r.resultCode===resultCode);
      if(!entrants.length)return null;
      return <div className="archive-award-result" data-champion={resultCode==='CHAMPION'} key={resultCode}>
       <span className="archive-award__label">{resultNames[resultCode]}</span>
       {entrants.map(r=>{
-       const points=mundial?undefined:data.standings.find(row=>row.competitionCode===competition&&row.participantKey===r.participantKey)?.points;
+       const points=league?data.standings.find(row=>row.competitionCode===competition&&row.participantKey===r.participantKey)?.points:undefined;
        return <div className="archive-award-entrant" key={r.participantKey}>
         <div><Person data={data} id={r.participantKey}/>{r.teamLabel&&competition!=='COPA_DUOS'&&<small>{r.teamLabel}</small>}</div>
         {points!==undefined&&<span className="archive-award__points"><strong>{points}</strong><span>puntos</span></span>}
@@ -88,12 +96,13 @@ function ArchiveMatchCards({detail,matches}:{detail:HistoryDetail;matches:Archiv
    caption={archivePublicDescription(m.round)} duo={m.scoreBasis==='DUO'}/>
  )}</div>;
 }
-function ArchiveDuoFinal({data,final}:{data:ArchivePayload;final:HistoricalFinal}){
+function ArchiveDuoFinal({data,final,caption}:{data:ArchivePayload;final:HistoricalFinal;caption?:string}){
  return <article className="archive-match-card archive-duo-final">
   {(['a','b'] as const).map(side=><div key={side} className="archive-match-entry" data-winner={final.winner===side||undefined}>
    <div className="archive-duo-members">{final[side].members?.map(member=><Person key={member.userId} data={data} id={member.userId!}/>)}</div>
    <strong>{side==='a'?final.pointsA:final.pointsB}</strong>
   </div>)}
+  {caption&&<div className="archive-match-caption"><small>{caption}</small></div>}
  </article>;
 }
 
