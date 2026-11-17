@@ -211,6 +211,7 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
  const roundNames=[...new Set(rounds.map(r=>r.round))];
  const worldOverall=isWorldCupOverall(c.code);
  const worldZone=worldCupZone(c.code);
+ const clubWorld=competitionFamily(c.code).startsWith('MUNDIAL_DE_CLUBES');
  const hasWorldStandings=Boolean((worldOverall||worldZone)&&standings.length);
  const worldTableTitle=worldOverall?'Prode Mundial':'Primera fase';
  const isCup=!worldOverall&&(c.kind==='CUP'||c.kind==='TOURNAMENT');
@@ -225,6 +226,10 @@ function CompetitionDetail({detail,competition}:{detail:HistoryDetail;competitio
  return <div className="archive-competition">
   <div className="archive-competition-heading"><Trophy code={c.code} name={c.name} season={summary.number}/><div><span className="archive-kicker">Competición · T{summary.number}</span><h2>{worldOverall?worldTableTitle:c.name}</h2></div></div>
   {!worldOverall&&<Podium detail={detail} code={c.code}/>}
+  {clubWorld&&isCup&&standings.length>0&&<section className="archive-panel">
+   <SectionHeading title="Tabla de posiciones" detail={standings.length+' participantes'}/>
+   <StatsTable data={data} rows={standings} positions label={'Tabla de '+c.name}/>
+  </section>}
   {worldOverall&&hasWorldStandings&&<section className="archive-panel"><SectionHeading title="Tabla general"/><StatsTable data={data} rows={standings} positions label={worldTableTitle}/></section>}
   {leagueZones.length>0&&<section className="archive-panel"><SectionHeading title="Tablas por zona"/>
    {leagueZones.map(zone=><section key={zone.name}><h3>{zone.name}</h3><StatsTable data={data} label={zone.name} positions rows={zone.entries.map(row=>({
