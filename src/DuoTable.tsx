@@ -146,7 +146,7 @@ export default function DuoTable({
             </>
           )}
           <div
-            className="cup-table-scroll"
+            className="cup-table-scroll cup-table-scroll--duos"
             role="region"
             aria-label={`Tabla de ${link.roundName}`}
             tabIndex={0}
@@ -174,18 +174,18 @@ export default function DuoTable({
               <tbody>
                 {table.rows.map((r) => (
                   <tr key={r.entryId}>
-                    <td>{r.position}</td>
-                    <td>{r.displayName.split(' · ')[0]}</td>
-                    <td>{r.members?.[0]?.fullName ?? '—'}</td>
-                    <td>{r.members?.[0]?.points ?? 0}</td>
-                    <td>{r.members?.[1]?.fullName ?? '—'}</td>
-                    <td>{r.members?.[1]?.points ?? 0}</td>
-                    <td>{r.basePoints}</td>
-                    <td>{r.bonusPoints}</td>
-                    <td>
+                    <td data-label="Posición">{r.position}</td>
+                    <td data-label="Dúo">{r.displayName.split(' · ')[0]}</td>
+                    <td data-label="Integrante 1">{r.members?.[0]?.fullName ?? '—'}</td>
+                    <td data-label="PTS 1">{r.members?.[0]?.points ?? 0}</td>
+                    <td data-label="Integrante 2">{r.members?.[1]?.fullName ?? '—'}</td>
+                    <td data-label="PTS 2">{r.members?.[1]?.points ?? 0}</td>
+                    <td data-label="Base">{r.basePoints}</td>
+                    <td data-label="Bonus">{r.bonusPoints}</td>
+                    <td data-label="TOTAL">
                       <strong>{r.totalPoints}</strong>
                     </td>
-                    <td>
+                    <td data-label="Estado">
                       {r.decision === 'ELIMINATED'
                         ? 'Eliminado'
                         : r.decision === 'QUALIFIED'
@@ -196,7 +196,7 @@ export default function DuoTable({
                               ? 'Eliminación propuesta'
                               : 'Continúa'}
                     </td>
-                    <td>
+                    <td data-label="Bonus siguiente">
                       {r.nextBonusPoints ??
                         (table.wouldEliminate?.includes(r.entryId)
                           ? 0
