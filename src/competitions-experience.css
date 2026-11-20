@@ -179,3 +179,8 @@
   .duo-name-form .button { width:100%; }
   .league-promotion .cx-knockout-column { flex-basis:85vw; }
 }
+
+@media(max-width:800px){
+ .cx-detail .league-sport-table{min-width:0;width:100%;max-width:100%}
+ .cx-detail .league-sport-table tbody tr>:is(td,th){padding:6px 4px}
+}
