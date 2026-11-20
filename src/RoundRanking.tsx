@@ -83,16 +83,16 @@ export default function RoundRanking({ roundId, mode, refreshToken = 0 }: Props)
             <tbody>
               {ranking.map((entry) => (
                 <tr key={entry.userId}>
-                  <td><strong>{entry.position}</strong></td>
-                  <td>
+                  <td data-label="Posición"><strong>{entry.position}</strong></td>
+                  <td className="ranking-participant">
                     <span className="participant-shield-name"><ParticipantShield userId={entry.userId} name={entry.fullName} size="sm" decorative/><strong>{entry.fullName}</strong></span>
                     {entry.provisional && <small> provisional</small>}
                   </td>
-                  <td className="ranking-points">{entry.points}</td>
-                  <td>{entry.fulls}</td>
-                  <td>{entry.partials}</td>
-                  <td>{entry.errors}</td>
-                  <td>{entry.extras}</td>
+                  <td className="ranking-points" data-label="Puntos">{entry.points}</td>
+                  <td data-label="Plenos">{entry.fulls}</td>
+                  <td data-label="Parciales">{entry.partials}</td>
+                  <td data-label="Errores">{entry.errors}</td>
+                  <td data-label="Extras">{entry.extras}</td>
                 </tr>
               ))}
             </tbody>
