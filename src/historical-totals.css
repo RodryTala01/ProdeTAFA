@@ -139,3 +139,60 @@
  .totals-table--general td:nth-child(7)::before{content:'Extras'}
  .totals-table--general td:nth-child(8)::before{content:'Promedio por partido'}
 }
+
+/* On narrow viewports every historical ranking is readable by scrolling the PAGE,
+ * not a second horizontal scroller inside the ranking panel. Desktop tables stay unchanged. */
+@media (max-width:900px){
+ .historical-totals .totals-table-wrap{overflow:visible;width:100%;max-width:100%;outline:0}
+ .historical-totals .totals-table,.historical-totals .totals-table--general{
+  display:block;width:100%;min-width:0;max-width:100%;table-layout:auto;
+ }
+ .historical-totals .totals-table thead{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;border:0;
+ }
+ .historical-totals .totals-table tbody{display:grid;gap:9px;width:100%}
+ .historical-totals .totals-table tbody tr{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 10px;
+  min-width:0;width:100%;padding:10px 12px;
+  border:1px solid var(--border);border-radius:var(--radius-control);
+  background:var(--surface-raised);
+ }
+ .historical-totals .totals-table tbody tr>:is(th,td){
+  display:block;min-width:0;max-width:100%;padding:8px 4px;
+  border-bottom:1px solid var(--border);text-align:left;white-space:normal;
+  overflow-wrap:anywhere;font-size:.83rem;
+ }
+ .historical-totals .totals-table tbody tr>:first-child{
+  grid-column:1;align-self:center;border:0;color:var(--text-muted);font-weight:800;
+ }
+ .historical-totals .totals-table tbody tr>th[scope=row]{
+  grid-column:2;align-self:center;border:0;font-weight:750;
+ }
+ .historical-totals .totals-person,.historical-totals .totals-table--honours .totals-person{
+  min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;
+ }
+ .historical-totals .totals-person a{min-width:0;overflow-wrap:anywhere}
+ .historical-totals .totals-table tbody tr>td[data-label]::before{
+  content:attr(data-label);display:block;margin-bottom:2px;
+  color:var(--text-muted);font-size:.69rem;font-weight:650;line-height:1.3;
+ }
+ .historical-totals .totals-table--honours tbody tr>td:nth-child(n+3){
+  grid-column:1/-1;display:flex;align-items:start;justify-content:space-between;
+  flex-wrap:wrap;gap:5px 10px;
+ }
+ .historical-totals .totals-table--honours tbody tr>td:nth-child(n+3)::before{
+  flex:0 0 auto;padding-top:3px;
+ }
+ .historical-totals .totals-table--honours .totals-awards{
+  min-width:0;max-width:100%;justify-items:end;text-align:right;
+ }
+ .historical-totals .totals-awards ul{max-width:100%;min-width:0;justify-content:flex-end}
+ .historical-totals .totals-table--general tbody tr{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+ }
+ .historical-totals .totals-table--general td:nth-child(n+3)::before{
+  content:attr(data-label);display:block;
+ }
+ .historical-totals .totals-breakdown dl{max-width:100%;overflow-wrap:anywhere}
+}
