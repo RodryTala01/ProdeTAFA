@@ -98,7 +98,7 @@ it('Promoción no es torneo con campeón: se muestra debajo de Liga, no en tarje
  const html=renderToStaticMarkup(createElement(SeasonDetail,{detail:{...historyLeague,summary},competition:'LIGA_A'}));
  expect(html).toContain('>Promoción<');
  expect(html).toContain('Promoción 1');
- expect(html).not.toContain('archive-movements');
+ expect(html).toContain('archive-movements');
  expect(html).not.toContain('href="#/historia/4/PROMOCION"');
  const catalog=renderToStaticMarkup(createElement(SeasonDetail,{detail:{...historyLeague,summary},view:'resumen'}));
  expect(catalog).not.toContain('href="#/historia/4/PROMOCION"');
@@ -236,7 +236,7 @@ it('reúne campeón y subcampeón en la misma tarjeta de la competición',()=>{
  expect(cards[0].textContent).toContain('Campeón');
  expect(cards[0].textContent).toContain('Subcampeón');
  expect(cards[0].textContent).toContain('beto');
- expect(host.textContent).not.toContain('Ascensos y descensos');
+ expect(host.textContent).toContain('Ascensos y descensos');
 });
 
 it('muestra las tablas de T8 cuando la importación solo trae cruces',()=>{
