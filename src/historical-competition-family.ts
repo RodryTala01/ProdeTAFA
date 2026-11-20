@@ -13,6 +13,18 @@ export function isHistoryOnlyCompetition(code:string,name=code){
 }
 export const historicalCompetitionName=(name:string)=>name.replace(/^(Prode Pago)\s*\(no oficial\)$/i,'$1');
 
+/** The Gold bracket awards the World Cup itself; silver keeps its own cup title. */
+export function historicalCompetitionDisplayName(code:string,name:string):string {
+ const clean=historicalCompetitionName(name).replace(/Qatar 2022/i,'Mundial 2022').replace(/^Copa de Campeones$/i,'Copa Campeones');
+ const family=competitionFamily(code);
+ const club=family.startsWith('MUNDIAL_DE_CLUBES');
+ const gold=family==='MUNDIAL_ORO'||family==='MUNDIAL_DE_CLUBES_ORO'
+  ||(club&&/\bCopa\s+Oro\b/i.test(clean));
+ if(!gold)return clean;
+ const year=clean.match(/\b(?:19|20)\d{2}\b/)?.[0]??code.match(/(?:19|20)\d{2}/)?.[0];
+ return (club?'Mundial de Clubes':'Mundial')+(year?' '+year:'');
+}
+
 export function isWorldCupOverall(code:string){
  return code==='MUNDIAL_QATAR_2022';
 }
