@@ -277,3 +277,15 @@
 .participant-archive .archive-award__label,
 .participant-archive .archive-group-table th { text-transform:none; letter-spacing:normal; }
 .archive-award--champion .archive-award-result[data-champion=false] .archive-award__label { color:var(--text-muted); }
+
+/* Confirmed historical division changes, shown below season honours and league tables. */
+.archive-movements-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr)); gap:12px; }
+.archive-movement-group { min-width:0; padding:16px; border:1px solid var(--border); border-left:3px solid var(--border-strong); border-radius:var(--radius-control); background:var(--surface-raised); }
+.archive-movement-group[data-type='ASCENSO'] { border-left-color:var(--accent); }
+.archive-movement-group[data-type='DESCENSO'] { border-left-color:var(--danger,#e77575); }
+.archive-movement-group[data-type='PERMANENCIA'] { border-left-color:var(--text-muted); }
+.participant-archive .archive-movement-group h3 { font-size:.9375rem; font-weight:700; margin:0 0 12px; }
+.archive-movement-group ul { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+.archive-movement-group li { min-width:0; display:grid; gap:2px; }
+.archive-movement-group li+li { border-top:1px solid var(--border); padding-top:10px; }
+.archive-movement-group li small { margin-left:38px; color:var(--text-muted); }
