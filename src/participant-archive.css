@@ -289,3 +289,55 @@
 .archive-movement-group li { min-width:0; display:grid; gap:2px; }
 .archive-movement-group li+li { border-top:1px solid var(--border); padding-top:10px; }
 .archive-movement-group li small { margin-left:38px; color:var(--text-muted); }
+
+/* Keep season tables, IFFHS, group tables and Dúos inside the phone width.
+ * On phones the vertical page scroll replaces nested horizontal table scrolling. */
+@media(max-width:800px){
+ .participant-archive :is(.archive-table,.archive-group-table){
+  display:block;overflow:visible;width:100%;min-width:0;max-width:100%;
+ }
+ .participant-archive :is(.archive-table,.archive-group-table) table{
+  display:block;width:100%;max-width:100%;min-width:0;table-layout:auto;
+ }
+ .participant-archive :is(.archive-table,.archive-group-table) thead{
+  position:absolute;overflow:hidden;width:1px;height:1px;margin:-1px;padding:0;
+  clip-path:inset(50%);white-space:nowrap;border:0;
+ }
+ .participant-archive :is(.archive-table,.archive-group-table) tbody{
+  display:grid;gap:8px;padding:8px 10px;min-width:0;
+ }
+ .participant-archive :is(.archive-table,.archive-group-table) tbody tr{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px;
+  width:100%;min-width:0;padding:9px;
+  border:1px solid var(--border);border-radius:var(--radius-control);
+  background:var(--surface-raised);
+ }
+ .participant-archive :is(.archive-table,.archive-group-table) tbody tr>:is(td,th){
+  display:block;min-width:0;max-width:100%;padding:8px 5px;
+  border-bottom:1px solid var(--border);text-align:left;white-space:normal;
+  overflow-wrap:anywhere;font-size:.84rem;
+ }
+ .participant-archive :is(.archive-table,.archive-group-table) tbody tr>th[scope=row]{
+  grid-column:1/-1;grid-row:1;min-width:0;white-space:normal;font-weight:750;
+ }
+ .participant-archive :is(.archive-table,.archive-group-table) tbody tr>th[scope=row] .archive-person{
+  min-width:0;max-width:100%;overflow-wrap:anywhere;
+ }
+ .participant-archive :is(.archive-table,.archive-group-table) tbody tr>td[data-label]::before{
+  content:attr(data-label);display:block;margin-bottom:2px;
+  font-size:.68rem;font-weight:650;line-height:1.3;color:var(--text-muted);
+ }
+ .participant-archive :is(.archive-table,.archive-group-table) tbody tr>.archive-points{
+  font-size:1rem;font-weight:800;
+ }
+ .participant-archive .archive-duo-tables th[scope=row]{min-width:0}
+ .participant-archive .archive-duo-tables caption{
+  display:block;text-align:left;padding:10px 15px;font-weight:750;
+ }
+ .participant-archive .archive-group-table tbody tr[data-phase-decision=qualified]{
+  border-left:3px solid var(--success);
+ }
+ .participant-archive .archive-group-table tbody tr[data-phase-decision=eliminated]{
+  border-left:3px solid var(--danger);
+ }
+}
