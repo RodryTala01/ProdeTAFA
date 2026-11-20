@@ -3,6 +3,7 @@ import {it,expect} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {createElement} from 'react';
 import {SeasonDetail,historicalExtras} from '../src/ParticipantArchive';
+import {historicalCompetitionDisplayName} from '../src/historical-competition-family';
 import {participantRoute} from '../src/participant-navigation';
 import {archiveStandingZone,archiveHistoryGroups,archivePublicDescription,historicalMatchLayout,visibleArchiveCompetitions} from '../src/archive-history-view';
 import {importedSummary} from '../worker/season-history';
@@ -260,4 +261,28 @@ it('muestra las tablas de T8 cuando la importación solo trae cruces',()=>{
  expect(render('COPA_DUOS')).toContain('Desempate de fase 3');
  expect(render('LIGA_B')).toContain('Zona B');
  expect(catalog.duos.flatMap(phase=>phase.individuals).reduce((sum,row)=>sum+(row.stats[0]??0),0)).toBe(849);
+});
+
+it('muestra al campeon de Copa Oro como campeon del Mundial y conserva Copa Plata',()=>{
+ expect(historicalCompetitionDisplayName('MUNDIAL_2026_ORO','Mundial 2026 — Copa Oro')).toBe('Mundial 2026');
+ expect(historicalCompetitionDisplayName('MUNDIAL_2026_PLATA','Mundial 2026 — Copa Plata (no oficial)')).toBe('Mundial 2026 — Copa Plata (no oficial)');
+ expect(historicalCompetitionDisplayName('MUNDIAL_CLUBES_ORO','Copa Oro Mundial de Clubes 2025')).toBe('Mundial de Clubes 2025');
+ expect(historicalCompetitionDisplayName('COPA_A','Copa A')).toBe('Copa A');
+});
+
+it('detalla solo ascensos, descensos y permanencias documentados debajo del resumen y la tabla',()=>{
+ const archived={...historyLeague,summary:importedSummary(historyLeague.data)};
+ const season=renderToStaticMarkup(createElement(SeasonDetail,{detail:archived}));
+ const league=renderToStaticMarkup(createElement(SeasonDetail,{detail:archived,competition:'LIGA_A'}));
+ for(const html of [season,league]){
+  expect(html).toContain('Ascensos y descensos');
+  expect(html).toContain('Ascensos');
+  expect(html).toContain('Descensos');
+  expect(html).toContain('Permanencias');
+  expect(html).toContain('archive-movement-group');
+ }
+ const without={...archived,data:{...historyLeague.data,movements:[]}};
+ const empty=renderToStaticMarkup(createElement(SeasonDetail,{detail:without,competition:'LIGA_A'}));
+ expect(empty).toContain('No hay ascensos ni descensos confirmados');
+ expect(empty).not.toContain('archive-movement-group');
 });
