@@ -83,9 +83,9 @@ export function TeamHistory({matches,identity}:{matches:TeamMatch[];identity?:Te
     const open=expanded.includes(r.id);
     return <Fragment key={r.id}><tr>
      <th scope="row"><a href={'#/club/participante/'+encodeURIComponent(r.id)}>{person(r.id,r.name,r.participantName,r.shieldUrl)}</a></th>
-     <td className={r.difference>0?'equipo-positive':r.difference<0?'equipo-negative':''}>{r.difference>0?'+':''}{r.difference}</td>
-     <td>{r.matches.length}</td><td>{r.wins}</td><td>{r.draws}</td><td>{r.losses}</td><td>{r.points}</td><td>{r.otherPoints}</td>
-     <td><button type="button" aria-expanded={open} aria-controls={'equipo-rival-'+encodeURIComponent(r.id)} aria-label={(open?'Cerrar':'Ver')+' enfrentamientos contra '+r.name} onClick={()=>setExpanded(old=>open?old.filter(x=>x!==r.id):[...old,r.id])}>{open?'−':'+'}</button></td>
+     <td data-label="DIF" className={r.difference>0?'equipo-positive':r.difference<0?'equipo-negative':''}>{r.difference>0?'+':''}{r.difference}</td>
+     <td data-label="PJ">{r.matches.length}</td><td data-label="PG">{r.wins}</td><td data-label="PE">{r.draws}</td><td data-label="PP">{r.losses}</td><td data-label="PF">{r.points}</td><td data-label="PC">{r.otherPoints}</td>
+     <td data-label="Ficha"><button type="button" aria-expanded={open} aria-controls={'equipo-rival-'+encodeURIComponent(r.id)} aria-label={(open?'Cerrar':'Ver')+' enfrentamientos contra '+r.name} onClick={()=>setExpanded(old=>open?old.filter(x=>x!==r.id):[...old,r.id])}>{open?'−':'+'}</button></td>
     </tr>{open&&<tr className="equipo-detail" id={'equipo-rival-'+encodeURIComponent(r.id)}><td colSpan={9}><div className="equipo-detail-inner">
      {[...r.matches].sort((a,b)=>b.seasonNumber-a.seasonNumber||(a.id<0&&b.id<0?a.id-b.id:b.id-a.id)).map(m=>{
       const outcome=matchOutcome(m),label=outcome==='win'?'Victoria':outcome==='loss'?'Derrota':'Empate';
