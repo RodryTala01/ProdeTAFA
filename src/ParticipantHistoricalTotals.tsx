@@ -118,7 +118,7 @@ function Rows({rows}:{rows:PalmarTotal[]}){
  return <div className="totals-table-wrap" tabIndex={0} role="region" aria-label="Palmarés de participantes">
   <table className="totals-table totals-table--honours">
    <thead><tr><th>Pos.</th><th>Participante</th><th>Campeonatos</th><th>Subcampeonatos</th><th>Participaciones</th></tr></thead>
-   <tbody>{rows.map(r=><tr key={r.userId} data-podium={r.position<=3?r.position:undefined}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th><td><Awards count={r.championships} kind="gold" awards={r.awards?.filter(a=>a.champion)}/></td><td><Awards count={r.runnerUps} kind="silver" awards={r.awards?.filter(a=>!a.champion)}/></td><td>{r.participations}</td></tr>)}</tbody>
+   <tbody>{rows.map(r=><tr key={r.userId} data-podium={r.position<=3?r.position:undefined}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th><td data-label="Campeonatos"><Awards count={r.championships} kind="gold" awards={r.awards?.filter(a=>a.champion)}/></td><td data-label="Subcampeonatos"><Awards count={r.runnerUps} kind="silver" awards={r.awards?.filter(a=>!a.champion)}/></td><td data-label="Participaciones">{r.participations}</td></tr>)}</tbody>
   </table>
  </div>;
 }
@@ -127,8 +127,8 @@ function IffhsRows({rows,seasons,official}:{rows:IffhsTotal[];seasons:number[];o
   <table className="totals-table">
    <thead><tr><th>Pos.</th><th>Participante</th>{official?seasons.map(n=><th key={n}>T{n}</th>):null}<th>PTS IFFHS</th>{!official&&<><th>Temporadas</th><th>Prom. / temp.</th><th>Detalle</th></>}</tr></thead>
    <tbody>{rows.map(r=><tr key={r.userId}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th>
-    {official&&seasons.map(n=><td key={n}>{r.breakdown.find(b=>b.seasonNumber===n)?.points==null?'—':decimal(r.breakdown.find(b=>b.seasonNumber===n)?.points??null)}</td>)}
-    <td className="totals-highlight">{decimal(r.totalPoints)}</td>{!official&&<><td>{r.seasons}</td><td>{decimal(r.average)}</td><td><details className="totals-breakdown"><summary aria-label={'Temporadas de '+r.fullName}>Ver</summary><dl>{r.breakdown.map(b=><div key={b.seasonNumber}><dt>T{b.seasonNumber}</dt><dd>{decimal(b.points)}</dd></div>)}</dl></details></td></>}
+    {official&&seasons.map(n=><td key={n} data-label={"T"+n}>{r.breakdown.find(b=>b.seasonNumber===n)?.points==null?'—':decimal(r.breakdown.find(b=>b.seasonNumber===n)?.points??null)}</td>)}
+    <td className="totals-highlight" data-label="PTS IFFHS">{decimal(r.totalPoints)}</td>{!official&&<><td data-label="Temporadas">{r.seasons}</td><td data-label="Prom. / temp.">{decimal(r.average)}</td><td data-label="Detalle"><details className="totals-breakdown"><summary aria-label={'Temporadas de '+r.fullName}>Ver</summary><dl>{r.breakdown.map(b=><div key={b.seasonNumber}><dt>T{b.seasonNumber}</dt><dd>{decimal(b.points)}</dd></div>)}</dl></details></td></>}
    </tr>)}</tbody>
   </table>
  </div>;
@@ -138,9 +138,9 @@ function GeneralRows({rows}:{rows:GeneralTotal[]}){
   <table className="totals-table totals-table--general">
    <thead><tr><th>#</th><th>Participante</th><th>PTS</th><th>Plenos</th><th>Parciales</th><th>Errores</th><th>Extras</th><th>Promedio por partido</th></tr></thead>
    <tbody>{rows.map(r=><tr key={r.userId}><td>{r.position}°</td><th scope="row"><Player userId={r.userId} name={r.fullName}/></th>
-    <td className="totals-highlight">{fmt(r.points)}</td><td>{r.fulls===null?'—':fmt(r.fulls)}</td><td>{r.partials===null?'—':fmt(r.partials)}</td>
-    <td>{r.errors===null?'—':fmt(r.errors)}</td><td>{r.extras===null?'—':fmt(r.extras)}</td>
-    <td>{decimal(r.averagePoints)}</td>
+    <td className="totals-highlight" data-label="PTS">{fmt(r.points)}</td><td data-label="Plenos">{r.fulls===null?'—':fmt(r.fulls)}</td><td data-label="Parciales">{r.partials===null?'—':fmt(r.partials)}</td>
+    <td data-label="Errores">{r.errors===null?'—':fmt(r.errors)}</td><td data-label="Extras">{r.extras===null?'—':fmt(r.extras)}</td>
+    <td data-label="Prom. / partido">{decimal(r.averagePoints)}</td>
    </tr>)}</tbody>
   </table>
  </div>;
