@@ -95,3 +95,48 @@
  letter-spacing: inherit; text-transform: uppercase; cursor: pointer; white-space: nowrap;
 }
 .equipo-sort:hover,.equipo-sort:focus-visible { color: var(--accent); }
+
+/* Rivalries stay in the page width; retain the sortable column controls. */
+@media(max-width:800px){
+ .equipo-table-scroll{overflow:visible;width:100%;max-width:100%}
+ .equipo-table{display:block;width:100%;min-width:0;max-width:100%}
+ .equipo-table thead{display:block;background:transparent;margin-bottom:10px}
+ .equipo-table thead tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+ .equipo-table thead th{
+  display:block;min-width:0;padding:3px 0;border:0;text-align:center;
+  white-space:normal;
+ }
+ .equipo-table thead th:last-child{display:none}
+ .equipo-table .equipo-sort{
+  width:100%;height:34px;min-width:0;min-height:34px;padding:5px;
+  font-size:.72rem;border:1px solid var(--border);border-radius:var(--radius-control);
+  background:var(--surface-raised);
+ }
+ .equipo-table tbody{display:grid;gap:8px}
+ .equipo-table tbody>tr:not(.equipo-detail){
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px;
+  min-width:0;padding:9px 11px;border:1px solid var(--border);
+  border-radius:var(--radius-control);background:var(--surface-raised);
+ }
+ .equipo-table tbody>tr:not(.equipo-detail)>th[scope=row]{
+  display:block;grid-column:1/-1;min-width:0;padding:6px 3px;
+  border-bottom:1px solid var(--border);white-space:normal;overflow-wrap:anywhere;
+ }
+ .equipo-table tbody>tr:not(.equipo-detail)>td{
+  display:block;min-width:0;padding:8px 3px;border-bottom:1px solid var(--border);
+  text-align:left;white-space:normal;
+ }
+ .equipo-table tbody>tr:not(.equipo-detail)>td[data-label]::before{
+  content:attr(data-label);display:block;margin-bottom:2px;color:var(--text-muted);
+  font-size:.68rem;font-weight:650;
+ }
+ .equipo-table tbody>tr:not(.equipo-detail)>td:last-child{
+  grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
+ }
+ .equipo-table tbody>tr:not(.equipo-detail)>td:last-child::before{margin:0}
+ .equipo-table .equipo-detail{display:block;min-width:0;max-width:100%}
+ .equipo-table .equipo-detail>td{
+  display:block;width:100%;max-width:100%;white-space:normal;
+ }
+ .equipo-table .equipo-detail-inner{min-width:0;max-width:100%}
+}
