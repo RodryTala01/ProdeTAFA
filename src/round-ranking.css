@@ -80,3 +80,31 @@
     padding: 18px;
   }
 }
+
+/* Ranking in a phone: no second horizontal scroll area. */
+@media(max-width:800px){
+ .ranking-table-wrap{overflow:visible;max-width:100%}
+ .ranking-table{display:block;width:100%;min-width:0;max-width:100%}
+ .ranking-table thead{
+  position:absolute;overflow:hidden;width:1px;height:1px;margin:-1px;padding:0;
+  clip-path:inset(50%);white-space:nowrap;border:0;
+ }
+ .ranking-table tbody{display:grid;gap:8px}
+ .ranking-table tbody tr{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px;
+  min-width:0;padding:10px;border:1px solid var(--border);
+  border-radius:var(--radius-control);background:var(--surface-raised);
+ }
+ .ranking-table tbody tr>td{
+  display:block;width:auto;min-width:0;padding:7px 5px;
+  border-top:0;border-bottom:1px solid var(--border);
+  text-align:left;white-space:normal;overflow-wrap:anywhere;
+ }
+ .ranking-table tbody tr>td:first-child{grid-column:1;align-self:center;border:0}
+ .ranking-table tbody tr>td.ranking-participant{grid-column:2;align-self:center;border:0}
+ .ranking-table .participant-shield-name{min-width:0;max-width:100%}
+ .ranking-table tbody tr>td[data-label]::before{
+  content:attr(data-label);display:block;color:var(--text-muted);
+  font-size:.68rem;font-weight:650;margin-bottom:2px;
+ }
+}
