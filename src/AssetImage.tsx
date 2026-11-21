@@ -17,8 +17,11 @@ function AssetSource({src,name,size='md',decorative=false,fallback,loading='lazy
   </span>;
 }
 export function AssetImage(props:ImageProps) {return <AssetSource key={props.src??''} {...props}/>;}
+export function participantShieldSource(name: string, userId?: string, season?: number, logoUrl?: string | null, shieldUrl?: string | null) {
+  return shieldUrl || logoUrl || participantAsset(userId, season) || (!userId || userId.startsWith('hist:') ? participantNamedAsset(name) : undefined);
+}
 export function ParticipantShield({name,userId,season,logoUrl,shieldUrl,...props}:{name:string;userId?:string;season?:number;logoUrl?:string|null;shieldUrl?:string|null;size?:AssetSize;decorative?:boolean}) {
-  const direct=shieldUrl||logoUrl||participantAsset(userId,season)||(!userId||userId.startsWith('hist:')?participantNamedAsset(name):undefined);
+  const direct=participantShieldSource(name,userId,season,logoUrl,shieldUrl);
   return <AssetImage {...props} name={`Escudo de ${name}`} fallback={initials(name)} src={direct}/>;
 }
 export function TeamShield({name,teamId,logoUrl,...props}:{name:string;teamId?:string|null;logoUrl?:string|null;size?:AssetSize;decorative?:boolean}) {

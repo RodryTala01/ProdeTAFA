@@ -1,3 +1,5 @@
+import DownloadImageButton from './DownloadImageButton';
+import { downloadFixturePng } from './export-sports-png';
 import {useRoundRefresh} from './round-refresh';
 import {argentinaDateTime} from './match-time';
 import {CompetitionImage} from './AssetImage';
@@ -433,6 +435,7 @@ export default function ParticipantRound() {
           {round.submitted && <p className="submission-state--ok">Pronóstico enviado{round.lastSubmittedAt ? ` · ${submissionTime(round.lastSubmittedAt)}` : ''}</p>}
           {round.submitted && changes.length > 0 && <p>Cambiaste {changes.length} partido{changes.length === 1 ? '' : 's'} desde tu último envío.</p>}
         </div>
+        {round.matches.length > 0 && <DownloadImageButton key={round.id} label="Descargar imagen de la fecha" download={() => downloadFixturePng(round.name, round.matches)}/>}
         <a className="prediction-history-link" href="#/club/historial">Ver historial</a>
         <label className="compact-switch"><input type="checkbox" checked={compact} onChange={event => { setCompact(event.target.checked); try { localStorage.setItem('tafa.predictions.compact', String(event.target.checked)); } catch { /* Optional preference. */ } }}/>Vista compacta</label>
       </div>
