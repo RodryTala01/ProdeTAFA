@@ -1,3 +1,5 @@
+import DownloadImageButton from './DownloadImageButton';
+import { downloadFixturePng } from './export-sports-png';
 import {argentinaDateTime} from './match-time';
 import AdminRoundSubmissions from './AdminRoundSubmissions';
 import {safeAdminError} from './safe-admin-error';
@@ -283,6 +285,7 @@ export default function AdminRounds() {
                 <p>{statusLabel} · Horarios de Argentina</p>{isDraft && selected.matches.length < 12 && <p>Faltan {12-selected.matches.length} partidos para completar la Fecha.</p>}
               </div>
               <div className="topbar-actions">
+                {selected.matches.length > 0 && <DownloadImageButton key={selected.id} label="Descargar imagen de la fecha" download={() => downloadFixturePng(selected.name, selected.matches)}/>}
                 {isDraft && (
                   <button className="button button--primary" disabled={busy || selected.matches.length !== 12 || rounds.some(round => round.status === 'open' && round.id !== selected.id)} onClick={() => setConfirm({ title: `¿Publicar ${selected.name}?`, message: 'Los participantes podrán pronosticar. Después de publicar no se pueden agregar ni quitar partidos.', action: 'Publicar', run: publishRound })}>Publicar</button>
                 )}

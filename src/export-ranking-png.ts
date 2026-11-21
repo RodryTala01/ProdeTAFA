@@ -1,3 +1,5 @@
+import { downloadPng } from './download-png';
+
 export async function downloadRankingPng(title:string,headers:string[],rows:string[][]){
  const width=1100, rowHeight=44, inset=32, tableTop=132;
  const canvas=document.createElement('canvas');
@@ -43,13 +45,5 @@ export async function downloadRankingPng(title:string,headers:string[],rows:stri
  };
  renderRow(headers,0);
  rows.forEach((row,i)=>renderRow(row,i+1));
- const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('No se pudo generar el PNG')),'image/png'));
- const url=URL.createObjectURL(blob);
- const link=document.createElement('a');
- link.href=url;
- link.download='prode-tafa-'+title.toLowerCase().normalize('NFD').replace(/\p{M}/gu,'').replace(/[^a-z0-9]+/g,'-').replace(/-$/,'')+'.png';
- document.body.append(link);
- link.click();
- link.remove();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
+ await downloadPng(canvas,title);
 }
