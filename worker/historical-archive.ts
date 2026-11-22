@@ -179,6 +179,14 @@ async function loggedIn(request:Request,env:Env){
  return env.DB.prepare("SELECT u.id,u.role FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND julianday(s.expires_at)>julianday('now') AND u.is_active=1 LIMIT 1")
  .bind(hash).first<{id:string;role:string}>();
 }
+// Direct movements confirmed by the administrator for the close of T30.
+const season30DirectMovements: ArchiveMovement[] = [
+ {participantKey:'t1-kevin-sivori',fromDivision:'B',toDivision:'A',type:'ASCENSO',detail:'Ascenso directo confirmado al cierre de la T30'},
+ {participantKey:'t27-nahuel-gonzalez',fromDivision:'B',toDivision:'A',type:'ASCENSO',detail:'Ascenso directo confirmado al cierre de la T30'},
+ {participantKey:'t24-cristian-serpico',fromDivision:'A',toDivision:'B',type:'DESCENSO',detail:'Descenso directo confirmado al cierre de la T30'},
+ {participantKey:'t4-eze',fromDivision:'A',toDivision:'B',type:'DESCENSO',detail:'Descenso directo confirmado al cierre de la T30'},
+];
+
 export async function activeHistoricalArchives(db:D1Database):Promise<Array<{seasonNumber:number;data:ArchivePayload}>>{
  const rows=await db.prepare("SELECT season_number,payload_json FROM historical_imports WHERE status='active' ORDER BY season_number,id")
  .all<{season_number:number;payload_json:string}>();
@@ -191,6 +199,15 @@ export async function activeHistoricalArchives(db:D1Database):Promise<Array<{sea
  return [...grouped].map(([seasonNumber,batches])=>{
   const merged=mergeArchiveBatches(batches);
   if(merged.errors.length||!merged.data)throw Error('Inconsistencia en archivo histórico T'+seasonNumber+': '+merged.errors.join('; '));
+  if (seasonNumber === 30) {
+   const {participants,movements}=merged.data;
+   for (const movement of season30DirectMovements) {
+    if (participants.some(person=>person.key===movement.participantKey) &&
+        !movements.some(existing=>existing.participantKey===movement.participantKey&&existing.type===movement.type)) {
+     movements.push({...movement});
+    }
+   }
+  }
   return {seasonNumber,data:merged.data};
  });
 }
