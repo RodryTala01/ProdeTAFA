@@ -1,6 +1,6 @@
 // Participant read model: persisted public sporting data only. No refresh/mutation.
-export async function competitionOverview(db: D1Database, userId: string, requested: number) {
-  const editions = (await db.prepare(`SELECT season_number AS seasonNumber,name,status FROM tafa_seasons WHERE status <> 'draft' ORDER BY season_number DESC`).all<{seasonNumber:number;name:string;status:string}>()).results;
+export async function competitionOverview(db: D1Database, userId: string, requested: number, includeDrafts = false) {
+  const editions = (await db.prepare(includeDrafts ? `SELECT season_number AS seasonNumber,name,status FROM tafa_seasons ORDER BY season_number DESC` : `SELECT season_number AS seasonNumber,name,status FROM tafa_seasons WHERE status <> 'draft' ORDER BY season_number DESC`).all<{seasonNumber:number;name:string;status:string}>()).results;
   const edition = requested > 0 ? editions.find(s => s.seasonNumber === requested) : editions.find(s => s.status === 'active');
   if (!edition) return { currentUserId:userId, editions, season:null };
   const season = await db.prepare('SELECT id FROM tafa_seasons WHERE season_number=?').bind(edition.seasonNumber).first<{id:number}>();

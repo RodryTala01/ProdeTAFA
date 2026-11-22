@@ -646,6 +646,10 @@ export async function handleCompetitionEngine(request: Request, env: Env): Promi
 
   if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
 
+  if (pathname === '/api/admin/competition-engine/draw-overview' && request.method === 'GET') {
+    return json(await competitionOverview(env.DB,user.id,Number(url.searchParams.get('season')),true));
+  }
+
   if (pathname === '/api/admin/competition-engine' && request.method === 'GET') {
     return json(await adminState(env));
   }

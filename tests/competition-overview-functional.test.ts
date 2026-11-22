@@ -19,3 +19,12 @@ it('exposes all competitions, public history and historical membership without p
 
 
 it('uses actual historical duo members instead of a generated team name',async()=>{db.exec("INSERT INTO tafa_seasons(id,season_number,name,status) VALUES(1,32,'T32','active'); INSERT INTO competitions(id,season_id,code,canonical_name,display_name,family) VALUES(1,1,'COPA_DUOS','Dúos','Dúos','CUP'); INSERT INTO competition_entries(id,competition_id,entry_type,display_name) VALUES(1,1,'DUO','Equipo inventado'); INSERT INTO competition_entry_members(entry_id,user_id) VALUES(1,'p'),(1,'admin'); INSERT INTO competition_results(competition_id,entry_id,result_code,final_position,confirmed_by_user_id) VALUES(1,1,'CHAMPION',1,'admin');");const data=await(await request()).json() as any;expect(data.season.history[0].name).toBe('p + admin');});
+it('admin draw export reads draft seasons without writes and blocks participant access',async()=>{
+ db.exec("INSERT INTO tafa_seasons(id,season_number,name,status) VALUES(1,33,'T33','draft')");
+ const url='http://local/api/admin/competition-engine/draw-overview?season=33';
+ const call=(user:string)=>handleCompetitionEngine(new Request(url,{headers:user?{cookie:`prode_session=${user}`}:{}}),env());
+ expect((await call(''))!.status).toBe(401);
+ expect((await call('p'))!.status).toBe(403);
+ const response=(await call('admin'))!;expect(response.status).toBe(200);
+ expect((await response.json() as any).season.seasonNumber).toBe(33);
+});

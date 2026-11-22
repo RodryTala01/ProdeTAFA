@@ -1,3 +1,5 @@
+import DrawExport from './DrawExport';
+import {groupDraw} from './draw-export-model';
 import { useEffect, useState } from "react";
 import CupAbKnockout from "./CupAbKnockout";
 import {
@@ -197,6 +199,12 @@ export default function AdminCupAb({
       className="cup-ab form-stack"
       aria-label={`Administración deportiva ${competition.displayName}`}
     >
+      {(context?.assignments.length??0)>0&&<DrawExport build={()=>{
+       const assignments=context!.assignments;
+       const codes=[...new Set(assignments.map(a=>a.code))];
+       return groupDraw(competition,seasonNumber,codes.map(code=>({name:assignments.find(a=>a.code===code)!.name,userIds:assignments.filter(a=>a.code===code).map(a=>a.userId)})),eligible,false,['1.º de cada grupo: acceso a Cuartos.','2.º y 3.º: acceso a Octavos.','Desde el 4.º puesto: eliminación.']);
+      }}/>}
+
       <h2>
         {competition.displayName} · División {competition.divisionCode}
       </h2>
@@ -490,10 +498,12 @@ export default function AdminCupAb({
             <button className="button button--secondary" disabled={groupLocked||!eligible.length} onClick={()=>void previewAutomatic()}>{drawPreview?'Repetir sorteo · Nueva vista previa':'Generar vista previa del sorteo'}</button>
             {drawPreview&&<section className="asc-draw-preview" aria-label="Vista previa del sorteo de Copa A/B">
               <h4>Propuesta sin guardar · Semilla {drawPreview.randomSeed}</h4><p>Revisá los grupos. Confirmar guardará exactamente esta propuesta.</p>
+              <DrawExport build={()=>groupDraw(competition,seasonNumber,drawPreview.groups,eligible,true,['1.º de cada grupo: acceso a Cuartos.','2.º y 3.º: acceso a Octavos.','Desde el 4.º puesto: eliminación.'])}/>
               <div className="cup-grid">{drawPreview.groups.map(g=><article key={g.code}><strong>{g.name}</strong><ol>{g.participants.map(p=><li key={p.userId}>{p.fullName} <small>· Bombo {p.pot}</small></li>)}</ol></article>)}</div>
             </section>}
           </>}
-          <button
+{mode==='MANUAL'&&groups.length>0&&groups.every(g=>g.userIds.every(Boolean))&&<DrawExport build={()=>groupDraw(competition,seasonNumber,groups,eligible,true)}/>}
+                    <button
             className="button button--primary"
             disabled={groupLocked||!eligible.length||(mode==='MANUAL'&&selected.some(v=>!v))||(mode==='AUTOMATIC'&&!drawPreview)}
             onClick={() => void save()}>
@@ -563,7 +573,7 @@ export default function AdminCupAb({
         </>
       )}
       {tab !== "summary" && tab !== "groups" && (
-        <CupAbKnockout
+        <CupAbKnockout seasonNumber={seasonNumber}
           key={`${competition.id}-${tab}-${competition.stages.map((s) => s.id).join("-")}`}
           competition={competition}
           groupStage={stage}

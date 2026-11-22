@@ -1,3 +1,5 @@
+import DrawExport from './DrawExport';
+import {storedKnockoutDraw} from './draw-export-model';
 import {ParticipantShield} from './AssetImage';
 import AdminLeague from './AdminLeague';
 import { AdminConfirm } from './AdminUI';
@@ -361,9 +363,10 @@ export default function AdminCompetitions() {
                   {competition.family !== 'LEAGUE' && !['COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_CAMPEONES','COPA_PAPA','PROMOCION'].includes(competition.code) && <p className="competition-pending">Configuración deportiva específica pendiente. El armado de grupos, parejas y cruces tendrá opciones asistida y manual, con validaciones y auditoría.</p>}
                   {['COPA_A','COPA_B'].includes(competition.code) && competition.stages.some(s=>s.stageType==='ACCUMULATIVE_GROUPS') && <AdminCupAb key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='COPA_TOTAL' && competition.stages.some(s=>s.stageType==='ROUND_ROBIN_GROUPS') && <AdminCupTotal key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  {competition.stages.some(s=>s.stageType==='KNOCKOUT')&&<DrawExport build={()=>storedKnockoutDraw(competition,selected.seasonNumber)}/>}
                   {competition.code==='COPA_DUOS' && <AdminCupDuos key={competition.id} competition={competition} seasonNumber={selected.seasonNumber} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='COPA_CAMPEONES' && <AdminCupChampions key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
-                  {competition.code==='COPA_PAPA' && <AdminCupPapa key={competition.id} competition={competition} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
+                  {competition.code==='COPA_PAPA' && <AdminCupPapa seasonNumber={selected.seasonNumber} key={competition.id} competition={competition} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='PROMOCION' && <AdminPromotion key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code!=='PROMOCION' && <section><h3>Resultados de la competición</h3><AdminResults key={`results-${competition.id}`} competition={competition} seasonNumber={selected.seasonNumber} archived={selected.status==='archived'}/></section>}
                   <button type="button" className="button button--secondary" onClick={()=>setSetupStep('fechas')}>Siguiente: Fechas y ajustes →</button>

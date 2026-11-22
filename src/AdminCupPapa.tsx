@@ -1,3 +1,4 @@
+import DrawExport from './DrawExport';
 import { useEffect, useState } from 'react';
 import {
   cupApi,
@@ -19,10 +20,12 @@ import {
 import './cup-ab.css';
 export default function AdminCupPapa({
   competition: c,
+  seasonNumber,
   rounds,
   disabled,
 }: {
   competition: CupCompetition;
+  seasonNumber:number;
   rounds: CupRound[];
   disabled: boolean;
 }) {
@@ -106,6 +109,13 @@ export default function AdminCupPapa({
       aria-label="Administración deportiva Copa Papa"
     >
       <h3>{c.displayName}</h3>
+      {data&&!data.proposal.initial.hasEncounters&&pairs.length>0&&pairs.every(p=>p.userAId)&&<DrawExport build={()=>{
+       const eligible=papaEligible(data.proposal);
+       const person=(id:string)=>{const p=eligible.find(p=>p.id===id);if(!p)throw new Error('Participante no disponible.');return {userId:p.id,name:p.name};};
+       return {competitionCode:c.code,competitionName:c.displayName,season:seasonNumber,phase:'Llave inicial',state:'Vista previa',kind:'bracket',
+        blocks:pairs.map((pair,index)=>({id:String(index),title:'Cruce '+(index+1),sides:[[person(pair.userAId)],pair.userBId?[person(pair.userBId)]:[]],bye:!pair.userBId}))};
+      }}/>}
+
       <p>
         Nombre homenaje editable en Configuración general. La identidad se
         conserva como COPA_PAPA.

@@ -1,3 +1,5 @@
+import DrawExport from './DrawExport';
+import {groupDraw} from './draw-export-model';
 import {argentinaDateTime} from './match-time';
 import { useEffect, useState } from 'react';
 import {
@@ -228,7 +230,7 @@ export default function AdminCupTotal({
     kind: 'qualified' | 'winners' | 'third-place' = 'winners',
   ) =>
     ko[index] ? (
-      <TotalKnockout
+      <TotalKnockout seasonNumber={seasonNumber}
         key={`${ko[index].id}-${competition.roundLinks.length}`}
         competition={competition}
         rounds={rounds}
@@ -255,6 +257,12 @@ export default function AdminCupTotal({
       className="cup-ab form-stack"
       aria-label="Administración deportiva Copa Total"
     >
+      {(ctx?.assignments.length??0)>0&&<DrawExport build={()=>{
+       const assignments=ctx!.assignments;
+       const codes=[...new Set(assignments.map(a=>a.code))];
+       return groupDraw(competition,seasonNumber,codes.map(code=>({name:assignments.find(a=>a.code===code)!.name,userIds:assignments.filter(a=>a.code===code).map(a=>a.userId)})),people,false,[]);
+      }}/>}
+
       <span className="eyebrow">COPA TOTAL · T{seasonNumber}</span>
       <h2>{competition.displayName}</h2>
       <nav className="cup-tabs" aria-label="Fases de Copa Total">
@@ -493,9 +501,11 @@ export default function AdminCupTotal({
             <button className="button button--secondary" disabled={groupLocked||!people.length} onClick={()=>void previewGroups()}>{drawPreview?'Repetir sorteo · Nueva vista previa':'Generar vista previa del sorteo'}</button>
             {drawPreview&&<section className="asc-draw-preview" aria-label="Vista previa del sorteo de Copa Total">
               <h4>Propuesta sin guardar · Semilla {drawPreview.randomSeed}</h4><p>Esta distribución se puede repetir. Confirmar guardará los grupos mostrados.</p>
+              <DrawExport build={()=>groupDraw(competition,seasonNumber,drawPreview.groups,people,true,[])}/>
               <div className="cup-grid">{drawPreview.groups.map(g=><article key={g.code}><strong>{g.name}</strong><ol>{g.participants.map(p=><li key={p.userId}>{p.fullName}</li>)}</ol></article>)}</div>
             </section>}
           </>}
+          {mode==='MANUAL'&&groups.length>0&&groups.every(g=>g.userIds.every(Boolean))&&<DrawExport build={()=>groupDraw(competition,seasonNumber,groups,people,true)}/>}
           <button className="button button--primary" disabled={groupLocked||!people.length||(mode==='MANUAL'&&selected.some(v=>!v))||(mode==='AUTOMATIC'&&!drawPreview)} onClick={()=>void saveGroups()}>
             {mode==='MANUAL'?'Guardar grupos manuales':'Confirmar los grupos de esta vista previa'}
           </button>

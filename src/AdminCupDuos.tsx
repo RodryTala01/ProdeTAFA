@@ -134,7 +134,7 @@ export default function AdminCupDuos({
             </>
           )}
           {tab === 'Parejas' && (
-            <DuoPairs
+            <DuoPairs seasonNumber={seasonNumber}
               competition={c}
               context={context}
               disabled={locked}

@@ -1,13 +1,17 @@
+import DrawExport from './DrawExport';
+import {groupDraw} from './draw-export-model';
 import { useState } from 'react';
 import { cupApi, cupAdmin, type CupCompetition } from './cup-ab-api';
 import type { DuoContext, DuoMember } from './AdminCupDuos';
 export default function DuoPairs({
   competition: c,
+  seasonNumber,
   context,
   disabled,
   onChanged,
 }: {
   competition: CupCompetition;
+  seasonNumber:number;
   context: DuoContext;
   disabled: boolean;
   onChanged: () => Promise<void>;
@@ -56,6 +60,10 @@ export default function DuoPairs({
   return (
     <section className="form-stack">
       <h3>Parejas</h3>
+      {drawPreview&&<DrawExport build={()=>groupDraw(c,seasonNumber,drawPreview.pairs.map(p=>({name:p.displayName,userIds:p.members.map(m=>m.userId)})),context.eligible,true,[],'Parejas')}/>}
+      {context.pairs.length>0&&<DrawExport build={()=>groupDraw(c,seasonNumber,context.pairs.map(p=>({name:p.displayName,userIds:p.members.filter(m=>m.validUntilBeforeRoundId===null).map(m=>m.userId)})),context.pairs.flatMap(p=>p.members),false,[],'Parejas')}/>}
+
+      {!context.pairs.length&&mode==='MANUAL'&&pairs.length>0&&pairs.flat().every(Boolean)&&<DrawExport build={()=>groupDraw(c,seasonNumber,pairs.map((p,i)=>({name:'Dúo '+(i+1),userIds:p})),context.eligible,true,[],'Parejas')}/>}
       {!context.pairs.length && (
         <>
           <div className="topbar-actions">

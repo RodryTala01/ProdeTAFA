@@ -1,3 +1,7 @@
+import {storedKnockoutDraw} from './draw-export-model';
+import DrawExport from './DrawExport';
+import type {Overview} from './participant-competitions';
+import {entryMembers} from './participant-competitions';
 import { useEffect, useState } from "react";
 import { statusLabel } from "./competition-presentation";
 import {
@@ -14,6 +18,7 @@ import EncounterCard from "./CupEncounter";
 
 export default function CupAbKnockout({
   competition,
+  seasonNumber,
   groupStage,
   rounds,
   action,
@@ -21,6 +26,7 @@ export default function CupAbKnockout({
   disabled,
 }: {
   competition: CupCompetition;
+  seasonNumber:number;
   groupStage: CupStage;
   rounds: CupRound[];
   action: "r16" | "quarterfinals" | "semifinals" | "final";
@@ -138,6 +144,20 @@ export default function CupAbKnockout({
   }
   return (
     <section className="form-stack">
+      {encounters.length>0&&<DrawExport build={()=>storedKnockoutDraw(competition,seasonNumber,Number(target))}/>}
+      {mode==='MANUAL'&&pairs.length>0&&pairs.every(pair=>pair.length===2&&pair.every(Boolean))&&<DrawExport build={async()=>{
+       if(new Set(pairs.flat()).size!==pairs.flat().length)throw new Error('Hay participantes repetidos en los cruces.');
+       const overview=await cupApi<Overview>('/api/admin/competition-engine/draw-overview?season='+seasonNumber);
+       const season=overview.season;
+       if(!season||!season.competitions.some(c=>c.id===competition.id))throw new Error('No encontramos la temporada de estos cruces.');
+       return {competitionCode:competition.code,competitionName:competition.displayName,season:season.seasonNumber,phase:label,state:'Vista previa',kind:'bracket',
+        blocks:pairs.map((pair,index)=>({id:String(index),title:label+' · Cruce '+(index+1),sides:pair.map(id=>{
+         const members=entryMembers(season,Number(id),null);
+         if(!members.length)throw new Error('No encontramos los integrantes de un cruce.');
+         return members.map(m=>({userId:m.userId,name:m.fullName}));
+        })}))};
+      }}/>}
+
       <h3>{label}</h3>
       <p>
         {targetStage
