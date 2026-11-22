@@ -551,3 +551,39 @@ describe("Copa A/B: endpoints reales con SQLite", () => {
     }
   });
 });
+
+describe('Copa B con 12 participantes',()=>{
+ async function twelve(){
+  db.exec("DELETE FROM season_division_members WHERE division_id=2 AND user_id>='B13'");
+  const selected=people('B').slice(0,12);
+  const assigned=Array.from({length:4},(_,i)=>({code:'ABCD'[i],name:'Grupo '+'ABCD'[i],userIds:selected.slice(i*3,i*3+3)}));
+  expect((await call(`${base}/stages/6/groups`,'POST',{groups:assigned})).status).toBe(200);
+  return assigned;
+ }
+ it('requires four groups of three and supports the same assisted preview',async()=>{
+  db.exec("DELETE FROM season_division_members WHERE division_id=2 AND user_id>='B13'");
+  expect((await call(`${base}/stages/6/groups`,'POST',{groups:[{code:'A',userIds:people('B').slice(0,6)},{code:'B',userIds:people('B').slice(6,12)}]})).status).toBe(400);
+  const response=await call(`${base}/stages/6/groups/draw`,'POST',{preview:true,rankingUserIds:people('B').slice(0,12)});
+  expect(response.status).toBe(200);const data=await response.json() as any;
+  expect(data.groups).toHaveLength(4);expect(data.groups.every((g:any)=>g.userIds.length===3)).toBe(true);
+ });
+ it('waits for three finished dates, sends eight to QF and rejects R16 or third-place entries',async()=>{
+  await twelve();
+  db.exec("INSERT INTO competition_stages(id,competition_id,code,name,stage_type,sequence) VALUES(7,2,'R16','Octavos','KNOCKOUT',2),(8,2,'QF','Cuartos','KNOCKOUT',3),(9,2,'SF','Semifinal','KNOCKOUT',4),(10,2,'FINAL','Final','KNOCKOUT',5); INSERT INTO rounds(id,name,status,category) VALUES(1,'Grupo 1','finished','COPA'),(2,'Grupo 2','finished','COPA'),(3,'Grupo 3','finished','COPA'),(4,'Cuartos','draft','COPA'); INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence) VALUES(1,2,6,1,1),(2,2,6,2,2),(4,2,8,4,1)");
+  const path=`${progress(6,'quarterfinals')}?targetStageId=8&roundLinkId=4&groupStageId=6`;
+  expect((await call(path)).status).toBe(409);
+  db.exec('INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence) VALUES(3,2,6,3,3)');
+  const result=await call(path);expect(result.status).toBe(200);const pool=(await result.json() as any).pool;
+  expect(pool).toHaveLength(8);expect(pool.every((p:any)=>p.position<=2)).toBe(true);
+  expect((await call(`${progress(6,'r16')}?targetStageId=7&roundLinkId=4&groupStageId=6`)).status).toBe(409);
+  const third=db.prepare("SELECT ge.entry_id FROM competition_group_entries ge JOIN competition_entry_members m ON m.entry_id=ge.entry_id WHERE m.user_id='B03'").get() as any;
+  const bad=adjacent(pool);bad[0][0]=third.entry_id;
+  const body={targetStageId:8,roundLinkId:4,groupStageId:6,mode:'MANUAL'};
+  expect((await call(progress(6,'quarterfinals'),'POST',{...body,pairs:bad})).status).toBe(400);
+  expect((await call(progress(6,'quarterfinals'),'POST',{...body,pairs:adjacent(pool)})).status).toBe(200);
+  expect((db.prepare('SELECT COUNT(*) AS n FROM competition_encounters WHERE stage_id=8').get() as any).n).toBe(4);
+  const table=await(await call('competition-engine/cups/COPA_B/groups?season=32')).json() as any;
+  expect(table.provisional).toBe(false);
+  expect(table.groups.flatMap((g:any)=>g.standings).filter((p:any)=>p.destination==='QUARTERFINAL')).toHaveLength(8);
+ });
+});

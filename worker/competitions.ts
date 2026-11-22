@@ -1,3 +1,4 @@
+import {cupAbStageFormat} from './cup-ab-format';
 import {promotionLeagueStatus} from './promotion-league-phase';
 import { competitionOverview } from './competition-overview';
 type Env = {
@@ -483,10 +484,17 @@ async function linkRound(request: Request, env: Env, user: SessionUser, competit
   if (!Number.isInteger(stageId) || stageId <= 0 || !Number.isInteger(roundId) || roundId <= 0) return error('Etapa o fecha inválida');
 
   const stage = await env.DB.prepare(
-    `SELECT id FROM competition_stages WHERE id = ? AND competition_id = ? LIMIT 1`,
-  ).bind(stageId, competitionId).first<{ id: number }>();
+    `SELECT id,stage_type FROM competition_stages WHERE id = ? AND competition_id = ? LIMIT 1`,
+  ).bind(stageId, competitionId).first<{ id: number;stage_type:string }>();
   if (!stage) return error('La etapa no pertenece a esta competición', 409);
 
+  if(stage.stage_type==='ACCUMULATIVE_GROUPS'&&purpose==='NORMAL'){
+    const format=await cupAbStageFormat(env.DB,stageId);
+    if(format.directQuarterfinals){
+      const count=await env.DB.prepare("SELECT COUNT(*) AS n FROM competition_round_links WHERE stage_id=? AND purpose='NORMAL'").bind(stageId).first<{n:number}>();
+      if(Number(count?.n)>=3)return error('Copa B con 12 participantes tiene exactamente tres Fechas de grupos.',409);
+    }
+  }
   if(competition.family==='PROMOTION'){
     const ready=await promotionLeagueStatus(env.DB,competition.season_id);
     if(!ready.ready)return error(ready.reason,409);

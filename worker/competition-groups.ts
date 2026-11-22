@@ -1,3 +1,4 @@
+import {cupAbStageFormat} from './cup-ab-format';
 import type { Env } from './index';
 import { cupGroupContext } from './cup-ab-context';
 
@@ -138,6 +139,7 @@ export async function configureGroups(request: Request, env: Env, user: SessionU
   const eligible = eligibleResult.results ?? [];
   if (eligible.length === 0) return error('La división todavía no tiene participantes asignados', 409);
 
+  if(stage.competition_code==='COPA_B'&&eligible.length===12&&(body.groups.length!==4||body.groups.some(g=>g.userIds?.length!==3)))return error('Copa B con 12 participantes requiere cuatro grupos de tres.');
   const eligibleIds = new Set(eligible.map((row) => row.user_id));
   const seenUsers = new Set<string>();
   const seenCodes = new Set<string>();
@@ -318,6 +320,7 @@ async function groupStandings(request: Request, env: Env, cupCodeRaw: string) {
               u.full_name COLLATE NOCASE`,
   ).bind(stage.id).all<GroupStandingRow>();
 
+  const format=await cupAbStageFormat(env.DB,stage.id);
   const groups = new Map<number, {
     id: number;
     code: string;
@@ -365,15 +368,16 @@ async function groupStandings(request: Request, env: Env, cupCodeRaw: string) {
       errors: Number(row.errors ?? 0),
       extras: Number(row.extras ?? 0),
       provisional: Number(row.provisional_scores ?? 0) > 0,
-      destination: position === 1 ? 'QUARTERFINAL' : position <= 3 ? 'ROUND_OF_16' : 'ELIMINATED',
+      destination: format.directQuarterfinals ? (position<=2?'QUARTERFINAL':'ELIMINATED') : position === 1 ? 'QUARTERFINAL' : position <= 3 ? 'ROUND_OF_16' : 'ELIMINATED',
     });
   }
 
   const linkedRounds = linkedRoundsResult.results ?? [];
-  const stageProvisional = linkedRounds.length !== 2 || linkedRounds.some((round) => round.status !== 'finished')
+  const stageProvisional = linkedRounds.length !== format.groupRounds || linkedRounds.some((round) => round.status !== 'finished')
     || Array.from(groups.values()).some((group) => group.standings.some((entry) => entry.provisional));
 
   return json({
+    format,
     currentUserId: user.id,
     season: {
       id: Number(stage.season_id),

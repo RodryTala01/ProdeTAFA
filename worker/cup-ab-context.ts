@@ -1,3 +1,4 @@
+import {cupAbFormat} from '../shared/cup-ab-format';
 import type { Env } from "./index";
 
 // The division is the source of eligibility in both manual and assisted flows.
@@ -63,6 +64,7 @@ export async function cupGroupContext(env: Env, stageId: number) {
     .all<{ code: string; name: string; userId: string }>();
   return {
     stage,
+    format:cupAbFormat(stage.code,(assignments.results?.length||eligible.results?.length)||0),
     eligible: eligible.results ?? [],
     defendingChampionUserId: (eligible.results ?? []).some(
       (e) => e.userId === championId,

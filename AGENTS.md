@@ -225,6 +225,10 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Octavos valida en backend segundos contra terceros, todos una vez. Cuartos usa primeros de grupo y ganadores confirmados de Octavos; Semifinal y Final usan ganadores confirmados.
 - Copa A/B no tiene tercer puesto. Cruces editables antes de publicación/inicio, con motivo y auditoría al corregir. El modo manual no guarda randomSeed.
 
+### Copa B con 12 participantes
+
+- Con exactamente 12 participantes: cuatro grupos de tres, tres Fechas acumulativas de grupos y los dos primeros de cada grupo a Cuartos directamente; sin Octavos. Manual primero y sorteo opcional, conservando scoring y desempates vigentes. El conteo se fija por los integrantes guardados de los grupos; antes de configurarlos se usa la división elegible. Otras cantidades conservan el formato previo.
+
 ### Copa Total Admin
 
 - Elegibles: participantes activos pertenecientes a las divisiones de la temporada, tanto A como B.

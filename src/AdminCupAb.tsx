@@ -1,3 +1,4 @@
+import {cupAbFormat} from '../shared/cup-ab-format';
 import DrawExport from './DrawExport';
 import {groupDraw} from './draw-export-model';
 import { useEffect, useState } from "react";
@@ -78,6 +79,10 @@ export default function AdminCupAb({
     [error, setError] = useState(""),
     [message, setMessage] = useState(""),
     [reason, setReason] = useState("");
+  const format=cupAbFormat(competition.code,context?.assignments.length||context?.eligible.length||0);
+  const visiblePhases=phases.filter(p=>!format.directQuarterfinals||p.key!=='r16');
+  const knockoutStages=competition.stages.filter(s=>s.stageType==='KNOCKOUT').sort((a,b)=>a.sequence-b.sequence);
+  const skippedStageId=format.directQuarterfinals&&knockoutStages.length===4?knockoutStages[0].id:null;
   const dates = competition.roundLinks
     .filter((l) => l.stageId === stage.id && l.purpose === "NORMAL")
     .sort((a, b) => a.sequence - b.sequence);
@@ -202,14 +207,14 @@ export default function AdminCupAb({
       {(context?.assignments.length??0)>0&&<DrawExport build={()=>{
        const assignments=context!.assignments;
        const codes=[...new Set(assignments.map(a=>a.code))];
-       return groupDraw(competition,seasonNumber,codes.map(code=>({name:assignments.find(a=>a.code===code)!.name,userIds:assignments.filter(a=>a.code===code).map(a=>a.userId)})),eligible,false,['1.º de cada grupo: acceso a Cuartos.','2.º y 3.º: acceso a Octavos.','Desde el 4.º puesto: eliminación.']);
+       return groupDraw(competition,seasonNumber,codes.map(code=>({name:assignments.find(a=>a.code===code)!.name,userIds:assignments.filter(a=>a.code===code).map(a=>a.userId)})),eligible,false,format.criteria);
       }}/>}
 
       <h2>
         {competition.displayName} · División {competition.divisionCode}
       </h2>
       <nav className="cup-tabs" aria-label="Fases de Copa">
-        {phases.map((p) => (
+        {visiblePhases.map((p) => (
           <button
             key={p.key}
             className={`button button--${tab === p.key ? "primary" : "ghost"}`}
@@ -238,7 +243,7 @@ export default function AdminCupAb({
             {competition.divisionCode}. Los puntos de estas Fechas se usan en
             esta Copa; vincularlas aquí no las incorpora a Liga.
           </p>
-          {[0, 1].map((i) => (
+          {Array.from({length:format.groupRounds},(_,i)=>i).map((i) => (
             <p key={i}>
               <strong>Fecha de grupos {i + 1}:</strong>{" "}
               {dates[i]
@@ -247,22 +252,22 @@ export default function AdminCupAb({
             </p>
           ))}
           <p>
-            Configurá los grupos antes de vincular las dos Fechas con los
+            Configurá los grupos antes de vincular las {format.groupRounds} Fechas con los
             controles generales de abajo.
           </p>
           {tab === "summary" && (
             <>
               <ul>
-                {competition.stages.map((s) => (
+                {competition.stages.filter(s=>s.id!==skippedStageId).map((s) => (
                   <li key={s.id}>
                     {s.name}: {statusLabel(s.status)}
                   </li>
                 ))}
               </ul>
               <p>
-                Octavos: segundos contra terceros. Cuartos: primeros de grupo y
+                {format.directQuarterfinals?'Cuatro grupos de tres. Tres Fechas. Los dos primeros de cada grupo pasan a Cuartos. Semifinal y Final, sin tercer puesto.':<>Octavos: segundos contra terceros. Cuartos: primeros de grupo y
                 ganadores confirmados de octavos. Semifinal y final: ganadores
-                confirmados. Sin tercer puesto.
+                confirmados. Sin tercer puesto.</>}
               </p>
             </>
           )}
@@ -353,8 +358,8 @@ export default function AdminCupAb({
             Cantidad de grupos
             <input
               type="number"
-              min="2"
-              max={Math.min(26, eligible.length)}
+              min={format.directQuarterfinals?4:2}
+              max={format.directQuarterfinals?4:Math.min(26, eligible.length)}
               value={count}
               disabled={groupLocked}
               onChange={(e) => {
@@ -498,11 +503,11 @@ export default function AdminCupAb({
             <button className="button button--secondary" disabled={groupLocked||!eligible.length} onClick={()=>void previewAutomatic()}>{drawPreview?'Repetir sorteo · Nueva vista previa':'Generar vista previa del sorteo'}</button>
             {drawPreview&&<section className="asc-draw-preview" aria-label="Vista previa del sorteo de Copa A/B">
               <h4>Propuesta sin guardar · Semilla {drawPreview.randomSeed}</h4><p>Revisá los grupos. Confirmar guardará exactamente esta propuesta.</p>
-              <DrawExport build={()=>groupDraw(competition,seasonNumber,drawPreview.groups,eligible,true,['1.º de cada grupo: acceso a Cuartos.','2.º y 3.º: acceso a Octavos.','Desde el 4.º puesto: eliminación.'])}/>
+              <DrawExport build={()=>groupDraw(competition,seasonNumber,drawPreview.groups,eligible,true,format.criteria)}/>
               <div className="cup-grid">{drawPreview.groups.map(g=><article key={g.code}><strong>{g.name}</strong><ol>{g.participants.map(p=><li key={p.userId}>{p.fullName} <small>· Bombo {p.pot}</small></li>)}</ol></article>)}</div>
             </section>}
           </>}
-{mode==='MANUAL'&&groups.length>0&&groups.every(g=>g.userIds.every(Boolean))&&<DrawExport build={()=>groupDraw(competition,seasonNumber,groups,eligible,true)}/>}
+{mode==='MANUAL'&&groups.length>0&&groups.every(g=>g.userIds.every(Boolean))&&<DrawExport build={()=>groupDraw(competition,seasonNumber,groups,eligible,true,format.criteria)}/>}
                     <button
             className="button button--primary"
             disabled={groupLocked||!eligible.length||(mode==='MANUAL'&&selected.some(v=>!v))||(mode==='AUTOMATIC'&&!drawPreview)}
@@ -576,6 +581,7 @@ export default function AdminCupAb({
         <CupAbKnockout seasonNumber={seasonNumber}
           key={`${competition.id}-${tab}-${competition.stages.map((s) => s.id).join("-")}`}
           competition={competition}
+          directQuarterfinals={format.directQuarterfinals}
           groupStage={stage}
           rounds={rounds}
           action={tab as "r16" | "quarterfinals" | "semifinals" | "final"}

@@ -1,3 +1,4 @@
+import {cupAbStageFormat} from './cup-ab-format';
 import type { Env } from './index';
 import { refreshStage } from './competition-knockout';
 
@@ -129,7 +130,8 @@ async function requireFinishedGroupDates(env: Env, groupStageId: number) {
      WHERE crl.stage_id=? AND crl.purpose='NORMAL'`,
   ).bind(groupStageId).all<{ status: string }>();
   const dates = rows.results ?? [];
-  if (dates.length !== 2) return 'La fase de grupos necesita exactamente dos Fechas vinculadas';
+  const format=await cupAbStageFormat(env.DB,groupStageId);
+  if (dates.length !== format.groupRounds) return `La fase de grupos necesita exactamente ${format.groupRounds} Fechas vinculadas`;
   if (dates.some((row) => row.status !== 'finished')) return 'La fase de grupos todavía tiene Fechas sin cerrar';
   return null;
 }
@@ -250,6 +252,22 @@ async function drawRoundOf16(env: Env, user: SessionUser, groupStage: StageRow, 
   return json({ok:true,action:'DRAW_R16',configurationMode:options.mode ?? 'AUTOMATIC',randomSeed,pairs});
 }
 
+async function drawDirectQuarterfinals(env:Env,user:SessionUser,source:StageRow,groupStageId:number,targetStageId:number,roundLinkId:number,options:Options){
+ if(source.id!==groupStageId||source.stage_type!=='ACCUMULATIVE_GROUPS')return error('Cuartos debe partir de los grupos de esta Copa.',409);
+ const validation=await validateTarget(env,source,targetStageId,roundLinkId,options);
+ if(!validation.ok)return error(validation.error,409);
+ const dateError=await requireFinishedGroupDates(env,groupStageId);if(dateError)return error(dateError,409);
+ const ranking=await rankedGroups(env,groupStageId);
+ const groupIds=[...new Set(ranking.map(e=>e.groupId))];
+ if(groupIds.length!==4||groupIds.some(id=>ranking.filter(e=>e.groupId===id).length!==3))return error('Se requieren cuatro grupos de tres participantes.',409);
+ const pool=ranking.filter(e=>e.position<=2);
+ if(options.preview)return json({pool});
+ const randomSeed=options.mode==='MANUAL'?undefined:freshSeed();
+ const pairs=options.mode==='MANUAL'?manualPairs(options.pairs,pool):pairSequential(shuffled(pool,mulberry32(randomSeed!)));
+ await persistPairs(env,user,targetStageId,roundLinkId,pairs,'QF','competition.cup_ab_qf_drawn',{sourceGroupStageId:groupStageId,randomSeed,format:'COPA_B_12'},options);
+ return json({ok:true,pairs,randomSeed});
+}
+
 async function drawQuarterfinals(env: Env, user: SessionUser, r16Stage: StageRow, groupStageId: number, targetStageId: number, roundLinkId: number, options: Options = {}) {
   if (r16Stage.stage_type !== 'KNOCKOUT') return error('La etapa de octavos no es eliminatoria', 409);
   const groupStage = await stageInfo(env, groupStageId);
@@ -330,12 +348,17 @@ export async function handleCompetitionCupAbProgression(request: Request, env: E
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa destino inválida');
   if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha destino inválida');
 
+  const configuredGroup=await env.DB.prepare("SELECT id FROM competition_stages WHERE competition_id=? AND stage_type='ACCUMULATIVE_GROUPS' ORDER BY sequence,id LIMIT 1").bind(sourceStage.competition_id).first<{id:number}>();
+  const format=await cupAbStageFormat(env.DB,configuredGroup?.id??sourceStageId);
+  if(format.directQuarterfinals&&action==='r16')return error('Copa B con 12 participantes avanza directamente a Cuartos.',409);
+
   // Phase identity follows the configured stage order, never arbitrary database IDs.
   const stages = await env.DB.prepare(`SELECT id FROM competition_stages WHERE competition_id=? AND stage_type='KNOCKOUT' ORDER BY sequence,id`)
     .bind(sourceStage.competition_id).all<{id:number}>();
-  const index = ['r16','quarterfinals','semifinals','final'].indexOf(action);
-  const ordered = stages.results ?? [];
-  if (ordered[index]?.id !== targetStageId || (index > 0 && ordered[index-1]?.id !== sourceStageId)) {
+  const index = (format.directQuarterfinals?['quarterfinals','semifinals','final']:['r16','quarterfinals','semifinals','final']).indexOf(action);
+  const allStages=stages.results??[];
+  const ordered = format.directQuarterfinals&&allStages.length===4?allStages.slice(1):allStages;
+  if (ordered[index]?.id !== targetStageId || (index > 0 && !(format.directQuarterfinals&&action==='quarterfinals') && ordered[index-1]?.id !== sourceStageId)) {
     return error('Las etapas deben seguir el orden Octavos, Cuartos, Semifinal y Final',409);
   }
 
@@ -344,6 +367,7 @@ export async function handleCompetitionCupAbProgression(request: Request, env: E
   if (action === 'quarterfinals') {
     const groupStageId = Number(body?.groupStageId);
     if (!Number.isInteger(groupStageId) || groupStageId <= 0) return error('Falta indicar la fase de grupos de origen');
+    if(format.directQuarterfinals)return await drawDirectQuarterfinals(env,user,sourceStage,groupStageId,targetStageId,roundLinkId,options);
     return await drawQuarterfinals(env, user, sourceStage, groupStageId, targetStageId, roundLinkId, options);
   }
   if (action === 'semifinals') return await drawWinnersStage(env, user, sourceStage, targetStageId, roundLinkId, 'DRAW_SEMIS', options);

@@ -20,6 +20,7 @@ export default function CupAbKnockout({
   competition,
   seasonNumber,
   groupStage,
+  directQuarterfinals=false,
   rounds,
   action,
   label,
@@ -28,15 +29,17 @@ export default function CupAbKnockout({
   competition: CupCompetition;
   seasonNumber:number;
   groupStage: CupStage;
+  directQuarterfinals?:boolean;
   rounds: CupRound[];
   action: "r16" | "quarterfinals" | "semifinals" | "final";
   label: string;
   disabled: boolean;
 }) {
-  const knockouts = competition.stages
+  const allKnockouts = competition.stages
     .filter((s) => s.stageType === "KNOCKOUT")
     .sort((a, b) => a.sequence - b.sequence);
-  const index = ["r16", "quarterfinals", "semifinals", "final"].indexOf(action);
+  const knockouts=directQuarterfinals&&allKnockouts.length===4?allKnockouts.slice(1):allKnockouts;
+  const index = (directQuarterfinals?["quarterfinals", "semifinals", "final"]:["r16", "quarterfinals", "semifinals", "final"]).indexOf(action);
   const [target, setTarget] = useState(String(knockouts[index]?.id ?? ""));
   const [source, setSource] = useState(
     String(index === 0 ? groupStage.id : (knockouts[index - 1]?.id ?? "")),

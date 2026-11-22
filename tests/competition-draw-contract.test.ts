@@ -16,8 +16,8 @@ describe('Copa A/B draw contract', () => {
     expect(drawWorker).toContain('groups[0].userIds.push(defendingChampionUserId)');
   });
 
-  it('uses four groups automatically only for the standard field of sixteen', () => {
-    expect(drawWorker).toContain('if (participants.length === 16) groupCount = 4');
+  it('uses four groups for sixteen participants and Copa B with twelve', () => {
+    expect(drawWorker).toContain("participants.length === 16 || (stage.competition_code==='COPA_B'&&participants.length===12)");
     expect(drawWorker).toContain('Para una cantidad distinta de 16 participantes indicá cuántos grupos querés usar');
   });
 

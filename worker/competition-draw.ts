@@ -205,8 +205,12 @@ async function drawGroups(request: Request, env: Env, user: SessionUser, stageId
 
   let groupCount = Number(body.groupCount);
   if (!Number.isInteger(groupCount) || groupCount <= 0) {
-    if (participants.length === 16) groupCount = 4;
+    if (participants.length === 16 || (stage.competition_code==='COPA_B'&&participants.length===12)) groupCount = 4;
     else return error('Para una cantidad distinta de 16 participantes indicá cuántos grupos querés usar');
+  }
+  if(stage.competition_code==='COPA_B'&&participants.length===12){
+    if(Number.isInteger(groupCount)&&groupCount!==4)return error('Copa B con 12 participantes requiere cuatro grupos de tres.');
+    groupCount=4;
   }
   if (groupCount < 2 || groupCount > participants.length) return error('Cantidad de grupos inválida');
 
