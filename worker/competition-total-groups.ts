@@ -270,7 +270,7 @@ async function generateFixtures(env: Env, user: SessionUser, stageId: number) {
 
     for (let miniDay = 1; miniDay <= 6; miniDay += 1) {
       const pairs = schedule[miniDay - 1] ?? [];
-      const segment = segments[miniDay - 1];
+      const segment = segments.find(s=>Number(s.mini_day)===miniDay);
       const statements = pairs.map((pair, pairIndex) => env.DB.prepare(
         `INSERT INTO competition_encounters
            (stage_id,group_id,round_link_id,segment_id,slot_key,entry_a_id,entry_b_id,status)

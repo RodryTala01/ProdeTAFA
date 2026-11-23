@@ -80,6 +80,8 @@ export default function AdminRounds() {
   const [hasSearched, setHasSearched] = useState(false);
   const detailVersion = useRef(0);
   const searchStart = useRef<HTMLInputElement>(null);
+  const searchVersion=useRef(0);
+  const [pendingSearch,setPendingSearch]=useState<{from:string;to:string;attempt:number;version:number}|null>(null);
   const today = localDateInputValue();
   const [rounds, setRounds] = useState<RoundSummary[]>([]);
   const [selected, setSelected] = useState<RoundDetail | null>(null);
@@ -181,26 +183,33 @@ export default function AdminRounds() {
     } finally { setClosing(false); }
   }
 
-  async function searchMatches(event: FormEvent) {
-    event.preventDefault();
+  async function runSearch(from:string,to:string,version:number,attempt=0) {
     setSearching(true); setError(''); setSuccess('');
     try {
-      const query = new URLSearchParams({ from: searchFrom, to: searchTo });
-      const data = await api<{ fixtures: Fixture[]; requestCount: number }>(`/api/admin/fixtures?${query.toString()}`);
-      setFixtures([...data.fixtures].sort((a,b) => Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt)));
+      const query = new URLSearchParams({from,to});
+      const data=await api<{fixtures:Fixture[];requestCount:number;pending?:boolean;pendingDates?:string[]}>(`/api/admin/fixtures?${query}`);
+      if(searchVersion.current!==version)return;
+      setFixtures([...data.fixtures].sort((a,b)=>Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt)));
       setHasSearched(true);
-      setSuccess(data.fixtures.length
-        ? `${data.fixtures.length} partidos encontrados. Se usaron ${data.requestCount} consultas al proveedor.`
-        : `No se encontraron partidos en ese rango. Se usaron ${data.requestCount} consultas.`);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudieron buscar partidos');
-    } finally { setSearching(false); }
+      setPendingSearch(data.pending&&attempt<20?{from,to,version,attempt:attempt+1}:null);
+      setSuccess(data.pending
+        ?`${data.fixtures.length} partidos disponibles. Faltan cargar ${data.pendingDates?.length??'algunos'} días de la semana elegida. ${attempt<20?'Esperando la adquisición de Promiedos; se actualiza automáticamente.':'La adquisición sigue pendiente. Volvé a buscar para consultar su estado.'}`
+        :data.fixtures.length?`${data.fixtures.length} partidos encontrados.`:'No se encontraron partidos en ese rango.');
+    }catch(caught){if(searchVersion.current===version){setPendingSearch(null);setError(caught instanceof Error?caught.message:'No se pudieron buscar partidos');}}
+    finally{if(searchVersion.current===version)setSearching(false);}
   }
-
-  function changeSearchFrom(value: string) {
-    setSearchFrom(value);
-    if (value) setSearchTo(addDaysToInput(value, 6));
+  async function searchMatches(event:FormEvent){event.preventDefault();setPendingSearch(null);await runSearch(searchFrom,searchTo,++searchVersion.current);}
+  useEffect(()=>{
+    if(!pendingSearch)return;
+    const timer=window.setTimeout(()=>void runSearch(pendingSearch.from,pendingSearch.to,pendingSearch.version,pendingSearch.attempt),30_000);
+    return()=>window.clearTimeout(timer);
+  },[pendingSearch]);
+  useEffect(()=>()=>{searchVersion.current++;},[]);
+  function changeSearchFrom(value:string){
+    searchVersion.current++;setPendingSearch(null);setSearching(false);setFixtures([]);setHasSearched(false);setSuccess('');setSearchFrom(value);
+    if(value)setSearchTo(addDaysToInput(value,6));
   }
+  function changeSearchTo(value:string){searchVersion.current++;setPendingSearch(null);setSearching(false);setFixtures([]);setHasSearched(false);setSuccess('');setSearchTo(value);}
 
   async function addFixture(fixture: Fixture, matchType: 'NORMAL' | 'PENALTIES_ONLY') {
     if (!selected) return;
@@ -311,9 +320,11 @@ export default function AdminRounds() {
               <section className="card fixture-search-card">
                 <p>Datos de partidos: <a href="https://www.promiedos.com.ar/" target="_blank" rel="noreferrer">Promiedos</a></p>
                 <div className="section-heading"><div><h2>Buscar partidos reales</h2><p>Elegí hasta 7 días. Los próximos partidos aparecen primero.</p></div></div>
+                <div className="topbar-actions"><button type="button" className="button button--secondary" onClick={()=>changeSearchFrom(addDaysToInput(searchFrom||today,-7))}>Semana anterior</button><button type="button" className="button button--secondary" onClick={()=>changeSearchFrom(today)}>Esta semana</button><button type="button" className="button button--secondary" onClick={()=>changeSearchFrom(addDaysToInput(searchFrom||today,7))}>Semana siguiente</button></div>
+                {pendingSearch&&<p role="status">Cargando la semana seleccionada desde Promiedos. Podés usar los partidos ya disponibles mientras llegan los demás.</p>}
                 <form className="fixture-search-form" onSubmit={searchMatches}>
                   <label><span>Desde</span><input ref={searchStart} type="date" value={searchFrom} onChange={(event) => changeSearchFrom(event.target.value)} required /></label>
-                  <label><span>Hasta</span><input type="date" value={searchTo} onChange={(event) => setSearchTo(event.target.value)} required /></label>
+                  <label><span>Hasta</span><input type="date" value={searchTo} onChange={(event) => changeSearchTo(event.target.value)} required /></label>
                   <button className="button button--primary" disabled={searching}>{searching ? 'Buscando…' : 'Buscar semana'}</button>
                 </form>
                 {hasSearched && !fixtures.length && <p>No hay partidos en este rango. Probá otras fechas.</p>}

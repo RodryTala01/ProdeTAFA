@@ -298,3 +298,18 @@ it('explicit historical refresh can repair a finalized kickoff without re-enabli
  await ingest([entry()]);await syncRoundResults(1,env());
  expect(await (await handlePromiedosCache(request(),ingestionEnv()))!.json()).toMatchObject({games:[]});
 });
+
+it('permite pedir la semana siguiente y deja en cola todos sus días sin consultar Promiedos desde el Worker',async()=>{
+ vi.stubGlobal('fetch',vi.fn(()=>{throw Error('No external fetch');}));
+ const response=await handleAdminRounds(req('fixtures?from=2099-01-05&to=2099-01-11'),env());
+ expect(response!.status).toBe(202);const data=await response!.json() as any;
+ expect(data.pending).toBe(true);expect(data.pendingDates).toHaveLength(7);expect(data.fixtures).toEqual([]);
+ expect(db.prepare("SELECT cache_key FROM promiedos_cache WHERE requested_at IS NOT NULL ORDER BY cache_key").all().map((r:any)=>r.cache_key)).toEqual(data.pendingDates);
+ expect(fetch).not.toHaveBeenCalled();
+});
+it('conserva los partidos de los días disponibles mientras se carga el resto de la semana',async()=>{
+ cache('day','2026-11-30',[game({start_time:'30-11-2026 15:45'})]);
+ const response=await handleAdminRounds(req('fixtures?from=2026-11-30&to=2026-12-06'),env());
+ expect(response!.status).toBe(202);const data=await response!.json() as any;
+ expect(data.pendingDates).toHaveLength(6);expect(data.fixtures).toHaveLength(1);
+});

@@ -122,22 +122,25 @@ async function configureSegments(env: Env, user: SessionUser, stageId: number) {
      ORDER BY crl.sequence`,
   ).bind(stageId).all<{ id: number; round_id: number; sequence: number; name: string }>();
   const links = linksResult.results ?? [];
-  if (links.length !== 2) return error('La fase de grupos de Copa Total necesita exactamente 2 Fechas vinculadas', 409);
-
-  const existingUse = await env.DB.prepare(
-    `SELECT COUNT(*) AS total
-     FROM competition_encounters ce
-     JOIN competition_round_segments crs ON crs.id=ce.segment_id
-     JOIN competition_round_links crl ON crl.id=crs.round_link_id
-     WHERE crl.stage_id=?`,
-  ).bind(stageId).first<{ total: number }>();
-  if (Number(existingUse?.total ?? 0) > 0) return error('No se pueden regenerar segmentos porque ya existen enfrentamientos asociados', 409);
-
-  for(const link of links){const blocked=await schedulingRoundError(env.DB,link.round_id);if(blocked)return error(blocked,409);}
+  if (links.length < 1 || links.length > 2) return error('Vinculá una o dos Fechas para programar progresivamente Copa Total', 409);
+  if(links.some(link=>![1,2].includes(Number(link.sequence))))return error('Revisá el orden de las dos Fechas de Copa Total',409);
+  const pending=[];
+  for(const link of links){
+    const existing=await env.DB.prepare(`SELECT COUNT(DISTINCT seg.id) AS segments,COUNT(sm.match_id) AS matches
+      FROM competition_round_segments seg LEFT JOIN competition_round_segment_matches sm ON sm.segment_id=seg.id WHERE seg.round_link_id=?`)
+      .bind(link.id).first<{segments:number;matches:number}>();
+    if(existing?.segments){
+      if(existing.segments!==3||existing.matches!==12)return error('La Fecha tiene segmentos incompletos y requiere revisión; no se regeneraron',409);
+      continue; // Frozen mini-dates remain intact, even after the first Fecha finishes.
+    }
+    const blocked=await schedulingRoundError(env.DB,link.round_id);if(blocked)return error(blocked,409);
+    pending.push(link);
+  }
+  if(!pending.length)return error('Las mini-fechas ya están asignadas. No se regeneraron segmentos existentes.',409);
   const planned=await env.DB.prepare('SELECT id,slot_key,round_link_id,score_a,score_b,winner_entry_id FROM competition_encounters WHERE stage_id=? AND segment_id IS NULL').bind(stageId).all<{id:number;slot_key:string;round_link_id:number|null;score_a:number|null;score_b:number|null;winner_entry_id:number|null}>();
   if((planned.results??[]).some(e=>e.round_link_id!==null||e.score_a!==null||e.score_b!==null||e.winner_entry_id!==null||!/-M([1-6])-\d+$/.test(e.slot_key)))return error('Hay cruces sin segmento que requieren revisión antes de programarlos.',409);
   const matchIdsByLink = new Map<number, number[]>();
-  for (const link of links) {
+  for (const link of pending) {
     const matches = await env.DB.prepare(
       `SELECT id FROM matches WHERE round_id=? ORDER BY kickoff_at,id`,
     ).bind(link.round_id).all<{ id: number }>();
@@ -146,12 +149,12 @@ async function configureSegments(env: Env, user: SessionUser, stageId: number) {
     matchIdsByLink.set(Number(link.id), ids);
   }
 
-  const statements:D1PreparedStatement[]=links.map(link=>env.DB.prepare('DELETE FROM competition_round_segments WHERE round_link_id=?').bind(link.id));
+  const statements:D1PreparedStatement[]=[];
   const frozen:unknown[]=[];
-  links.forEach((link,linkIndex)=>{
+  pending.forEach(link=>{
     const ids=matchIdsByLink.get(Number(link.id))!;
     for(let local=1;local<=3;local++){
-      const mini=linkIndex*3+local;
+      const mini=(Number(link.sequence)-1)*3+local;
       statements.push(env.DB.prepare('INSERT INTO competition_round_segments(round_link_id,code,name,sequence) VALUES (?,?,?,?)').bind(link.id,`MINI_${mini}`,`Mini fecha ${mini}`,local));
       const matchIds=ids.slice((local-1)*4,local*4);
       matchIds.forEach((id,i)=>statements.push(env.DB.prepare(`INSERT INTO competition_round_segment_matches(segment_id,match_id,sequence)

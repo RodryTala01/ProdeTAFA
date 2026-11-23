@@ -22,7 +22,7 @@ describe('Copa Total group contract', () => {
 
   it('maps six mini dates to the frozen six segments', () => {
     expect(worker).toContain('miniDay <= 6');
-    expect(worker).toContain('segments[miniDay - 1]');
+    expect(worker).toContain('segments.find(s=>Number(s.mini_day)===miniDay)');
   });
 
   it('scores each mini fixture only from the segment official predictions', () => {

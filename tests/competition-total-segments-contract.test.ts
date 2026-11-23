@@ -6,8 +6,8 @@ const worker = readFileSync(resolve('worker/competition-total-segments.ts'), 'ut
 const app = readFileSync(resolve('worker/app.ts'), 'utf8');
 
 describe('Copa Total segments contract', () => {
-  it('requires exactly two group dates', () => {
-    expect(worker).toContain('La fase de grupos de Copa Total necesita exactamente 2 Fechas vinculadas');
+  it('accepts the first group date before the second is linked', () => {
+    expect(worker).toContain('Vinculá una o dos Fechas para programar progresivamente Copa Total');
   });
 
   it('requires twelve real matches before splitting a date', () => {
@@ -30,12 +30,12 @@ describe('Copa Total segments contract', () => {
   });
 
   it('creates six chronological mini dates across both Cup dates', () => {
-    expect(worker).toContain('linkIndex*3+local');
+    expect(worker).toContain('(Number(link.sequence)-1)*3+local');
     expect(worker).toContain('`MINI_${mini}`');
   });
 
-  it('does not regenerate segments after encounters use them', () => {
-    expect(worker).toContain('No se pueden regenerar segmentos porque ya existen enfrentamientos asociados');
+  it('preserves frozen segments when adding the second date', () => {
+    expect(worker).toContain('continue; // Frozen mini-dates remain intact');expect(worker).not.toContain('DELETE FROM competition_round_segments');
   });
 
   it('routes Total segments before the generic engine', () => {

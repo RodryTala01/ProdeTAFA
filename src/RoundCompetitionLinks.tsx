@@ -1,7 +1,7 @@
 import {useEffect,useState} from 'react';
 import {cupApi} from './cup-ab-api';
 type Stage={code:string;segmentCount:number;id:number;competitionId:number;name:string;type:string;competitionName:string;seasonNumber:number};
-type Link={id:number;competitionId:number;stageId:number;purpose:string;competitionName:string;stageName:string;sequence:number};
+type Link={segmentCount?:number;id:number;competitionId:number;stageId:number;purpose:string;competitionName:string;stageName:string;sequence:number};
 type Encounter={id:number;stageId:number;slot:string;roundLinkId:number|null;roundId:number|null;nameA:string|null;nameB:string|null};
 type Data={stages:Stage[];links:Link[];encounters:Encounter[];lockedReason:string|null};
 type Round={id:number;name:string;status:string};
@@ -36,7 +36,7 @@ export default function RoundCompetitionLinks({roundId,rounds}:{roundId:number;r
    })}>Vincular fase</button>
    {!data.stages.length&&<p>No hay fases disponibles. Crealas desde Admin → Competiciones; no necesitan una Fecha.</p>}
    {!data.links.length&&<p>Esta Fecha todavía no tiene competencias vinculadas.</p>}
-   {data.links.map(link=><LinkEditor key={link.id} link={link} encounters={data.encounters.filter(e=>e.stageId===link.stageId)} totalGroups={data.stages.some(s=>s.id===link.stageId&&s.code==='COPA_TOTAL'&&s.type==='ROUND_ROBIN_GROUPS')} segmentsReady={data.stages.some(s=>s.id===link.stageId&&s.segmentCount===6)} knockout={data.stages.some(s=>s.id===link.stageId&&s.type==='KNOCKOUT')} rounds={rounds.filter(r=>r.id!==roundId&&r.status==='draft')} locked={locked||link.purpose!=='NORMAL'} run={run}/>)}
+   {data.links.map(link=><LinkEditor key={link.id} link={link} encounters={data.encounters.filter(e=>e.stageId===link.stageId)} totalGroups={data.stages.some(s=>s.id===link.stageId&&s.code==='COPA_TOTAL'&&s.type==='ROUND_ROBIN_GROUPS')} segmentsReady={link.segmentCount===3} knockout={data.stages.some(s=>s.id===link.stageId&&s.type==='KNOCKOUT')} rounds={rounds.filter(r=>r.id!==roundId&&r.status==='draft')} locked={locked||link.purpose!=='NORMAL'} run={run}/>)}
   </>}
  </section>;
 }
@@ -48,7 +48,7 @@ function LinkEditor({link,encounters,totalGroups,segmentsReady,knockout,rounds,l
  return <section className="form-stack" style={{borderTop:'1px solid var(--border)',paddingTop:'var(--space-3)'}}>
   <h3>{link.competitionName} · {link.stageName}</h3>
   <small>Fecha de fase {link.sequence}{link.purpose!=='NORMAL'?' · Desempate':''}</small>
-  {totalGroups&&<div><p>Copa Total usa dos Fechas de 12 partidos. Al estar ambas listas, asigná sus partidos a las seis mini-fechas del fixture.</p><button type="button" className="button button--secondary" disabled={locked||segmentsReady} onClick={()=>void run(()=>cupApi(`${base}/stages/${link.stageId}/total/segments`,'POST',{}))}>{segmentsReady?'Partidos asignados a las mini-fechas':'Asignar partidos a las mini-fechas'}</button></div>}
+  {totalGroups&&<div><p>La primera Fecha habilita F1–F3. Podés jugarla antes de vincular la segunda, que habilita F4–F6. Cada mini-fecha usa cuatro partidos.</p><button type="button" className="button button--secondary" disabled={locked||segmentsReady} onClick={()=>void run(()=>cupApi(`${base}/stages/${link.stageId}/total/segments`,'POST',{}))}>{segmentsReady?'Partidos asignados a las mini-fechas':'Asignar partidos a las mini-fechas'}</button></div>}
   {knockout&&<>
    {!encounters.length&&<p>La fase está vinculada. Los cruces se pueden configurar sin Fecha desde Competiciones y asignar aquí después.</p>}
    {encounters.map(e=><label className="checkbox-row" key={e.id}>

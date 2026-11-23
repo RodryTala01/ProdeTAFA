@@ -1,5 +1,5 @@
 import {promiedosFixture, PromiedosError} from './promiedos';
-import {searchCachedFixtures, getCachedFixture} from './promiedos-cache';
+import {searchCachedFixtures, getCachedFixture, PromiedosCachePending} from './promiedos-cache';
 import {FootballError} from './football-api';
 type Env = {
   DB: D1Database;
@@ -271,8 +271,9 @@ async function searchFixtures(url: URL, env: Env) {
     const counter = {count: 0};
     const byId = new Map<string, ReturnType<typeof promiedosFixture>>();
     const cached = await Promise.allSettled(dates.map(date => searchCachedFixtures(date,env.DB)));
-    const missing = cached.find(r => r.status === 'rejected');
-    if (missing?.status === 'rejected') throw missing.reason;
+    const failed = cached.find(r => r.status === 'rejected'&&!(r.reason instanceof PromiedosCachePending));
+    if (failed?.status === 'rejected') throw failed.reason;
+    const pendingDates=dates.filter((_,i)=>cached[i].status==='rejected');
     for (const result of cached) if (result.status === 'fulfilled') for (const item of result.value) byId.set(item.providerFixtureId,item);
     const fixtures = [...byId.values()].sort((a,b) => a.kickoffAt.localeCompare(b.kickoffAt));
 
@@ -282,7 +283,9 @@ async function searchFixtures(url: URL, env: Env) {
       rangeDays,
       requestCount: counter.count,
       fixtures,
-    });
+      pending:pendingDates.length>0,pendingDates,
+      message:pendingDates.length?'Se solicitó a GitHub Actions la carga de los días que faltan. La búsqueda se actualizará automáticamente.':null,
+    },{status:pendingDates.length?202:200});
   } catch (caught) {
     const message = caught instanceof PromiedosError || caught instanceof FootballError ? caught.message : 'No se pudo completar la búsqueda de partidos';
     console.error('Fixture search failed', message);

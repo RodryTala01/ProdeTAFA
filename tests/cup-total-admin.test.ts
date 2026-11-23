@@ -683,3 +683,23 @@ it('genera el fixture de Total sin calendario y lo programa después conservando
  expect(after.map(e=>[e.id,e.entry_a_id,e.entry_b_id])).toEqual(before.map(e=>[e.id,e.entry_a_id,e.entry_b_id]));
  expect(after.every(e=>e.round_link_id!==null&&e.segment_name==='Mini fecha '+e.slot_key.match(/-M([1-6])-\d+$/)[1])).toBe(true);
 });
+
+it('programa F1–F3 y permite jugarlas antes de agregar F4–F6 sin tocar lo anterior',async()=>{
+ await setup([3,3,3,3]);dates();db.exec('DELETE FROM competition_round_links WHERE id=2');
+ await fixture();
+ const first=db.prepare('SELECT id,code FROM competition_round_segments WHERE round_link_id=1 ORDER BY sequence').all();
+ expect(first.map((s:any)=>s.code)).toEqual(['MINI_1','MINI_2','MINI_3']);
+ expect((db.prepare('SELECT COUNT(*) n FROM competition_encounters WHERE segment_id IS NULL').get() as any).n).toBeGreaterThan(0);
+ db.exec("UPDATE rounds SET status='finished' WHERE id=1; UPDATE matches SET result_finalized_at='2099-01-01' WHERE round_id=1");
+ const table=await call('competition-engine/stages/1/total/groups');
+ const before=(await table.json() as any).groups;
+ expect(before[0].fixtures.filter((f:any)=>f.complete)).toHaveLength(3);
+ expect(before[0].standings.every((r:any)=>r.played===2)).toBe(true);
+ db.exec('INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence) VALUES(2,1,1,2,2)');
+ expect((await call(`${base}/stages/1/total/segments`,'POST',{})).status).toBe(200);
+ expect(db.prepare('SELECT id,code FROM competition_round_segments WHERE round_link_id=1 ORDER BY sequence').all()).toEqual(first);
+ expect(db.prepare('SELECT code FROM competition_round_segments WHERE round_link_id=2 ORDER BY sequence').all().map((s:any)=>s.code)).toEqual(['MINI_4','MINI_5','MINI_6']);
+ expect((db.prepare('SELECT COUNT(*) n FROM competition_encounters WHERE segment_id IS NULL').get() as any).n).toBe(0);
+ const after=(await(await call('competition-engine/stages/1/total/groups')).json() as any).groups;
+ expect(after[0].standings).toEqual(before[0].standings);
+});

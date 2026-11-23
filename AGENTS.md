@@ -234,6 +234,7 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Elegibles: participantes activos pertenecientes a las divisiones de la temporada, tanto A como B.
 - Grupos manuales como primera opción, entre 3 y 5 integrantes, todos exactamente una vez. Campeón anterior elegible de Copa Total en A1 también en el armado manual, usando resultados oficiales o archivos activos con identidad confirmada. No imponer otras restricciones adicionales al armado manual.
 - Sorteo opcional por bombos IFFHS de la temporada previa; campeón Total vigente elegible en A1. Guardar semilla y resultado auditado.
+- Vinculación progresiva: la primera Fecha habilita F1–F3 y se puede jugar/puntuar sin la segunda. Al vincular la segunda se agregan F4–F6 sin regenerar ni modificar los segmentos anteriores.
 - Exactamente dos Fechas de 12 partidos; seis mini-fechas de cuatro match_id persistidos. Fixture doble para grupos de 3/4, simple para 5 con sexta mini-fecha libre.
 - Tablas deportivas PTS/DG/GF/PG: igualdad completa conserva posición compartida. No decidir clasificados por nombre.
 - Clasificación configurable con vista previa, comodines y resolución manual de cortes empatados; selección excepcional completa con motivo y snapshot auditado.
