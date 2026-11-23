@@ -25,10 +25,10 @@ export async function storedKnockoutDraw(c:CupCompetition,seasonNumber:number,st
   const codes=new Set(result.bracket.map(node=>node.code));
   const member=(source:Source):DrawPerson[]=>{
    const members=entryMembers(season,source.entryId,null);
-   return members.length?members.map(m=>({userId:m.userId,name:m.fullName})):[{name:source.displayName??(codes.has(source.source)?'Ganador '+source.source:source.source.replace(/_/g,' '))}];
+   return members.length?members.map(m=>({userId:m.userId,name:m.fullName})):[{placeholder:source.entryId===null,name:source.displayName??(codes.has(source.source)?'Ganador '+source.source:source.source.replace(/_/g,' '))}];
   };
   return {competitionCode:c.code,competitionName:c.displayName,season:seasonNumber,phase:'Llave fija',state:'Confirmado',kind:'bracket',
-   blocks:result.bracket.map(node=>({id:node.code,title:node.code+' · '+node.label,sides:[member(node.sourceA),member(node.sourceB)],sources:[node.sourceA.source,node.sourceB.source].filter(source=>codes.has(source))}))};
+   blocks:result.bracket.map(node=>({id:node.code,title:node.code,branch:node.branch,sides:[member(node.sourceA),member(node.sourceB)],sources:[node.sourceA.source,node.sourceB.source].filter(source=>codes.has(source))}))};
  }
 
  const side=(entryId:number|null,round:number|null):DrawPerson[]=>{
@@ -41,7 +41,7 @@ export async function storedKnockoutDraw(c:CupCompetition,seasonNumber:number,st
   for(const encounter of season.encounters.filter(e=>e.stageId===stage.id)){
    // Only persisted, populated encounters are a saved draw.
    if(encounter.entryAId===null&&encounter.entryBId===null)continue;
-   blocks.push({id:String(encounter.id),title:stage.name+' · '+encounter.slot,
+   blocks.push({id:String(encounter.id),title:stage.name+' · '+encounter.slot,branch:stage.code==='FINAL'||/^Final(?:\s|$)/i.test(stage.name)?'FINAL':undefined,
     sides:[side(encounter.entryAId,encounter.roundId),side(encounter.entryBId,encounter.roundId)],
     bye:encounter.entryAId===null||encounter.entryBId===null,
     sources:[encounter.entryAId,encounter.entryBId].flatMap(entryId=>{

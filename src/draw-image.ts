@@ -1,9 +1,10 @@
+import {renderBracketImage} from './draw-bracket-image';
 import {competitionAsset,participantAsset,participantNamedAsset} from './competition-assets';
 
-export type DrawPerson={userId?:string;name:string;shieldUrl?:string|null};
+export type DrawPerson={userId?:string;name:string;shieldUrl?:string|null;placeholder?:boolean};
 export type DrawBlock={
  id:string;title:string;sides:DrawPerson[][];bye?:boolean;
- sources?:string[];positions?:string[];
+ sources?:string[];positions?:string[];branch?:string;
 };
 export type DrawImage={
  competitionCode:string;competitionName:string;season:number;phase:string;
@@ -63,6 +64,7 @@ export async function renderDrawImages(model:DrawImage):Promise<Blob[]>{
   p.shieldUrl||participantAsset(p.userId,model.season)||participantNamedAsset(p.name)
  ).filter((value):value is string=>Boolean(value))))])];
  const images=new Map(await Promise.all(urls.map(async url=>[url,await loadImage(url)] as const)));
+ if(model.kind==='bracket')return [await renderBracketImage(model,images,logoUrl)];
  const measure=document.createElement('canvas').getContext('2d')!;
  measure.font=font(25,true);
  const personHeight=(p:DrawPerson)=>Math.max(66,wrap(measure,p.name,cardWidth-108).length*32+20);
