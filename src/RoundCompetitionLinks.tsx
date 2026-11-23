@@ -19,7 +19,7 @@ export default function RoundCompetitionLinks({roundId,rounds}:{roundId:number;r
  const locked=busy||Boolean(data?.lockedReason);
  return <section className="card form-stack" aria-label="Competencias vinculadas a la Fecha">
   <h2>Competencias vinculadas</h2>
-  <p>Elegí las fases que se juegan en esta Fecha. En eliminatorias podés asignar todos los cruces o sólo algunos.</p>
+  <p>Elegí las fases que se juegan en esta Fecha. La misma Fecha puede usarse en otra competición. En eliminatorias podés asignar todos los cruces o sólo algunos.</p>
   {error&&<p role="alert">{error}</p>}
   {!data&&!error&&<p role="status">Cargando competencias…</p>}
   {data?.lockedReason&&<p role="status">{data.lockedReason}</p>}

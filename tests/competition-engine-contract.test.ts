@@ -24,7 +24,7 @@ describe('T32 competition engine contracts', () => {
     expect(worker).toContain('const linkMatch = pathname.match(');
     expect(worker).toContain('competition-engine\\/competitions\\/(\\d+)\\/rounds');
     expect(worker).toContain('INSERT INTO competition_round_links');
-    expect(adminUi).toContain('La misma Fecha puede usarse en otra competición');
+    expect(readFileSync(resolve(process.cwd(), 'src/RoundCompetitionLinks.tsx'), 'utf8')).toContain('La misma Fecha puede usarse en otra competición');
   });
 
   it('keeps division assignment separate from legacy league_participants', () => {
