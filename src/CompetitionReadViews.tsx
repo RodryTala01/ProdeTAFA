@@ -48,23 +48,37 @@ export function ChampionsProgression({s,nodes}:{s:Season;nodes:ChampionsNode[]})
   measure();const observer=new ResizeObserver(measure);observer.observe(host);host.querySelectorAll('[data-node-code]').forEach(el=>observer.observe(el));
   return()=>observer.disconnect();
  },[nodes]);
- const depths=new Map<string,number>();
- function depth(node:ChampionsNode,seen=new Set<string>()):number{
-  if(depths.has(node.code))return depths.get(node.code)!;
-  if(seen.has(node.code))return 0;
-  const visited=new Set(seen).add(node.code);
-  const parents=[node.sourceA,node.sourceB].flatMap(source=>nodes.filter(n=>n.code===source.source));
-  const result=parents.length?1+Math.max(...parents.map(parent=>depth(parent,visited))):0;
-  depths.set(node.code,result);return result;
+ const positions:Record<string,[number,number]>={U1:[1,2],U2:[2,2],U3:[3,2],U4:[4,2],U5:[5,2],L1:[1,5],L2:[1,7],L3:[2,6],L4:[3,6],L5:[3,8],L6:[4,7],L7:[5,7],F1:[6,4]};
+ const number=(code:string)=>nodes.findIndex(n=>n.code===code)+1;
+ function feeder(source:Source){
+  const previous=nodes.find(n=>n.code===source.source);
+  if(!previous)return 'Participante por definir';
+  const names=[previous.sourceA,previous.sourceB].map(s=>s.entryId!==null?entryNameFor(s.entryId):null);
+  return names.every(Boolean)?`Ganador de ${names.join(' vs. ')}`:`Ganador del cruce ${number(previous.code)}`;
  }
- nodes.forEach(n=>depth(n));
- const levels=[...new Set(depths.values())].sort((a,b)=>a-b);
- return <section className="cx-knockout"><div className="cx-knockout-head"><h2>Llave de Copa Campeones</h2><small>Seguí cada código hacia la próxima ronda →</small></div><div className="sport-bracket-scroll"><div ref={canvas} className="cx-knockout-columns sport-champions-rounds"><svg className="sport-bracket-lines" aria-hidden="true">{connections.map((d,i)=><path key={i} d={d}/>)}</svg>{levels.map(level=><section className="cx-knockout-column" key={level}><h3>{level===levels.at(-1)?'Final':`Ronda ${level+1}`}</h3>{nodes.filter(n=>depths.get(n.code)===level).map(n=><article className="sport-encounter" data-node-code={n.code} key={n.id}>
-  <h4>{n.code} · {n.label}</h4>{[n.sourceA,n.sourceB].map((source,i)=><div key={i}>{source.entryId!==null?<EntryIdentity s={s} id={source.entryId} round={n.round?.id??null}/>:<span>Ganador de {source.source}</span>}<strong>{(i===0?n.encounter?.scoreA:n.encounter?.scoreB)??'—'}</strong></div>)}
-  <small>{n.encounter?.adminConfirmedAt?'Resultado confirmado':n.sourceA.entryId!==null&&n.sourceB.entryId!==null?'Cruce definido':'Esperando rivales'}</small>
-  {nodes.some(other=>[other.sourceA.source,other.sourceB.source].includes(n.code))&&<footer>Ganador → {nodes.filter(other=>[other.sourceA.source,other.sourceB.source].includes(n.code)).map(other=>other.code).join(', ')}</footer>}
- </article>)}</section>)}</div></div></section>;
+ const entryNameFor=(id:number)=>entryName(s,id,null);
+ return <section className="cx-knockout"><div className="cx-knockout-head"><h2>Llave de Copa Campeones</h2><small>Dos caminos hacia la final · deslizá para seguir los cruces →</small></div>
+  <div className="sport-bracket-scroll"><div ref={canvas} className="sport-champions-tree">
+   <svg className="sport-bracket-lines" aria-hidden="true">{connections.map((d,i)=><path key={i} d={d}/>)}</svg>
+   {Array.from({length:6},(_,i)=><h3 className="sport-champions-round-title" key={i} style={{gridColumn:i+1,gridRow:1}}>{i===5?'Final':`Ronda ${i+1}`}</h3>)}
+   <div className="sport-champions-branch" style={{gridColumn:'1 / 6',gridRow:4}}>Rama inferior</div>
+   {nodes.map((n,index)=>{
+    const [column,row]=positions[n.code]??[index+1,2];
+    const next=nodes.find(other=>[other.sourceA.source,other.sourceB.source].includes(n.code));
+    return <article className="sport-encounter" data-node-code={n.code} key={n.id} style={{gridColumn:column,gridRow:`${row} / span 2`}}>
+     <h4>{n.code==='F1'?'Final':`Cruce ${number(n.code)}`}{n.code.startsWith('U')?' · Rama superior':''}</h4>
+     {[n.sourceA,n.sourceB].map((source,i)=><div key={i}>
+      {source.entryId!==null?<EntryIdentity s={s} id={source.entryId} round={n.round?.id??null}/>:<span className="sport-bracket-feeder">{feeder(source)}</span>}
+      <strong>{(i===0?n.encounter?.scoreA:n.encounter?.scoreB)??'—'}</strong>
+     </div>)}
+     <small>{n.encounter?.adminConfirmedAt?'Resultado confirmado':n.sourceA.entryId!==null&&n.sourceB.entryId!==null?'Cruce definido':'Esperando la definición del rival'}</small>
+     {next&&<button type="button" className="sport-bracket-next" onClick={()=>canvas.current?.querySelector(`[data-node-code="${next.code}"]`)?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})}>Ganador → {next.code==='F1'?'Final':`Cruce ${number(next.code)}`}</button>}
+    </article>;
+   })}
+  </div></div>
+ </section>;
 }
+
 export function ImportedCompetitionHistory({code}:{code:string}){
  const [seasons,setSeasons]=useState<HistorySummary[]|null>(null),[error,setError]=useState(false);
  useEffect(()=>{const controller=new AbortController();readCompetition<{seasons:HistorySummary[]}>('/api/participant/history',controller.signal).then(d=>setSeasons(d.seasons)).catch(()=>{if(!controller.signal.aborted)setError(true);});return()=>controller.abort();},[]);

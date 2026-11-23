@@ -1,3 +1,4 @@
+import type {ChampionsNode} from './CompetitionReadViews';
 import { contextLabel, type CompetitionContext } from './competition-contexts';
 import { entryMembers, participation, readCompetition, type Overview } from './participant-competitions';
 
@@ -22,6 +23,7 @@ export type LeagueSummary = {
 export type HomeData = {
   season: CurrentSeason | null; round: HomeRound | null; league: LeagueSummary | null;
   contexts: CompetitionContext[]; errors: string[];
+  competitionDetails?:Record<number,{groups?:{name:string;standings:{entryId:number;userId?:string;position:number;points?:number;totalPoints?:number}[]}[];bracket?:ChampionsNode[]}>;
   pending?:boolean;overview?: Overview; resultRound?: HomeRound | null;
 };
 export const emptyHome: HomeData = { season: null, round: null, league: null, contexts: [], errors: [] };
@@ -32,7 +34,18 @@ const read = readCompetition;
 export async function loadHome(signal?: AbortSignal, onProgress?: (data:HomeData)=>void): Promise<HomeData> {
   const data: HomeData = { ...emptyHome, errors: [], contexts: [] };
   const notify=()=>{if(!signal?.aborted)onProgress?.({...data,pending:true,errors:[...data.errors]});};
-  const overview=read<Overview>('/api/competition-engine/overview',signal).then(value=>{data.overview=value;notify();}).catch(()=>{data.errors.push('No pudimos cargar tus cruces.');});
+  const overview=read<Overview>('/api/competition-engine/overview',signal).then(async value=>{
+    data.overview=value;notify();const s=value.season;if(!s)return;
+    data.competitionDetails={};
+    await Promise.all(s.competitions.map(async c=>{
+      const group=s.stages.find(st=>st.competitionId===c.id&&['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS'].includes(st.type));
+      const registered=s.members.some(m=>m.competitionId===c.id&&m.userId===value.currentUserId);
+      const url=c.code==='COPA_CAMPEONES'?`/api/competition-engine/competitions/${c.id}/champions/bracket`:registered&&group?(group.type==='ACCUMULATIVE_GROUPS'?`/api/competition-engine/cups/${c.code}/groups?season=${s.seasonNumber}`:`/api/competition-engine/stages/${group.id}/total/groups`):null;
+      if(!url)return;
+      try{const details=await read<NonNullable<HomeData['competitionDetails']>[number]>(url,signal);data.competitionDetails={...data.competitionDetails,[c.id]:details};notify();}
+      catch{if(!signal?.aborted)data.errors.push(`No pudimos cargar el detalle de ${c.displayName}.`);}
+    }));
+  }).catch(()=>{data.errors.push('No pudimos cargar tus cruces.');});
   const [season, round] = await Promise.allSettled([
     read<{ season: CurrentSeason | null }>('/api/competition-engine/current', signal),
     read<{ round: HomeRound | null }>('/api/participant/round', signal),

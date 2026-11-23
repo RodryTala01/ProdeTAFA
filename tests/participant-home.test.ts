@@ -259,3 +259,14 @@ it('Partidos de la Fecha identifica la liga real de cada cruce junto al horario 
  expect(html).toContain('ARG');
  expect(html).not.toContain('Últimos resultados');
 });
+
+it('Tu estado general uses the actual group position and points supplied by the group endpoint',()=>{
+ const season={id:1,seasonNumber:33,name:'T33',status:'active',competitions:[{id:3,code:'COPA_TOTAL',displayName:'Copa Total',family:'CUP',status:'active',divisionId:null}],stages:[{id:9,competitionId:3,name:'Grupos',code:'GROUPS',type:'ROUND_ROBIN_GROUPS',sequence:1,status:'active'}],members:[{entryId:7,competitionId:3,userId:'me',fullName:'Yo',status:'active',entryType:'INDIVIDUAL',validFrom:null,validTo:null}],people:[],links:[],encounters:[],results:[],history:[],segments:[]};
+ const model={...data,overview:{currentUserId:'me',editions:[],season},competitionDetails:{3:{groups:[{name:'Grupo C',standings:[{entryId:7,position:2,points:6}]}]}}} as HomeData;
+ const card=homeCompetitionStatuses(model,'me').find(c=>c.code==='COPA_TOTAL');expect(card?.primary).toBe('Fase de grupos');expect(card?.detail).toBe('Grupo C · 2° puesto · 6 pts');
+});
+it('Tu estado general uses a Champions assigned opponent even before node activation or Fecha linking',()=>{
+ const season={id:1,seasonNumber:33,name:'T33',status:'active',competitions:[{id:3,code:'COPA_CAMPEONES',displayName:'Copa Campeones',family:'CUP',status:'active',divisionId:null}],stages:[],members:[{entryId:7,competitionId:3,userId:'me',fullName:'Yo',status:'active',entryType:'INDIVIDUAL',validFrom:null,validTo:null},{entryId:8,competitionId:3,userId:'rival',fullName:'Rival real',status:'active',entryType:'INDIVIDUAL',validFrom:null,validTo:null}],people:[],links:[],encounters:[],results:[],history:[],segments:[]};
+ const model={...data,overview:{currentUserId:'me',editions:[],season},competitionDetails:{3:{bracket:[{id:1,code:'U1',label:'Inicio',sourceA:{entryId:7,source:'A',displayName:'Yo'},sourceB:{entryId:8,source:'B',displayName:'Rival real'},stageId:null,round:null,encounter:null}]}}} as HomeData;
+ expect(homeCompetitionStatuses(model,'me').find(c=>c.code==='COPA_CAMPEONES')?.detail).toBe('vs. Rival real');
+});

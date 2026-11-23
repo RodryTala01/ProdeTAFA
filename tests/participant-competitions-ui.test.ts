@@ -44,5 +44,15 @@ it('Papa previews byes in next round without confirming the unresolved opponent'
 it('Champions follows node dependencies in round columns without rebuilding a 16-entry draw',()=>{
  const source=(entryId:number|null,ref:string)=>({entryId,source:ref,displayName:null});
  const nodes=[{id:1,code:'U1',label:'Primer cruce',sourceA:source(1,'A'),sourceB:source(2,'B'),stageId:null,round:null,encounter:null},{id:2,code:'F1',label:'Final',sourceA:source(null,'U1'),sourceB:source(3,'C'),stageId:null,round:null,encounter:null}];
- const html=render(ChampionsProgression,{s:previewOverview.season,nodes});expect(html).toContain('Ronda 1');expect(html).toContain('Final');expect(html).toContain('Ganador de U1');expect(html).not.toContain('Rama superior');
+ const html=render(ChampionsProgression,{s:previewOverview.season,nodes});expect(html).toContain('Ronda 1');expect(html).toContain('Final');expect(html).toContain('Ganador de');expect(html).toContain('sport-champions-tree');expect(html).toContain('Cruce 1');
+});
+
+import {CompetitionBody} from '../src/ParticipantCompetitions';
+it('participant Duos table is visible before scheduling and alongside configured semifinals',()=>{
+ const base=previewOverview.season!,competition={...base.competitions[0],id:900,code:'COPA_DUOS',family:'CUP',displayName:'Copa Dúos'};
+ const members=base.members.slice(0,2).map(m=>({...m,competitionId:900,entryId:901,entryType:'DUO',validTo:null}));
+ const stage={...base.stages[0],id:902,competitionId:900,type:'KNOCKOUT'};
+ const s={...base,competitions:[competition],members,stages:[stage],duoEntries:[{entryId:901,displayName:'Dúo confirmado'}],encounters:[{...base.encounters[0],stageId:902,entryAId:901}]};
+ const html=render(CompetitionBody,{s,c:competition,user:members[0].userId});
+ expect(html).toContain('Tabla de Dúos');expect(html).toContain('Dúo confirmado');expect(html).toContain('posiciones y puntos disponibles al vincular una Fecha');expect(html).toContain('sport-table');
 });

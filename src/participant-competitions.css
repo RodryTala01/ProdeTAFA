@@ -119,3 +119,14 @@
 .sport-bracket-lines{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:-1;pointer-events:none}
 .sport-bracket-lines path{fill:none;stroke:var(--border);stroke-width:2}
 .sport-champions-rounds .cx-knockout-column{width:280px;flex-basis:280px}
+
+.sport-champions-tree{position:relative;isolation:isolate;display:grid;width:max-content;grid-template-columns:repeat(6,280px);grid-template-rows:32px repeat(8,minmax(110px,auto));column-gap:44px;row-gap:14px;padding:10px 4px 20px}
+.sport-champions-tree>.sport-encounter{margin:0;min-width:0;align-self:stretch;display:flex;flex-direction:column;justify-content:center;position:relative;border:1px solid var(--border-strong)}
+.sport-champions-tree .sport-encounter>div{padding:12px 0;gap:8px}
+.sport-champions-tree .sport-encounter h4{margin:0 0 8px;font-size:.85rem;color:var(--accent)}
+.sport-champions-tree .sport-encounter .sport-entry-identity{display:flex;flex-wrap:nowrap;font-size:.95rem;line-height:1.35}
+.sport-champions-round-title{margin:0;font-size:.95rem;color:var(--text);border-bottom:2px solid var(--accent)}
+.sport-champions-branch{align-self:center;font-weight:800;color:var(--text-muted);border-bottom:1px solid var(--border);padding-bottom:8px}
+.sport-bracket-feeder{font-size:.83rem;line-height:1.4;color:var(--text-muted)}
+.sport-bracket-next{margin-top:12px;padding:8px 0;background:transparent;border:0;border-top:1px solid var(--border);text-align:left;color:var(--accent);cursor:pointer;font:inherit;font-size:.8rem}
+.sport-champions-tree .sport-bracket-lines path{stroke:var(--text-muted);stroke-width:2}
