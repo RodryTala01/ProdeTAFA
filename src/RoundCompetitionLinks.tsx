@@ -6,10 +6,15 @@ type Encounter={id:number;stageId:number;slot:string;roundLinkId:number|null;rou
 type Data={stages:Stage[];links:Link[];encounters:Encounter[];lockedReason:string|null};
 type Round={id:number;name:string;status:string};
 const base='/api/admin/competition-engine';
+async function readLinks(roundId:number):Promise<Data>{
+ const data=await cupApi<Data>(`${base}/scheduling/rounds/${roundId}`);
+ if(!data||!Array.isArray(data.stages)||!Array.isArray(data.links)||!Array.isArray(data.encounters))throw new Error('No pudimos cargar las vinculaciones de competencias. Reintentá.');
+ return data;
+}
 export default function RoundCompetitionLinks({roundId,rounds}:{roundId:number;rounds:Round[]}){
  const [data,setData]=useState<Data|null>(null),[stage,setStage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
- const load=async()=>setData(await cupApi<Data>(`${base}/scheduling/rounds/${roundId}`));
- useEffect(()=>{let live=true;cupApi<Data>(`${base}/scheduling/rounds/${roundId}`).then(d=>{if(live)setData(d);}).catch(e=>{if(live)setError(e.message);});return()=>{live=false;};},[roundId]);
+ const load=async()=>setData(await readLinks(roundId));
+ useEffect(()=>{let live=true;readLinks(roundId).then(d=>{if(live)setData(d);}).catch(e=>{if(live)setError(e.message);});return()=>{live=false;};},[roundId]);
  async function run(action:()=>Promise<unknown>){setBusy(true);setError('');try{await action();await load();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
  const locked=busy||Boolean(data?.lockedReason);
  return <section className="card form-stack" aria-label="Competencias vinculadas a la Fecha">
