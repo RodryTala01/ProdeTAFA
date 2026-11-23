@@ -632,3 +632,39 @@ describe('Copa Total Admin: DB y endpoints reales', () => {
   });
 
 });
+
+describe('Copa Total: campeón anterior en A1',()=>{
+ function officialChampion(season:number,userId:string){
+  db.prepare('INSERT INTO tafa_seasons(id,season_number,name) VALUES(?,?,?)').run(season,season,'T'+season);
+  db.prepare("INSERT INTO competitions(id,season_id,code,canonical_name,display_name,family) VALUES(?,?,'COPA_TOTAL','Copa Total','Copa Total','CUP')").run(season,season);
+  db.prepare('INSERT INTO competition_entries(id,competition_id,display_name) VALUES(?,?,?)').run(season*100,season,userId);
+  db.prepare('INSERT INTO competition_entry_members(entry_id,user_id) VALUES(?,?)').run(season*100,userId);
+  db.prepare("INSERT INTO competition_results(competition_id,entry_id,result_code,final_position,confirmed_by_user_id) VALUES(?,?,'CHAMPION',1,'admin')").run(season,season*100);
+ }
+ it('valida A1 en el armado manual y lo mantiene en el sorteo automático',async()=>{
+  officialChampion(31,id(4));
+  const bad=groups([4,4,4,4,4,4,4,4]);
+  expect((await call(`${base}/stages/1/total/groups`,'POST',{groups:bad})).status).toBe(409);
+  [bad[0].userIds[0],bad[0].userIds[3]]=[bad[0].userIds[3],bad[0].userIds[0]];
+  expect((await call(`${base}/stages/1/total/groups`,'POST',{groups:bad})).status).toBe(200);
+  const preview=await call(`${base}/stages/1/total/groups/draw`,'POST',{groupSizes:[4,4,4,4,4,4,4,4],preview:true});
+  expect(preview.status).toBe(200);const data=await preview.json() as any;
+  expect(data.groups[0].code).toBe('A');expect(data.groups[0].userIds[0]).toBe(id(4));
+ });
+ it('reconoce al campeón importado mediante su vinculación de identidad confirmada',async()=>{
+  const archive={version:1,season:{number:31,name:'T31',kind:'REGULAR'},participants:[{key:'campeon',name:'Histórico',userId:id(17),division:'B'}],competitions:[{code:'COPA_TOTAL',name:'Copa Total',kind:'CUP'}],statistics:[],standings:[],rounds:[],results:[{competitionCode:'COPA_TOTAL',participantKey:'campeon',position:1,resultCode:'CHAMPION',teamLabel:null}],matches:[],movements:[],iffhs:[]};
+  db.prepare("INSERT INTO historical_imports(season_number,season_name,source_name,source_sha256,payload_json,counts_json) VALUES(31,'T31','test',?,?,?)").run('a'.repeat(64),JSON.stringify(archive),'{}');
+  const response=await call(`${base}/stages/1/total/groups`);expect(response.status).toBe(200);
+  expect((await response.json() as any).defendingChampionUserId).toBe(id(17));
+  const proposed=groups([4,4,4,4,4,4,4,4]);
+  expect((await call(`${base}/stages/1/total/groups`,'POST',{groups:proposed})).status).toBe(409);
+  [proposed[0].userIds[0],proposed[4].userIds[0]]=[proposed[4].userIds[0],proposed[0].userIds[0]];
+  expect((await call(`${base}/stages/1/total/groups`,'POST',{groups:proposed})).status).toBe(200);
+ });
+ it('no reserva A1 para un campeón más antiguo si el vigente no es elegible',async()=>{
+  officialChampion(30,id(1));officialChampion(31,id(20));members(12);
+  const response=await call(`${base}/stages/1/total/groups`);expect((await response.json() as any).defendingChampionUserId).toBeNull();
+  const proposed=groups([4,4,4]);[proposed[0].userIds[0],proposed[0].userIds[1]]=[proposed[0].userIds[1],proposed[0].userIds[0]];
+  expect((await call(`${base}/stages/1/total/groups`,'POST',{groups:proposed})).status).toBe(200);
+ });
+});

@@ -136,15 +136,15 @@ export default function AdminCupTotal({
       g.userIds.push(a.userId);
     }
     const n = Math.max(1, Math.round(context.eligible.length / 4));
-    setGroups(saved.length ? saved : empty(n, context.eligible.length));
+    setGroups(saved.length ? saved : empty(n, context.eligible.length,context.defendingChampionUserId));
   }
-  function empty(n: number, total: number): Group[] {
+  function empty(n: number, total: number,champion=ctx?.defendingChampionUserId): Group[] {
     return Array.from({ length: n }, (_, i) => ({
       code: String.fromCharCode(65 + i),
       name: `Grupo ${String.fromCharCode(65 + i)}`,
       userIds: Array.from(
         { length: Math.floor(total / n) + (i < total % n ? 1 : 0) },
-        () => '',
+        (_,j) => i===0&&j===0?(champion??''):'',
       ),
     }));
   }
@@ -338,7 +338,7 @@ export default function AdminCupTotal({
               el sorteo externo.
             </p>
             <p>
-              Campeón vigente elegible · A1 automático:{' '}
+              Campeón anterior elegible · A1 reservado:{' '}
               {people.find((p) => p.userId === ctx?.defendingChampionUserId)
                 ?.fullName ?? 'Sin campeón registrado elegible'}
             </p>
@@ -456,7 +456,7 @@ export default function AdminCupTotal({
                       <select
                         aria-label={`Grupo ${g.code} posición ${j + 1}`}
                         value={v}
-                        disabled={groupLocked}
+                        disabled={groupLocked||(g.code==='A'&&j===0&&Boolean(ctx?.defendingChampionUserId)&&v===ctx?.defendingChampionUserId)}
                         onChange={(e) =>
                           setGroups((gs) =>
                             gs.map((row, k) =>

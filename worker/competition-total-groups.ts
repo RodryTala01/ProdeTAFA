@@ -1,3 +1,4 @@
+import {activeHistoricalArchives,historicalIdentityResolver} from './historical-archive';
 import type { Env } from './index';
 import { handleIffhs } from './iffhs';
 
@@ -90,10 +91,19 @@ export async function totalGroupContext(env: Env, stageId: number) {
   const assignments=await env.DB.prepare(`SELECT g.code,g.name,m.user_id AS userId FROM competition_groups g
     JOIN competition_group_entries ge ON ge.group_id=g.id JOIN competition_entry_members m ON m.entry_id=ge.entry_id
     WHERE g.stage_id=? ORDER BY g.sequence,ge.seed_position`).bind(stageId).all<{code:string;name:string;userId:string}>();
-  const champion=await env.DB.prepare(`SELECT m.user_id FROM competition_results r JOIN competitions c ON c.id=r.competition_id
+  const official=await env.DB.prepare(`SELECT m.user_id AS userId,t.season_number AS seasonNumber FROM competition_results r JOIN competitions c ON c.id=r.competition_id
     JOIN tafa_seasons t ON t.id=c.season_id JOIN competition_entry_members m ON m.entry_id=r.entry_id
-    WHERE c.code='COPA_TOTAL' AND t.season_number<? AND r.result_code='CHAMPION' ORDER BY t.season_number DESC,r.confirmed_at DESC LIMIT 1`)
-    .bind(stage.season_number).first<{user_id:string}>();
+    WHERE c.code='COPA_TOTAL' AND t.season_number<? AND r.result_code='CHAMPION'`)
+    .bind(stage.season_number).all<{userId:string;seasonNumber:number}>();
+  const archives=await activeHistoricalArchives(env.DB);
+  const resolve=historicalIdentityResolver(archives);
+  const champions=[...(official.results??[]),...archives.filter(a=>a.seasonNumber<stage.season_number).flatMap(a=>a.data.results
+    .filter(r=>r.competitionCode==='COPA_TOTAL'&&r.resultCode==='CHAMPION')
+    .map(r=>({seasonNumber:a.seasonNumber,userId:resolve(a.data,r.participantKey)})))];
+  const latest=Math.max(...champions.map(c=>c.seasonNumber));
+  const latestIds=[...new Set(champions.filter(c=>c.seasonNumber===latest).map(c=>c.userId))];
+  // Never infer an identity or silently fall back to an older eligible winner.
+  const championUserId=latestIds.length===1?latestIds[0]:null;
   const last=await env.DB.prepare(`SELECT after_json,created_at FROM audit_log WHERE entity_type='competition_stage' AND entity_id=?
     AND action IN ('competition.total_groups_configured','competition.total_groups_drawn') ORDER BY id DESC LIMIT 1`).bind(String(stageId)).first<{after_json:string;created_at:string}>();
   const fixture=await env.DB.prepare('SELECT COUNT(*) n FROM competition_encounters WHERE stage_id=?').bind(stageId).first<{n:number}>();
@@ -101,7 +111,7 @@ export async function totalGroupContext(env: Env, stageId: number) {
     JOIN rounds r ON r.id=l.round_id LEFT JOIN matches m ON m.round_id=r.id WHERE l.stage_id=? AND l.purpose='NORMAL' GROUP BY l.id ORDER BY l.sequence,l.id`)
     .bind(stageId).all();
   return {stage,eligible:people.results??[],assignments:assignments.results??[],links:links.results??[],fixtureCount:Number(fixture?.n??0),
-    defendingChampionUserId:people.results?.some(p=>p.userId===champion?.user_id)?champion!.user_id:null,
+    defendingChampionUserId:people.results?.some(p=>p.userId===championUserId)?championUserId:null,
     lastConfiguration:last?{...JSON.parse(last.after_json),createdAt:last.created_at}:null};
 }
 
@@ -178,11 +188,14 @@ async function configureGroups(request: Request, env: Env, user: SessionUser, st
   }
   if (seen.size !== eligible.size) return error('Todos los participantes de la temporada deben estar exactamente en un grupo de Copa Total');
 
+  const before=await totalGroupContext(env,stageId);
+  const champion=before?.defendingChampionUserId;
+  if(champion&&groups.find(g=>g.code==='A')?.userIds[0]!==champion)return error('El campeón anterior elegible de Copa Total debe ocupar A1.',409);
+
   let entryByUser: Map<string, number>;
   try { entryByUser = await ensureEntries(env, stage.competition_id, participants); }
   catch (caught) { return error(caught instanceof Error ? caught.message : 'No se pudieron crear las entradas', 500); }
 
-  const before=await totalGroupContext(env,stageId);
   const statements:D1PreparedStatement[]=[env.DB.prepare('DELETE FROM competition_groups WHERE stage_id=?').bind(stageId)];
   groups.forEach((group,i)=>{
     statements.push(env.DB.prepare('INSERT INTO competition_groups(stage_id,code,name,sequence) VALUES (?,?,?,?)').bind(stageId,group.code,group.name,i+1));
