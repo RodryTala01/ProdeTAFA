@@ -1,3 +1,4 @@
+import {clearCompetitionReads} from './participant-competitions';
 import ParticipantDirectory from './ParticipantDirectory';
 import ParticipantArchive from './ParticipantArchive';
 import ParticipantHistoricalTotals from './ParticipantHistoricalTotals';
@@ -29,6 +30,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
   const [revision, setRevision] = useState(0);
   const menu = useRef<HTMLDetailsElement>(null);
   const content = useRef<HTMLElement>(null);
+  useEffect(()=>()=>clearCompetitionReads(),[user.id]);
   useRoundRefresh(data.round?.matches, () => setRevision(n => n + 1), route === 'inicio');
   useEffect(() => {
     const change = () => {
@@ -43,8 +45,8 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
   useEffect(() => {
     const controller = new AbortController();
     if (route !== 'inicio') return;
-    if (!data.round) setLoading(true);
-    loadHome(controller.signal).then(next => {
+    if (!data.season&&!data.overview&&!data.resultRound) setLoading(true);
+    loadHome(controller.signal, next=>{if(!controller.signal.aborted){setData(next);setLoading(false);}}).then(next => {
       if (!controller.signal.aborted) { setData(next); setLoading(false); }
     });
     return () => controller.abort();

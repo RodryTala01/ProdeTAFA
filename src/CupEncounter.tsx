@@ -60,7 +60,7 @@ export default function EncounterCard({
               {
                 pending: 'Pendiente',
                 ready: 'Pendiente',
-                live: 'En juego · provisional',
+                live: 'En juego',
                 tied: 'Desempate TAFA pendiente',
                 finished: 'Terminado · falta confirmar',
               } as Record<string, string>

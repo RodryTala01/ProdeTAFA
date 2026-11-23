@@ -16,7 +16,8 @@ export function useRoundRefresh(matches:RefreshMatch[]|undefined,refresh:()=>voi
   const delay=roundRefreshDelay(matches??[]);
   const repeat=(matches??[]).some(m=>LIVE_MATCH_STATUSES.has(m.status??'') || (m.status==='NS' && Date.parse(m.kickoffAt)<=Date.now() && Date.parse(m.kickoffAt)>=Date.now()-4*3_600_000));
   const timer=delay===null?undefined:repeat?window.setInterval(()=>{if(roundRefreshDelay(matches??[])===null){window.clearInterval(timer);return;}callback.current();},delay):window.setTimeout(()=>callback.current(),delay);
-  const focus=()=>callback.current();
+  let lastFocus=Date.now();
+  const focus=()=>{if(Date.now()-lastFocus<60_000)return;lastFocus=Date.now();callback.current();};
   window.addEventListener('focus',focus);
   return()=>{if(timer!==undefined){window.clearTimeout(timer);window.clearInterval(timer);}window.removeEventListener('focus',focus);};
  },[matches,enabled]);

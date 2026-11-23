@@ -8,15 +8,8 @@ const labels:Record<string,string>={LIGA_A:'Liga',LIGA_B:'Liga',COPA_A:'Copa A',
 const tones:Record<string,string>={LIGA_A:'league',LIGA_B:'league',COPA_A:'division',COPA_B:'division',COPA_TOTAL:'total',COPA_DUOS:'duos',COPA_CAMPEONES:'champions',COPA_PAPA:'papa'};
 
 export function visibleCompetitions(s:Season,user:string):Competition[] {
- const person=s.people.find(p=>p.userId===user);
- return families.flatMap(family=>{
-  const all=family.map(code=>s.competitions.find(c=>c.code===code)).filter((c):c is Competition=>Boolean(c));
-  if(all.length<=1)return all;
-  const participating=all.find(c=>s.members.some(m=>m.competitionId===c.id&&m.userId===user));
-  const byDivision=all.find(c=>person?.division&&c.code.endsWith('_'+person.division));
-  const byId=all.find(c=>person?.divisionId&&c.divisionId===person.divisionId);
-  return [participating??byDivision??byId??all[0]];
- });
+ void user;
+ return families.flatMap(family=>family.flatMap(code=>s.competitions.filter(c=>c.code===code)));
 }
 function latestEncounter(s:Season,c:Competition,user:string):Encounter|null {
  const ids=new Set(s.stages.filter(st=>st.competitionId===c.id).map(st=>st.id));

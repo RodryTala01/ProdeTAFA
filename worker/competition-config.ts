@@ -181,6 +181,13 @@ async function createStage(request: Request, env: Env, user: SessionUser, compet
   if (!name) return error('La etapa necesita un nombre');
   if (!stageType || !STAGE_TYPES.includes(stageType)) return error('Tipo de etapa inválido');
 
+  if(competition.code==='COPA_DUOS'&&stageType==='SURVIVAL_TABLE'&&body?.settings!=null){
+    const settings=body.settings as {eliminateCount?:unknown};
+    const count=Number(settings.eliminateCount??0);
+    if(!Number.isInteger(count)||count<0)return error('Cantidad de dúos eliminados inválida');
+    const pairs=await env.DB.prepare("SELECT COUNT(*) AS total FROM competition_entries WHERE competition_id=? AND entry_type='DUO' AND status='active'").bind(competitionId).first<{total:number}>();
+    if(pairs?.total&&count>=pairs.total)return error('No se pueden eliminar todos los dúos de una misma Fecha');
+  }
   let code = normalizeStageCode(body?.code || name);
   if (!code) return error('No se pudo generar un código de etapa válido');
 
@@ -222,7 +229,7 @@ async function createStage(request: Request, env: Env, user: SessionUser, compet
     'competition_stage',
     String(stageId),
     null,
-    { competitionId, code, name, stageType, sequence },
+    { competitionId, code, name, stageType, sequence, settings:body?.settings??null },
   );
 
   return json({

@@ -551,7 +551,7 @@ export default function ParticipantRound() {
                   <div className="score-earned">
                     <strong>{match.score.points > 0 ? '+' : ''}{match.score.points} pts · {scoreLabel(match.score.resultType)}</strong>
                     {match.score.extraPoints > 0 && <small>+{match.score.extraPoints} por penales</small>}
-                    {match.score.provisional && <small>provisional</small>}
+
                   </div>
                 )}
               </div>
@@ -566,7 +566,7 @@ export default function ParticipantRound() {
       </section><aside className="prediction-sidebar">
         <section className="prediction-summary prediction-progress"><h2>MI PRONÓSTICO</h2>{progress}</section>
         <ParticipantCompetitionContexts key={`contexts-${round.id}`} roundId={round.id}/>
-        <section className="prediction-summary"><h2>PUNTAJE DE LA FECHA</h2><dl>{stats.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><p>Partidos resueltos <strong>{resolved.length} / {round.matches.length}</strong></p><progress value={resolved.length} max={round.matches.length || 1} aria-label="Partidos resueltos"/>{round.matches.some(m=>m.score?.provisional) && <small>Incluye puntos provisionales</small>}</section>
+        <section className="prediction-summary"><h2>PUNTAJE DE LA FECHA</h2><dl>{stats.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><p>Partidos resueltos <strong>{resolved.length} / {round.matches.length}</strong></p><progress value={resolved.length} max={round.matches.length || 1} aria-label="Partidos resueltos"/></section>
       {!isFinished && <section className="card submit-card">
         <div className="submit-copy"><p>{complete} de {round.matches.length} partidos completados</p>
           <p>{openMatches.length === 0 ? 'Los pronósticos ya cerraron.' : !canSubmit ? 'Completá los partidos abiertos para enviar.' : round.submitted && changes.length ? 'Tus cambios todavía no están enviados.' : 'Todo listo para enviar.'}</p>

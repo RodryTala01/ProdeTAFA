@@ -448,12 +448,22 @@ async function readBracket(env: Env, competitionId: number) {
     round_id: number | null; round_name: string | null; round_status: string | null;
   }>();
 
+  const slots=await env.DB.prepare(`SELECT q.slot_code,q.confirmed_entry_id,q.status,e.display_name
+    FROM competition_qualification_slots q LEFT JOIN competition_entries e ON e.id=q.confirmed_entry_id WHERE q.competition_id=?`)
+    .bind(competitionId).all<{slot_code:string;confirmed_entry_id:number|null;status:string;display_name:string|null}>();
+  function resolveSource(type:'SLOT'|'WINNER',ref:string){
+    if(type==='SLOT'){
+      const slot=slots.results?.find(s=>s.slot_code===ref);
+      const ready=!!slot&&slot.confirmed_entry_id!==null&&['confirmed','replaced'].includes(slot.status);
+      return {ready,entryId:ready?Number(slot!.confirmed_entry_id):null,displayName:ready?slot!.display_name:null,source:ref};
+    }
+    const parent=rows.results?.find(n=>n.node_code===ref);
+    const ready=!!parent&&parent.winner_entry_id!==null&&parent.encounter_status==='finished'&&parent.admin_confirmed_at!==null;
+    return {ready,entryId:ready?Number(parent!.winner_entry_id):null,displayName:ready?parent!.winner_name:null,source:ref};
+  }
   const nodes = [];
   for (const row of rows.results ?? []) {
-    const [sourceA, sourceB] = await Promise.all([
-      resolveBracketSource(env, competitionId, row.source_a_type, row.source_a_ref),
-      resolveBracketSource(env, competitionId, row.source_b_type, row.source_b_ref),
-    ]);
+    const sourceA=resolveSource(row.source_a_type,row.source_a_ref),sourceB=resolveSource(row.source_b_type,row.source_b_ref);
     nodes.push({
       id: Number(row.id),
       code: row.node_code,

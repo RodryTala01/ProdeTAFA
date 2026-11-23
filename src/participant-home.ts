@@ -1,5 +1,5 @@
 import { contextLabel, type CompetitionContext } from './competition-contexts';
-import { entryMembers, participation, type Overview } from './participant-competitions';
+import { entryMembers, participation, readCompetition, type Overview } from './participant-competitions';
 
 export type Competition = { id: number; code: string; displayName: string; family: string; status: string };
 export type CurrentSeason = {
@@ -22,19 +22,17 @@ export type LeagueSummary = {
 export type HomeData = {
   season: CurrentSeason | null; round: HomeRound | null; league: LeagueSummary | null;
   contexts: CompetitionContext[]; errors: string[];
-  overview?: Overview; resultRound?: HomeRound | null;
+  pending?:boolean;overview?: Overview; resultRound?: HomeRound | null;
 };
 export const emptyHome: HomeData = { season: null, round: null, league: null, contexts: [], errors: [] };
 
-async function read<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error('No disponible');
-  return response.json() as Promise<T>;
-}
+const read = readCompetition;
 
 // Read-only aggregation of existing APIs; never derive classifications or winners here.
-export async function loadHome(signal?: AbortSignal): Promise<HomeData> {
+export async function loadHome(signal?: AbortSignal, onProgress?: (data:HomeData)=>void): Promise<HomeData> {
   const data: HomeData = { ...emptyHome, errors: [], contexts: [] };
+  const notify=()=>{if(!signal?.aborted)onProgress?.({...data,pending:true,errors:[...data.errors]});};
+  const overview=read<Overview>('/api/competition-engine/overview',signal).then(value=>{data.overview=value;notify();}).catch(()=>{data.errors.push('No pudimos cargar tus cruces.');});
   const [season, round] = await Promise.allSettled([
     read<{ season: CurrentSeason | null }>('/api/competition-engine/current', signal),
     read<{ round: HomeRound | null }>('/api/participant/round', signal),
@@ -46,19 +44,17 @@ export async function loadHome(signal?: AbortSignal): Promise<HomeData> {
     data.resultRound = round.value.round;
   }
   else data.errors.push('No pudimos cargar la próxima Fecha.');
-  const tasks: Promise<void>[] = [];
-  if (data.season) tasks.push(read<Overview>(`/api/competition-engine/overview?season=${data.season.seasonNumber}`, signal)
-    .then(value => { data.overview = value; })
-    .catch(() => { data.errors.push('No pudimos cargar tus cruces.'); }));
+  notify();
+  const tasks: Promise<void>[] = [overview];
   const division = data.season?.division?.code;
   if (division === 'A' || division === 'B') tasks.push(
     read<LeagueSummary>(`/api/competition-engine/leagues/LIGA_${division}/standings`, signal)
-      .then(value => { data.league = value; })
+      .then(value => { data.league = value; notify(); })
       .catch(() => { data.errors.push('No pudimos cargar tu posición en Liga.'); }),
   );
   if (data.round) tasks.push(
     read<{ contexts: CompetitionContext[] }>(`/api/participant/rounds/${data.round.id}/competition-contexts`, signal)
-      .then(value => { data.contexts = value.contexts; })
+      .then(value => { data.contexts = value.contexts; notify(); })
       .catch(() => { data.errors.push('No pudimos cargar tus competiciones de esta Fecha.'); }),
   );
   await Promise.all(tasks);
@@ -121,17 +117,17 @@ export function homeCompetitions(data: HomeData, user: string) {
     const members = s.members.filter(m => m.competitionId === c.id && m.userId === user);
     const contexts = data.contexts.filter(ctx => ctx.competition.id === c.id);
     const stages = s.stages.filter(st => st.competitionId === c.id);
-    const encounters = s.encounters.filter(e => stages.some(st => st.id === e.stageId) &&
+    const encounters = s.encounters.filter(e => stages.some(st => st.id === e.stageId&&st.type==='KNOCKOUT') &&
       [e.entryAId,e.entryBId].some(id => entryMembers(s,id,e.roundId).some(m => m.userId === user)))
       .sort((a,b) => (stages.find(st=>st.id===b.stageId)?.sequence??0)-(stages.find(st=>st.id===a.stageId)?.sequence??0) || b.id-a.id);
     const current = encounters.find(e => e.roundId === data.round?.id && contexts.some(ctx => ctx.kind === 'KNOCKOUT' && ctx.encounter.id === e.id));
     const encounter = current ?? encounters.find(e => !e.confirmedAt && [e.entryAId,e.entryBId].some(id => entryMembers(s,id,null).some(m=>m.userId===user)));
     if (c.code.startsWith('LIGA_') && c.code !== `LIGA_${division}`) return [];
     if (['COPA_A','COPA_B'].includes(c.code) && c.code !== ownCup) return [];
-    if (!c.code.startsWith('LIGA_') && !members.length && !contexts.length) return [];
+
     if (c.code === 'PROMOCION') return []; // Fecha 6 lives inside Liga, not as another cup.
     return [{competition:c, status:participation(s,c,user), encounter,
-      phase: contexts[0]?.stage?.name ?? stages.find(st=>st.id===(encounter??encounters[0])?.stageId)?.name,
+      phase: contexts[0]?.stage?.name ?? stages.find(st=>st.id===(encounter??encounters[0])?.stageId)?.name ?? stages.find(st=>st.status==='active')?.name ?? stages.find(st=>['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS','SURVIVAL_TABLE'].includes(st.type))?.name ?? stages[0]?.name,
       sides: encounter ? [entryMembers(s,encounter.entryAId,encounter.roundId),entryMembers(s,encounter.entryBId,encounter.roundId)] : [],
       context: contexts[0]}];
   }).sort((a,b)=>Number(b.competition.code.startsWith('LIGA_'))-Number(a.competition.code.startsWith('LIGA_')));

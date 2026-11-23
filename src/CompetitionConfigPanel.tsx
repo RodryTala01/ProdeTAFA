@@ -42,6 +42,7 @@ export default function CompetitionConfigPanel({ competition, disabled = false, 
   const [displayName, setDisplayName] = useState(competition.displayName);
   const [status, setStatus] = useState(competition.status);
   const [stageName, setStageName] = useState('');
+  const [eliminateCount, setEliminateCount] = useState(0);
   const [stageType, setStageType] = useState<StageType>('KNOCKOUT');
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState<Stage | null>(null);
@@ -78,7 +79,7 @@ export default function CompetitionConfigPanel({ competition, disabled = false, 
     try {
       await api(`/api/admin/competition-engine/competitions/${competition.id}/stages`, {
         method: 'POST',
-        body: JSON.stringify({ name: stageName.trim(), stageType }),
+        body: JSON.stringify({ name: stageName.trim(), stageType, ...(competition.code==='COPA_DUOS'&&stageType==='SURVIVAL_TABLE'?{settings:{eliminateCount}}:{}) }),
       });
       setStageName('');
       setSuccess('Etapa creada.');
@@ -160,6 +161,7 @@ export default function CompetitionConfigPanel({ competition, disabled = false, 
               {STAGE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
+          {competition.code==='COPA_DUOS'&&stageType==='SURVIVAL_TABLE'&&<label className="field"><span>Dúos eliminados al finalizar cada Fecha de esta etapa</span><input type="number" min="0" step="1" required disabled={structureLocked} value={eliminateCount} onChange={e=>setEliminateCount(Number(e.target.value))}/></label>}
           <button className="button button--secondary" disabled={structureLocked || !stageName.trim()}>Crear etapa</button>
         </form>
 

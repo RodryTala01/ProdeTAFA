@@ -1,3 +1,4 @@
+import DuoCaptainNotice from './DuoCaptainNotice';
 import {argentinaDateTime} from './match-time';
 import {ParticipantShield,CompetitionImage,TeamShield} from './AssetImage';
 import { useEffect, useState } from 'react';
@@ -39,7 +40,7 @@ export function HomeErrors({ errors, retry }: { errors: string[]; retry: () => v
 export function LeagueSummary({ data }: { data: HomeData }) {
   const mine = data.league?.standings.find(row => row.userId === data.league?.currentUserId);
   return <section className="reference-section"><div className="section-heading"><h2>{data.league?.competition.displayName ?? data.season?.division?.name ?? 'Tu Liga'}</h2></div>
-    {mine ? <><div className="league-snapshot"><strong className="sport-number">{mine.position}<span>.º</span></strong><div><strong>{mine.points} <small>PTS</small></strong><p>Tu posición actual</p></div></div>{data.league?.provisional && <p>Puntaje provisional</p>}</> : <p>{data.season?.division ? 'Todavía no hay una posición disponible.' : 'Todavía no tenés una división asignada en una temporada activa.'}</p>}
+    {mine ? <><div className="league-snapshot"><strong className="sport-number">{mine.position}<span>.º</span></strong><div><strong>{mine.points} <small>PTS</small></strong><p>Tu posición actual</p></div></div></> : <p>{data.season?.division ? 'Todavía no hay una posición disponible.' : 'Todavía no tenés una división asignada en una temporada activa.'}</p>}
     <a className="button button--secondary" href={data.season?.division?competitionHref('LIGA_'+data.season.division.code,data.season.seasonNumber):'#/competiciones'}>Ver Liga <Icon name="arrow" /></a>
   </section>;
 }
@@ -79,8 +80,10 @@ export default function ParticipantHome({ name, data, userId }: { name: string; 
   const leagueName=data.season?.division?'LIGA_'+data.season.division.code:null;
   const matches=[...(data.round?.matches??[])].filter(m=>m.home&&m.away).sort((a,b)=>Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt));
   return <div className="home-sports">
+    {data.season&&data.overview?.season?.competitions.filter(c=>c.code==='COPA_DUOS').map(c=><DuoCaptainNotice key={c.id} competitionId={c.id} season={data.season!.seasonNumber}/>)}
     <div className="home-welcome"><span>{data.season?.name??'PRODE TAFA'}</span><span>{name}</span></div>
-    {!data.errors.includes('No pudimos cargar la próxima Fecha.')&&<NextRound round={data.round}/>}
+    {data.pending&&<p role="status" className="loader">Actualizando tu temporada…</p>}
+    {(!data.pending||data.round)&&!data.errors.includes('No pudimos cargar la próxima Fecha.')&&<NextRound round={data.round}/>}
     <div className="home-main-grid"><section className="home-panel"><HomeHeading title="Partidos de la Fecha" href="#/pronosticos" label="Ver toda la Fecha"/>
       {matches.length?<div className="home-fixtures">{matches.map((m,i)=>{
         const state=homeFixtureState(m);
@@ -116,7 +119,7 @@ export default function ParticipantHome({ name, data, userId }: { name: string; 
             {leagueName&&<span className="home-league-name"><CompetitionImage code={leagueName} name={data.league?.competition.displayName??leagueName} size="xs" decorative/>{homeCompetitionName(leagueName,data.league?.competition.displayName??leagueName)}</span>}
           </div>
           <div className="home-league-points"><strong>{mine.points} <small>pts</small></strong>
-            <span>{data.league?.provisional?'Tabla provisional':'Tabla de tu Liga'}</span>
+            <span>Tabla de tu Liga</span>
           </div>
           <div className="home-league-stats" aria-label="Estadísticas de liga">
             {([['Plenos',mine.fulls],['Parciales',mine.partials],['Errores',mine.errors],['Extras',mine.extras]] as const).filter(([,value])=>value!=null).map(([label,value])=>

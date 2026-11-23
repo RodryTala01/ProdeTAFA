@@ -28,3 +28,49 @@ it('admin draw export reads draft seasons without writes and blocks participant 
  const response=(await call('admin'))!;expect(response.status).toBe(200);
  expect((await response.json() as any).season.seasonNumber).toBe(33);
 });
+
+import {totalGroupStandings,scoreEntrySegment} from '../worker/competition-total-groups';
+it('Total exposes planned group fixtures and batches the same segment scores as the existing scorer',async()=>{
+ db.exec(`INSERT INTO tafa_seasons(id,season_number,name,status) VALUES(1,32,'T32','active');
+ INSERT INTO competitions(id,season_id,code,canonical_name,display_name,family) VALUES(1,1,'COPA_TOTAL','Copa Total','Copa Total','CUP');
+ INSERT INTO competition_stages(id,competition_id,code,name,stage_type,sequence) VALUES(1,1,'GROUPS','Grupos','ROUND_ROBIN_GROUPS',1);
+ INSERT INTO competition_entries(id,competition_id,display_name) VALUES(1,1,'p'),(2,1,'admin');
+ INSERT INTO competition_entry_members(entry_id,user_id) VALUES(1,'p'),(2,'admin');
+ INSERT INTO competition_groups(id,stage_id,code,name,sequence) VALUES(1,1,'A','Grupo A',1);
+ INSERT INTO competition_group_entries(group_id,entry_id,seed_position) VALUES(1,1,1),(1,2,2);
+ INSERT INTO competition_encounters(id,stage_id,group_id,slot_key,entry_a_id,entry_b_id) VALUES(1,1,1,'A-M1-1',1,2);`);
+ const planned=await(await request()).json() as any;
+ expect(planned.season.encounters[0]).toMatchObject({id:1,groupId:1,roundId:null,slot:'A-M1-1'});
+ expect((await totalGroupStandings(env() as any,1))?.groups[0].fixtures[0]).toMatchObject({segmentId:null,complete:false});
+ db.exec(`INSERT INTO rounds(id,name) VALUES(1,'Fecha Copas');
+ INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence) VALUES(1,1,1,1,1);
+ INSERT INTO competition_round_segments(id,round_link_id,code,name,sequence) VALUES(1,1,'F1','F1',1);
+ UPDATE competition_encounters SET round_link_id=1,segment_id=1 WHERE id=1;`);
+ for(let i=1;i<=4;i++){
+  db.prepare("INSERT INTO matches(id,round_id,provider,provider_fixture_id,home_team_name,away_team_name,kickoff_at,result_finalized_at) VALUES (?,1,'manual',?,'Local','Visitante','2099-01-01','2099-01-01')").run(i,String(i));
+  db.prepare('INSERT INTO competition_round_segment_matches(segment_id,match_id,sequence) VALUES(1,?,?)').run(i,i);
+  db.prepare('INSERT INTO predictions(id,user_id,match_id,predicted_home_score,predicted_away_score) VALUES(?,?,?,1,0)').run(i,'p',i);
+  db.prepare("INSERT INTO official_predictions(id,user_id,match_id,predicted_home_score,predicted_away_score,updated_at,source) VALUES(?,'p',?,1,0,'2099-01-01','submission')").run(i,i);
+  db.prepare("INSERT INTO prediction_scores(prediction_id,result_type,base_points,total_points,calculated_at) VALUES(?,'FULL',3,3,'2099-01-01')").run(i);
+ }
+ const expected=await scoreEntrySegment(env() as any,1,1);
+ const groups=await totalGroupStandings(env() as any,1);
+ expect(groups!.groups[0].fixtures[0]).toMatchObject({scoreA:expected.points,scoreB:0,complete:expected.complete});
+ expect(groups!.groups[0].standings[0]).toMatchObject({entryId:1,points:3,gf:12,gd:12,won:1});
+});
+
+import {handleCompetitionDuos} from '../worker/competition-duos';
+it('Dúos reads stage elimination defaults without accumulating other Fechas or dropping shields',async()=>{
+ db.exec(`INSERT INTO tafa_seasons(id,season_number,name,status) VALUES(1,32,'T32','active');
+ INSERT INTO competitions(id,season_id,code,canonical_name,display_name,family) VALUES(1,1,'COPA_DUOS','Dúos','Dúos','CUP');
+ INSERT INTO competition_stages(id,competition_id,code,name,stage_type,sequence,settings_json) VALUES(1,1,'SURVIVAL','Survival','SURVIVAL_TABLE',1,'{"eliminateCount":1}');
+ INSERT INTO competition_entries(id,competition_id,entry_type,display_name) VALUES(1,1,'DUO','Dúo 1'),(2,1,'DUO','Dúo 2');
+ INSERT INTO competition_entry_members(entry_id,user_id) VALUES(1,'p'),(2,'admin');
+ INSERT INTO rounds(id,name) VALUES(1,'Anterior'),(2,'Actual');
+ INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence) VALUES(1,1,1,1,1),(2,1,1,2,2);
+ INSERT INTO competition_entry_bonuses(competition_id,stage_id,round_link_id,entry_id,points,reason) VALUES(1,1,1,1,100,'Anterior'),(1,1,2,1,2,'Actual');`);
+ const response=await handleCompetitionDuos(new Request('http://local/api/competition-engine/round-links/2/duos/table',{headers:{cookie:'prode_session=p'}}),env() as any);
+ const data=await response!.json() as any;
+ expect(data.settings.eliminateCount).toBe(1);expect(data.rows[0]).toMatchObject({entryId:1,basePoints:0,bonusPoints:2,totalPoints:2});
+ expect(data.rows[0].members[0].userId).toBe('p');
+});

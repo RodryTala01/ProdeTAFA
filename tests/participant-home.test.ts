@@ -1,3 +1,4 @@
+import {clearCompetitionReads} from '../src/participant-competitions';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync } from 'node:fs';
@@ -13,7 +14,7 @@ const round: HomeRound = { id: 7, name: 'Jornada publicada', status: 'open', sub
 const liga = { id: 2, code: 'LIGA_B', displayName: 'Liga B', family: 'LEAGUE', status: 'active' };
 const copa = { id: 3, code: 'COPA_A', displayName: 'Copa A', family: 'CUP', status: 'active' };
 const data: HomeData = { ...emptyHome, round, season: { id: 1, name: 'Temporada actual', seasonNumber: 33, division: { code: 'B', name: 'Liga B' }, competitions: [liga], competitionCatalog: [copa, liga] }, league: { competition: liga, currentUserId: 'me', provisional: false, standings: [{ userId: 'me', position: 5, points: 18 }] } };
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {clearCompetitionReads();vi.unstubAllGlobals();});
 
 describe('Participante: Home y navegación', () => {
   it('default y hashes inválidos abren Inicio; las seis secciones y subrutas sobreviven al refresco', () => {

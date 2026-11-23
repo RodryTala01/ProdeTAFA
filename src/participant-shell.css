@@ -101,3 +101,7 @@
 @media (max-width: 700px) {
   .participant-nav { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
+
+.participant-content>.loader::before{content:'';display:inline-block;width:18px;height:18px;margin-right:10px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:participant-loading-spin .8s linear infinite;vertical-align:middle}
+@keyframes participant-loading-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.participant-content>.loader::before{animation:none}}

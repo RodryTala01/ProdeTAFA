@@ -245,6 +245,7 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 - Parejas manuales como primera opción, sorteo opcional con semilla auditada. Todos los elegibles activos A/B exactamente una vez, dos por dúo. Cantidad impar requiere resolución Admin.
 - Sustitución excepcional con vigencia desde la Fecha elegida (límite superior exclusivo), sin modificar snapshots pasados ni superponer integrantes.
 - Tabla por Fecha: suma de los dos integrantes, ausencias 0, más bonus explícito; no acumular puntos deportivos anteriores.
+- Al crear una etapa SURVIVAL_TABLE de Dúos, settings_json.eliminateCount define el valor inicial de eliminados para sus Fechas; una configuración específica de Fecha prevalece. La tabla mantiene puntos de esa Fecha + bonus, sin acumulación histórica.
 - Eliminación y bonus por posición configurables; confirmar únicamente resultados definitivos, sin cortes empatados ni puestos de semifinales ambiguos. Snapshot de integrantes/puntos, eliminación, bonus y auditoría en un batch.
 - Empates múltiples: comparar todos en la misma Fecha Liga posterior con el evaluador TAFA existente, nunca usar plenos/parciales/nombres como criterio deportivo.
 - Con cuatro clasificados: semifinales fijas 1.º–4.º y 2.º–3.º, +2 sólo para primero y segundo. Final de ganadores confirmados, sin tercer puesto.

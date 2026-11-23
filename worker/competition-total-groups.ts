@@ -317,6 +317,21 @@ export async function totalGroupStandings(env: Env, stageId: number) {
     LEFT JOIN competition_round_segment_matches sm ON sm.segment_id=seg.id LEFT JOIN matches m ON m.id=sm.match_id
     WHERE l.stage_id=? AND l.purpose='NORMAL'`).bind(stageId).first<{links:number;segments:number;matches:number;finalized:number}>();
   const incomplete=coverage?.links!==2||coverage?.segments!==6||coverage?.matches!==24||coverage?.finalized!==24;
+  const segmentScores = await env.DB.prepare(`SELECT cem.entry_id,sm.segment_id,
+    COALESCE(SUM(ps.total_points),0) AS points,COUNT(sm.match_id) AS match_count,
+    COALESCE(SUM(CASE WHEN m.result_finalized_at IS NOT NULL OR m.is_void=1 THEN 1 ELSE 0 END),0) AS finalized_count
+    FROM competition_round_segment_matches sm
+    JOIN competition_round_segments seg ON seg.id=sm.segment_id
+    JOIN competition_round_links l ON l.id=seg.round_link_id
+    JOIN matches m ON m.id=sm.match_id
+    JOIN competition_entries e ON e.competition_id=l.competition_id
+    JOIN competition_entry_members cem ON cem.entry_id=e.id
+    LEFT JOIN official_predictions op ON op.user_id=cem.user_id AND op.match_id=m.id
+    LEFT JOIN prediction_scores ps ON ps.prediction_id=op.id
+    WHERE l.stage_id=? GROUP BY cem.entry_id,sm.segment_id`).bind(stageId)
+    .all<{entry_id:number;segment_id:number;points:number;match_count:number;finalized_count:number}>();
+  const scores = new Map((segmentScores.results??[]).map(r=>[`${r.entry_id}:${r.segment_id}`,{points:Number(r.points),complete:r.match_count===4&&r.finalized_count===4}]));
+  const score=(entry:number,segment:number|null)=>scores.get(`${entry}:${segment}`)??{points:0,complete:false};
   const groups = [];
   for (const group of groupsResult.results ?? []) {
     const entriesResult = await env.DB.prepare(
@@ -341,10 +356,8 @@ export async function totalGroupStandings(env: Env, stageId: number) {
     let provisional = incomplete || !(encounters.results?.length);
     const fixtures = [];
     for (const encounter of encounters.results ?? []) {
-      const [a, b] = await Promise.all([
-        scoreEntrySegment(env, Number(encounter.entry_a_id), Number(encounter.segment_id)),
-        scoreEntrySegment(env, Number(encounter.entry_b_id), Number(encounter.segment_id)),
-      ]);
+      const a=score(Number(encounter.entry_a_id),encounter.segment_id);
+      const b=score(Number(encounter.entry_b_id),encounter.segment_id);
       fixtures.push({ slotKey:encounter.slot_key,segmentId:encounter.segment_id===null?null:Number(encounter.segment_id), id: Number(encounter.id), entryAId: Number(encounter.entry_a_id), entryBId: Number(encounter.entry_b_id), scoreA: a.points, scoreB: b.points, complete: a.complete && b.complete });
       if (!a.complete || !b.complete) { provisional = true; continue; }
       const rowA = table.get(Number(encounter.entry_a_id));

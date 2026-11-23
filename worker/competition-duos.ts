@@ -276,7 +276,10 @@ async function computedTable(env: Env, roundLinkId: number) {
     `SELECT eliminate_count,bonus_by_position_json
      FROM competition_survival_round_settings WHERE round_link_id=? LIMIT 1`,
   ).bind(roundLinkId).first<{ eliminate_count: number; bonus_by_position_json: string }>();
-  const eliminateCount = Number(settingsRow?.eliminate_count ?? 0);
+  const stageSettings=await env.DB.prepare('SELECT settings_json FROM competition_stages WHERE id=?').bind(context.stage_id).first<{settings_json:string|null}>();
+  const defaults=JSON.parse(stageSettings?.settings_json||'{}') as {eliminateCount?:number};
+  const eliminateCount = Number(settingsRow?.eliminate_count ?? defaults.eliminateCount ?? 0);
+  if(!Number.isInteger(eliminateCount)||eliminateCount<0)throw new Error('Configuración de eliminados inválida');
   const bonusByPosition = settingsRow?.bonus_by_position_json ? JSON.parse(settingsRow.bonus_by_position_json) as BonusMap : {};
 
   const entriesResult = await env.DB.prepare(
@@ -444,7 +447,9 @@ async function confirmRound(env: Env, user: SessionUser, roundLinkId: number) {
     return error('Hay bonus para la próxima jornada pero todavía no existe una Fecha siguiente vinculada a esta etapa', 409);
   }
 
-  const snapshotStatements: D1PreparedStatement[] = [];
+  const snapshotStatements: D1PreparedStatement[] = [env.DB.prepare(`INSERT OR IGNORE INTO competition_survival_round_settings
+    (round_link_id,stage_id,eliminate_count,bonus_by_position_json,updated_by_user_id) VALUES (?,?,?,?,?)`)
+    .bind(roundLinkId,checked.context.stage_id,computed.settings.eliminateCount,JSON.stringify(computed.settings.bonusByPosition),user.id)];
   for (const award of awards) {
     const isEliminated = eliminated.has(award.row.entryId);
     const decision = isEliminated ? 'ELIMINATED' : reachesSemifinals ? 'QUALIFIED' : 'ACTIVE';
@@ -861,7 +866,7 @@ async function ownDuo(env:Env,competitionId:number,userId:string){
  const originalCaptain=typeof source.captainUserId==='string'?source.captainUserId:originals.results?.[0]?.userId;
  const captainUserId=active.some(m=>m.userId===originalCaptain)?originalCaptain:active[0]?.userId;
  const nickname=typeof source.nickname==='string'?source.nickname:member.display_name.split(' · ')[0];
- return {competition,team:{entryId:member.id,nickname,captainUserId,canRename:captainUserId===userId,
+ return {competition,team:{entryId:member.id,nickname,captainUserId,canRename:captainUserId===userId,needsName:typeof source.nickname!=='string'||!source.nickname.trim(),
   members:active.map(m=>({userId:m.userId,fullName:m.fullName}))}};
 }
 async function changeDuoName(request:Request,env:Env,user:SessionUser,competitionId:number){

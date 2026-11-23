@@ -1,16 +1,16 @@
 import {homeCompetitions,type HomeData} from './participant-home';
-import {competitionHref,phaseName,entryMembers} from './participant-competitions';
+import {competitionHref,phaseName,entryMembers,papaNextRound,papaSourceEntry} from './participant-competitions';
 
 const order=['LIGA_A','LIGA_B','COPA_A','COPA_B','COPA_TOTAL','COPA_DUOS','COPA_PAPA','COPA_CAMPEONES','PROMOCION'];
 export function homeCompetitionName(code:string, fallback:string):string {
  const labels:Record<string,string>={LIGA_A:'Liga A',LIGA_B:'Liga B',COPA_A:'Copa A',COPA_B:'Copa B',
-  COPA_TOTAL:'Total',COPA_DUOS:'Dúos',COPA_PAPA:'Papa',COPA_CAMPEONES:'Campeones',PROMOCION:'Promoción'};
+  COPA_TOTAL:'Copa Total',COPA_DUOS:'Copa Dúos',COPA_PAPA:'Copa Papa',COPA_CAMPEONES:'Copa Campeones',PROMOCION:'Promoción'};
  return labels[code]??fallback;
 }
 export function homeCompetitionDirectory(data:HomeData,user:string){
  const candidates=data.overview?.season?.competitions??data.season?.competitionCatalog??data.season?.competitions??[];
  const current=new Set(homeCompetitions(data,user).map(c=>c.competition.code));
- return candidates.filter(c=>c.code!=='PROMOCION'||data.overview?.season?.competitions.some(x=>x.code==='PROMOCION'))
+ return candidates.filter(c=>c.code!=='PROMOCION')
   .map(c=>({code:c.code,name:homeCompetitionName(c.code,c.displayName),
     href:competitionHref(c.code,data.season?.seasonNumber),current:current.has(c.code)}))
   .sort((a,b)=>{
@@ -27,20 +27,20 @@ export function homeCompetitionStatuses(data:HomeData,user:string){
   let primary=status;
   let detail:string|null=null;
   if(league){
-    primary=mine?`${mine.position}° · ${mine.points} pts`:'Posición pendiente';
-    detail=mine?.zone?.label??(data.league?.provisional?'Tabla provisional':status);
+    primary=phaseName(phase??'Liga');
+    detail=mine?`${mine.position}° · ${mine.points} pts`:status;
   }else{
     const isActive=status==='Participando'||status==='Clasificado'||status.startsWith('Participación registrada');
-    if(isActive && phase)primary=phaseName(phase);
+    if(isActive && phase)primary=season?.stages.some(st=>st.competitionId===c.id&&st.name===phase&&['ACCUMULATIVE_GROUPS','ROUND_ROBIN_GROUPS'].includes(st.type))?'Fase de grupos':phaseName(phase);
     if(context?.kind==='ACCUMULATIVE_GROUP'||context?.kind==='TOTAL_GROUP'){
-      primary=context.group.name;
-      detail=phase?phaseName(phase):status;
+      primary='Fase de grupos';
+      detail=context.group.name;
     }
     const opponent=context?.kind==='KNOCKOUT'?context.encounter.opponentName:null;
     const oppositeSide=sides.find(side=>!side.some(m=>m.userId===user));
     const oppositeNames=oppositeSide?.map(m=>m.fullName).join(' + ');
     if(opponent||oppositeNames)detail='vs. '+(opponent||oppositeNames);
-    else if(encounter && status!=='Eliminado')detail='Rival por definir';
+    else if(encounter && status!=='Eliminado')detail='Esperando rival';
     else if(!detail && phase && primary!==phaseName(phase))detail=phaseName(phase);
     if(c.code==='COPA_DUOS'){
       const contextPartner=context?.kind==='DUO_SURVIVAL'?context.partner?.fullName
@@ -51,6 +51,15 @@ export function homeCompetitionStatuses(data:HomeData,user:string){
       const teammate=contextPartner??currentPartner;
       if(teammate)detail=detail?[detail,'Con '+teammate].join(' · '):'Con '+teammate;
     }
+    if(season&&c.code==='COPA_PAPA'&&status!=='Eliminado'){
+      const next=papaNextRound(season,c).find(pair=>pair.sources.some(e=>entryMembers(season,papaSourceEntry(e),null).some(m=>m.userId===user)));
+      if(next){
+        primary=phaseName(next.stage.name);
+        const rival=next.sources.find(e=>!entryMembers(season,papaSourceEntry(e),null).some(m=>m.userId===user));
+        detail=rival?'Esperando rival: '+[rival.entryAId,rival.entryBId].filter(id=>id!==null).map(id=>entryMembers(season,id,rival.roundId).map(m=>m.fullName).join(' + ')).join(' o '):'Esperando rival';
+      }
+    }
+    if(status==='No participás'){primary='No participa';detail=null;}
     if(status==='Eliminado'||status==='Campeón'||status==='Subcampeón') {
       primary=status;
       if(phase)detail=phaseName(phase);
