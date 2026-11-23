@@ -1,3 +1,4 @@
+import {schedulingRoundError} from './competition-scheduling';
 import type { Env } from './index';
 
 type SessionUser = { id: string; role: 'admin' | 'participant'; is_active: number };
@@ -547,9 +548,9 @@ async function activateNode(
 
   const body = await request.json().catch(() => null) as { stageId?: number; roundLinkId?: number } | null;
   const stageId = Number(body?.stageId);
-  const roundLinkId = Number(body?.roundLinkId);
+  const roundLinkId = body?.roundLinkId ? Number(body.roundLinkId) : null;
   if (!Number.isInteger(stageId) || stageId <= 0) return error('Etapa inválida');
-  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha inválida');
+  if (roundLinkId !== null && (!Number.isInteger(roundLinkId) || roundLinkId <= 0)) return error('Fecha inválida');
 
   const stage = await env.DB.prepare(
     `SELECT id,stage_type,status FROM competition_stages
@@ -558,13 +559,16 @@ async function activateNode(
   if (!stage || stage.stage_type !== 'KNOCKOUT') return error('La etapa debe ser eliminatoria y pertenecer a Copa Campeones', 409);
   if (stage.status === 'finished' || stage.status === 'archived') return error('La etapa ya está cerrada', 409);
 
+  if(roundLinkId!==null){
   const link = await env.DB.prepare(
-    `SELECT id FROM competition_round_links
+    `SELECT id,round_id FROM competition_round_links
      WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL'
      LIMIT 1`,
-  ).bind(roundLinkId, competitionId, stageId).first<{ id: number }>();
+  ).bind(roundLinkId, competitionId, stageId).first<{ id: number;round_id:number }>();
   if (!link) return error('La Fecha no está vinculada a la etapa elegida', 409);
 
+  const blocked=await schedulingRoundError(env.DB,link.round_id);if(blocked)return error(blocked,409);
+  }
   const created = await env.DB.prepare(
     `INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
      VALUES (?,?,?,?,?,'pending') RETURNING id`,

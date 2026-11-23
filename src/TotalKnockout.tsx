@@ -93,7 +93,7 @@ export default function TotalKnockout({
         randomSeed?: number;
       }>(path, 'POST', {
         targetStageId: targetId,
-        roundLinkId: Number(link),
+        roundLinkId: link?Number(link):null,
         ...(mode === 'MANUAL'
           ? {
               pairs: pairs.map((p) => ({
@@ -146,7 +146,7 @@ export default function TotalKnockout({
             setPool([]);
           }}
         >
-          <option value="">Elegir Fecha vinculada</option>
+          <option value="">Sin Fecha · vincular después desde Fechas</option>
           {links.map((l) => (
             <option key={l.id} value={l.id}>
               {l.roundName} · {statusLabel(l.roundStatus)}
@@ -156,13 +156,13 @@ export default function TotalKnockout({
       </label>
       {!links.length && (
         <p>
-          Vinculá una Fecha a esta etapa desde Configuración general, etapas y
+          Podés configurar los cruces sin Fecha y vincularlos después desde
           Fechas.
         </p>
       )}
       <button
         className="button button--secondary"
-        disabled={locked || !link}
+        disabled={locked}
         onClick={() => void preview()}
       >
         Consultar clasificados para {label}

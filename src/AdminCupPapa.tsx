@@ -235,7 +235,6 @@ export default function AdminCupPapa({
                 disabled={
                   initialLocked ||
                   !stage ||
-                  !link ||
                   papaPairErrors(pairs, people).length > 0 ||
                   (!!initial?.pairs.length && !reason.trim())
                 }
@@ -247,7 +246,7 @@ export default function AdminCupPapa({
                         'POST',
                         {
                           stageId: Number(stage),
-                          roundLinkId: Number(link),
+                          roundLinkId: link?Number(link):null,
                           pairs,
                           reason,
                         },
@@ -330,7 +329,7 @@ export default function AdminCupPapa({
               />
               <button
                 className="button button--primary"
-                disabled={locked || !ready || !stage || !link}
+                disabled={locked || !ready || !stage}
                 onClick={() =>
                   void run(
                     () =>
@@ -339,7 +338,7 @@ export default function AdminCupPapa({
                         'POST',
                         {
                           targetStageId: Number(stage),
-                          roundLinkId: Number(link),
+                          roundLinkId: link?Number(link):null,
                         },
                       ),
                     sourceEncounters.length === 2
@@ -365,8 +364,7 @@ export default function AdminCupPapa({
                       !ready ||
                       sourceEncounters.length !== 2 ||
                       papaLosers(sourceEncounters).length !== 2 ||
-                      !stage ||
-                      !link
+                      !stage
                     }
                     onClick={() =>
                       void run(
@@ -376,7 +374,7 @@ export default function AdminCupPapa({
                             'POST',
                             {
                               targetStageId: Number(stage),
-                              roundLinkId: Number(link),
+                              roundLinkId: link?Number(link):null,
                             },
                           ),
                         'Tercer puesto creado con los perdedores confirmados.',
@@ -566,7 +564,7 @@ function PapaTarget({
           value={link}
           onChange={(e) => onLink(e.target.value)}
         >
-          <option value="">Elegir Fecha vinculada</option>
+          <option value="">Sin Fecha · vincular después desde Fechas</option>
           {c.roundLinks
             .filter(
               (l) => l.stageId === Number(stage) && l.purpose === 'NORMAL',
@@ -578,7 +576,7 @@ function PapaTarget({
             ))}
         </select>
       </label>
-      <p>Creá etapas y vinculá Fechas desde Configuración general.</p>
+      <p>Creá las etapas en Configuración general. Las Fechas se pueden vincular después.</p>
     </>
   );
 }

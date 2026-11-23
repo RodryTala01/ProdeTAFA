@@ -274,7 +274,7 @@ function DuoKnockout({
                   disabled={locked}
                   onChange={(e) => setLink(e.target.value)}
                 >
-                  <option value="">Elegir Fecha vinculada</option>
+                  <option value="">Sin Fecha · vincular después desde Fechas</option>
                   {links.map((l) => (
                     <option key={l.id} value={l.id}>
                       {l.roundName}
@@ -285,7 +285,7 @@ function DuoKnockout({
               <button
                 className="button button--primary"
                 disabled={
-                  locked || !link || (!final && !source) || (final && !sourceId)
+                  locked || (!final && !source) || (final && !sourceId)
                 }
                 onClick={() =>
                   void run(() =>
@@ -294,7 +294,7 @@ function DuoKnockout({
                         ? `${cupAdmin}/stages/${sourceId}/duos/final`
                         : `${cupAdmin}/round-links/${source}/duos/semifinals`,
                       'POST',
-                      { targetStageId: targetId, roundLinkId: Number(link) },
+                      { targetStageId: targetId, roundLinkId: link?Number(link):null },
                     ),
                   )
                 }

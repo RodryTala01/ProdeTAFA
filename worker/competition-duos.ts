@@ -491,7 +491,7 @@ async function ensureDuoKnockoutTarget(
   env: Env,
   competitionId: number,
   stageId: number,
-  roundLinkId: number,
+  roundLinkId: number | null,
 ) {
   const c=await competitionInfo(env,competitionId);
   if(!c||[c.status,c.season_status].some(s=>['finished','archived'].includes(s)))return {ok:false as const,error:'La competición o temporada ya está cerrada'};
@@ -510,6 +510,7 @@ async function ensureDuoKnockoutTarget(
   if (stage.stage_type !== 'KNOCKOUT') return { ok: false as const, error: 'La etapa destino debe ser eliminatoria' };
   if (stage.status === 'finished' || stage.status === 'archived') return { ok: false as const, error: 'La etapa destino ya está cerrada' };
 
+  if(roundLinkId!==null){
   const link = await env.DB.prepare(
     `SELECT id,round_id FROM competition_round_links
      WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL'
@@ -520,12 +521,13 @@ async function ensureDuoKnockoutTarget(
   if(round?.status!=='draft'||(round.kickoff&&new Date(round.kickoff).getTime()<=Date.now()))return {ok:false as const,error:'La Fecha destino ya fue publicada o iniciada'};
 
 
+  }
   const existing = await env.DB.prepare(
     `SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?`,
   ).bind(stageId).first<{ total: number }>();
   if (Number(existing?.total ?? 0) > 0) return { ok: false as const, error: 'La etapa destino ya tiene cruces configurados' };
 
-  return { ok: true as const, stage, link };
+  return { ok: true as const, stage };
 }
 
 async function buildSemifinals(request: Request, env: Env, user: SessionUser, sourceRoundLinkId: number) {
@@ -534,9 +536,9 @@ async function buildSemifinals(request: Request, env: Env, user: SessionUser, so
 
   const body = await request.json().catch(() => null) as { targetStageId?: number; roundLinkId?: number } | null;
   const targetStageId = Number(body?.targetStageId);
-  const roundLinkId = Number(body?.roundLinkId);
+  const roundLinkId = body?.roundLinkId ? Number(body.roundLinkId) : null;
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa de semifinal inválida');
-  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha de semifinal inválida');
+  if (roundLinkId !== null && (!Number.isInteger(roundLinkId) || roundLinkId <= 0)) return error('Fecha de semifinal inválida');
 
   const order=await knockoutOrder(env,source.context.competition_id);if(order[0]!==targetStageId)return error('La etapa destino debe ser Semifinal',409);
   const snapshot = await snapshotPayload(env, sourceRoundLinkId);
@@ -619,9 +621,9 @@ async function buildFinal(request: Request, env: Env, user: SessionUser, semifin
 
   const body = await request.json().catch(() => null) as { targetStageId?: number; roundLinkId?: number } | null;
   const targetStageId = Number(body?.targetStageId);
-  const roundLinkId = Number(body?.roundLinkId);
+  const roundLinkId = body?.roundLinkId ? Number(body.roundLinkId) : null;
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa final inválida');
-  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha final inválida');
+  if (roundLinkId !== null && (!Number.isInteger(roundLinkId) || roundLinkId <= 0)) return error('Fecha final inválida');
 
   if(order[1]!==targetStageId)return error('El destino debe ser Final; Copa Dúos no tiene tercer puesto',409);
   const target = await ensureDuoKnockoutTarget(env, semifinalStage.competition_id, targetStageId, roundLinkId);

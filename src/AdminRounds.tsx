@@ -1,3 +1,4 @@
+import RoundCompetitionLinks from './RoundCompetitionLinks';
 import {argentinaDateTime} from './match-time';
 import AdminRoundSubmissions from './AdminRoundSubmissions';
 import {safeAdminError} from './safe-admin-error';
@@ -302,6 +303,7 @@ export default function AdminRounds() {
               </div>
             </section>
 
+            <RoundCompetitionLinks key={selected.id} roundId={selected.id} rounds={rounds}/>
             {!isDraft && !detailLoading && <AdminRoundSubmissions key={selected.id} roundId={selected.id}/>}
 
             {isDraft && rounds.some(round => round.status === 'open' && round.id !== selected.id) && <p className="alert">Ya hay una Fecha abierta. Cerrala antes de publicar otra.</p>}

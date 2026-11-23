@@ -187,7 +187,7 @@ async function ensurePapaEntry(env: Env, competitionId: number, userId: string, 
   return Number(created.id);
 }
 
-async function validateTarget(env: Env, competitionId: number, stageId: number, roundLinkId: number, allowExisting = false) {
+async function validateTarget(env: Env, competitionId: number, stageId: number, roundLinkId: number | null, allowExisting = false) {
   const competition=await papaCompetition(env,competitionId);
   if(!competition||[competition.status,competition.season_status].some(s=>['finished','archived'].includes(s))) return {ok:false as const,error:'La competición o temporada ya está cerrada'};
   const stage = await env.DB.prepare(
@@ -196,6 +196,7 @@ async function validateTarget(env: Env, competitionId: number, stageId: number, 
   ).bind(stageId, competitionId).first<{ id: number; stage_type: string; status: string }>();
   if (!stage || stage.stage_type !== 'KNOCKOUT') return { ok: false as const, error: 'La etapa debe ser eliminatoria y pertenecer a Copa Papa' };
   if (stage.status === 'finished' || stage.status === 'archived') return { ok: false as const, error: 'La etapa ya está cerrada' };
+  if(roundLinkId!==null){
   const link = await env.DB.prepare(
     `SELECT id FROM competition_round_links
      WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL' LIMIT 1`,
@@ -203,6 +204,7 @@ async function validateTarget(env: Env, competitionId: number, stageId: number, 
   if (!link) return { ok: false as const, error: 'La Fecha no está vinculada a la etapa indicada' };
   const activity=await env.DB.prepare(`SELECT r.id FROM competition_round_links l JOIN rounds r ON r.id=l.round_id LEFT JOIN matches m ON m.round_id=r.id WHERE l.id=? AND (r.status<>'draft' OR julianday(m.kickoff_at)<=julianday('now') OR m.result_finalized_at IS NOT NULL) LIMIT 1`).bind(roundLinkId).first();
   if(activity)return {ok:false as const,error:'La Fecha destino ya fue publicada o iniciada'};
+  }
   const existing = await env.DB.prepare(
     `SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?`,
   ).bind(stageId).first<{ total: number }>();
@@ -217,9 +219,9 @@ async function confirmInitialBracket(request: Request, env: Env, user: SessionUs
     stageId?: number; roundLinkId?: number; pairs?: PairInput[]; reason?: string;
   } | null;
   const stageId = Number(body?.stageId);
-  const roundLinkId = Number(body?.roundLinkId);
+  const roundLinkId = body?.roundLinkId ? Number(body.roundLinkId) : null;
   if (!Number.isInteger(stageId) || stageId <= 0) return error('Etapa inicial inválida');
-  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha inicial inválida');
+  if (roundLinkId !== null && (!Number.isInteger(roundLinkId) || roundLinkId <= 0)) return error('Fecha inicial inválida');
   if (!Array.isArray(body?.pairs) || body.pairs.length === 0) return error('Tenés que confirmar los cruces iniciales');
 
   const before=await initialState(env,competitionId);
@@ -313,9 +315,9 @@ async function buildNextRound(request: Request, env: Env, user: SessionUser, sou
 
   const body = await request.json().catch(() => null) as { targetStageId?: number; roundLinkId?: number } | null;
   const targetStageId = Number(body?.targetStageId);
-  const roundLinkId = Number(body?.roundLinkId);
+  const roundLinkId = body?.roundLinkId ? Number(body.roundLinkId) : null;
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa destino inválida');
-  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha destino inválida');
+  if (roundLinkId !== null && (!Number.isInteger(roundLinkId) || roundLinkId <= 0)) return error('Fecha destino inválida');
   const target = await validateTarget(env, source.competition_id, targetStageId, roundLinkId);
   if (!target.ok) return error(target.error, 409);
   const order=await env.DB.prepare('SELECT 1 FROM competition_stages a JOIN competition_stages b ON b.id=? WHERE a.id=? AND b.sequence>a.sequence').bind(targetStageId,sourceStageId).first();
@@ -353,9 +355,9 @@ async function buildThirdPlace(request: Request, env: Env, user: SessionUser, se
 
   const body = await request.json().catch(() => null) as { targetStageId?: number; roundLinkId?: number } | null;
   const targetStageId = Number(body?.targetStageId);
-  const roundLinkId = Number(body?.roundLinkId);
+  const roundLinkId = body?.roundLinkId ? Number(body.roundLinkId) : null;
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa de tercer puesto inválida');
-  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha de tercer puesto inválida');
+  if (roundLinkId !== null && (!Number.isInteger(roundLinkId) || roundLinkId <= 0)) return error('Fecha de tercer puesto inválida');
   const target = await validateTarget(env, source.competition_id, targetStageId, roundLinkId);
   if (!target.ok) return error(target.error, 409);
 

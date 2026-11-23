@@ -388,3 +388,7 @@ Si una regla futura es ambigua, no inventar una extensión grande: mantener el c
 - Historia usa sólo lotes históricos activos y temporadas oficiales finalizadas/archivadas. Títulos explícitos: T1 Brasil 2021 es Copa América, nunca inferir Liga A. No importar T1 durante este bloque.
 - Fechas históricas identificadas por competitionCode/round/participantKey y cruces por matchId estable; conservar cuatro cruces individuales Dúos. Nuevos campos en JSON, sin nueva migración.
 - Estadisticas sigue siendo la única fuente de totales importados; nunca sumar tablas de competiciones de nuevo.
+
+### Configuración independiente de Fechas
+- Los sorteos y cruces pueden confirmarse con round_link_id NULL; no requieren una Fecha destino. Los requisitos deportivos de clasificación y ganadores de la etapa origen se conservan.
+- Admin → Fechas vincula fases y cruces ya configurados, permitiendo varias competencias por Fecha y distribuir fases entre Fechas. Los cambios se auditan y se bloquean tras publicación, inicio, envíos, puntajes o resultados confirmados. Promoción conserva ambos cruces en la misma Fecha; Dúos conserva sus bonus y Campeones sus referencias al programar después. Sin nuevos pronósticos ni cambios de scoring.

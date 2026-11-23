@@ -1,3 +1,4 @@
+import {handleCompetitionEngine} from '../worker/competitions';
 import { readFileSync, readdirSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
@@ -58,7 +59,7 @@ async function call(path: string, method = 'GET', body?: object) {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
-  for (const handler of [handleCompetitionChampions, handleCompetitionKnockout]) {
+  for (const handler of [handleCompetitionChampions, handleCompetitionKnockout, handleCompetitionEngine]) {
     const response = await handler(request, env());
     if (response) return response;
   }
@@ -257,4 +258,17 @@ describe('Copa Campeones backend funcional', () => {
     const nextBracket = (await after.json() as any).bracket;
     expect(nextBracket.find((node: any) => node.code === 'U2').readyToActivate).toBe(true);
   });
+});
+
+it('activa un cruce de Campeones sin Fecha y actualiza nodo y cruce al programarlo después',async()=>{
+ const pref=await call('admin/competition-engine/competitions/100/champions/prefill','POST',{});
+ const slots=(await pref.json() as any).slots;
+ expect((await call('admin/competition-engine/competitions/100/champions/slots','PUT',{slots:slots.map((s:any)=>({slotCode:s.slotCode,userId:s.proposedUser.id}))})).status).toBe(200);
+ expect((await call('admin/competition-engine/competitions/100/champions/bracket','POST',{})).status).toBe(200);
+ const response=await call('admin/competition-engine/competitions/100/champions/nodes/U1/activate','POST',{stageId:200});
+ expect(response.status).toBe(200);const id=(await response.json() as any).encounterId;
+ expect((db.prepare('SELECT round_link_id FROM competition_encounters WHERE id=?').get(id) as any).round_link_id).toBeNull();
+ expect((await call('admin/competition-engine/scheduling/links/400','PUT',{encounterIds:[id]})).status).toBe(200);
+ expect((db.prepare('SELECT round_link_id FROM competition_champions_nodes WHERE encounter_id=?').get(id) as any).round_link_id).toBe(400);
+ expect((db.prepare('SELECT round_link_id FROM competition_encounters WHERE id=?').get(id) as any).round_link_id).toBe(400);
 });
