@@ -35,6 +35,8 @@ export default function AdminCupPapa({
     [tab, setTab] = useState('Propuesta'),
     [pairs, setPairs] = useState<PapaPair[]>([]),
     [stage, setStage] = useState(''),
+    [destinationStage, setDestinationStage] = useState(''),
+    [destinationReason, setDestinationReason] = useState(''),
     [source, setSource] = useState(''),
     [reason, setReason] = useState(''),
     [busy, setBusy] = useState(false),
@@ -248,6 +250,28 @@ export default function AdminCupPapa({
                   ? 'Guardar corrección manual'
                   : 'Confirmar llave inicial'}
               </button>
+              {!!initial?.pairs.length && (
+                <fieldset className="form-stack" disabled={initialLocked}>
+                  <legend>Corregir etapa destino</legend>
+                  <p>Conserva los cruces y sus Fechas vinculadas, sin volver a sortear.</p>
+                  <label className="field">Nueva etapa
+                    <select value={destinationStage} onChange={e => setDestinationStage(e.target.value)}>
+                      <option value="">Elegir etapa</option>
+                      {emptyStages.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  </label>
+                  <label className="field">Motivo de la corrección
+                    <input value={destinationReason} onChange={e => setDestinationReason(e.target.value)} />
+                  </label>
+                  <button className="button" disabled={initialLocked || !destinationStage || !destinationReason.trim()}
+                    onClick={() => void run(async () => {
+                      await cupApi(`${cupAdmin}/competitions/${c.id}/papa/initial-stage`, 'PUT', {stageId:Number(destinationStage),reason:destinationReason});
+                      setDestinationStage(''); setDestinationReason('');
+                    }, 'Etapa destino corregida. Se conservaron los cruces y se registró el motivo.')}>
+                    Guardar etapa destino
+                  </button>
+                </fieldset>
+              )}
               {initialLocked && !locked && (
                 <p>
                   La llave ya tuvo actividad o avance y no puede corregirse.

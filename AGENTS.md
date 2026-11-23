@@ -261,7 +261,7 @@ La rama `dev/t32-competition-engine` ya contiene el backend deportivo del motor 
 
 - Mantener COPA_PAPA y editar display_name para el homenaje desde Configuración general.
 - Propuesta espejo de temporada anterior: mejor Liga A vs peor Liga B, con no emparejados y byes de referencia visibles. Manual primero, todos los activos A/B exactamente una vez; rival null representa bye.
-- Corrección de llave inicial mediante su endpoint específico, con motivo, snapshot anterior y auditoría. Sólo antes de publicación/inicio/actividad o avance; conservar etapa y Fecha originales.
+- Corrección de llave inicial mediante su endpoint específico, con motivo, snapshot anterior y auditoría. Sólo antes de publicación/inicio/actividad o avance; conservar etapa y Fecha originales al editar parejas. Se permite corregir por separado la etapa destino inicial con motivo y auditoría antes de actividad o avance, conservando IDs, cruces y Fechas borrador seguras.
 - Progresión secuencial de ganadores confirmados, sin nuevos sorteos ni reconstrucción por knockout genérico. Final desde dos ganadores; tercer puesto desde exactamente dos perdedores de semifinales, con etapa/vínculo independiente.
 - Reutilizar CupEncounter para puntajes, ganadores y TAFA. Bloquear mutaciones con competición/temporada cerrada y bifurcaciones repetidas de la misma ronda.
 

@@ -1,4 +1,5 @@
 import type { Env } from './index';
+import { schedulingRoundError } from './competition-scheduling';
 
 type SessionUser = { id: string; role: 'admin' | 'participant'; is_active: number };
 type PairInput = { userAId?: string; userBId?: string | null };
@@ -277,6 +278,44 @@ async function confirmInitialBracket(request: Request, env: Env, user: SessionUs
   return json({ ok: true, competitionId, stageId, roundLinkId, pairs });
 }
 
+async function correctInitialStage(request: Request, env: Env, user: SessionUser, competitionId: number) {
+  const competition = await papaCompetition(env, competitionId);
+  if (!competition || competition.code !== 'COPA_PAPA') return error('Copa Papa no encontrada', 404);
+  const body = await request.json().catch(() => null) as {stageId?: number; reason?: string} | null;
+  const stageId = Number(body?.stageId), reason = body?.reason?.trim();
+  if (!Number.isInteger(stageId) || stageId <= 0 || !reason) return error('Elegí la etapa destino e indicá el motivo');
+  const before = await initialState(env, competitionId);
+  if (!before.stageId || !before.editable) return error('La llave inicial ya tuvo actividad o avance y no puede cambiar de etapa', 409);
+  if (stageId === before.stageId) return error('Elegí una etapa diferente');
+  const source = await validateTarget(env, competitionId, before.stageId, null, true);
+  const target = await validateTarget(env, competitionId, stageId, null);
+  if (!source.ok) return error(source.error, 409);
+  if (!target.ok) return error(target.error, 409);
+  const activity = await env.DB.prepare(`SELECT 1 FROM competition_encounters e WHERE e.stage_id=? AND (
+    (COALESCE(e.resolution,'')<>'bye' AND (e.score_a IS NOT NULL OR e.score_b IS NOT NULL OR e.admin_confirmed_at IS NOT NULL OR e.winner_entry_id IS NOT NULL))
+    OR EXISTS(SELECT 1 FROM competition_tiebreaks t WHERE t.encounter_id=e.id))
+    UNION ALL SELECT 1 FROM competition_results WHERE competition_id=? LIMIT 1`).bind(before.stageId, competitionId).first();
+  if (activity) return error('Hay puntajes, resultados o desempates confirmados; no se puede cambiar la etapa', 409);
+  const links = await env.DB.prepare('SELECT id,round_id,purpose FROM competition_round_links WHERE stage_id=?').bind(before.stageId).all<{id:number;round_id:number;purpose:string}>();
+  if (links.results?.length) {
+    const occupied = await env.DB.prepare('SELECT id FROM competition_round_links WHERE stage_id=? LIMIT 1').bind(stageId).first();
+    if (occupied) return error('La etapa destino ya tiene Fechas vinculadas. Corregí esas vinculaciones desde Fechas primero', 409);
+    for (const link of links.results) {
+      const blocked = await schedulingRoundError(env.DB, link.round_id);
+      if (blocked) return error(blocked, 409);
+      const shared = await env.DB.prepare('SELECT id FROM competition_encounters WHERE round_link_id=? AND stage_id<>? LIMIT 1').bind(link.id, before.stageId).first();
+      if (link.purpose !== 'NORMAL' || shared) return error('La vinculación tiene actividad compartida o desempates y no puede moverse', 409);
+    }
+  }
+  await env.DB.batch([
+    env.DB.prepare('UPDATE competition_round_links SET stage_id=? WHERE stage_id=?').bind(stageId, before.stageId),
+    env.DB.prepare('UPDATE competition_encounters SET stage_id=? WHERE stage_id=?').bind(stageId, before.stageId),
+    env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json) VALUES (?,'competition.papa_initial_stage_corrected','competition',?,?,?)`)
+      .bind(user.id, String(competitionId), JSON.stringify(before), JSON.stringify({stageId, reason, preservedEncounters:true})),
+  ]);
+  return json({ok:true,stageId});
+}
+
 async function confirmedOutcome(env: Env, stageId: number) {
   const rows = await env.DB.prepare(
     `SELECT id,entry_a_id,entry_b_id,winner_entry_id,status,admin_confirmed_at
@@ -385,6 +424,15 @@ export async function handleCompetitionPapa(request: Request, env: Env): Promise
     if (request.method !== 'GET') return error('Método no permitido', 405);
     const payload = await seedingProposal(env, Number(proposalMatch[1]));
     return payload ? json(payload) : error('Copa Papa no encontrada', 404);
+  }
+
+  const stageCorrection = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/papa\/initial-stage$/);
+  if (stageCorrection) {
+    const user = await sessionUser(request, env);
+    if (!user) return error('No autorizado', 401);
+    if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+    if (request.method !== 'PUT') return error('Método no permitido', 405);
+    return correctInitialStage(request, env, user, Number(stageCorrection[1]));
   }
 
   const initialMatch = pathname.match(/^\/api\/admin\/competition-engine\/competitions\/(\d+)\/papa\/initial-bracket$/);
