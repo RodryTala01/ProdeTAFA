@@ -44,8 +44,7 @@ export default function CupAbKnockout({
   const [source, setSource] = useState(
     String(index === 0 ? groupStage.id : (knockouts[index - 1]?.id ?? "")),
   );
-  const [link, setLink] = useState(""),
-    [mode, setMode] = useState<"MANUAL" | "AUTOMATIC">("MANUAL");
+  const [mode, setMode] = useState<"MANUAL" | "AUTOMATIC">("MANUAL");
   const [pool, setPool] = useState<Entry[]>([]),
     [pairs, setPairs] = useState<string[][]>([]),
     [encounters, setEncounters] = useState<Encounter[]>([]);
@@ -53,9 +52,6 @@ export default function CupAbKnockout({
     [error, setError] = useState(""),
     [message, setMessage] = useState(""),
     [reason, setReason] = useState("");
-  const links = competition.roundLinks.filter(
-    (l) => l.stageId === Number(target) && l.purpose === "NORMAL",
-  );
   const targetStage = competition.stages.find((s) => s.id === Number(target));
   const locked = disabled || busy;
   async function loadEncounters() {
@@ -73,7 +69,6 @@ export default function CupAbKnockout({
     setPairs([]);
     setMessage("");
     setError("");
-    setLink("");
     if (target)
       cupApi<{ encounters: Encounter[] }>(
         `/api/competition-engine/stages/${target}/knockout`,
@@ -102,7 +97,7 @@ export default function CupAbKnockout({
   }
   const payload = {
     targetStageId: Number(target),
-    roundLinkId: link?Number(link):null,
+
     groupStageId: groupStage.id,
   };
   const path = `${cupAdmin}/stages/${source}/cup-ab-progression/${action}`;
@@ -205,25 +200,7 @@ export default function CupAbKnockout({
           ))}
         </select>
       </label>
-      <label className="field">
-        Fecha de {label}
-        <select
-          aria-label={`Fecha de ${label}`}
-          disabled={locked}
-          value={link}
-          onChange={(e) => {
-            setLink(e.target.value);
-            setPool([]);
-          }}
-        >
-          <option value="">Sin Fecha · vincular después desde Fechas</option>
-          {links.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.roundName} · {statusLabel(l.roundStatus)}
-            </option>
-          ))}
-        </select>
-      </label>
+
       <p>
         La Fecha es opcional; podés vincularla después desde Admin → Fechas. Los ganadores
         anteriores deben estar confirmados por Admin.

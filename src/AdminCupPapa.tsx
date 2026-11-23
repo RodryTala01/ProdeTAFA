@@ -35,7 +35,6 @@ export default function AdminCupPapa({
     [tab, setTab] = useState('Propuesta'),
     [pairs, setPairs] = useState<PapaPair[]>([]),
     [stage, setStage] = useState(''),
-    [link, setLink] = useState(''),
     [source, setSource] = useState(''),
     [reason, setReason] = useState(''),
     [busy, setBusy] = useState(false),
@@ -53,11 +52,6 @@ export default function AdminCupPapa({
     setStage(
       tab === 'Llave inicial' ? String(d.proposal.initial.stageId ?? '') : '',
     );
-    setLink(
-      tab === 'Llave inicial'
-        ? String(d.proposal.initial.roundLinkId ?? '')
-        : '',
-    );
   }
   useEffect(() => {
     let active = true;
@@ -67,7 +61,7 @@ export default function AdminCupPapa({
           setData(d);
           setPairs(d.proposal.initial.pairs);
           setStage(String(d.proposal.initial.stageId ?? ''));
-          setLink(String(d.proposal.initial.roundLinkId ?? ''));
+
         }
       })
       .catch((e) => {
@@ -131,11 +125,6 @@ export default function AdminCupPapa({
                 setTab(t);
                 setStage(
                   t === 'Llave inicial' ? String(initial?.stageId ?? '') : '',
-                );
-                setLink(
-                  t === 'Llave inicial'
-                    ? String(initial?.roundLinkId ?? '')
-                    : '',
                 );
               }}
             >
@@ -212,13 +201,13 @@ export default function AdminCupPapa({
                     : emptyStages
                 }
                 stage={stage}
-                link={link}
+
                 disabled={initialLocked || !!initial?.pairs.length}
                 onStage={(v) => {
                   setStage(v);
-                  setLink('');
+
                 }}
-                onLink={setLink}
+
               />
               {!!initial?.pairs.length && (
                 <label className="field">
@@ -246,7 +235,7 @@ export default function AdminCupPapa({
                         'POST',
                         {
                           stageId: Number(stage),
-                          roundLinkId: link?Number(link):null,
+                          roundLinkId: initial?.roundLinkId??null,
                           pairs,
                           reason,
                         },
@@ -276,7 +265,7 @@ export default function AdminCupPapa({
                   onChange={(e) => {
                     setSource(e.target.value);
                     setStage('');
-                    setLink('');
+
                   }}
                 >
                   <option value="">Elegir etapa con cruces</option>
@@ -319,13 +308,13 @@ export default function AdminCupPapa({
                       Infinity),
                 )}
                 stage={stage}
-                link={link}
+
                 disabled={locked || !ready}
                 onStage={(v) => {
                   setStage(v);
-                  setLink('');
+
                 }}
-                onLink={setLink}
+
               />
               <button
                 className="button button--primary"
@@ -338,7 +327,7 @@ export default function AdminCupPapa({
                         'POST',
                         {
                           targetStageId: Number(stage),
-                          roundLinkId: link?Number(link):null,
+
                         },
                       ),
                     sourceEncounters.length === 2
@@ -374,7 +363,7 @@ export default function AdminCupPapa({
                             'POST',
                             {
                               targetStageId: Number(stage),
-                              roundLinkId: link?Number(link):null,
+
                             },
                           ),
                         'Tercer puesto creado con los perdedores confirmados.',
@@ -527,18 +516,14 @@ function PapaTarget({
   competition: c,
   stages,
   stage,
-  link,
   disabled,
   onStage,
-  onLink,
 }: {
   competition: CupCompetition;
   stages: CupCompetition['stages'];
   stage: string;
-  link: string;
   disabled: boolean;
   onStage: (v: string) => void;
-  onLink: (v: string) => void;
 }) {
   return (
     <>
@@ -557,25 +542,7 @@ function PapaTarget({
           ))}
         </select>
       </label>
-      <label className="field">
-        Fecha destino
-        <select
-          disabled={disabled || !stage}
-          value={link}
-          onChange={(e) => onLink(e.target.value)}
-        >
-          <option value="">Sin Fecha · vincular después desde Fechas</option>
-          {c.roundLinks
-            .filter(
-              (l) => l.stageId === Number(stage) && l.purpose === 'NORMAL',
-            )
-            .map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.roundName}
-              </option>
-            ))}
-        </select>
-      </label>
+
       <p>Creá las etapas en Configuración general. Las Fechas se pueden vincular después.</p>
     </>
   );

@@ -122,7 +122,7 @@ export async function configureGroups(request: Request, env: Env, user: SessionU
   if (stage.status !== 'draft') return error('Los grupos sólo pueden reemplazarse mientras la etapa está en borrador', 409);
 
   const linkedRounds = await env.DB.prepare(
-    `SELECT COUNT(*) AS total FROM competition_round_links WHERE stage_id = ?`,
+    `SELECT COUNT(*) AS total FROM competition_round_links l JOIN rounds r ON r.id=l.round_id WHERE l.stage_id = ? AND (r.status<>'draft' OR r.published_at IS NOT NULL OR EXISTS(SELECT 1 FROM matches m WHERE m.round_id=r.id AND (julianday(m.kickoff_at)<=julianday('now') OR m.result_finalized_at IS NOT NULL)))`,
   ).bind(stageId).first<{ total: number }>();
   if (Number(linkedRounds?.total ?? 0) > 0) return error('Desvinculá las Fechas antes de reemplazar los grupos', 409);
 

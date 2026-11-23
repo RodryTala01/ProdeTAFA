@@ -668,3 +668,18 @@ describe('Copa Total: campeón anterior en A1',()=>{
   expect((await call(`${base}/stages/1/total/groups`,'POST',{groups:proposed})).status).toBe(200);
  });
 });
+
+it('genera el fixture de Total sin calendario y lo programa después conservando los cruces',async()=>{
+ members(12);
+ expect((await call(`${base}/stages/1/total/groups`,'POST',{groups:groups([3,4,5])})).status).toBe(200);
+ expect((db.prepare('SELECT COUNT(*) n FROM rounds').get() as any).n).toBe(0);
+ expect((await call(`${base}/stages/1/total/fixture`,'POST',{})).status).toBe(200);
+ const before=db.prepare('SELECT id,slot_key,entry_a_id,entry_b_id,round_link_id,segment_id FROM competition_encounters ORDER BY id').all() as any[];
+ expect(before).toHaveLength(28);expect(before.every(e=>e.round_link_id===null&&e.segment_id===null)).toBe(true);
+ db.exec("INSERT INTO rounds(id,name,status) VALUES(1,'Posterior 1','draft'),(2,'Posterior 2','draft'); INSERT INTO competition_round_links(id,competition_id,stage_id,round_id,sequence) VALUES(1,1,1,1,1),(2,1,1,2,2)");
+ for(let r=1;r<=2;r++)for(let i=0;i<12;i++)db.prepare("INSERT INTO matches(round_id,provider,provider_fixture_id,home_team_name,away_team_name,kickoff_at) VALUES(?,'test',?,'Local','Visitante','2099-01-01T18:00:00Z')").run(r,'calendar-'+r+'-'+i);
+ expect((await call(`${base}/stages/1/total/segments`,'POST',{})).status).toBe(200);
+ const after=db.prepare('SELECT e.*,s.name AS segment_name FROM competition_encounters e JOIN competition_round_segments s ON s.id=e.segment_id ORDER BY e.id').all() as any[];
+ expect(after.map(e=>[e.id,e.entry_a_id,e.entry_b_id])).toEqual(before.map(e=>[e.id,e.entry_a_id,e.entry_b_id]));
+ expect(after.every(e=>e.round_link_id!==null&&e.segment_name==='Mini fecha '+e.slot_key.match(/-M([1-6])-\d+$/)[1])).toBe(true);
+});

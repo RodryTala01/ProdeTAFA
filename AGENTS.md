@@ -392,3 +392,5 @@ Si una regla futura es ambigua, no inventar una extensión grande: mantener el c
 ### Configuración independiente de Fechas
 - Los sorteos y cruces pueden confirmarse con round_link_id NULL; no requieren una Fecha destino. Los requisitos deportivos de clasificación y ganadores de la etapa origen se conservan.
 - Admin → Fechas vincula fases y cruces ya configurados, permitiendo varias competencias por Fecha y distribuir fases entre Fechas. Los cambios se auditan y se bloquean tras publicación, inicio, envíos, puntajes o resultados confirmados. Promoción conserva ambos cruces en la misma Fecha; Dúos conserva sus bonus y Campeones sus referencias al programar después. Sin nuevos pronósticos ni cambios de scoring.
+
+- La creación/sorteo no muestra selectores de Fecha ni exige segmentos reales. Copa Total permite generar sus seis mini-jornadas con round_link_id y segment_id NULL; Admin → Fechas asigna después las dos Fechas y sus partidos a esos cruces sin regenerar sus IDs. La preparación del calendario y sus segmentos se administra exclusivamente desde Fechas.

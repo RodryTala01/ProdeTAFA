@@ -176,7 +176,7 @@ async function drawGroups(request: Request, env: Env, user: SessionUser, stageId
   if (stage.season_status === 'finished' || stage.season_status === 'archived') return error('La temporada ya está cerrada', 409);
 
   const linkedRounds = await env.DB.prepare(
-    `SELECT COUNT(*) AS total FROM competition_round_links WHERE stage_id = ?`,
+    `SELECT COUNT(*) AS total FROM competition_round_links l JOIN rounds r ON r.id=l.round_id WHERE l.stage_id = ? AND (r.status<>'draft' OR r.published_at IS NOT NULL OR EXISTS(SELECT 1 FROM matches m WHERE m.round_id=r.id AND (julianday(m.kickoff_at)<=julianday('now') OR m.result_finalized_at IS NOT NULL)))`,
   ).bind(stageId).first<{ total: number }>();
   if (Number(linkedRounds?.total ?? 0) > 0) return error('Desvinculá las Fechas antes de volver a sortear', 409);
 

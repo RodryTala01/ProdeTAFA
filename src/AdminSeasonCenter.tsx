@@ -74,7 +74,6 @@ export function AdminSeasonCenter({season,onSelectFamily,onSelectCompetition,onM
        <ul className="asc-steps">
          <li className={info.created===info.required?'asc-done':''}>{info.created===info.required?'✓':'○'} Competiciones creadas ({info.created}/{info.required})</li>
          <li className={info.stages===info.required?'asc-done':''}>{info.stages===info.required?'✓':'○'} Etapas configuradas ({info.stages}/{info.required})</li>
-         <li className={info.dates===info.required?'asc-done':''}>{info.dates===info.required?'✓':'○'} Calendario · se puede vincular después ({info.dates}/{info.required})</li>
          <li className={sportInfo.ok?'asc-done':''}>{sportInfo.ok?'✓':'○'} {sportInfo.label}</li>
        </ul>
        <small>{sportInfo.detail}</small>
@@ -93,12 +92,12 @@ export function AdminFamilyOverview({season,family,onBack,onSelectCompetition}:{
  <p>Elegí qué edición querés completar. El asistente conserva la configuración deportiva y las validaciones existentes.</p>{family.key==='liga'&&<p><strong>Fecha 6 · Promoción:</strong> se administra desde la etapa «Sorteo y fases» de Liga A o B, no como competencia aparte.</p>}
  <div className="asc-family-list">{family.codes.filter(code=>code!=='PROMOCION').map(code=>{
    const c=season.competitions.find(item=>item.code===code);const optional=family.optional?.includes(code);
-   return <article key={code} className="asc-family-row"><div className="asc-family-icon"><CompetitionImage code={code} name={c?.displayName??code} size="md" season={season.seasonNumber} decorative/></div><div><h3>{c?.displayName??code.replaceAll('_',' ')}</h3><p>{optional?'Fase final de Liga · se prepara cuando correspondan las posiciones definitivas':c?'Etapas: '+c.stages.length+' · Fechas vinculadas: '+c.roundLinks.length:'No se encontró la edición; revisar la plantilla de temporada.'}</p></div>{c?<button className="button button--secondary" type="button" onClick={()=>onSelectCompetition(c)}>Configurar →</button>:<span className="asc-state">Sin crear</span>}</article>;
+   return <article key={code} className="asc-family-row"><div className="asc-family-icon"><CompetitionImage code={code} name={c?.displayName??code} size="md" season={season.seasonNumber} decorative/></div><div><h3>{c?.displayName??code.replaceAll('_',' ')}</h3><p>{optional?'Fase final de Liga · se prepara cuando correspondan las posiciones definitivas':c?'Etapas: '+c.stages.length:'No se encontró la edición; revisar la plantilla de temporada.'}</p></div>{c?<button className="button button--secondary" type="button" onClick={()=>onSelectCompetition(c)}>Configurar →</button>:<span className="asc-state">Sin crear</span>}</article>;
  })}</div>
  </section>;
 }
 
-export const setupSteps=[{key:'resumen',label:'Resumen'},{key:'participantes',label:'Participantes'},{key:'armado',label:'Sorteo y fases'},{key:'fechas',label:'Fechas y ajustes'},{key:'revision',label:'Revisión'}] as const;
+export const setupSteps=[{key:'resumen',label:'Resumen'},{key:'participantes',label:'Participantes'},{key:'armado',label:'Sorteo y fases'},{key:'fechas',label:'Etapas'},{key:'revision',label:'Revisión'}] as const;
 export type SetupStep=typeof setupSteps[number]['key'];
 
 export function CompetitionSetupHeader({season,competition,step,onStep,onBack}:{season:SetupSeason;competition:SetupCompetition;step:SetupStep;onStep:(step:SetupStep)=>void;onBack:()=>void}){
@@ -106,7 +105,7 @@ export function CompetitionSetupHeader({season,competition,step,onStep,onBack}:{
  return <div className="asc-guide">
    <div className="asc-guide-top"><button className="button button--ghost" type="button" onClick={onBack}>← Volver a las competencias</button><span className="eyebrow">T{season.seasonNumber} · Configuración guiada</span></div>
    <nav aria-label="Pasos de preparación" className="asc-step-nav">{setupSteps.map((s,i)=><button type="button" key={s.key} aria-current={step===s.key?'step':undefined} className={step===s.key?'asc-step-current':''} onClick={()=>onStep(s.key)}><b>{i+1}</b><span>{s.label}</span></button>)}</nav>
-   <div className="asc-guide-title"><div><span className="eyebrow">PASO {idx+1} DE 5</span><h3>{setupSteps[idx].label}</h3></div><span className="asc-state">{competition.stages.length} etapas · {competition.roundLinks.length} Fechas</span></div>
+   <div className="asc-guide-title"><div><span className="eyebrow">PASO {idx+1} DE 5</span><h3>{setupSteps[idx].label}</h3></div><span className="asc-state">{competition.stages.length} etapas</span></div>
  </div>;
 }
 export function AdminSetupParticipants({season,competition,onEditDivisions}:{season:SetupSeason;competition:SetupCompetition;onEditDivisions:()=>void}) {
@@ -120,7 +119,6 @@ export function AdminSetupReview({season,competition,onStep}:{season:SetupSeason
  return <section className="asc-wizard-content"><h3>Revisión antes de activar</h3><p>Esta lista revisa la estructura que podemos verificar. La confirmación de sorteos, cupos y ganadores debe hacerse dentro de cada herramienta deportiva; no se infiere a partir de Fechas vinculadas.</p>
  <div className="asc-review-row"><span>{persons.length?'✓':'!'} Participantes en la temporada: {persons.length}</span><button type="button" onClick={()=>onStep('participantes')}>Revisar</button></div>
  <div className="asc-review-row"><span>{tasks.structure?'✓':'!'} Etapas: {competition.stages.length}</span><button type="button" onClick={()=>onStep('fechas')}>Configurar</button></div>
- <div className="asc-review-row"><span>{tasks.dates?'✓':'○'} Fechas vinculadas: {competition.roundLinks.length} · opcional para preparar la competición</span><button type="button" onClick={()=>onStep('fechas')}>Vincular</button></div>
  <div className="asc-review-row"><span>◇ Sorteos y cupos: verificar manualmente</span><button type="button" onClick={()=>onStep('armado')}>Revisar</button></div>
  <p className="asc-review-warning">No se activa automáticamente ninguna competición ni se ejecuta un sorteo desde este resumen.</p></section>;
 }

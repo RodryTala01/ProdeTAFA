@@ -83,12 +83,9 @@ export default function AdminCupAb({
   const visiblePhases=phases.filter(p=>!format.directQuarterfinals||p.key!=='r16');
   const knockoutStages=competition.stages.filter(s=>s.stageType==='KNOCKOUT').sort((a,b)=>a.sequence-b.sequence);
   const skippedStageId=format.directQuarterfinals&&knockoutStages.length===4?knockoutStages[0].id:null;
-  const dates = competition.roundLinks
-    .filter((l) => l.stageId === stage.id && l.purpose === "NORMAL")
-    .sort((a, b) => a.sequence - b.sequence);
   const locked =
     disabled || busy || ["finished", "archived"].includes(competition.status);
-  const groupLocked = locked || stage.status !== "draft" || dates.length > 0;
+  const groupLocked = locked || stage.status !== "draft";
   function emptyGroups(n: number, people: Person[], champ: string) {
     return Array.from({ length: n }, (_, i) => ({
       code: String.fromCharCode(65 + i),
@@ -240,20 +237,7 @@ export default function AdminCupAb({
         <>
           <p>
             {eligible.length} participantes elegibles · División{" "}
-            {competition.divisionCode}. Los puntos de estas Fechas se usan en
-            esta Copa; vincularlas aquí no las incorpora a Liga.
-          </p>
-          {Array.from({length:format.groupRounds},(_,i)=>i).map((i) => (
-            <p key={i}>
-              <strong>Fecha de grupos {i + 1}:</strong>{" "}
-              {dates[i]
-                ? `${dates[i].roundName} · ${statusLabel(dates[i].roundStatus)}`
-                : "Sin vincular"}
-            </p>
-          ))}
-          <p>
-            Configurá los grupos antes de vincular las {format.groupRounds} Fechas con los
-            controles generales de abajo.
+            {competition.divisionCode}.
           </p>
           {tab === "summary" && (
             <>

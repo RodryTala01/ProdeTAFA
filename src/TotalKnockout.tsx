@@ -32,11 +32,7 @@ export default function TotalKnockout({
   label: string;
   disabled: boolean;
 }) {
-  const links = competition.roundLinks.filter(
-    (l) => l.stageId === targetId && l.purpose === 'NORMAL',
-  );
-  const [link, setLink] = useState(String(links[0]?.id ?? '')),
-    [encounters, setEncounters] = useState<Encounter[]>([]),
+  const [encounters, setEncounters] = useState<Encounter[]>([]),
     [pool, setPool] = useState<Entry[]>([]),
     [pairs, setPairs] = useState<string[][]>([]),
     [mode, setMode] = useState('MANUAL'),
@@ -70,7 +66,7 @@ export default function TotalKnockout({
   async function preview() {
     await run(async () => {
       const data = await cupApi<{ pool: Entry[] }>(
-        `${path}?targetStageId=${targetId}&roundLinkId=${link}`,
+        `${path}?targetStageId=${targetId}`,
       );
       setPool(data.pool);
       setPairs(
@@ -93,7 +89,7 @@ export default function TotalKnockout({
         randomSeed?: number;
       }>(path, 'POST', {
         targetStageId: targetId,
-        roundLinkId: link?Number(link):null,
+
         ...(mode === 'MANUAL'
           ? {
               pairs: pairs.map((p) => ({
@@ -135,31 +131,8 @@ export default function TotalKnockout({
           competition.stages.find((s) => s.id === targetId)?.status ?? 'draft',
         )}
       </p>
-      <label className="field">
-        Fecha de {label}
-        <select
-          aria-label={`Fecha de ${label}`}
-          value={link}
-          disabled={locked}
-          onChange={(e) => {
-            setLink(e.target.value);
-            setPool([]);
-          }}
-        >
-          <option value="">Sin Fecha · vincular después desde Fechas</option>
-          {links.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.roundName} · {statusLabel(l.roundStatus)}
-            </option>
-          ))}
-        </select>
-      </label>
-      {!links.length && (
-        <p>
-          Podés configurar los cruces sin Fecha y vincularlos después desde
-          Fechas.
-        </p>
-      )}
+
+
       <button
         className="button button--secondary"
         disabled={locked}

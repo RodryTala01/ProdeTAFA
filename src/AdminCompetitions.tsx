@@ -118,8 +118,6 @@ export default function AdminCompetitions() {
   const [data, setData] = useState<EngineData | null>(null);
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
   const [assignments, setAssignments] = useState<Record<string, string>>({});
-  const [roundByCompetition, setRoundByCompetition] = useState<Record<number, number | ''>>({});
-  const [stageByCompetition, setStageByCompetition] = useState<Record<number, number | ''>>({});
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<number | null>(null);
@@ -153,7 +151,6 @@ export default function AdminCompetitions() {
   useEffect(() => {
     if (!selected) {
       setAssignments({});
-      setStageByCompetition({});
       return;
     }
 
@@ -161,11 +158,7 @@ export default function AdminCompetitions() {
     for (const member of selected.members) nextAssignments[member.userId] = member.divisionCode;
     setAssignments(nextAssignments);
 
-    const initialStages: Record<number, number | ''> = {};
-    for (const competition of selected.competitions) {
-      initialStages[competition.id] = competition.stages[0]?.id ?? '';
-    }
-    setStageByCompetition(initialStages);
+
   }, [selected]);
 
   async function createT32() {
@@ -212,35 +205,6 @@ export default function AdminCompetitions() {
       await load(selected.id);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo cambiar el estado');
-    } finally { setLoading(false); }
-  }
-
-  async function linkRound(competition: Competition) {
-    const stageId = stageByCompetition[competition.id];
-    const roundId = roundByCompetition[competition.id];
-    if (!stageId || !roundId) return;
-    setLoading(true); setError(''); setSuccess('');
-    try {
-      await api(`/api/admin/competition-engine/competitions/${competition.id}/rounds`, {
-        method: 'POST',
-        body: JSON.stringify({ stageId, roundId, purpose: 'NORMAL' }),
-      });
-      setRoundByCompetition((current) => ({ ...current, [competition.id]: '' }));
-      setSuccess(`Fecha vinculada a ${competition.displayName}. La misma Fecha puede usarse en otra competición.`);
-      await load(selected?.id ?? null);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo vincular la Fecha');
-    } finally { setLoading(false); }
-  }
-
-  async function unlinkRound(competition: Competition, link: RoundLink) {
-    setLoading(true); setError(''); setSuccess('');
-    try {
-      await api(`/api/admin/competition-engine/competitions/${competition.id}/rounds/${link.id}`, { method: 'DELETE' });
-      setSuccess(`${link.roundName} fue desvinculada de ${competition.displayName}.`);
-      await load(selected?.id ?? null);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo desvincular la Fecha');
     } finally { setLoading(false); }
   }
 
@@ -343,14 +307,14 @@ export default function AdminCompetitions() {
                       {selectedCompetitionId !== null && <p className="eyebrow" aria-label="Ubicación actual">T{selected.seasonNumber} › {competition.displayName} › Administración</p>}
                       <span className="eyebrow">{familyLabel(competition.family)}{competition.divisionCode ? ` · DIVISIÓN ${competition.divisionCode}` : ''}</span>
                       <h2>{competition.displayName}</h2>
-                      <p>{competition.stages.filter(stage => ['active','open','in_progress'].includes(stage.status)).map(stage => stage.name).join(' · ') || `${competition.stages.length} etapas`} · {competition.roundLinks.length} Fechas vinculadas</p>
-                      {!isCompetitionClosed(competition.status) && (!competition.stages.length || !competition.roundLinks.length) && <small className="admin-task-note">{!competition.stages.length ? 'Sin etapas configuradas' : 'Calendario pendiente · se vincula después'}</small>}
+                      <p>{competition.stages.filter(stage => ['active','open','in_progress'].includes(stage.status)).map(stage => stage.name).join(' · ') || `${competition.stages.length} etapas`}</p>
+                      {!isCompetitionClosed(competition.status) && !competition.stages.length && <small className="admin-task-note">Sin etapas configuradas</small>}
                     </div>
                     <span className="user-chip">{statusLabel(competition.status)}</span>
                   </div>
 
                   <>
-                  {setupStep==='resumen' && <section className="asc-wizard-content"><h3>Preparar {competition.displayName}</h3><p>Esta edición ya forma parte de la temporada. Revisá los participantes, prepará el sorteo o los cruces sin necesitar Fechas. El calendario se asigna después desde Admin → Fechas. Ninguna acción deportiva se confirma automáticamente.</p><p><strong>{competition.stages.length} etapas</strong> · <strong>{competition.roundLinks.length} Fechas vinculadas</strong> · {statusLabel(competition.status)}</p><button className="button button--primary" type="button" onClick={()=>setSetupStep('participantes')}>Empezar con los participantes →</button></section>}
+                  {setupStep==='resumen' && <section className="asc-wizard-content"><h3>Preparar {competition.displayName}</h3><p>Esta edición ya forma parte de la temporada. Revisá los participantes, prepará el sorteo o los cruces sin necesitar Fechas. El calendario se asigna después desde Admin → Fechas. Ninguna acción deportiva se confirma automáticamente.</p><p><strong>{competition.stages.length} etapas</strong> · {statusLabel(competition.status)}</p><button className="button button--primary" type="button" onClick={()=>setSetupStep('participantes')}>Empezar con los participantes →</button></section>}
                   {setupStep==='participantes' && <><AdminSetupParticipants season={selected} competition={competition} onEditDivisions={()=>setShowDivisions(true)}/><button type="button" className="button button--primary" onClick={()=>setSetupStep('armado')}>Siguiente: sorteos y fases →</button></>}
                   {setupStep==='revision' && <AdminSetupReview season={selected} competition={competition} onStep={setSetupStep}/>}
                   {setupStep==='armado' && <>
@@ -371,61 +335,9 @@ export default function AdminCompetitions() {
                   {competition.code!=='PROMOCION' && <section><h3>Resultados de la competición</h3><AdminResults key={`results-${competition.id}`} competition={competition} seasonNumber={selected.seasonNumber} archived={selected.status==='archived'}/></section>}
                   <button type="button" className="button button--secondary" onClick={()=>setSetupStep('fechas')}>Etapas y ajustes opcionales →</button>
                   </>}
-                   {setupStep==='fechas' && <details open><summary>Configuración y vínculos de Fechas</summary><p className="admin-help">Configurá las etapas internas. Las Fechas son opcionales en esta preparación; podés vincularlas después desde Admin → Fechas.</p>
-                  <CompetitionConfigPanel
-                    key={competition.id}
-                    competition={competition}
-                    disabled={loading || fetching || selected?.status === 'finished' || selected?.status === 'archived'}
-                    onChanged={() => load(selected.id)}
-                  />
-
-                  {competition.stages.length > 0 && (
-                    <div className="round-create">
-                      <select
-                        aria-label="Etapa para vincular Fecha"
-                        disabled={loading || fetching || isCompetitionClosed(selected.status) || isCompetitionClosed(competition.status)}
-                        value={stageByCompetition[competition.id] ?? ''}
-                        onChange={(event) => setStageByCompetition((current) => ({ ...current, [competition.id]: Number(event.target.value) }))}
-                      >
-                        {competition.stages.map((stage) => <option key={stage.id} value={stage.id}>{stage.name} · {stageTypeLabel(stage.stageType)}</option>)}
-                      </select>
-                      <select
-                        aria-label="Fecha para vincular"
-                        disabled={loading || fetching || isCompetitionClosed(selected.status) || isCompetitionClosed(competition.status)}
-                        value={roundByCompetition[competition.id] ?? ''}
-                        onChange={(event) => setRoundByCompetition((current) => ({ ...current, [competition.id]: event.target.value ? Number(event.target.value) : '' }))}
-                      >
-                        <option value="">Elegir Fecha...</option>
-                        {availableRounds.map((round) => <option key={round.id} value={round.id}>{round.name} · {statusLabel(round.status)} · {round.category}</option>)}
-                      </select>
-                      <button className="button button--secondary" disabled={loading || fetching || selected.status === 'finished' || selected.status === 'archived' || isCompetitionClosed(competition.status) || !roundByCompetition[competition.id]} onClick={() => void linkRound(competition)}>Vincular Fecha</button>
-                    </div>
-                  )}
-
-                  {competition.roundLinks.length > 0 && (
-                    <div className="user-list">
-                      {competition.roundLinks.map((link) => (
-                        <div className="user-row" key={link.id}>
-                          <div className="avatar">{link.sequence}</div>
-                          <div className="user-data">
-                            <strong>{link.roundName}</strong>
-                            <span>{competition.stages.find((stage) => stage.id === link.stageId)?.name} · {link.purpose === 'TIEBREAK' ? 'Desempate' : 'Jornada'} · {statusLabel(link.roundStatus)}</span>
-                          </div>
-                          <button className="button button--ghost" disabled={loading || fetching || selected?.status === 'finished' || selected?.status === 'archived' || isCompetitionClosed(competition.status)} onClick={() => setConfirm({ title: `¿Desvincular ${link.roundName}?`, message: `Se quitará el vínculo con ${competition.displayName}. Puede afectar sus cálculos y cruces.`, run: () => unlinkRound(competition, link) })}>Desvincular</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                   {setupStep==='fechas' && <details open><summary>Etapas de la competencia</summary>
+                  <CompetitionConfigPanel key={competition.id} competition={competition} disabled={loading||fetching||['finished','archived'].includes(selected.status)} onChanged={()=>load(selected.id)}/>
                   </details>}
-                  {setupStep==='fechas'&&competition.family==='LEAGUE'&&selected.competitions.filter(c=>c.code==='PROMOCION').map(promo=><details key={promo.id} className="admin-disclosure"><summary>Fecha 6 · Configurar etapa y vincular Fecha de Promoción</summary><p>La Fecha 6 utiliza el motor de Promoción, pero se administra exclusivamente desde Liga. No modifica los puntos ni las cinco Fechas regulares.</p>
-                    <CompetitionConfigPanel competition={promo} disabled={loading||fetching||['finished','archived'].includes(selected.status)} onChanged={()=>load(selected.id)}/>
-                    {promo.stages.length>0&&<div className="round-create">
-                      <select aria-label="Etapa de Promoción" value={stageByCompetition[promo.id]??promo.stages[0]?.id??''} onChange={e=>setStageByCompetition(x=>({...x,[promo.id]:Number(e.target.value)}))}>{promo.stages.map(stage=><option value={stage.id} key={stage.id}>{stage.name}</option>)}</select>
-                      <select aria-label="Fecha 6 de Promoción" value={roundByCompetition[promo.id]??''} onChange={e=>setRoundByCompetition(x=>({...x,[promo.id]:e.target.value?Number(e.target.value):''}))}><option value="">Elegir Fecha 6…</option>{availableRounds.map(round=><option key={round.id} value={round.id}>{round.name} · {statusLabel(round.status)}</option>)}</select>
-                      <button type="button" className="button button--secondary" disabled={loading||fetching||!roundByCompetition[promo.id]||isCompetitionClosed(promo.status)} onClick={()=>void linkRound(promo)}>Vincular Fecha 6</button>
-                    </div>}
-                    <div className="user-list">{promo.roundLinks.map(link=><div className="user-row" key={link.id}><div className="user-data"><strong>{link.roundName}</strong><span>Promoción · {statusLabel(link.roundStatus)}</span></div><button type="button" className="button button--ghost" disabled={loading||fetching||isCompetitionClosed(promo.status)} onClick={()=>setConfirm({title:'¿Desvincular la Fecha de Promoción?',message:'Quitará el vínculo de la Fecha 6, sin borrar la Liga.',run:()=>unlinkRound(promo,link)})}>Desvincular</button></div>)}</div>
-                  </details>)}
                   {setupStep==='fechas'&&<button className="button button--primary" type="button" onClick={()=>setSetupStep('revision')}>Siguiente: Revisión final →</button>}
                   </>
                 </div>

@@ -412,7 +412,7 @@ async function insertPairs(
   const statements = paired.pairs.map((pair, index) => env.DB.prepare(
     `INSERT INTO competition_encounters(stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status)
      VALUES (?,?,?,?,?,'pending')`,
-  ).bind(targetStageId, roundLinkId, `${slotPrefix}-${index + 1}`, pair[0], pair[1]));
+  ).bind(targetStageId, roundLinkId??(body.replace?(before.results?.[index] as {round_link_id?:number|null})?.round_link_id??null:null), `${slotPrefix}-${index + 1}`, pair[0], pair[1]));
   if(body.replace)statements.unshift(env.DB.prepare('DELETE FROM competition_encounters WHERE stage_id=?').bind(targetStageId));
   const configurationMode=Array.isArray(body.pairs)?'MANUAL':'AUTOMATIC';
   const detail={sourceStageId,targetStageId,roundLinkId,configurationMode,...(configurationMode==='AUTOMATIC'?{randomSeed:paired.randomSeed}:{}),pairs:paired.pairs,reason:body.reason?.trim()||null};

@@ -214,7 +214,7 @@ async function persistPairs(env: Env, user: SessionUser, targetStageId: number, 
   if(options.replace) statements.push(env.DB.prepare('DELETE FROM competition_encounters WHERE stage_id=?').bind(targetStageId));
   statements.push(...pairs.map((pair,index)=>env.DB.prepare(`INSERT INTO competition_encounters
     (stage_id,round_link_id,slot_key,entry_a_id,entry_b_id,status) VALUES (?,?,?,?,?,'pending')`)
-    .bind(targetStageId,roundLinkId,`${prefix}-${index+1}`,pair[0],pair[1])));
+    .bind(targetStageId,roundLinkId??(options.replace?(before.results?.[index] as {round_link_id?:number|null})?.round_link_id??null:null),`${prefix}-${index+1}`,pair[0],pair[1])));
   statements.push(env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json)
     VALUES (?,?,'competition_stage',?,?,?)`).bind(user.id,action,String(targetStageId),JSON.stringify(before.results ?? []),
     JSON.stringify({...detail,configurationMode:options.mode ?? 'AUTOMATIC',reason:options.reason?.trim() || null,pairs})));

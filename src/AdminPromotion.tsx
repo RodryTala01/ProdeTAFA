@@ -34,7 +34,6 @@ export default function AdminPromotion({
     [choices, setChoices] = useState<PromotionChoice[]>([]),
     [tab, setTab] = useState('Cupos'),
     [stage, setStage] = useState(''),
-    [link, setLink] = useState(''),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [message, setMessage] = useState('');
@@ -89,9 +88,6 @@ export default function AdminPromotion({
       (s) =>
         s.stageType === 'KNOCKOUT' &&
         !['finished', 'archived'].includes(s.status),
-    ),
-    links = c.roundLinks.filter(
-      (l) => l.stageId === Number(stage) && l.purpose === 'NORMAL',
     );
   const preview = promotionPreview(data?.encounters ?? []),
     sourceStage = data?.stages.find((s) => s.encounters.length === 2)?.stageId;
@@ -109,7 +105,6 @@ export default function AdminPromotion({
         <strong>{data.leaguePhase.ready?'Fase final habilitada':'Pendiente de Liga A/B'}</strong>
         <p>{data.leaguePhase.reason}</p>
         <p>{data.leaguePhase.regularRounds.map(r=>`${r.code==='LIGA_A'?'Liga A':'Liga B'}: ${r.finished}/5 Fechas finalizadas · ${r.positions}/${r.participants} posiciones confirmadas`).join(' · ')}</p>
-        {data.leaguePhase.rounds.length===1&&<p>Fecha 6 vinculada: {data.leaguePhase.rounds[0].name}.</p>}
       </section>}
       <nav className="cup-tabs" aria-label="Secciones Promoción">
         {['Cupos', 'Cruces', 'Movimientos'].map((t) => (
@@ -225,7 +220,7 @@ export default function AdminPromotion({
                       disabled={locked || !unlocked || !confirmed || dirty}
                       onChange={(e) => {
                         setStage(e.target.value);
-                        setLink('');
+
                       }}
                     >
                       <option value="">Elegir etapa</option>
@@ -236,21 +231,7 @@ export default function AdminPromotion({
                       ))}
                     </select>
                   </label>
-                  <label className="field">
-                    Fecha compartida para ambos cruces
-                    <select
-                      value={link}
-                      disabled={locked || !unlocked || !stage || dirty}
-                      onChange={(e) => setLink(e.target.value)}
-                    >
-                      <option value="">Sin Fecha · vincular después desde Fechas</option>
-                      {links.map((l) => (
-                        <option key={l.id} value={l.id}>
-                          {l.roundName}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+
                   <p>
                     Creá la etapa desde Configuración
                     general.
@@ -262,15 +243,14 @@ export default function AdminPromotion({
                       !unlocked ||
                       !confirmed ||
                       dirty ||
-                      !stages.some((s) => s.id === Number(stage)) ||
-                      (Boolean(link)&&!links.some((l) => l.id === Number(link)))
+                      !stages.some((s) => s.id === Number(stage))
                     }
                     onClick={() =>
                       void run(
                         () =>
                           cupApi(base + '/matches', 'POST', {
                             stageId: Number(stage),
-                            roundLinkId: link?Number(link):null,
+
                           }),
                         'Los dos cruces fijos fueron creados. Podés vincular su Fecha después.',
                       )

@@ -1,3 +1,4 @@
+import {schedulingRoundError} from './competition-scheduling';
 import type { Env } from './index';
 
 type SessionUser = { id: string; role: 'admin' | 'participant'; is_active: number };
@@ -132,6 +133,9 @@ async function configureSegments(env: Env, user: SessionUser, stageId: number) {
   ).bind(stageId).first<{ total: number }>();
   if (Number(existingUse?.total ?? 0) > 0) return error('No se pueden regenerar segmentos porque ya existen enfrentamientos asociados', 409);
 
+  for(const link of links){const blocked=await schedulingRoundError(env.DB,link.round_id);if(blocked)return error(blocked,409);}
+  const planned=await env.DB.prepare('SELECT id,slot_key,round_link_id,score_a,score_b,winner_entry_id FROM competition_encounters WHERE stage_id=? AND segment_id IS NULL').bind(stageId).all<{id:number;slot_key:string;round_link_id:number|null;score_a:number|null;score_b:number|null;winner_entry_id:number|null}>();
+  if((planned.results??[]).some(e=>e.round_link_id!==null||e.score_a!==null||e.score_b!==null||e.winner_entry_id!==null||!/-M([1-6])-\d+$/.test(e.slot_key)))return error('Hay cruces sin segmento que requieren revisión antes de programarlos.',409);
   const matchIdsByLink = new Map<number, number[]>();
   for (const link of links) {
     const matches = await env.DB.prepare(
@@ -152,6 +156,10 @@ async function configureSegments(env: Env, user: SessionUser, stageId: number) {
       const matchIds=ids.slice((local-1)*4,local*4);
       matchIds.forEach((id,i)=>statements.push(env.DB.prepare(`INSERT INTO competition_round_segment_matches(segment_id,match_id,sequence)
         VALUES ((SELECT id FROM competition_round_segments WHERE round_link_id=? AND code=?),?,?)`).bind(link.id,`MINI_${mini}`,id,i+1)));
+      for(const encounter of planned.results??[]){
+        if(Number(encounter.slot_key.match(/-M([1-6])-\d+$/)?.[1])!==mini)continue;
+        statements.push(env.DB.prepare('UPDATE competition_encounters SET round_link_id=?,segment_id=(SELECT id FROM competition_round_segments WHERE round_link_id=? AND code=?) WHERE id=? AND round_link_id IS NULL AND segment_id IS NULL').bind(link.id,link.id,`MINI_${mini}`,encounter.id));
+      }
       frozen.push({roundLinkId:link.id,miniDay:mini,matchIds});
     }
   });

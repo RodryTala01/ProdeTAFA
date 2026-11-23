@@ -249,7 +249,7 @@ async function generateFixtures(env: Env, user: SessionUser, stageId: number) {
      WHERE crl.stage_id=? AND crl.purpose='NORMAL' ORDER BY mini_day`,
   ).bind(stageId).all<{ id: number; round_link_id: number; mini_day: number }>();
   const segments = segmentsResult.results ?? [];
-  if (segments.length !== 6) return error('Primero generá los 6 segmentos de Copa Total', 409);
+
 
   const groupsResult = await env.DB.prepare(
     `SELECT id,code,name FROM competition_groups WHERE stage_id=? ORDER BY sequence`,
@@ -275,7 +275,7 @@ async function generateFixtures(env: Env, user: SessionUser, stageId: number) {
         `INSERT INTO competition_encounters
            (stage_id,group_id,round_link_id,segment_id,slot_key,entry_a_id,entry_b_id,status)
          VALUES (?,?,?,?,?,?,?,'pending')`,
-      ).bind(stageId, group.id, segment.round_link_id, segment.id, `${group.code}-M${miniDay}-${pairIndex + 1}`, pair[0], pair[1]));
+      ).bind(stageId, group.id, segment?.round_link_id??null, segment?.id??null, `${group.code}-M${miniDay}-${pairIndex + 1}`, pair[0], pair[1]));
       allStatements.push(...statements);
       createdSummary.push({ group: group.code, miniDay, pairs });
     }
@@ -335,9 +335,9 @@ export async function totalGroupStandings(env: Env, stageId: number) {
     }
 
     const encounters = await env.DB.prepare(
-      `SELECT id,entry_a_id,entry_b_id,segment_id FROM competition_encounters
+      `SELECT id,entry_a_id,entry_b_id,segment_id,slot_key FROM competition_encounters
        WHERE stage_id=? AND group_id=? ORDER BY id`,
-    ).bind(stageId, group.id).all<{ id: number; entry_a_id: number; entry_b_id: number; segment_id: number }>();
+    ).bind(stageId, group.id).all<{ id: number; entry_a_id: number; entry_b_id: number; segment_id: number|null;slot_key:string }>();
     let provisional = incomplete || !(encounters.results?.length);
     const fixtures = [];
     for (const encounter of encounters.results ?? []) {
@@ -345,7 +345,7 @@ export async function totalGroupStandings(env: Env, stageId: number) {
         scoreEntrySegment(env, Number(encounter.entry_a_id), Number(encounter.segment_id)),
         scoreEntrySegment(env, Number(encounter.entry_b_id), Number(encounter.segment_id)),
       ]);
-      fixtures.push({ segmentId:Number(encounter.segment_id), id: Number(encounter.id), entryAId: Number(encounter.entry_a_id), entryBId: Number(encounter.entry_b_id), scoreA: a.points, scoreB: b.points, complete: a.complete && b.complete });
+      fixtures.push({ slotKey:encounter.slot_key,segmentId:encounter.segment_id===null?null:Number(encounter.segment_id), id: Number(encounter.id), entryAId: Number(encounter.entry_a_id), entryBId: Number(encounter.entry_b_id), scoreA: a.points, scoreB: b.points, complete: a.complete && b.complete });
       if (!a.complete || !b.complete) { provisional = true; continue; }
       const rowA = table.get(Number(encounter.entry_a_id));
       const rowB = table.get(Number(encounter.entry_b_id));

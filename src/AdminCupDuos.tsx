@@ -201,11 +201,7 @@ function DuoKnockout({
   final: boolean;
   disabled: boolean;
 }) {
-  const links = c.roundLinks.filter(
-    (l) => l.stageId === targetId && l.purpose === 'NORMAL',
-  );
-  const [link, setLink] = useState(String(links[0]?.id ?? '')),
-    [source, setSource] = useState(String(survivalLinks.at(-1)?.id ?? '')),
+  const [source, setSource] = useState(String(survivalLinks.at(-1)?.id ?? '')),
     [encounters, setEncounters] = useState<Encounter[]>([]),
     [busy, setBusy] = useState(false),
     [error, setError] = useState('');
@@ -267,21 +263,7 @@ function DuoKnockout({
                   </select>
                 </label>
               )}
-              <label className="field">
-                Fecha destino
-                <select
-                  value={link}
-                  disabled={locked}
-                  onChange={(e) => setLink(e.target.value)}
-                >
-                  <option value="">Sin Fecha · vincular después desde Fechas</option>
-                  {links.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.roundName}
-                    </option>
-                  ))}
-                </select>
-              </label>
+
               <button
                 className="button button--primary"
                 disabled={
@@ -294,7 +276,7 @@ function DuoKnockout({
                         ? `${cupAdmin}/stages/${sourceId}/duos/final`
                         : `${cupAdmin}/round-links/${source}/duos/semifinals`,
                       'POST',
-                      { targetStageId: targetId, roundLinkId: link?Number(link):null },
+                      { targetStageId: targetId },
                     ),
                   )
                 }

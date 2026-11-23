@@ -1,6 +1,5 @@
 import DrawExport from './DrawExport';
 import {groupDraw} from './draw-export-model';
-import {argentinaDateTime} from './match-time';
 import { useEffect, useState } from 'react';
 import {
   cupApi,
@@ -37,7 +36,8 @@ type TableGroup = {
   standings: TotalStanding[];
   fixtures: {
     id: number;
-    segmentId: number;
+    segmentId: number|null;
+    slotKey?:string;
     entryAId: number;
     entryBId: number;
     scoreA: number;
@@ -45,17 +45,10 @@ type TableGroup = {
     complete: boolean;
   }[];
 };
-type Segment = {
-  id: number;
-  globalMiniDay: number;
-  roundName: string;
-  roundId: number;
-  matches: { matchId: number; home: string; away: string; kickoffAt: string }[];
-};
 const tabs = [
   'Resumen',
   'Grupos',
-  'Mini-fechas',
+  'Fixture',
   'Tabla',
   'Clasificación',
   'Octavos',
@@ -84,8 +77,7 @@ export default function AdminCupTotal({
   const [tab, setTab] = useState('Resumen'),
     [ctx, setCtx] = useState<Context | null>(null),
     [groups, setGroups] = useState<Group[]>([]),
-    [table, setTable] = useState<TableGroup[]>([]),
-    [segments, setSegments] = useState<Segment[]>([]);
+    [table, setTable] = useState<TableGroup[]>([]);
   const [ranking, setRanking] = useState<
       { userId: string; position: number; totalPoints: number }[]
     >([]),
@@ -98,13 +90,10 @@ export default function AdminCupTotal({
     { stageId: number; encounters: Encounter[] }[]
   >([]);
   async function load() {
-    const [context, t, segs, r, ...knockouts] = await Promise.all([
+    const [context, t, r, ...knockouts] = await Promise.all([
       cupApi<Context>(`${cupAdmin}/stages/${stage.id}/total/groups`),
       cupApi<{ groups: TableGroup[] }>(
         `/api/competition-engine/stages/${stage.id}/total/groups`,
-      ),
-      cupApi<{ segments: Segment[] }>(
-        `${cupAdmin}/stages/${stage.id}/total/segments`,
       ),
       cupApi<{ ranking: typeof ranking; missingSeasons: number[] }>(
         `/api/competition-engine/iffhs/ranking?throughSeason=${seasonNumber - 1}`,
@@ -117,7 +106,6 @@ export default function AdminCupTotal({
     ]);
     setCtx(context);
     setTable(t.groups);
-    setSegments(segs.segments);
     setRanking(r.ranking);
     setMissing(r.missingSeasons);
     setOutcomes(
@@ -295,13 +283,6 @@ export default function AdminCupTotal({
             {competition.stages.map((s) => (
               <li key={s.id}>
                 {s.name} · {statusLabel(s.status)}
-                {competition.roundLinks
-                  .filter((l) => l.stageId === s.id)
-                  .map((l) => (
-                    <p key={l.id}>
-                      {l.roundName} · {statusLabel(l.roundStatus)}
-                    </p>
-                  ))}
               </li>
             ))}
           </ul>
@@ -511,121 +492,13 @@ export default function AdminCupTotal({
           </button>
         </>
       )}
-      {tab === 'Mini-fechas' && (
-        <>
-          <h3>Dos Fechas Copa · seis mini-fechas</h3>
-          {[0, 1].map((i) => (
-            <p key={i}>
-              <strong>Fecha Copa {i + 1}:</strong>{' '}
-              {ctx?.links[i]
-                ? `${ctx.links[i].name} · ${ctx.links[i].matchCount}/12 partidos`
-                : 'Sin vincular'}
-            </p>
-          ))}
-          <p>
-            Usá los controles generales para vincular exactamente dos Fechas.
-            Los partidos guardados en cada bloque son la fuente de verdad.
-          </p>
-          <button
-            className="button button--primary"
-            disabled={
-              locked ||
-              !!ctx?.fixtureCount ||
-              ctx?.links.length !== 2 ||
-              ctx.links.some((l) => l.matchCount !== 12)
-            }
-            onClick={() =>
-              void run(async () => {
-                await cupApi(
-                  `${cupAdmin}/stages/${stage.id}/total/segments`,
-                  'POST',
-                  {},
-                );
-                await load();
-                setMessage('Seis mini-fechas generadas.');
-              })
-            }
-          >
-            Generar mini-fechas
-          </button>
-          <details>
-            <summary>Revisar grupos antes de generar fixture</summary>
-            {table.map((g) => (
-              <div key={g.id}>
-                <h4>{g.name}</h4>
-                <p>{g.standings.map((s) => s.displayName).join(' · ')}</p>
-                <p>
-                  {g.standings.length === 5
-                    ? 'Rueda única; mini-fecha 6 libre.'
-                    : 'Doble rueda.'}
-                </p>
-              </div>
-            ))}
-          </details>
-          <button
-            className="button button--primary"
-            disabled={
-              locked ||
-              !!ctx?.fixtureCount ||
-              segments.length !== 6 ||
-              !table.length
-            }
-            onClick={() =>
-              void run(async () => {
-                await cupApi(
-                  `${cupAdmin}/stages/${stage.id}/total/fixture`,
-                  'POST',
-                  {},
-                );
-                await load();
-                setMessage('Fixture generado.');
-              })
-            }
-          >
-            Generar fixture de grupos
-          </button>
-          {!!ctx?.fixtureCount && (
-            <p>Fixture generado. No se permite regenerarlo.</p>
-          )}
-          {segments.map((seg) => (
-            <details key={seg.id} className="competition-stage">
-              <summary>
-                {seg.roundName} · Mini-fecha {seg.globalMiniDay}
-              </summary>
-              <p>
-                Partidos {((seg.globalMiniDay - 1) % 3) * 4 + 1}–
-                {((seg.globalMiniDay - 1) % 3) * 4 + 4}
-              </p>
-              <ul>
-                {seg.matches.map((m) => (
-                  <li key={m.matchId}>
-                    {m.home} vs {m.away} ·{' '}
-                    {argentinaDateTime(m.kickoffAt)}
-                  </li>
-                ))}
-              </ul>
-              {table.map((g) => (
-                <div key={g.id}>
-                  <strong>{g.name}</strong>
-                  {g.fixtures
-                    .filter((f) => f.segmentId === seg.id)
-                    .map((f) => (
-                      <p key={f.id}>
-                        {pairName(g, f.entryAId)} {f.scoreA} – {f.scoreB}{' '}
-                        {pairName(g, f.entryBId)} ·{' '}
-                        {f.complete ? 'Definitivo' : 'Provisional'}
-                      </p>
-                    ))}
-                  {ctx?.fixtureCount &&
-                  !g.fixtures.some((f) => f.segmentId === seg.id) ? (
-                    <p>Mini-fecha libre.</p>
-                  ) : null}
-                </div>
-              ))}
-            </details>
-          ))}
-        </>
-      )}
+      {tab === 'Fixture' && <section className="form-stack"><h3>Fixture de grupos</h3>
+       <button type="button" className="button button--primary" disabled={locked||!!ctx?.fixtureCount||!table.length} onClick={()=>void run(async()=>{
+        await cupApi(`${cupAdmin}/stages/${stage.id}/total/fixture`,'POST',{});await load();setMessage('Fixture de seis mini-fechas generado.');
+       })}>Generar fixture de grupos</button>
+       {!!ctx?.fixtureCount&&<p>Fixture confirmado · {ctx.fixtureCount} cruces.</p>}
+       {table.map(g=><article key={g.id}><h4>{g.name}</h4>{g.fixtures.map(f=><p key={f.id}>Mini-fecha {f.slotKey?.match(/-M([1-6])-\d+$/)?.[1]??'—'} · {pairName(g,f.entryAId)} vs {pairName(g,f.entryBId)}</p>)}</article>)}
+      </section>}
       {tab === 'Tabla' && (
         <>
           <h3>Tabla de grupos</h3>

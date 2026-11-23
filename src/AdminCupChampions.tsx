@@ -213,12 +213,12 @@ export default function AdminCupChampions({
                     onChanged={() =>
                       run(async () => {}, 'Fuentes actualizadas.')
                     }
-                    onActivate={(stageId, roundLinkId) =>
+                    onActivate={(stageId) =>
                       run(
                         () =>
                           cupApi(`${base}/nodes/${n.code}/activate`, 'POST', {
                             stageId,
-                            roundLinkId,
+
                           }),
                         `${n.code} activado.`,
                       )
@@ -348,17 +348,13 @@ export function ChampionNodeCard({
   rounds: CupRound[];
   disabled: boolean;
   onChanged: () => Promise<void>;
-  onActivate: (stage: number, link: number) => Promise<void>;
+  onActivate: (stage: number) => Promise<void>;
 }) {
-  const [stage, setStage] = useState(''),
-    [link, setLink] = useState('');
+  const [stage, setStage] = useState('');
   const stages = c.stages.filter(
     (s) =>
       s.stageType === 'KNOCKOUT' &&
       !['finished', 'archived'].includes(s.status),
-  );
-  const links = c.roundLinks.filter(
-    (l) => l.stageId === Number(stage) && l.purpose === 'NORMAL',
   );
   const source = (s: ChampionNode['sourceA']) =>
     s.displayName ??
@@ -396,7 +392,7 @@ export function ChampionNodeCard({
               value={stage}
               onChange={(e) => {
                 setStage(e.target.value);
-                setLink('');
+
               }}
             >
               <option value="">Elegir etapa eliminatoria</option>
@@ -407,30 +403,15 @@ export function ChampionNodeCard({
               ))}
             </select>
           </label>
-          <label className="field">
-            Fecha de {n.code}
-            <select
-              disabled={disabled || !n.readyToActivate || !stage}
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-            >
-              <option value="">Sin Fecha · vincular después desde Fechas</option>
-              {links.map((l) => (
-                <option value={l.id} key={l.id}>
-                  {l.roundName}
-                </option>
-              ))}
-            </select>
-          </label>
+
           <button
             className="button button--primary"
             disabled={
               disabled ||
               !n.readyToActivate ||
-              !stages.some((s) => s.id === Number(stage)) ||
-              (Boolean(link)&&!links.some((l) => l.id === Number(link)))
+              !stages.some((s) => s.id === Number(stage))
             }
-            onClick={() => void onActivate(Number(stage), Number(link))}
+            onClick={() => void onActivate(Number(stage))}
           >
             Activar {n.code}
           </button>
