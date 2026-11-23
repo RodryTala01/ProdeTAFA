@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { readCompetition } from './participant-competitions';
+import { readCompetition,clearCompetitionReads } from './participant-competitions';
 
 export function ParticipantState({ loading = false, error, retry, empty }: { loading?: boolean; error?: string; retry?: () => void; empty?: string }) {
   if (loading) return <p className="participant-state" role="status">Cargando…</p>;
@@ -21,5 +21,5 @@ export function useParticipantRead<T>(url: string | null, message: string) {
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [url, message, revision]);
-  return { data, error, loading, retry: () => setRevision(n => n + 1) };
+  return { data, error, loading, retry: () => {clearCompetitionReads();setRevision(n => n + 1);} };
 }

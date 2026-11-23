@@ -71,7 +71,7 @@ export default function ParticipantDashboard({ user, onLogout }: { user: { id: s
           : route.startsWith('club/participante/') ? <ParticipantClubPage key={route} user={user} route={route}/>
           : route === 'competiciones/liga' ? <><a className="button button--ghost" href="#/competiciones">Volver a Competiciones</a><LeagueView /></>
           : route.startsWith('competiciones') ? <ParticipantCompetitionsPage route={route}/>
-           : <><PushNotifications userId={user.id} mode="prompt"/>{loading ? <p className="loader" role="status">Cargando tu temporada…</p> : <><HomeErrors errors={data.errors} retry={() => setRevision(n => n + 1)} /><ParticipantHome name={user.fullName} userId={user.id} data={data} /></>}</>}
+           : <><PushNotifications userId={user.id} mode="prompt"/>{loading ? <p className="loader" role="status">Cargando tu temporada…</p> : <><HomeErrors errors={data.errors} retry={() => {clearCompetitionReads();setRevision(n => n + 1);}} /><ParticipantHome name={user.fullName} userId={user.id} data={data} /></>}</>}
       </section>
     </div>
   </main>;

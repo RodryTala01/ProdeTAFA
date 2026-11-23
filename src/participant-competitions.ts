@@ -42,6 +42,11 @@ const reads = new Map<string,{until:number;value:Promise<unknown>}>();
 export function clearCompetitionReads(){reads.clear();}
 export async function readCompetition<T>(url:string,signal?:AbortSignal):Promise<T> {
  if(signal?.aborted)throw new DOMException('Aborted','AbortError');
+ if(!url.startsWith('/api/competition-engine/')&&url!=='/api/participant/round'&&url!=='/api/participant/history'){
+  const response=await fetch(url,{signal});
+  if(!response.ok)throw new Error('No pudimos cargar esta información. Reintentá en unos instantes.');
+  return response.json() as Promise<T>;
+ }
  let cached=reads.get(url);
  if(!cached||cached.until<Date.now()){
   const value=fetch(url).then(async response=>{if(!response.ok)throw new Error('No pudimos cargar esta información. Reintentá en unos instantes.');return response.json();});
