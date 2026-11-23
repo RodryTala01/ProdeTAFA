@@ -102,7 +102,7 @@ export default function CupAbKnockout({
   }
   const payload = {
     targetStageId: Number(target),
-    roundLinkId: Number(link),
+    roundLinkId: link?Number(link):null,
     groupStageId: groupStage.id,
   };
   const path = `${cupAdmin}/stages/${source}/cup-ab-progression/${action}`;
@@ -216,7 +216,7 @@ export default function CupAbKnockout({
             setPool([]);
           }}
         >
-          <option value="">Elegir Fecha vinculada</option>
+          <option value="">Sin Fecha · vincular después desde Fechas</option>
           {links.map((l) => (
             <option key={l.id} value={l.id}>
               {l.roundName} · {statusLabel(l.roundStatus)}
@@ -225,12 +225,12 @@ export default function CupAbKnockout({
         </select>
       </label>
       <p>
-        Vinculá la Fecha a esta etapa con los controles generales. Los ganadores
+        La Fecha es opcional; podés vincularla después desde Admin → Fechas. Los ganadores
         anteriores deben estar confirmados por Admin.
       </p>
       <button
         className="button button--secondary"
-        disabled={locked || !target || !source || !link}
+        disabled={locked || !target || !source}
         onClick={() => void preview()}
       >
         Consultar clasificados para {label}

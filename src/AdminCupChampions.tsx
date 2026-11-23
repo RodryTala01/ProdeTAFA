@@ -414,7 +414,7 @@ export function ChampionNodeCard({
               value={link}
               onChange={(e) => setLink(e.target.value)}
             >
-              <option value="">Elegir Fecha vinculada</option>
+              <option value="">Sin Fecha · vincular después desde Fechas</option>
               {links.map((l) => (
                 <option value={l.id} key={l.id}>
                   {l.roundName}
@@ -428,7 +428,7 @@ export function ChampionNodeCard({
               disabled ||
               !n.readyToActivate ||
               !stages.some((s) => s.id === Number(stage)) ||
-              !links.some((l) => l.id === Number(link))
+              (Boolean(link)&&!links.some((l) => l.id === Number(link)))
             }
             onClick={() => void onActivate(Number(stage), Number(link))}
           >
@@ -436,7 +436,7 @@ export function ChampionNodeCard({
           </button>
           {!stages.length && (
             <p>
-              Creá una etapa eliminatoria y vinculá su Fecha en Configuración
+              Creá una etapa eliminatoria en Configuración
               general.
             </p>
           )}

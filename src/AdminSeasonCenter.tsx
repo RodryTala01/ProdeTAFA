@@ -34,9 +34,9 @@ export function familyReadiness(season:SetupSeason,f:SetupFamily) {
  const dates=items.filter(c=>c?.roundLinks.length).length;
  // Stages and linked dates do NOT prove that groups, seeding, entrants, or
  // qualifiers were confirmed. Avoid displaying a false "ready to activate".
- const structurallyPrepared=created===required.length&&stages===required.length&&dates===required.length;
+ const structurallyPrepared=created===required.length&&stages===required.length;
  return {created,stages,dates,required:required.length,structurallyPrepared,
-  label:created<required.length?'Sin crear':stages<required.length?'Faltan etapas':dates<required.length?'Faltan Fechas':'Revisar sorteo y cupos'};
+  label:created<required.length?'Sin crear':stages<required.length?'Faltan etapas':'Revisar sorteo y cupos'};
 }
 export function firstPendingFamily(season:SetupSeason) {
  return setupFamilies.find(f=>!familyReadiness(season,f).structurallyPrepared)??setupFamilies[0];
@@ -74,7 +74,7 @@ export function AdminSeasonCenter({season,onSelectFamily,onSelectCompetition,onM
        <ul className="asc-steps">
          <li className={info.created===info.required?'asc-done':''}>{info.created===info.required?'✓':'○'} Competiciones creadas ({info.created}/{info.required})</li>
          <li className={info.stages===info.required?'asc-done':''}>{info.stages===info.required?'✓':'○'} Etapas configuradas ({info.stages}/{info.required})</li>
-         <li className={info.dates===info.required?'asc-done':''}>{info.dates===info.required?'✓':'○'} Fechas vinculadas ({info.dates}/{info.required})</li>
+         <li className={info.dates===info.required?'asc-done':''}>{info.dates===info.required?'✓':'○'} Calendario · se puede vincular después ({info.dates}/{info.required})</li>
          <li className={sportInfo.ok?'asc-done':''}>{sportInfo.ok?'✓':'○'} {sportInfo.label}</li>
        </ul>
        <small>{sportInfo.detail}</small>
@@ -120,7 +120,7 @@ export function AdminSetupReview({season,competition,onStep}:{season:SetupSeason
  return <section className="asc-wizard-content"><h3>Revisión antes de activar</h3><p>Esta lista revisa la estructura que podemos verificar. La confirmación de sorteos, cupos y ganadores debe hacerse dentro de cada herramienta deportiva; no se infiere a partir de Fechas vinculadas.</p>
  <div className="asc-review-row"><span>{persons.length?'✓':'!'} Participantes en la temporada: {persons.length}</span><button type="button" onClick={()=>onStep('participantes')}>Revisar</button></div>
  <div className="asc-review-row"><span>{tasks.structure?'✓':'!'} Etapas: {competition.stages.length}</span><button type="button" onClick={()=>onStep('fechas')}>Configurar</button></div>
- <div className="asc-review-row"><span>{tasks.dates?'✓':'!'} Fechas vinculadas: {competition.roundLinks.length}</span><button type="button" onClick={()=>onStep('fechas')}>Vincular</button></div>
+ <div className="asc-review-row"><span>{tasks.dates?'✓':'○'} Fechas vinculadas: {competition.roundLinks.length} · opcional para preparar la competición</span><button type="button" onClick={()=>onStep('fechas')}>Vincular</button></div>
  <div className="asc-review-row"><span>◇ Sorteos y cupos: verificar manualmente</span><button type="button" onClick={()=>onStep('armado')}>Revisar</button></div>
  <p className="asc-review-warning">No se activa automáticamente ninguna competición ni se ejecuta un sorteo desde este resumen.</p></section>;
 }

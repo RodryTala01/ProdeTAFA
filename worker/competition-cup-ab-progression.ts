@@ -88,13 +88,14 @@ async function stageInfo(env: Env, stageId: number) {
   ).bind(stageId).first<StageRow>();
 }
 
-async function validateTarget(env: Env, source: StageRow, targetStageId: number, roundLinkId: number, options: Options = {}): Promise<TargetValidation> {
+async function validateTarget(env: Env, source: StageRow, targetStageId: number, roundLinkId: number | null, options: Options = {}): Promise<TargetValidation> {
   const target = await stageInfo(env, targetStageId);
   if (!target) return { ok: false, error: 'Etapa destino no encontrada' };
   if (target.competition_id !== source.competition_id) return { ok: false, error: 'Las etapas no pertenecen a la misma Copa' };
   if (target.stage_type !== 'KNOCKOUT') return { ok: false, error: 'La etapa destino debe ser eliminatoria' };
   if (target.status === 'finished' || target.status === 'archived') return { ok: false, error: 'La etapa destino ya está cerrada' };
 
+  if(roundLinkId!==null){
   const link = await env.DB.prepare(
     `SELECT id FROM competition_round_links
      WHERE id = ? AND competition_id = ? AND stage_id = ? AND purpose = 'NORMAL' LIMIT 1`,
@@ -106,6 +107,7 @@ async function validateTarget(env: Env, source: StageRow, targetStageId: number,
     FROM competition_round_links l JOIN rounds r ON r.id=l.round_id WHERE l.id=?`).bind(roundLinkId)
     .first<{ status: string; published_at: string | null; started: number }>();
   if (lock?.status !== 'draft' || lock.published_at || lock.started) return { ok: false, error: 'La Fecha destino ya fue publicada o iniciada; no se pueden reemplazar sus cruces' };
+  }
   const closed = await env.DB.prepare(`SELECT c.status, s.status AS season_status FROM competitions c JOIN tafa_seasons s ON s.id=c.season_id WHERE c.id=?`)
     .bind(source.competition_id).first<{status:string;season_status:string}>();
   if (closed && [closed.status,closed.season_status].some((v)=>['finished','archived'].includes(v))) return {ok:false,error:'La Copa o temporada está cerrada'};
@@ -205,7 +207,7 @@ function manualPairs(raw: unknown, pool: Array<{entryId:number}>, seconds?: Set<
   if(seen.size!==allowed.size) throw new Error('Usá todos los clasificados exactamente una vez');
   return pairs;
 }
-async function persistPairs(env: Env, user: SessionUser, targetStageId: number, roundLinkId: number,
+async function persistPairs(env: Env, user: SessionUser, targetStageId: number, roundLinkId: number | null,
   pairs: Array<[number, number | null]>, prefix: string, action: string, detail: object, options: Options) {
   const before=await env.DB.prepare('SELECT * FROM competition_encounters WHERE stage_id=? ORDER BY id').bind(targetStageId).all();
   const statements: D1PreparedStatement[]=[];
@@ -226,7 +228,7 @@ function pairSequential(entries: Array<{ entryId: number }>) {
   return pairs;
 }
 
-async function drawRoundOf16(env: Env, user: SessionUser, groupStage: StageRow, targetStageId: number, roundLinkId: number, options: Options = {}) {
+async function drawRoundOf16(env: Env, user: SessionUser, groupStage: StageRow, targetStageId: number, roundLinkId: number | null, options: Options = {}) {
   if (groupStage.stage_type !== 'ACCUMULATIVE_GROUPS') return error('La etapa origen no es una fase de grupos acumulativos', 409);
   const dateError = await requireFinishedGroupDates(env, groupStage.id);
   if (dateError) return error(dateError, 409);
@@ -252,7 +254,7 @@ async function drawRoundOf16(env: Env, user: SessionUser, groupStage: StageRow, 
   return json({ok:true,action:'DRAW_R16',configurationMode:options.mode ?? 'AUTOMATIC',randomSeed,pairs});
 }
 
-async function drawDirectQuarterfinals(env:Env,user:SessionUser,source:StageRow,groupStageId:number,targetStageId:number,roundLinkId:number,options:Options){
+async function drawDirectQuarterfinals(env:Env,user:SessionUser,source:StageRow,groupStageId:number,targetStageId:number,roundLinkId:number|null,options:Options){
  if(source.id!==groupStageId||source.stage_type!=='ACCUMULATIVE_GROUPS')return error('Cuartos debe partir de los grupos de esta Copa.',409);
  const validation=await validateTarget(env,source,targetStageId,roundLinkId,options);
  if(!validation.ok)return error(validation.error,409);
@@ -268,7 +270,7 @@ async function drawDirectQuarterfinals(env:Env,user:SessionUser,source:StageRow,
  return json({ok:true,pairs,randomSeed});
 }
 
-async function drawQuarterfinals(env: Env, user: SessionUser, r16Stage: StageRow, groupStageId: number, targetStageId: number, roundLinkId: number, options: Options = {}) {
+async function drawQuarterfinals(env: Env, user: SessionUser, r16Stage: StageRow, groupStageId: number, targetStageId: number, roundLinkId: number | null, options: Options = {}) {
   if (r16Stage.stage_type !== 'KNOCKOUT') return error('La etapa de octavos no es eliminatoria', 409);
   const groupStage = await stageInfo(env, groupStageId);
   if (!groupStage || groupStage.competition_id !== r16Stage.competition_id || groupStage.stage_type !== 'ACCUMULATIVE_GROUPS') {
@@ -298,7 +300,7 @@ async function drawQuarterfinals(env: Env, user: SessionUser, r16Stage: StageRow
 }
 
 async function drawWinnersStage(
-  env: Env, user: SessionUser, sourceStage: StageRow, targetStageId: number, roundLinkId: number,
+  env: Env, user: SessionUser, sourceStage: StageRow, targetStageId: number, roundLinkId: number | null,
   action: 'DRAW_SEMIS' | 'BUILD_FINAL', options: Options = {},
 ) {
   if (sourceStage.stage_type !== 'KNOCKOUT') return error('La etapa origen no es eliminatoria', 409);
@@ -344,9 +346,9 @@ export async function handleCompetitionCupAbProgression(request: Request, env: E
   if(options.mode && !['MANUAL','AUTOMATIC'].includes(options.mode)) return error('Modo inválido');
   if(options.pairs && options.mode!=='MANUAL') return error('Los cruces explícitos requieren modo MANUAL');
   const targetStageId = Number(body?.targetStageId);
-  const roundLinkId = Number(body?.roundLinkId);
+  const roundLinkId = body?.roundLinkId ? Number(body.roundLinkId) : null;
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa destino inválida');
-  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha destino inválida');
+  if (roundLinkId !== null && (!Number.isInteger(roundLinkId) || roundLinkId <= 0)) return error('Fecha destino inválida');
 
   const configuredGroup=await env.DB.prepare("SELECT id FROM competition_stages WHERE competition_id=? AND stage_type='ACCUMULATIVE_GROUPS' ORDER BY sequence,id LIMIT 1").bind(sourceStage.competition_id).first<{id:number}>();
   const format=await cupAbStageFormat(env.DB,configuredGroup?.id??sourceStageId);

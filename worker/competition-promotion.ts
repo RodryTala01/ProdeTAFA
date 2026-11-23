@@ -1,3 +1,4 @@
+import {schedulingRoundError} from './competition-scheduling';
 import {promotionLeagueStatus} from './promotion-league-phase';
 import type { Env } from './index';
 
@@ -274,20 +275,23 @@ async function buildMatches(request: Request, env: Env, user: SessionUser, compe
 
   const body = await request.json().catch(() => null) as { stageId?: number; roundLinkId?: number } | null;
   const stageId = Number(body?.stageId);
-  const roundLinkId = Number(body?.roundLinkId);
+  const roundLinkId = body?.roundLinkId ? Number(body.roundLinkId) : null;
   if (!Number.isInteger(stageId) || stageId <= 0) return error('Etapa inválida');
-  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha inválida');
+  if (roundLinkId !== null && (!Number.isInteger(roundLinkId) || roundLinkId <= 0)) return error('Fecha inválida');
 
   const stage = await env.DB.prepare(
     `SELECT id,stage_type,status FROM competition_stages WHERE id=? AND competition_id=? LIMIT 1`,
   ).bind(stageId, competitionId).first<{ id: number; stage_type: string; status: string }>();
   if (!stage || stage.stage_type !== 'KNOCKOUT') return error('La etapa de Promoción debe ser eliminatoria', 409);
   if(['finished','archived'].includes(stage.status))return error('La etapa ya está cerrada',409);
+  if(roundLinkId!==null){
   const link = await env.DB.prepare(
-    `SELECT id FROM competition_round_links
+    `SELECT id,round_id FROM competition_round_links
      WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL' LIMIT 1`,
-  ).bind(roundLinkId, competitionId, stageId).first<{ id: number }>();
+  ).bind(roundLinkId, competitionId, stageId).first<{ id: number;round_id:number }>();
   if (!link) return error('La Fecha no está vinculada a Promoción', 409);
+  const blocked=await schedulingRoundError(env.DB,link.round_id);if(blocked)return error(blocked,409);
+  }
   const existing = await env.DB.prepare(`SELECT COUNT(*) AS total FROM competition_encounters WHERE stage_id=?`)
     .bind(stageId).first<{ total: number }>();
   if (Number(existing?.total ?? 0) > 0) return error('Los cruces de Promoción ya fueron creados', 409);

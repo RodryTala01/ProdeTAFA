@@ -300,20 +300,22 @@ async function qualifiersPayload(env: Env, sourceStageId: number, targetStageId:
   }));
 }
 
-async function validateTargetLink(env: Env, source: StageRow, targetStageId: number, roundLinkId: number, options:{replace?:boolean;reason?:string;preview?:boolean}={}) {
+async function validateTargetLink(env: Env, source: StageRow, targetStageId: number, roundLinkId: number | null, options:{replace?:boolean;reason?:string;preview?:boolean}={}) {
   const target = await stageInfo(env, targetStageId);
   if (!target || target.competition_id !== source.competition_id || target.stage_type !== 'KNOCKOUT') {
     return { ok: false as const, error: 'La etapa destino debe ser eliminatoria y pertenecer a la misma Copa Total' };
   }
   if (target.status === 'finished' || target.status === 'archived') return { ok: false as const, error: 'La etapa destino ya está cerrada' };
+  if(roundLinkId!==null){
   const link = await env.DB.prepare(
     `SELECT id FROM competition_round_links
      WHERE id=? AND competition_id=? AND stage_id=? AND purpose='NORMAL' LIMIT 1`,
   ).bind(roundLinkId, source.competition_id, targetStageId).first<{ id: number }>();
   if (!link) return { ok: false as const, error: 'La Fecha indicada no está vinculada a la etapa destino' };
+  }
   if(source.id===targetStageId || [source.season_status,source.competition_status].some(v=>['finished','archived'].includes(v)))return {ok:false as const,error:'La Copa o temporada está cerrada, o el destino coincide con el origen'};
   const lock=await env.DB.prepare(`SELECT r.status,r.published_at,EXISTS(SELECT 1 FROM matches m WHERE m.round_id=r.id AND julianday(m.kickoff_at)<=julianday('now')) started FROM competition_round_links l JOIN rounds r ON r.id=l.round_id WHERE l.id=?`).bind(roundLinkId).first<{status:string;published_at:string|null;started:number}>();
-  if(lock?.status!=='draft'||lock.published_at||lock.started)return {ok:false as const,error:'La Fecha destino ya fue publicada o iniciada'};
+  if(roundLinkId!==null&&(lock?.status!=='draft'||lock.published_at||lock.started))return {ok:false as const,error:'La Fecha destino ya fue publicada o iniciada'};
   const unsafe=await env.DB.prepare(`SELECT COUNT(*) n FROM competition_encounters e LEFT JOIN competition_round_links l ON l.id=e.round_link_id LEFT JOIN rounds r ON r.id=l.round_id WHERE e.stage_id=? AND (e.admin_confirmed_at IS NOT NULL OR r.status<>'draft' OR r.published_at IS NOT NULL OR EXISTS(SELECT 1 FROM matches m WHERE m.round_id=r.id AND julianday(m.kickoff_at)<=julianday('now')) OR EXISTS(SELECT 1 FROM competition_tiebreaks t WHERE t.encounter_id=e.id))`).bind(targetStageId).first<{n:number}>();
   if(Number(unsafe?.n)>0)return {ok:false as const,error:'Los cruces ya tienen actividad deportiva'};
   if(options.replace&&!options.preview&&!options.reason?.trim())return {ok:false as const,error:'Indicá el motivo de la corrección'};
@@ -396,7 +398,7 @@ async function confirmedOutcome(env: Env, stageId: number) {
 }
 
 async function insertPairs(
-  env: Env, user: SessionUser, sourceStageId: number, targetStageId: number, roundLinkId: number,
+  env: Env, user: SessionUser, sourceStageId: number, targetStageId: number, roundLinkId: number | null,
   available: number[], body: { random?: boolean; pairs?: PairInput[];replace?:boolean;reason?:string;preview?:boolean }, slotPrefix: string, action: string,
 ) {
   const source = await stageInfo(env, sourceStageId);
@@ -424,9 +426,9 @@ async function buildProgression(request: Request, env: Env, user: SessionUser, s
     targetStageId?: number; roundLinkId?: number; random?: boolean; pairs?: PairInput[];replace?:boolean;reason?:string;preview?:boolean;
   } | null;
   const targetStageId = Number(body?.targetStageId);
-  const roundLinkId = Number(body?.roundLinkId);
+  const roundLinkId = body?.roundLinkId ? Number(body.roundLinkId) : null;
   if (!Number.isInteger(targetStageId) || targetStageId <= 0) return error('Etapa destino inválida');
-  if (!Number.isInteger(roundLinkId) || roundLinkId <= 0) return error('Fecha destino inválida');
+  if (roundLinkId !== null && (!Number.isInteger(roundLinkId) || roundLinkId <= 0)) return error('Fecha destino inválida');
 
   if(body)body.preview=request.method==='GET';
   const source=await stageInfo(env,sourceStageId);

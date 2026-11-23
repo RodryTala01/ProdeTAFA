@@ -243,7 +243,7 @@ export default function AdminPromotion({
                       disabled={locked || !unlocked || !stage || dirty}
                       onChange={(e) => setLink(e.target.value)}
                     >
-                      <option value="">Elegir Fecha vinculada</option>
+                      <option value="">Sin Fecha · vincular después desde Fechas</option>
                       {links.map((l) => (
                         <option key={l.id} value={l.id}>
                           {l.roundName}
@@ -252,7 +252,7 @@ export default function AdminPromotion({
                     </select>
                   </label>
                   <p>
-                    Creá la etapa y vinculá la Fecha desde Configuración
+                    Creá la etapa desde Configuración
                     general.
                   </p>
                   <button
@@ -263,16 +263,16 @@ export default function AdminPromotion({
                       !confirmed ||
                       dirty ||
                       !stages.some((s) => s.id === Number(stage)) ||
-                      !links.some((l) => l.id === Number(link))
+                      (Boolean(link)&&!links.some((l) => l.id === Number(link)))
                     }
                     onClick={() =>
                       void run(
                         () =>
                           cupApi(base + '/matches', 'POST', {
                             stageId: Number(stage),
-                            roundLinkId: Number(link),
+                            roundLinkId: link?Number(link):null,
                           }),
-                        'Los dos cruces fijos fueron creados en la misma Fecha.',
+                        'Los dos cruces fijos fueron creados. Podés vincular su Fecha después.',
                       )
                     }
                   >

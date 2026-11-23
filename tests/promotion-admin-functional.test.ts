@@ -150,12 +150,13 @@ describe('Promocion backend funcional', () => {
     expect((await call('admin/competition-engine/competitions/100/rounds','POST',{stageId:200,roundId:300})).status).toBe(409);
     expect((db.prepare("SELECT COUNT(*) n FROM competition_round_links WHERE competition_id=100 AND purpose='NORMAL'").get() as any).n).toBe(1);
   });
-  it('no permite desvincular la Fecha 6 después de generar sus cruces',async()=>{
+  it('desvincula ambos cruces pendientes de Promoción sin borrar el sorteo',async()=>{
     const pref=await call('admin/competition-engine/competitions/100/promotion/prefill','POST',{});
     const slots=(await pref.json() as any).slots;
     expect((await call('admin/competition-engine/competitions/100/promotion/slots','PUT',{slots:slots.map((s:any)=>({slotCode:s.slotCode,userId:s.proposedUser.id}))})).status).toBe(200);
     expect((await call('admin/competition-engine/competitions/100/promotion/matches','POST',{stageId:200,roundLinkId:400})).status).toBe(200);
-    expect((await call('admin/competition-engine/competitions/100/rounds/400','DELETE')).status).toBe(409);
+    expect((await call('admin/competition-engine/competitions/100/rounds/400','DELETE')).status).toBe(200);
+    const preserved=db.prepare('SELECT round_link_id FROM competition_encounters WHERE stage_id=200').all() as any[];expect(preserved).toHaveLength(2);expect(preserved.every(e=>e.round_link_id===null)).toBe(true);
   });
   it('la consulta de Promoción informa el estado real de la Fecha 6',async()=>{
     const data=await (await call('competition-engine/competitions/100/promotion/slots')).json() as any;

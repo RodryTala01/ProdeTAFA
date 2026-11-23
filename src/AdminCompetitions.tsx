@@ -344,13 +344,13 @@ export default function AdminCompetitions() {
                       <span className="eyebrow">{familyLabel(competition.family)}{competition.divisionCode ? ` · DIVISIÓN ${competition.divisionCode}` : ''}</span>
                       <h2>{competition.displayName}</h2>
                       <p>{competition.stages.filter(stage => ['active','open','in_progress'].includes(stage.status)).map(stage => stage.name).join(' · ') || `${competition.stages.length} etapas`} · {competition.roundLinks.length} Fechas vinculadas</p>
-                      {!isCompetitionClosed(competition.status) && (!competition.stages.length || !competition.roundLinks.length) && <small className="admin-task-note">{!competition.stages.length ? 'Sin etapas configuradas' : 'Sin Fechas vinculadas'}</small>}
+                      {!isCompetitionClosed(competition.status) && (!competition.stages.length || !competition.roundLinks.length) && <small className="admin-task-note">{!competition.stages.length ? 'Sin etapas configuradas' : 'Calendario pendiente · se vincula después'}</small>}
                     </div>
                     <span className="user-chip">{statusLabel(competition.status)}</span>
                   </div>
 
                   <>
-                  {setupStep==='resumen' && <section className="asc-wizard-content"><h3>Preparar {competition.displayName}</h3><p>Esta edición ya forma parte de la temporada. Revisá los participantes, prepará el sorteo o los cruces y vinculá las Fechas necesarias. Ninguna acción deportiva se confirma automáticamente.</p><p><strong>{competition.stages.length} etapas</strong> · <strong>{competition.roundLinks.length} Fechas vinculadas</strong> · {statusLabel(competition.status)}</p><button className="button button--primary" type="button" onClick={()=>setSetupStep('participantes')}>Empezar con los participantes →</button></section>}
+                  {setupStep==='resumen' && <section className="asc-wizard-content"><h3>Preparar {competition.displayName}</h3><p>Esta edición ya forma parte de la temporada. Revisá los participantes, prepará el sorteo o los cruces sin necesitar Fechas. El calendario se asigna después desde Admin → Fechas. Ninguna acción deportiva se confirma automáticamente.</p><p><strong>{competition.stages.length} etapas</strong> · <strong>{competition.roundLinks.length} Fechas vinculadas</strong> · {statusLabel(competition.status)}</p><button className="button button--primary" type="button" onClick={()=>setSetupStep('participantes')}>Empezar con los participantes →</button></section>}
                   {setupStep==='participantes' && <><AdminSetupParticipants season={selected} competition={competition} onEditDivisions={()=>setShowDivisions(true)}/><button type="button" className="button button--primary" onClick={()=>setSetupStep('armado')}>Siguiente: sorteos y fases →</button></>}
                   {setupStep==='revision' && <AdminSetupReview season={selected} competition={competition} onStep={setSetupStep}/>}
                   {setupStep==='armado' && <>
@@ -369,9 +369,9 @@ export default function AdminCompetitions() {
                   {competition.code==='COPA_PAPA' && <AdminCupPapa seasonNumber={selected.seasonNumber} key={competition.id} competition={competition} rounds={availableRounds} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code==='PROMOCION' && <AdminPromotion key={competition.id} competition={competition} rounds={availableRounds} eligible={activeParticipants.filter(p=>selected.members.some(m=>m.userId===p.id)).map(p=>({id:p.id,name:p.fullName}))} disabled={loading || fetching || ['finished','archived'].includes(selected.status)}/> }
                   {competition.code!=='PROMOCION' && <section><h3>Resultados de la competición</h3><AdminResults key={`results-${competition.id}`} competition={competition} seasonNumber={selected.seasonNumber} archived={selected.status==='archived'}/></section>}
-                  <button type="button" className="button button--secondary" onClick={()=>setSetupStep('fechas')}>Siguiente: Fechas y ajustes →</button>
+                  <button type="button" className="button button--secondary" onClick={()=>setSetupStep('fechas')}>Etapas y ajustes opcionales →</button>
                   </>}
-                   {setupStep==='fechas' && <details open><summary>Configuración y vínculos de Fechas</summary><p className="admin-help">Configurá las etapas internas y las Fechas que alimentan cada etapa.</p>
+                   {setupStep==='fechas' && <details open><summary>Configuración y vínculos de Fechas</summary><p className="admin-help">Configurá las etapas internas. Las Fechas son opcionales en esta preparación; podés vincularlas después desde Admin → Fechas.</p>
                   <CompetitionConfigPanel
                     key={competition.id}
                     competition={competition}

@@ -1,3 +1,4 @@
+import {handleScheduling,removeScheduledLink,schedulingRoundError} from './competition-scheduling';
 import {cupAbStageFormat} from './cup-ab-format';
 import {promotionLeagueStatus} from './promotion-league-phase';
 import { competitionOverview } from './competition-overview';
@@ -471,6 +472,10 @@ async function linkRound(request: Request, env: Env, user: SessionUser, competit
   if (!competition) return error('Competición no encontrada', 404);
   if (competition.season_status === 'finished' || competition.season_status === 'archived') return error('La temporada ya está cerrada', 409);
 
+  if(['finished','archived'].includes(competition.status))return error('La competición ya está cerrada',409);
+  const snapshot=await env.DB.prepare('SELECT id FROM competition_results WHERE competition_id=? LIMIT 1').bind(competitionId).first();
+  if(snapshot)return error('La competición ya tiene resultados finales confirmados',409);
+
   const body = await request.json().catch(() => null) as {
     stageId?: number;
     roundId?: number;
@@ -484,9 +489,10 @@ async function linkRound(request: Request, env: Env, user: SessionUser, competit
   if (!Number.isInteger(stageId) || stageId <= 0 || !Number.isInteger(roundId) || roundId <= 0) return error('Etapa o fecha inválida');
 
   const stage = await env.DB.prepare(
-    `SELECT id,stage_type FROM competition_stages WHERE id = ? AND competition_id = ? LIMIT 1`,
-  ).bind(stageId, competitionId).first<{ id: number;stage_type:string }>();
+    `SELECT id,stage_type,status FROM competition_stages WHERE id = ? AND competition_id = ? LIMIT 1`,
+  ).bind(stageId, competitionId).first<{ id: number;stage_type:string;status:string }>();
   if (!stage) return error('La etapa no pertenece a esta competición', 409);
+  if(['finished','archived'].includes(stage.status))return error('La etapa ya está cerrada',409);
 
   if(stage.stage_type==='ACCUMULATIVE_GROUPS'&&purpose==='NORMAL'){
     const format=await cupAbStageFormat(env.DB,stageId);
@@ -512,6 +518,7 @@ async function linkRound(request: Request, env: Env, user: SessionUser, competit
     const round = await env.DB.prepare('SELECT id, category FROM rounds WHERE id = ? LIMIT 1')
     .bind(roundId).first<{ id: number; category: string }>();
   if (!round) return error('Fecha no encontrada', 404);
+  const schedulingBlocked=await schedulingRoundError(env.DB,roundId);if(schedulingBlocked)return error(schedulingBlocked,409);
   if(competition.family==='PROMOTION'&&round.category!=='AMISTOSO'&&round.category!=='LIGA')
     return error('La Fecha 6 de Promoción debe ser una Fecha de Liga, no una copa.',409);
 
@@ -556,16 +563,9 @@ async function unlinkRound(env: Env, user: SessionUser, competitionId: number, l
   ).bind(linkId, competitionId).first<{ id: number; round_id: number; season_id: number }>();
   if (!link) return error('Vínculo no encontrado', 404);
 
-  const linkedMatches=await env.DB.prepare(
-    'SELECT id FROM competition_encounters WHERE round_link_id=? LIMIT 1'
-  ).bind(linkId).first();
-  if(linkedMatches)return error('No se puede desvincular una Fecha que ya tiene cruces confirmados o pendientes.',409);
-    await env.DB.prepare('DELETE FROM competition_round_links WHERE id = ?').bind(linkId).run();
-  await audit(env, user.id, 'competition.round_unlinked', 'competition', String(competitionId), {
-    linkId,
-    roundId: link.round_id,
-  });
-  return json({ ok: true, season: await seasonPayload(env, Number(link.season_id)) });
+  const result=await removeScheduledLink(env,user,linkId,competitionId);
+  if(!result.ok)return result;
+  return json({ok:true,season:await seasonPayload(env,Number(link.season_id))});
 }
 
 async function participantCurrent(env: Env, user: SessionUser) {
@@ -653,6 +653,8 @@ export async function handleCompetitionEngine(request: Request, env: Env): Promi
   }
 
   if (user.role !== 'admin') return error('Acceso de administrador requerido', 403);
+
+  const scheduling=await handleScheduling(request,env,user);if(scheduling)return scheduling;
 
   if (pathname === '/api/admin/competition-engine/draw-overview' && request.method === 'GET') {
     return json(await competitionOverview(env.DB,user.id,Number(url.searchParams.get('season')),true));

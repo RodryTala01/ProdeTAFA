@@ -1,3 +1,4 @@
+import {handleCompetitionEngine} from '../worker/competitions';
 import { readFileSync, readdirSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { createHash } from 'node:crypto';
@@ -42,7 +43,7 @@ async function call(path: string, method = 'GET', body?: object) {
     headers: { cookie: 'prode_session=admin', 'content-type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
-  const response = await handleCompetitionPapa(request, env());
+  const response = await handleCompetitionPapa(request, env()) ?? await handleCompetitionEngine(request,env());
   if (!response) throw new Error('No route ' + path);
   return response;
 }
@@ -255,4 +256,32 @@ describe('Copa Papa backend funcional', () => {
     expect((await call('admin/competition-engine/stages/203/papa/third-place','POST',{targetStageId:206,roundLinkId:406})).status).toBe(409);
 
   });
+});
+
+it('confirma una llave sin ninguna Fecha y programa cruces después sin reconstruir el sorteo',async()=>{
+ db.exec('DELETE FROM competition_round_links; DELETE FROM rounds;');
+ const created=await call('admin/competition-engine/competitions/100/papa/initial-bracket','POST',{stageId:201,pairs:[{userAId:'P1',userBId:'P6'},{userAId:'P2',userBId:'P5'},{userAId:'P3',userBId:'P4'}]});
+ expect(created.status).toBe(200);
+ const original=db.prepare('SELECT * FROM competition_encounters WHERE stage_id=201 ORDER BY id').all() as any[];
+ expect(original).toHaveLength(3);expect(original.every(e=>e.round_link_id===null&&e.score_a===null&&e.score_b===null)).toBe(true);
+ db.exec("INSERT INTO rounds(id,name,status,category) VALUES(501,'Posterior 1','draft','COPA'),(502,'Posterior 2','draft','COPA')");
+ const route='admin/competition-engine/scheduling';
+ const listing=await(await call(route+'/rounds/501')).json() as any;expect(listing.encounters.filter((e:any)=>e.stageId===201)).toHaveLength(3);
+ expect((await call('admin/competition-engine/competitions/100/rounds','POST',{stageId:201,roundId:501})).status).toBe(200);
+ expect((await call('admin/competition-engine/competitions/100/rounds','POST',{stageId:201,roundId:502})).status).toBe(200);
+ const links=db.prepare('SELECT id,round_id FROM competition_round_links WHERE stage_id=201 ORDER BY id').all() as any[];
+ expect((await call(route+'/links/'+links[0].id,'PUT',{encounterIds:[original[0].id]})).status).toBe(200);
+ expect((await call(route+'/links/'+links[1].id,'PUT',{encounterIds:[original[1].id,original[2].id]})).status).toBe(200);
+ const after=db.prepare('SELECT * FROM competition_encounters WHERE stage_id=201 ORDER BY id').all() as any[];
+ expect(after.map(e=>[e.id,e.entry_a_id,e.entry_b_id])).toEqual(original.map(e=>[e.id,e.entry_a_id,e.entry_b_id]));
+ expect(after.map(e=>e.round_link_id)).toEqual([links[0].id,links[1].id,links[1].id]);
+ expect((await call(route+'/links/'+links[0].id,'DELETE')).status).toBe(200);
+ expect((db.prepare('SELECT round_link_id FROM competition_encounters WHERE id=?').get(original[0].id) as any).round_link_id).toBeNull();
+ db.exec("INSERT INTO rounds(id,name,status) VALUES(503,'Mover','draft')");
+ expect((await call(route+'/links/'+links[1].id,'PATCH',{roundId:503})).status).toBe(200);
+ db.prepare('UPDATE competition_encounters SET score_a=10 WHERE id=?').run(original[1].id);
+ expect((await call(route+'/links/'+links[1].id,'DELETE')).status).toBe(409);
+ expect((await call(route+'/links/'+links[1].id,'PUT',{encounterIds:[]})).status).toBe(409);
+ db.exec("UPDATE rounds SET status='open' WHERE id=501");
+ expect((await call('admin/competition-engine/competitions/100/rounds','POST',{stageId:202,roundId:501})).status).toBe(409);
 });
