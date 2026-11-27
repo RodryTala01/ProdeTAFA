@@ -1,5 +1,5 @@
 // Network acquisition runs only in GitHub Actions, never in the Worker.
-import {PromiedosError, parsePromiedosGame, parsePromiedosDay, promiedosFixture} from '../worker/promiedos';
+import {PromiedosError, parsePromiedosGame, parsePromiedosDay} from '../worker/promiedos';
 export {safeDailyLiveGame} from '../worker/promiedos';
 const API = 'https://api.promiedos.com.ar';
 const WEB = 'https://www.promiedos.com.ar';
@@ -47,9 +47,6 @@ async function request<T>(path: string, parse: (value: unknown) => T, counter: R
 export async function getPromiedosDay(date: string, counter: RequestCounter = {count:0}) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new PromiedosError('Fecha inválida');
   return request('/games/' + date.split('-').reverse().join('-'), parsePromiedosDay, counter);
-}
-export async function searchPromiedosFixtures(date: string, counter: RequestCounter = {count:0}) {
-  return (await getPromiedosDay(date,counter)).map(g=>promiedosFixture(g));
 }
 export async function getPromiedosGame(id: string, counter: RequestCounter = {count:0}) {
   if (!/^[a-zA-Z0-9_-]{1,100}$/.test(id)) throw new PromiedosError('ID inválido');

@@ -1,6 +1,6 @@
 import RoundImageExport from './RoundImageExport';
 import RoundCompetitionLinks from './RoundCompetitionLinks';
-import {argentinaDateTime} from './match-time';
+import {argentinaCalendarDate, argentinaDateTime, shiftCalendarDate, utcDate} from './match-time';
 import AdminRoundSubmissions from './AdminRoundSubmissions';
 import {safeAdminError} from './safe-admin-error';
 import {TeamShield,CompetitionImage} from './AssetImage';
@@ -54,16 +54,6 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data;
 }
 
-function localDateInputValue(date = new Date()) {
-  return new Intl.DateTimeFormat('en-CA', {timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
-}
-
-function addDaysToInput(value: string, days: number) {
-  const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day + days));
-  return date.toISOString().slice(0, 10);
-}
-
 function formatKickoff(value: string) { return argentinaDateTime(value); }
 
 function Team({ name, logoUrl, teamId }: { name: string; logoUrl: string | null; teamId?:string|null }) {
@@ -84,12 +74,12 @@ export default function AdminRounds() {
   const searchStart = useRef<HTMLInputElement>(null);
   const searchVersion=useRef(0);
   const [pendingSearch,setPendingSearch]=useState<{from:string;to:string;attempt:number;version:number}|null>(null);
-  const today = localDateInputValue();
+  const today = argentinaCalendarDate(new Date());
   const [rounds, setRounds] = useState<RoundSummary[]>([]);
   const [selected, setSelected] = useState<RoundDetail | null>(null);
   const [newRoundName, setNewRoundName] = useState('');
   const [searchFrom, setSearchFrom] = useState(today);
-  const [searchTo, setSearchTo] = useState(addDaysToInput(today, 6));
+  const [searchTo, setSearchTo] = useState(shiftCalendarDate(today, 6));
   const [searchText, setSearchText] = useState('');
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [loading, setLoading] = useState(false);
@@ -107,7 +97,7 @@ export default function AdminRounds() {
     setDetailLoading(true);
     try {
       const data = await api<{ round: RoundDetail }>(`/api/admin/rounds/${id}`);
-      if (version === detailVersion.current) setSelected({ ...data.round, matches: [...data.round.matches].sort((a,b) => Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt) || a.id-b.id), matchCount: data.round.matches.length });
+      if (version === detailVersion.current) setSelected({ ...data.round, matches: [...data.round.matches].sort((a,b) => +utcDate(a.kickoffAt) - +utcDate(b.kickoffAt) || a.id-b.id), matchCount: data.round.matches.length });
     } finally { if (version === detailVersion.current) setDetailLoading(false); }
   }
 
@@ -192,7 +182,7 @@ export default function AdminRounds() {
       const query = new URLSearchParams({from,to});
       const data=await api<{fixtures:Fixture[];requestCount:number;pending?:boolean;pendingDates?:string[]}>(`/api/admin/fixtures?${query}`);
       if(searchVersion.current!==version)return;
-      setFixtures([...data.fixtures].sort((a,b)=>Date.parse(a.kickoffAt)-Date.parse(b.kickoffAt)));
+      setFixtures([...data.fixtures].sort((a,b)=>+utcDate(a.kickoffAt) - +utcDate(b.kickoffAt)));
       setHasSearched(true);
       setPendingSearch(data.pending&&attempt<20?{from,to,version,attempt:attempt+1}:null);
       setSuccess(data.pending
@@ -210,7 +200,7 @@ export default function AdminRounds() {
   useEffect(()=>()=>{searchVersion.current++;},[]);
   function changeSearchFrom(value:string){
     searchVersion.current++;setPendingSearch(null);setSearching(false);setFixtures([]);setHasSearched(false);setSuccess('');setSearchFrom(value);
-    if(value)setSearchTo(addDaysToInput(value,6));
+    if(value)setSearchTo(shiftCalendarDate(value,6));
   }
   function changeSearchTo(value:string){searchVersion.current++;setPendingSearch(null);setSearching(false);setFixtures([]);setHasSearched(false);setSuccess('');setSearchTo(value);}
 
@@ -332,7 +322,7 @@ export default function AdminRounds() {
               <section className="card fixture-search-card">
                 <p>Datos de partidos: <a href="https://www.promiedos.com.ar/" target="_blank" rel="noreferrer">Promiedos</a></p>
                 <div className="section-heading"><div><h2>Buscar partidos reales</h2><p>Elegí hasta 7 días. Los próximos partidos aparecen primero.</p></div></div>
-                <div className="topbar-actions"><button type="button" className="button button--secondary" onClick={()=>changeSearchFrom(addDaysToInput(searchFrom||today,-7))}>Semana anterior</button><button type="button" className="button button--secondary" onClick={()=>changeSearchFrom(today)}>Esta semana</button><button type="button" className="button button--secondary" onClick={()=>changeSearchFrom(addDaysToInput(searchFrom||today,7))}>Semana siguiente</button></div>
+                <div className="topbar-actions"><button type="button" className="button button--secondary" onClick={()=>changeSearchFrom(shiftCalendarDate(searchFrom||today,-7))}>Semana anterior</button><button type="button" className="button button--secondary" onClick={()=>changeSearchFrom(today)}>Esta semana</button><button type="button" className="button button--secondary" onClick={()=>changeSearchFrom(shiftCalendarDate(searchFrom||today,7))}>Semana siguiente</button></div>
                 {pendingSearch&&<p role="status">Cargando la semana seleccionada desde Promiedos. Podés usar los partidos ya disponibles mientras llegan los demás.</p>}
                 <form className="fixture-search-form" onSubmit={searchMatches}>
                   <label><span>Desde</span><input ref={searchStart} type="date" value={searchFrom} onChange={(event) => changeSearchFrom(event.target.value)} required /></label>
@@ -374,19 +364,53 @@ export default function AdminRounds() {
                 {selected.matches.some(m => m.provider === 'promiedos') && <p>Datos de partidos: <a href="https://www.promiedos.com.ar/">Promiedos</a></p>}
                 <div className="section-heading"><h2>Partidos agregados</h2><span>{isDraft ? 'Ordenados por horario' : 'Resultados del proveedor'}</span></div>
                 <div className="stored-match-list">
-                  {selected.matches.map((match, index) => (
-                    <div className="stored-match" key={match.id}>
-                      <div className="stored-match-main">
-                        <small>{index + 1}. {match.competitionName || 'Competencia'} · {formatKickoff(match.kickoffAt)} · {match.status}</small>
-                        <div className="stored-teams"><Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl} /><span>vs</span><Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl} /></div>
-                        {match.goals.home !== null && match.goals.away !== null && <span className="penalty-badge">Resultado {match.goals.home} - {match.goals.away}</span>}
-                        {match.matchType === 'PENALTIES_ONLY' && <span className="penalty-badge">PENALES</span>}
-                      </div>
-                      {(isDraft||isOpen)&&['NS','scheduled'].includes(match.status)&&<button type="button" className="button button--secondary" disabled={busy} onClick={()=>setConfirm({title:'¿Cambiar Penales?',message:'Cambia si se solicita elegir ganador de penales. Solo se permite antes del cierre y si todavía no hay pronósticos oficiales para este partido.',action:match.matchType==='NORMAL'?'Activar Penales':'Quitar Penales',run:()=>changeMatchType(match)})}>{match.matchType==='NORMAL'?'Activar Penales':'Quitar Penales'}</button>}
-                      {((isDraft||isOpen)&&['NS','scheduled'].includes(match.status)||isFinished)&&<AdminKickoffEditor roundId={selected.id} matchId={match.id} kickoffAt={match.kickoffAt} corrected={match.kickoffOverride} onChanged={()=>{setSuccess('Horario corregido para toda TAFA.');void loadRound(selected.id);}}/>}
-                      {isDraft && <AdminMenu label={`Acciones de ${match.home.name} vs ${match.away.name}`}><button className="admin-menu-danger" disabled={busy} onClick={() => setConfirm({ title: '¿Quitar partido?', message: `${match.home.name} vs ${match.away.name} se quitará del borrador. Podés volver a agregarlo desde la búsqueda.`, action: 'Quitar partido', run: () => removeMatch(match) })}>Quitar partido</button></AdminMenu>}
-                    </div>
-                  ))}
+                  {selected.matches.map((match, index) => {
+                    const scheduled = ['NS', 'scheduled'].includes(match.status);
+                    const canChangeType = (isDraft || isOpen) && scheduled;
+                    return (
+                      <article className="stored-match" key={match.id}>
+                        <div className="stored-match-main">
+                          <div className="stored-match-meta">
+                            <span>{index + 1}. {match.competitionName || 'Competencia'}</span>
+                            <time dateTime={match.kickoffAt}>{formatKickoff(match.kickoffAt)}</time>
+                            <span>{scheduled ? 'Programado' : match.status}</span>
+                          </div>
+                          <div className="stored-teams">
+                            <Team name={match.home.name} teamId={match.home.id} logoUrl={match.home.logoUrl} />
+                            <span>vs</span>
+                            <Team name={match.away.name} teamId={match.away.id} logoUrl={match.away.logoUrl} />
+                          </div>
+                          {match.goals.home !== null && match.goals.away !== null && <span className="penalty-badge">Resultado {match.goals.home} - {match.goals.away}</span>}
+                          {match.matchType === 'PENALTIES_ONLY' && <span className="penalty-badge">PENALES</span>}
+                        </div>
+                        {(canChangeType || isDraft) && (
+                          <div className="stored-match-actions">
+                            {canChangeType && <button type="button" className="button button--secondary" disabled={busy} onClick={() => setConfirm({
+                              title: '¿Cambiar Penales?',
+                              message: 'Cambia si se solicita elegir ganador de penales. Solo se permite antes del cierre y si todavía no hay pronósticos oficiales para este partido.',
+                              action: match.matchType === 'NORMAL' ? 'Activar Penales' : 'Quitar Penales',
+                              run: () => changeMatchType(match),
+                            })}>{match.matchType === 'NORMAL' ? 'Activar Penales' : 'Quitar Penales'}</button>}
+                            {isDraft && <AdminMenu label={`Acciones de ${match.home.name} vs ${match.away.name}`}>
+                              <button className="admin-menu-danger" disabled={busy} onClick={() => setConfirm({
+                                title: '¿Quitar partido?',
+                                message: `${match.home.name} vs ${match.away.name} se quitará del borrador. Podés volver a agregarlo desde la búsqueda.`,
+                                action: 'Quitar partido',
+                                run: () => removeMatch(match),
+                              })}>Quitar partido</button>
+                            </AdminMenu>}
+                          </div>
+                        )}
+                        {(canChangeType || isFinished) && <AdminKickoffEditor
+                          roundId={selected.id} matchId={match.id} kickoffAt={match.kickoffAt} corrected={match.kickoffOverride}
+                          onChanged={() => {
+                            setSuccess('Horario corregido para toda TAFA.');
+                            void loadRound(selected.id).catch(() => setError('No pudimos recargar la Fecha. Volvé a abrirla para ver el horario.'));
+                          }}
+                        />}
+                      </article>
+                    );
+                  })}
                 </div>
               </section>
             )}

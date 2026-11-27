@@ -1,5 +1,6 @@
-import {PromiedosError, parsePromiedosGame, promiedosFixture, normalizePromiedosResult, PROMIEDOS_SOURCE_TIME_ZONE, type PromiedosGame} from './promiedos';
+import {PromiedosError, parsePromiedosGame, promiedosFixture, normalizePromiedosResult, type PromiedosGame} from './promiedos';
 import {manualResultSql} from './result-source';
+import {argentinaCalendarDate, shiftCalendarDate, utcDate} from '../src/match-time';
 
 export class PromiedosCachePending extends PromiedosError {}
 
@@ -7,6 +8,8 @@ type Env = {DB: D1Database; PROMIEDOS_INGEST_TOKEN?: string};
 type Kind = 'day' | 'game';
 const dateValid = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && Number.isFinite(Date.parse(s)) && new Date(s).toISOString().slice(0,10) === s;
 const keyValid = (kind: Kind, key: string) => typeof key === 'string' && (kind === 'day' ? dateValid(key) : /^[a-zA-Z0-9_-]{1,100}$/.test(key));
+// Pre-release day rows only contain localized strings. Refresh those even if their TTL is still valid.
+const verifiedDay = "(json_array_length(payload_json)=0 OR json_type(payload_json,'$[0].kickoffAt')='text')";
 const json = (data: unknown, status=200) => Response.json(data,{status,headers:{'cache-control':'no-store'}});
 
 async function queue(db: D1Database, kind: Kind, key: string) {
@@ -18,7 +21,7 @@ async function queue(db: D1Database, kind: Kind, key: string) {
 async function read(db: D1Database, kind: Kind, key: string) {
   if (!keyValid(kind,key)) throw new PromiedosError('Identificador de caché inválido');
   const row = await db.prepare(`SELECT payload_json FROM promiedos_cache WHERE kind=? AND cache_key=?
-    AND julianday(expires_at)>julianday('now')`).bind(kind,key).first<{payload_json:string}>();
+    AND julianday(expires_at)>julianday('now') ${kind==='day' ? 'AND '+verifiedDay : ''}`).bind(kind,key).first<{payload_json:string}>();
   if (!row) {
     await queue(db,kind,key);
     throw new PromiedosCachePending('Datos de Promiedos pendientes o vencidos. Se solicitó una actualización; reintentá después de la próxima carga.');
@@ -35,76 +38,68 @@ export async function getCachedGame(id: string, db: D1Database) {
   return parsePromiedosGame(await read(db,'game',id),id);
 }
 
-// Repair scheduled kickoffs using verified fresh provider snapshots, including
-// previously stored fixed-UTC-5 values after the US DST change. Only open,
-// scheduled, non-manual matches are eligible; predictions/results are untouched.
+// Repair existing scheduled matches from a fresh, verified instant, leaving
+// official predictions, results and explicit admin overrides intact.
 export async function repairCachedKickoffTimes(db: D1Database) {
   const matches = await db.prepare(`SELECT m.id,m.provider_fixture_id,m.home_team_provider_id,m.away_team_provider_id,m.kickoff_at
     FROM matches m JOIN rounds r ON r.id=m.round_id
-    WHERE m.provider='promiedos' AND m.status='NS' AND r.status='open'
+    WHERE m.provider='promiedos' AND m.status='NS'
+      AND (r.status='open' OR (r.status='draft' AND julianday(m.kickoff_at)>=julianday('now','-1 day')))
       AND m.result_finalized_at IS NULL AND NOT ${manualResultSql('m')}
       AND NOT EXISTS(SELECT 1 FROM audit_log a WHERE a.action='match.kickoff_corrected'
-        AND a.entity_type='match' AND a.entity_id=CAST(m.id AS TEXT))`)
+        AND a.entity_type='match' AND a.entity_id=CAST(m.id AS TEXT))
+    ORDER BY r.status='open' DESC, m.kickoff_at, m.id LIMIT 45`)
     .all<{id:number;provider_fixture_id:string;home_team_provider_id:string;away_team_provider_id:string;kickoff_at:string}>();
-  if(!matches.results?.length)return 0;
-  const providerDay = new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_SOURCE_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
-  const days = new Set<string>();
-  for(const m of matches.results){
-    const value=m.kickoff_at.trim().replace(' ','T');
-    const instant=new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)?value:`${value}Z`);
-    if(!Number.isFinite(instant.getTime()))continue;
-    // The legacy timestamp could straddle the provider's midnight.
-    for(const offset of [-1,0,1])days.add(providerDay.format(new Date(instant.getTime()+offset*86400000)));
+  if (!matches.results?.length) return 0;
+
+  const ids = [...new Set(matches.results.map(match => match.provider_fixture_id))];
+  const placeholders = ids.map(() => '?').join(',');
+  const cached = await db.prepare(`SELECT game_json,fixture_id FROM (
+    SELECT item.value AS game_json,json_extract(item.value,'$.id') AS fixture_id,c.fetched_at,c.kind
+    FROM promiedos_cache c,json_each(c.payload_json) item
+    WHERE c.kind='day' AND julianday(c.expires_at)>julianday('now') AND ${verifiedDay}
+      AND json_extract(item.value,'$.id') IN (${placeholders})
+    UNION ALL
+    SELECT payload_json,cache_key,fetched_at,kind FROM promiedos_cache
+    WHERE kind='game' AND julianday(expires_at)>julianday('now')
+      AND cache_key IN (${placeholders})
+    ) ORDER BY julianday(fetched_at) DESC,kind DESC`).bind(...ids,...ids)
+    .all<{fixture_id:string;game_json:string}>();
+
+  const games = new Map<string, PromiedosGame>();
+  for (const row of cached.results ?? []) {
+    if (games.has(row.fixture_id)) continue;
+    try {
+      const game = parsePromiedosGame(JSON.parse(row.game_json), row.fixture_id);
+      if (game.kickoffAt && game.status.enum === 1) games.set(game.id, game);
+    } catch { /* Ignore an unusable snapshot. */ }
   }
-  if(!days.size)return 0;
-  const keys=[...days];
-  const cached=await db.prepare(`SELECT payload_json FROM promiedos_cache WHERE kind='day'
-    AND cache_key IN (${keys.map(()=>'?').join(',')}) AND julianday(expires_at)>julianday('now')`)
-    .bind(...keys).all<{payload_json:string}>();
-  const games=new Map<string,PromiedosGame>();
-  for(const row of cached.results??[])for(const raw of JSON.parse(row.payload_json) as unknown[]){
-    try{const g=parsePromiedosGame(raw);games.set(g.id,g);}catch{/* Ignore invalid historical cache. */}
-  }
-  // Gamecenter cache is often fresher than the day list. Prefer it when present,
-  // but only for a not-started game with exactly matching teams.
-  const ids=[...new Set(matches.results.map(m=>m.provider_fixture_id))];
-  const gameRows=await db.prepare(`SELECT cache_key,payload_json FROM promiedos_cache
-    WHERE kind='game' AND cache_key IN (${ids.map(()=>'?').join(',')})
-      AND julianday(expires_at)>julianday('now')`).bind(...ids)
-    .all<{cache_key:string;payload_json:string}>();
-  for(const row of gameRows.results??[]){
-    try{
-      const g=parsePromiedosGame(JSON.parse(row.payload_json),row.cache_key);
-      if(g.status.enum===1)games.set(g.id,g);
-    }catch{/* Keep the last verified day snapshot. */}
-  }
-  let repaired=0;
-  for(const m of matches.results){
-    const game=games.get(m.provider_fixture_id);
-    if(!game||game.status.enum!==1||game.teams[0].id!==m.home_team_provider_id||game.teams[1].id!==m.away_team_provider_id)continue;
-    const kickoff=promiedosFixture(game).kickoffAt;
-    const stored=m.kickoff_at.trim().replace(' ','T');
-    if(new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(stored)?stored:`${stored}Z`).getTime()===Date.parse(kickoff))continue;
-    const updated=await db.prepare(`UPDATE matches SET kickoff_at=?,updated_at=datetime('now')
-      WHERE id=? AND provider='promiedos' AND status='NS' AND result_finalized_at IS NULL
-        AND round_id IN (SELECT id FROM rounds WHERE status='open')
+
+  let repaired = 0;
+  for (const match of matches.results) {
+    const game = games.get(match.provider_fixture_id);
+    const kickoff = game?.kickoffAt;
+    if (!kickoff || +utcDate(match.kickoff_at) === Date.parse(kickoff) ||
+        game.teams[0].id !== match.home_team_provider_id || game.teams[1].id !== match.away_team_provider_id) continue;
+    const updated = await db.prepare(`UPDATE matches SET kickoff_at=?,updated_at=datetime('now')
+      WHERE id=? AND kickoff_at=? AND provider='promiedos' AND status='NS' AND result_finalized_at IS NULL
+        AND round_id IN (SELECT id FROM rounds WHERE status IN ('open','draft'))
         AND NOT ${manualResultSql('matches')}
         AND NOT EXISTS(SELECT 1 FROM audit_log a WHERE a.action='match.kickoff_corrected'
-          AND a.entity_type='match' AND a.entity_id=CAST(matches.id AS TEXT))`).bind(kickoff,m.id).run();
-    repaired+=updated.meta.changes??0;
+          AND a.entity_type='match' AND a.entity_id=CAST(matches.id AS TEXT))`)
+      .bind(kickoff,match.id,match.kickoff_at).run();
+    repaired += updated.meta.changes ?? 0;
   }
   return repaired;
 }
 
-// Adding a fixture uses the selected day's cached list, not gamecenter.
+// The date in the cache and in the fixture picker is always the Argentine day.
 export async function getCachedFixture(id: string, kickoff: string, db: D1Database) {
-  if (!Number.isFinite(Date.parse(kickoff))) throw new PromiedosError('Horario inválido');
-  // The /games day key follows the provider's US Central calendar date (with DST).
-  // After midnight in Argentina the provider may still be on the previous day.
-  const date = new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_SOURCE_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(kickoff));
-  const fixtures = await searchCachedFixtures(date,db);
+  const date = new Date(kickoff);
+  if (!Number.isFinite(+date)) throw new PromiedosError('Horario inválido');
+  const fixtures = await searchCachedFixtures(argentinaCalendarDate(date),db);
   const found = fixtures.find(g=>g.providerFixtureId===id);
-  if (!found) throw new PromiedosError('El partido no está en la caché de esa fecha. Actualizá la búsqueda.');
+  if (!found) throw new PromiedosError('El partido no está en el calendario actualizado. Volvé a buscarlo.');
   return found;
 }
 
@@ -112,7 +107,7 @@ function cleanGame(value: unknown, id?: string): PromiedosGame {
   const g = parsePromiedosGame(value,id);
   // Do not persist advertising, betting information or unrelated provider fields.
   return {id:g.id,teams:g.teams.map(t=>({id:t.id,name:t.name})) as PromiedosGame['teams'],
-    start_time:g.start_time,status:{enum:g.status.enum,name:g.status.name},scores:g.scores,
+    start_time:g.start_time,kickoffAt:g.kickoffAt,status:{enum:g.status.enum,name:g.status.name},scores:g.scores,
     winner:g.winner,to_qualify:g.to_qualify,penalties:g.penalties,game_time:g.game_time,
     events:g.events?.map(e=>({name:e.name,scores:e.scores,is_penalties_stage:e.is_penalties_stage})),
     league:g.league ? {id:g.league.id,name:g.league.name,country_name:g.league.country_name} : undefined,
@@ -134,29 +129,29 @@ export async function getPromiedosWorkPlan(db:D1Database) {
       AND provider IN ('promiedos','manual') AND ${manualResultSql('matches')}))
     ORDER BY requested_at LIMIT 40`).all<{kind:Kind;cache_key:string}>();
   const days=new Set<string>(), games=new Set<string>();
-  for(const row of pending.results??[]) (row.kind==='day'?days:games).add(row.cache_key);
-  const dateFormat=new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_SOURCE_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
-  // First refresh source-calendar days for upcoming matches in published rounds.
-  // This also repairs old wrong kickoffs well before their stored lock time.
-  const scheduled=await db.prepare(`SELECT kickoff_at FROM matches WHERE provider='promiedos'
+  const today = argentinaCalendarDate(new Date());
+  // Refresh the dates that can affect published deadlines ahead of the general week cache.
+  const scheduled = await db.prepare(`SELECT kickoff_at FROM matches WHERE provider='promiedos'
     AND NOT ${manualResultSql('matches')} AND result_finalized_at IS NULL
     AND status='NS' AND round_id IN (SELECT id FROM rounds WHERE status='open')
     AND julianday(kickoff_at) BETWEEN julianday('now','-1 day') AND julianday('now','+30 days')
     ORDER BY kickoff_at LIMIT 32`).all<{kickoff_at:string}>();
-  for(const row of scheduled.results??[]){
-    const value=row.kickoff_at.trim().replace(' ','T');
-    const at=new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)?value:value+'Z');
-    if(!Number.isFinite(at.getTime()))continue;
-    const date=dateFormat.format(at);
-    const fresh=await db.prepare(`SELECT 1 AS ok FROM promiedos_cache WHERE kind='day'
-      AND cache_key=? AND julianday(expires_at)>julianday('now')`).bind(date).first();
-    if(!fresh)days.add(date);
+  const scheduledDays = new Set<string>();
+  for (const row of scheduled.results ?? []) {
+    const at = utcDate(row.kickoff_at);
+    if (Number.isFinite(+at)) scheduledDays.add(argentinaCalendarDate(at));
   }
-  // Warm a week using provider calendar days; never assume Argentina-local day keys.
-  for(let i=0;i<7;i++) {
-    const date=dateFormat.format(new Date(Date.now()+i*86400000));
-    const fresh=await db.prepare(`SELECT 1 AS ok FROM promiedos_cache WHERE kind='day' AND cache_key=? AND julianday(expires_at)>julianday('now')`).bind(date).first();
-    if(!fresh)days.add(date);
+  for (const date of scheduledDays) {
+    const fresh = await db.prepare(`SELECT 1 AS ok FROM promiedos_cache WHERE kind='day' AND cache_key=?
+      AND julianday(fetched_at)>julianday('now','-15 minutes') AND ${verifiedDay}`).bind(date).first();
+    if (!fresh) days.add(date);
+  }
+  for (const row of pending.results ?? []) (row.kind === 'day' ? days : games).add(row.cache_key);
+  for (let offset=0; offset<7; offset++) {
+    const date = shiftCalendarDate(today, offset);
+    const fresh = await db.prepare(`SELECT 1 AS ok FROM promiedos_cache WHERE kind='day' AND cache_key=?
+      AND julianday(expires_at)>julianday('now') AND ${verifiedDay}`).bind(date).first();
+    if (!fresh) days.add(date);
   }
   const active=await db.prepare(`SELECT provider_fixture_id,kickoff_at FROM matches WHERE provider='promiedos'
     AND NOT ${manualResultSql('matches')} AND result_finalized_at IS NULL
@@ -166,13 +161,16 @@ export async function getPromiedosWorkPlan(db:D1Database) {
     .all<{provider_fixture_id:string;kickoff_at:string}>();
   for(const row of active.results??[])games.add(row.provider_fixture_id);
   const gameDays:Record<string,string>={};
-  const providerDay=new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_SOURCE_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
-  for(const row of active.results??[]) {
-    const value=row.kickoff_at.trim().replace(' ','T');
-    const at=new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)?value:value+'Z');
-    if(Number.isFinite(at.getTime())) gameDays[row.provider_fixture_id]=providerDay.format(at);
+  for (const row of active.results ?? []) {
+    const at = utcDate(row.kickoff_at);
+    if (Number.isFinite(+at)) gameDays[row.provider_fixture_id] = argentinaCalendarDate(at);
   }
-  return {days:[...days].slice(0,14),games:[...new Set([...(active.results??[]).map(r=>r.provider_fixture_id),...games])].slice(0,24),gameDays};
+  return {
+    verifiedSchedule: true,
+    days: [...days].slice(0,14),
+    games: [...new Set([...(active.results??[]).map(r=>r.provider_fixture_id),...games])].slice(0,24),
+    gameDays,
+  };
 }
 
 export async function handlePromiedosCache(request: Request, env: Env): Promise<Response|null> {
@@ -218,7 +216,10 @@ export async function handlePromiedosCache(request: Request, env: Env): Promise<
         if(!Array.isArray(entry.payload)||entry.payload.length>5000)throw new Error();
         const games=entry.payload.map(g=>cleanGame(g));
         if(new Set(games.map(g=>g.id)).size!==games.length)throw new Error();
-        for(const game of games)promiedosFixture(game);
+        for (const game of games) {
+          const fixture = promiedosFixture(game);
+          if (argentinaCalendarDate(new Date(fixture.kickoffAt)) !== entry.key) throw new Error();
+        }
         payload=games;
       }else{
         const game=cleanGame(entry.payload,entry.key);normalizePromiedosResult(game);payload=game;

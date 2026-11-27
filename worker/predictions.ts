@@ -1,3 +1,4 @@
+import { utcDate } from '../src/match-time';
 import { participantCompetitionContexts } from './participant-contexts';
 import { predictionHistory } from './prediction-history';
 
@@ -96,7 +97,7 @@ async function sessionUser(request: Request, env: Env): Promise<SessionUser | nu
 }
 
 function lockTime(kickoffAt: string) {
-  return new Date(kickoffAt).getTime() + 60_000;
+  return utcDate(kickoffAt).getTime() + 60_000;
 }
 
 const STARTED_STATUSES = new Set(['1H','HT','2H','ET','BT','P','LIVE','FT','AET','PEN']);

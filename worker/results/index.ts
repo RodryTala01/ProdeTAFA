@@ -3,6 +3,7 @@ import {getCachedGame, PromiedosCachePending, repairCachedKickoffTimes} from '..
 import {manualResultSql} from '../result-source';
 import {footballFixtures, FootballError} from '../football-api';
 import { recalculateRoundScores } from '../scoring';
+import { ARGENTINA_TIME_ZONE, argentinaCalendarDate, utcDate } from '../../src/match-time';
 
 type Env = {
   DB: D1Database;
@@ -47,7 +48,6 @@ const encoder = new TextEncoder();
 const FINAL_STATUSES = new Set(['FT', 'AET', 'PEN']);
 const LIVE_STATUSES = new Set(['1H', 'HT', '2H', 'ET', 'BT', 'P', 'LIVE']);
 const VOID_STATUSES = new Set(['CANC', 'ABD', 'AWD', 'WO']);
-const ARGENTINA_TIMEZONE = 'America/Argentina/Buenos_Aires';
 
 function json(data: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -96,18 +96,6 @@ function hasScore(side: ScoreSide) {
   return Boolean(side && (side.home !== null || side.away !== null));
 }
 
-function calendarDateInArgentina(value: string) {
-  const date = new Date(value);
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: ARGENTINA_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(date);
-  const part = (type: 'year' | 'month' | 'day') => parts.find((entry) => entry.type === type)?.value ?? '';
-  return `${part('year')}-${part('month')}-${part('day')}`;
-}
-
 function overallWinner(item: ApiFixture) {
   if (item.teams.home.winner === true) return String(item.teams.home.id);
   if (item.teams.away.winner === true) return String(item.teams.away.id);
@@ -118,7 +106,7 @@ function overallWinner(item: ApiFixture) {
 }
 
 async function fetchFixturesForDate(date: string, env: Env) {
-  return footballFixtures<ApiFixture>({date,timezone:ARGENTINA_TIMEZONE},env.FOOTBALL_API_KEY!);
+  return footballFixtures<ApiFixture>({date,timezone:ARGENTINA_TIME_ZONE},env.FOOTBALL_API_KEY!);
 }
 
 async function applyFixture(item: ApiFixture, matchId: number, env: Env) {
@@ -176,7 +164,7 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
   const matches = rows.results ?? [];
   const legacy = matches.filter(m => m.provider !== 'promiedos' && (!eligibleIds || eligibleIds.includes(m.id)));
   const localByFixture = new Map(legacy.map(m => [m.provider_fixture_id, m]));
-  const requestedDates = legacy.length ? (onlyDates?.length ? [...new Set(onlyDates)] : [...new Set(legacy.map(m => calendarDateInArgentina(m.kickoff_at)))]) : [];
+  const requestedDates = legacy.length ? (onlyDates?.length ? [...new Set(onlyDates)] : [...new Set(legacy.map(m => argentinaCalendarDate(utcDate(m.kickoff_at))))]) : [];
   let updated = 0, finalized = 0;
   const counter = {count: 0};
   const warnings: string[] = [];
@@ -201,12 +189,12 @@ export async function syncRoundResults(roundId: number, env: Env, onlyDates?: st
       const r = normalizePromiedosResult(game);
       if (m.result_finalized_at && !r.final) throw new PromiedosError('Resultado final no confirmado');
       if (LIVE_STATUSES.has(m.status) && r.status === 'NS') throw new PromiedosError('Estado regresivo no confirmado');
-      // Fresh provider kickoffs can repair existing matches, including history.
-      // Prediction writes also check started status so a time repair cannot reopen play.
+      // Gamecenter may carry a localized clock without a verified instant.
+      // In that case update the score and preserve the scheduled kickoff.
       const update = env.DB.prepare(`UPDATE matches SET
         kickoff_at = CASE WHEN EXISTS(SELECT 1 FROM audit_log a
           WHERE a.action='match.kickoff_corrected' AND a.entity_type='match'
-          AND a.entity_id=CAST(matches.id AS TEXT)) THEN kickoff_at ELSE ? END,
+          AND a.entity_id=CAST(matches.id AS TEXT)) THEN kickoff_at ELSE COALESCE(?, kickoff_at) END,
         status=?, elapsed_minutes=?, home_score_current=?, away_score_current=?,
         home_score_regulation=?, away_score_regulation=?, winning_team_provider_id=?, qualified_team_provider_id=?,
         went_to_extra_time=?, went_to_penalties=?, is_void=0,
@@ -254,7 +242,7 @@ export async function syncEligibleRounds(env: Env) {
   const groups = new Map<number, {dates:Set<string>;ids:number[]}>();
   for(const m of eligible.results??[]) {
     const g=groups.get(m.round_id)??{dates:new Set<string>(),ids:[]};
-    g.dates.add(calendarDateInArgentina(m.kickoff_at));g.ids.push(m.id);groups.set(m.round_id,g);
+    g.dates.add(argentinaCalendarDate(utcDate(m.kickoff_at)));g.ids.push(m.id);groups.set(m.round_id,g);
   }
   for(const [id,g] of groups) try {
     const result = await syncRoundResults(id,env,[...g.dates],g.ids);
