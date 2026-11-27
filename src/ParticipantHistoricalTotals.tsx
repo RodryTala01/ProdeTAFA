@@ -5,16 +5,16 @@ import {historicalTrophies} from './historical-trophies';
 import {useState} from 'react';
 import {AssetImage,CompetitionImage,ParticipantShield} from './AssetImage';
 import {useParticipantRead,ParticipantState} from './ParticipantState';
-import type {PalmarTotal,GeneralTotal,IffhsTotal,TotalsData,PalmarAward,EditionPodium} from './historical-totals-types';
+import type {PalmarTotal,GeneralTotal,IffhsTotal,TotalsData,PalmarAward,EditionPodium,RelegationTotal} from './historical-totals-types';
 import type {HistoricalFinal} from './historical-finals';
 import {Icon} from './ui';
 import './historical-totals.css';
 
-type Tab='palmares'|'competencia'|'oficial'|'iffhs'|'general';
+type Tab='palmares'|'competencia'|'oficial'|'iffhs'|'general'|'descensos';
 const tabs:Array<{id:Tab;name:string}>=[
  {id:'palmares',name:'Palmarés'},{id:'competencia',name:'Por competencia'},
  {id:'oficial',name:'IFFHS Oficial'},{id:'iffhs',name:'IFFHS Total'},
- {id:'general',name:'Tabla general'},
+ {id:'general',name:'Tabla general'},{id:'descensos',name:'Descensos totales'},
 ];
 const fmt=(value:number)=>value.toLocaleString('es-AR',{maximumFractionDigits:2});
 const decimal=(value:number|null)=>value===null?'—':value.toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -133,6 +133,18 @@ function IffhsRows({rows,seasons,official}:{rows:IffhsTotal[];seasons:number[];o
   </table>
  </div>;
 }
+function RelegationRows({rows}:{rows:RelegationTotal[]}){
+ return <div className="totals-table-wrap" role="region" aria-label="Descensos totales" tabIndex={0}>
+  <table className="totals-table totals-table--relegations">
+   <thead><tr><th scope="col">Pos.</th><th scope="col">Participante</th><th scope="col">Descensos</th></tr></thead>
+   <tbody>{rows.map(row=><tr key={row.userId}>
+    <td>{row.position}°</td>
+    <th scope="row"><Player userId={row.userId} name={row.fullName}/></th>
+    <td data-label="Descensos">{row.relegations}</td>
+   </tr>)}</tbody>
+  </table>
+ </div>;
+}
 function GeneralRows({rows}:{rows:GeneralTotal[]}){
  return <div className="totals-table-wrap" role="region" aria-label="Tabla general histórica" tabIndex={0}>
   <table className="totals-table totals-table--general">
@@ -163,6 +175,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
  const rows=data.perCompetition[selected]??[];
  const honours=tab==='competencia'?rows:official?data.palmaresOfficial:data.palmares;
  const iffhs=tab==='oficial'?data.iffhsOfficial.ranking:data.iffhsTotal;
+ const relegations=data.relegations??[];
  const family=competitionFamily(selected);
  const latest=data.latestChampions[family];
  const finals=family.startsWith('LIGA_')?[]:data.finalsByCompetition?.[family]??[];
@@ -171,16 +184,18 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
  const titled=honours.filter(row=>row.championships>0||row.runnerUps>0);
  const title=tab==='palmares'?(official?'Palmarés Oficial':'Palmarés Total')
   :tab==='competencia'?(activeWorld?'Mundial · Zona '+worldCupZone(selected):data.competitions.find(c=>c.code===selected)?.name??'Por competencia')
-  :tab==='oficial'?'IFFHS Oficial':tab==='iffhs'?'IFFHS Total':'Tabla General Total';
+  :tab==='oficial'?'IFFHS Oficial':tab==='iffhs'?'IFFHS Total':tab==='descensos'?'Descensos totales':'Tabla General Total';
  const identity=(row:{position:number;fullName:string})=>[String(row.position),row.fullName];
  const exportRows=tab==='general'
   ?data.general.map(r=>[...identity(r),fmt(r.points),...[r.fulls,r.partials,r.errors,r.extras].map(n=>n==null?'—':fmt(n)),decimal(r.averagePoints)])
   :tab==='iffhs'||tab==='oficial'
    ?iffhs.map(r=>[...identity(r),...(tab==='oficial'?data.iffhsOfficial.seasons.map(n=>decimal(r.breakdown.find(b=>b.seasonNumber===n)?.points??null)):[]),decimal(r.totalPoints),...(tab==='iffhs'?[String(r.seasons),decimal(r.average)]:[])])
+   :tab==='descensos'?relegations.map(r=>[...identity(r),fmt(r.relegations)])
    :titled.map(r=>[...identity(r),fmt(r.championships),fmt(r.runnerUps),fmt(r.participations)]);
  const metrics=tab==='general'?['PTS','Plenos','Parciales','Errores','Extras','Prom. / partido']
   :tab==='oficial'?[...data.iffhsOfficial.seasons.map(n=>'T'+n),'PTS IFFHS']
-  :tab==='iffhs'?['PTS IFFHS','Temporadas','Prom. / temp.']:['Campeonatos','Subcampeonatos','Participaciones'];
+  :tab==='iffhs'?['PTS IFFHS','Temporadas','Prom. / temp.']
+  :tab==='descensos'?['Descensos']:['Campeonatos','Subcampeonatos','Participaciones'];
  async function exportPng(){
   setExporting(true);
   setExportError(false);
@@ -192,7 +207,7 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
   <div className="totals-header"><div><span className="totals-back">Estadísticas históricas de TAFA</span><h1>TABLAS TOTALES</h1></div><span className="totals-period">Todas las temporadas registradas</span></div>
   <nav className="totals-tabs" aria-label="Tablas Totales">{tabs.map(item=><button type="button" key={item.id} aria-pressed={item.id===tab} onClick={()=>setTab(item.id)}>{item.name}</button>)}</nav>
   <section className="totals-panel">
-   <header className="totals-panel-title"><span className="totals-panel-icon">{tab==='palmares'||tab==='competencia'?<img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="28" height="44"/>:tab==='general'?'▥':'◉'}</span><div><h2>{tab==='palmares'?(official?'PALMARÉS OFICIAL':'PALMARÉS TOTAL'):tab==='competencia'?'PALMARÉS POR COMPETENCIA':tab==='oficial'?'IFFHS OFICIAL':tab==='iffhs'?'IFFHS TOTAL':'TABLA GENERAL TOTAL'}</h2><p>{tab==='palmares'?'Campeonatos y subcampeonatos de todas las temporadas':tab==='competencia'?'Elegí la competencia para consultar sus campeones':tab==='oficial'?'Ranking de las últimas cinco temporadas':tab==='iffhs'?'Ranking IFFHS acumulado de todas las temporadas':'Estadísticas acumuladas, ordenadas por puntos totales'}</p></div>
+   <header className="totals-panel-title"><span className="totals-panel-icon">{tab==='palmares'||tab==='competencia'?<img src="/brand/tafa.png" alt="Escudo oficial TAFA" width="28" height="44"/>:tab==='general'||tab==='descensos'?'▥':'◉'}</span><div><h2>{(tab==='competencia'?'Palmarés por competencia':title).toLocaleUpperCase('es-AR')}</h2><p>{tab==='palmares'?'Campeonatos y subcampeonatos de todas las temporadas':tab==='competencia'?'Elegí la competencia para consultar sus campeones':tab==='oficial'?'Ranking de las últimas cinco temporadas':tab==='iffhs'?'Ranking IFFHS acumulado de todas las temporadas':tab==='descensos'?'Movimientos registrados en las temporadas históricas importadas':'Estadísticas acumuladas, ordenadas por puntos totales'}</p></div>
     {tab==='oficial'&&<span className="totals-period">Últimas 5 temporadas</span>}</header>
    <button type="button" className="button button--secondary" disabled={exporting||!exportRows.length} onClick={()=>void exportPng()}>{exporting?'Preparando PNG…':'Descargar tabla en PNG'}</button>
    {exportError&&<p role="alert">No pudimos preparar la imagen. Volvé a intentarlo.</p>}
@@ -236,7 +251,8 @@ export function HistoricalTotalsView({data}:{data:TotalsData}){
     ['Más plenos',leader(data.general,r=>r.fulls)],
     ['Participantes',data.general.length]
    ]}/><p className="totals-note">Las estadísticas suman los valores disponibles. El promedio usa las temporadas con plenos, parciales y errores registrados.</p><GeneralRows rows={data.general}/></>}
-   {((tab==='palmares'&&!honours.length)||(tab==='competencia'&&!rows.length)||(tab==='oficial'&&!data.iffhsOfficial.ranking.length)||(tab==='iffhs'&&!data.iffhsTotal.length)||(tab==='general'&&!data.general.length))&&<p className="totals-empty">Todavía no hay datos históricos disponibles para este ranking.</p>}
+   {tab==='descensos'&&relegations.length>0&&<RelegationRows rows={relegations}/>}
+   {((tab==='palmares'&&!honours.length)||(tab==='competencia'&&!rows.length)||(tab==='oficial'&&!data.iffhsOfficial.ranking.length)||(tab==='iffhs'&&!data.iffhsTotal.length)||(tab==='general'&&!data.general.length)||(tab==='descensos'&&!relegations.length))&&<p className="totals-empty">Todavía no hay datos históricos disponibles para este ranking.</p>}
   </section>
  </div>;
 }

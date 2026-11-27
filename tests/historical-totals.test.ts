@@ -61,6 +61,31 @@ it('la interfaz de rankings tiene tabla limpia sin resultados de ejemplo ni dupl
  expect(html).toContain('Subcampeonatos');
  expect(html).toContain('Ana');
  expect(html).not.toContain('PROMOCION');
+ const nav=html.match(/<nav[^>]+aria-label="Tablas Totales"[\s\S]+?<\/nav>/)?.[0];
+ expect(nav).toMatch(/>Descensos totales<\/button><\/nav>$/);
+});
+
+it('suma un descenso por identidad y temporada, con ceros para el plantel actual',()=>{
+ const relegation={type:'DESCENSO',fromDivision:'A',toDivision:'B',detail:null};
+ const previous={seasonNumber:3,data:{...archive.data,season:{...archive.data.season,number:3},
+  participants:archive.data.participants.map(p=>({...p,userId:null})),
+  movements:[{...relegation,participantKey:'a'},{...relegation,participantKey:'b'}],
+ }};
+ const current={...archive,data:{...archive.data,
+  participants:[...archive.data.participants,{key:'alias',name:'Ana (alias)',userId:'A',division:'A'},
+   {key:'old',name:'Inés histórica',userId:null,division:'A'}],
+  movements:[{...relegation,participantKey:'a'},{...relegation,participantKey:'alias'},
+   {participantKey:'old',type:'PERMANENCIA',fromDivision:'A',toDivision:'A',detail:null}],
+ }};
+ const totals=composeHistoricalTotals([previous,current] as never,[],[],[],[],[],[],[],[
+  {userId:'A',fullName:'Ana Pérez'},{userId:'D',fullName:'Diego'},{userId:'C',fullName:'Carla'},
+ ]);
+ expect(totals.relegations).toEqual([
+  {userId:'A',fullName:'Ana Pérez',position:1,relegations:2},
+  {userId:'hist:b',fullName:'Beto histórico',position:2,relegations:1},
+  {userId:'C',fullName:'Carla',position:3,relegations:0},
+  {userId:'D',fullName:'Diego',position:3,relegations:0},
+ ]);
 });
 it('la ficha de Mi Club presenta promedios fiables y resumen histórico con trofeos y estados en castellano',()=>{
  expect(historicalSeasonAverage({points:48,fulls:0,partials:0,errors:0})).toBeNull();

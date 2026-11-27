@@ -18,6 +18,7 @@
 .totals-table-wrap{max-width:100%;overflow:auto;scrollbar-width:thin;overscroll-behavior:contain;outline-offset:3px}
 .totals-table{width:100%;min-width:510px;border-collapse:collapse;font-variant-numeric:tabular-nums}
 .totals-table--general{min-width:1120px}
+.totals-table--relegations{min-width:0}
 .totals-table th,.totals-table td{padding:10px 11px;border-bottom:1px solid var(--border);text-align:right;font-size:.82rem;white-space:nowrap}
 .totals-table thead{background:var(--surface-raised)}
 .totals-table thead th{color:var(--text-muted);font-size:.72rem}
@@ -195,4 +196,15 @@
   content:attr(data-label);display:block;
  }
  .historical-totals .totals-breakdown dl{max-width:100%;overflow-wrap:anywhere}
+ .historical-totals .totals-table--relegations tbody tr{
+  grid-template-columns:2rem minmax(0,1fr) auto;
+  column-gap:6px;padding:3px 8px;
+ }
+ .historical-totals .totals-table--relegations tbody tr>td[data-label]{
+  grid-column:3;align-self:center;text-align:right;border:0;
+ }
+}
+
+@media(max-width:720px){
+ nav.totals-tabs button:last-child:nth-child(even){grid-column:auto}
 }

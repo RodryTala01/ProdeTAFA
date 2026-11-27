@@ -9,6 +9,7 @@ import {documentedHistoryGroups} from '../src/historical-group-catalog';
 import {archivedCompetitionFinals,combineCompetitionFinals,officialCompetitionFinals,type HistoricalFinal,type OfficialFinalRow} from '../src/historical-finals';
 
 type Archive=Awaited<ReturnType<typeof activeHistoricalArchives>>;
+type ParticipantIdentity={userId:string;fullName:string};
 type OfficialScore={userId:string;fullName:string;dates:number;points:number;fulls:number;partials:number;errors:number;extras:number;predictions:number};
 type Award={seasonNumber:number;code:string;name:string;userId:string;fullName:string;resultCode:string;points?:number|null};
 type Member={seasonNumber:number;code:string;name:string;userId:string;fullName:string};
@@ -38,7 +39,8 @@ export function composeHistoricalTotals(
  officialIffhs:IffhsScore[],
  officialSeasons:Array<{seasonNumber:number;userId:string}>=[],
  officialFinalRows:OfficialFinalRow[]=[],
- completedSeasons:number[]=[]
+ completedSeasons:number[]=[],
+ currentParticipants:ParticipantIdentity[]=[]
 ):TotalsData{
  const historyOnly=(value:string)=>/^(AMISTOSO_NO_OFICIAL|DESAFIO_DE_CAMPEONES|DESAFIO_CAMPEONES)(?:_|$)/.test(
   value.normalize('NFD').replace(/\p{M}/gu,'').trim().toUpperCase().replace(/[^A-Z0-9]+/g,'_')
@@ -50,6 +52,9 @@ export function composeHistoricalTotals(
  const meaningful=(code:string)=>code!=='PROMOCION'&&!isWorldCupOverall(code)&&!isHistoryOnlyCompetition(code)
   &&!historyOnly(code)&&!excluded.has(competitionFamily(code));
  const archiveId=historicalIdentityResolver(archives);
+ const relegationsByUser=new Map(currentParticipants.map(person=>[
+  person.userId,{...person,seasons:new Set<number>()}
+ ]));
  const names=new Map<string,string>();
  const participation=new Set<string>();
  const awards=new Map<string,Award>();
@@ -104,6 +109,15 @@ export function composeHistoricalTotals(
   for(const person of data.participants)addName(archiveId(data,person.key),person.name);
   const participant=(participantKey:string)=>data.participants.find(p=>p.key===participantKey);
   const display=(participantKey:string)=>participant(participantKey)?.name??participantKey;
+  for(const movement of data.movements){
+   if(movement.type!=='DESCENSO')continue;
+   const userId=archiveId(data,movement.participantKey);
+   const total=relegationsByUser.get(userId)??{
+    userId,fullName:names.get(userId)??display(movement.participantKey),seasons:new Set<number>()
+   };
+   total.seasons.add(data.season.number);
+   relegationsByUser.set(userId,total);
+  }
   const addPart=(code:string,participantKey:string)=>{
    if(meaningful(code))participation.add(key(data.season.number,competitionFamily(code),archiveId(data,participantKey)));
   };
@@ -248,10 +262,13 @@ export function composeHistoricalTotals(
    averagePartials:r.dates&&r.dates>0&&r.partials!==null?r.partials/r.dates:null,
    averageErrors:r.dates&&r.dates>0&&r.errors!==null?r.errors/r.dates:null,
    averageExtras:r.dates&&r.dates>0&&r.extras!==null?r.extras/r.dates:null}));
+ const relegations=rankSort([...relegationsByUser.values()].map(({seasons,...person})=>({
+  ...person,relegations:seasons.size
+ })),row=>row.relegations);
  return {seasons,competitions:[...competitionNames].filter(([code],index,all)=>all.findIndex(([other])=>competitionFamily(other)===competitionFamily(code))===index).map(([code,name])=>({code,name:competitionFamily(code)==='COPA_AMERICA'?'Copa América':competitionFamily(code)==='COPA_CAMPEONES'?'Copa Campeones':name})),
   palmares,palmaresOfficial,latestChampions,perCompetition,podiumsByCompetition,finalsByCompetition:combineCompetitionFinals(importedFinals.filter(f=>meaningful(f.competitionCode)),officialCompetitionFinals(officialFinalRows).filter(f=>meaningful(f.competitionCode))),
   iffhsOfficial:{seasons:officialWindow,ranking:rankedIffhs(officialWindow)},
-  iffhsTotal:rankedIffhs([...new Set([...seasons,...iffhsSeasons])].sort((a,b)=>b-a)),general:overall};
+  iffhsTotal:rankedIffhs([...new Set([...seasons,...iffhsSeasons])].sort((a,b)=>b-a)),general:overall,relegations};
 }
 export async function historicalTotals(request:Request,env:Env):Promise<TotalsData>{
  const db=env.DB;
@@ -331,6 +348,19 @@ export async function historicalTotals(request:Request,env:Env):Promise<TotalsDa
    final.tieB=sameSide?scores.scoreB:scores.scoreA;
   }),
  ]);
- const completed=(await db.prepare("SELECT season_number AS number FROM tafa_seasons WHERE status IN ('finished','archived')").all<{number:number}>()).results??[];
- return composeHistoricalTotals(archives,scores,awards,members,iffhs,linked,finals,completed.map(s=>s.number));
+ const [completed,currentParticipants]=await Promise.all([
+  db.prepare("SELECT season_number AS number FROM tafa_seasons WHERE status IN ('finished','archived')").all<{number:number}>(),
+  // The active account list also covers legacy seasons without a current roster.
+  db.prepare(`WITH current_season AS (
+   SELECT id FROM tafa_seasons WHERE status='active' ORDER BY season_number DESC LIMIT 1
+  )
+  SELECT u.id AS userId,u.full_name AS fullName FROM users u
+  WHERE u.role='participant' AND u.is_active=1
+   AND (NOT EXISTS (SELECT 1 FROM current_season) OR EXISTS (
+    SELECT 1 FROM season_division_members m
+    WHERE m.season_id=(SELECT id FROM current_season) AND m.user_id=u.id
+   ))`).all<ParticipantIdentity>(),
+ ]);
+ return composeHistoricalTotals(archives,scores,awards,members,iffhs,linked,finals,
+  (completed.results??[]).map(s=>s.number),currentParticipants.results??[]);
 }
