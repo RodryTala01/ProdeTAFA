@@ -1,11 +1,9 @@
+import {argentinaDateTime} from './match-time';
 import {ParticipantShield} from './AssetImage';
 import {useEffect,useState} from 'react';
 import './admin-submissions.css';
 export type SubmissionParticipant={id:string;name:string;active:number;lastAt:string|null;count:number};
-function sentAt(value:string){
- const utc=/(Z|[+-]\d{2}:\d{2})$/.test(value)?value:`${value.replace(' ','T')}Z`;
- return new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(utc));
-}
+const sentAt=(value:string)=>argentinaDateTime(value);
 export function SubmissionLists({participants}:{participants:SubmissionParticipant[]}){
  const active=participants.filter(p=>p.active);
  const sent=active.filter(p=>p.lastAt);
@@ -29,7 +27,7 @@ export default function AdminRoundSubmissions({roundId}:{roundId:number}){
   const controller=new AbortController();setLoading(true);setError(false);
   fetch(`/api/admin/rounds/${roundId}/prediction-history`,{signal:controller.signal}).then(async response=>{
    if(!response.ok)throw new Error('No disponible');
-   const data=await response.json();
+   const data=await response.json();if(!Array.isArray(data.participants))throw new Error('Envíos no disponibles');
    if(!controller.signal.aborted)setParticipants(data.participants);
   }).catch(()=>{if(!controller.signal.aborted)setError(true);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
   return()=>controller.abort();

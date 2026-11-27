@@ -313,3 +313,12 @@ it('conserva los partidos de los días disponibles mientras se carga el resto de
  expect(response!.status).toBe(202);const data=await response!.json() as any;
  expect(data.pendingDates).toHaveLength(6);expect(data.fixtures).toHaveLength(1);
 });
+
+it('edits Penales after adding a match and audits without changing fixtures',async()=>{
+ insert();db.exec("UPDATE matches SET kickoff_at='2099-01-01T20:00:00Z'");
+ const r=await handleAdminRounds(req('rounds/1/matches/1/type',{matchType:'PENALTIES_ONLY'}),env());
+ expect(r?.status).toBe(200);expect(db.prepare('SELECT match_type FROM matches WHERE id=1').get()?.match_type).toBe('PENALTIES_ONLY');
+ expect(db.prepare("SELECT COUNT(*) n FROM audit_log WHERE action='match.type_corrected'").get()?.n).toBe(1);
+ db.exec("UPDATE matches SET kickoff_at='2020-01-01T20:00:00Z'");
+ expect((await handleAdminRounds(req('rounds/1/matches/1/type',{matchType:'NORMAL'}),env()))?.status).toBe(409);
+});

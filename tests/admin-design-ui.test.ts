@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { act, createElement } from 'react';
+import { act, createElement, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import AdminRounds from '../src/AdminRounds';
@@ -26,6 +26,7 @@ beforeEach(()=>{
   if(url==='/api/admin/users')return json({users:[user,{...user,id:'test-2',fullName:'Carlos Prueba',phone:'000222',isActive:false}]});
   if(url==='/api/admin/rounds')return json({rounds:[round]});
   if(url==='/api/admin/rounds/2')return json({round});
+  if(url==='/api/admin/rounds/2/prediction-history')return json({round,participants:[{id:'test-1',name:'Rodrigo Prueba',active:1,lastAt:null,count:0}],events:[]});
   if(url.startsWith('/api/admin/fixtures'))return json({fixtures:[fixture],requestCount:1});
   if(url==='/api/admin/competition-engine')return json({seasons:[],participants:[],rounds:[]});
   throw Error(url);
@@ -49,5 +50,17 @@ it('una respuesta incompleta de vinculaciones no rompe la Fecha ni permite vincu
  scheduling={ok:true};await mount(AdminRounds);
  expect(host.textContent).toContain('No pudimos cargar las vinculaciones de competencias');
  expect(host.textContent).toContain('Faltan 11 partidos');expect(btn('Publicar').disabled).toBe(true);
+ expect(writes).toHaveLength(0);
+});
+
+it('Fechas ofrece una sola sección de envíos y no duplica el bloque al cambiar paneles',async()=>{
+ round.status='open';await act(async()=>root.render(createElement(StrictMode,null,createElement(AdminRounds))));
+ expect(host.querySelectorAll('.admin-round-submissions')).toHaveLength(0);
+ await click('Envíos de la Fecha');
+ expect(host.querySelectorAll('.admin-round-submissions')).toHaveLength(1);
+ expect([...host.querySelectorAll('h2')].filter(el=>el.textContent==='Envíos de la Fecha')).toHaveLength(1);
+ expect(host.querySelector('.submission-lists')?.textContent).toContain('Rodrigo Prueba');
+ await click('Partidos');expect(host.querySelectorAll('.admin-round-submissions')).toHaveLength(0);
+ await click('Envíos de la Fecha');expect(host.querySelectorAll('.admin-round-submissions')).toHaveLength(1);
  expect(writes).toHaveLength(0);
 });

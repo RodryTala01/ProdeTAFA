@@ -422,6 +422,26 @@ async function correctKickoff(request:Request,env:Env,admin:UserRow,roundId:numb
  return json({ok:true,kickoffAt:newKickoff,locked:date.getTime()+60000<=Date.now()});
 }
 
+async function correctMatchType(request:Request,env:Env,admin:UserRow,roundId:number,matchId:number){
+ const body=await request.json().catch(()=>null) as {matchType?:string}|null;
+ if(!body||!['NORMAL','PENALTIES_ONLY'].includes(body.matchType??''))return error('Tipo de partido inválido');
+ const match=await env.DB.prepare(`SELECT m.match_type FROM matches m JOIN rounds r ON r.id=m.round_id
+ WHERE m.id=? AND m.round_id=? AND r.status IN ('draft','open') AND m.status IN ('NS','scheduled')
+ AND julianday(m.kickoff_at)+1.0/1440>julianday('now')
+ AND NOT EXISTS(SELECT 1 FROM official_predictions p WHERE p.match_id=m.id)`).bind(matchId,roundId).first<{match_type:string}>();
+ if(!match)return error('Solo se puede cambiar Penales antes del cierre y sin pronósticos oficiales para ese partido.',409);
+ if(match.match_type===body.matchType)return json({ok:true});
+ await env.DB.batch([
+ env.DB.prepare(`UPDATE matches SET match_type=?,updated_at=datetime('now') WHERE id=? AND round_id=? AND match_type=?
+ AND status IN ('NS','scheduled') AND julianday(kickoff_at)+1.0/1440>julianday('now')
+ AND round_id IN(SELECT id FROM rounds WHERE status IN('draft','open'))
+ AND NOT EXISTS(SELECT 1 FROM official_predictions p WHERE p.match_id=matches.id)`).bind(body.matchType,matchId,roundId,match.match_type),
+ env.DB.prepare(`INSERT INTO audit_log(actor_user_id,action,entity_type,entity_id,before_json,after_json)
+ SELECT ?,'match.type_corrected','match',?,?,? WHERE changes()=1`).bind(admin.id,String(matchId),JSON.stringify({matchType:match.match_type}),JSON.stringify({matchType:body.matchType,roundId}))]);
+ const current=await env.DB.prepare('SELECT match_type FROM matches WHERE id=?').bind(matchId).first<{match_type:string}>();
+ return current?.match_type===body.matchType?json({ok:true}):error('El partido cambió. Recargá la Fecha.',409);
+}
+
 export async function handleAdminRounds(request: Request, env: Env): Promise<Response | null> {
   const url = new URL(request.url);
   const pathname = url.pathname;
@@ -451,6 +471,9 @@ export async function handleAdminRounds(request: Request, env: Env): Promise<Res
   if (addMatchRoute && request.method === 'POST') {
     return addMatch(request, env, admin, Number(addMatchRoute[1]));
   }
+
+  const typeRoute=pathname.match(/^\/api\/admin\/rounds\/(\d+)\/matches\/(\d+)\/type$/);
+  if(typeRoute&&request.method==='PUT')return correctMatchType(request,env,admin,Number(typeRoute[1]),Number(typeRoute[2]));
 
   const correctKickoffRoute=pathname.match(/^\/api\/admin\/rounds\/(\d+)\/matches\/(\d+)\/kickoff$/);
   if(correctKickoffRoute&&request.method==='PUT'){

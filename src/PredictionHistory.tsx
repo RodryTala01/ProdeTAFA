@@ -1,3 +1,4 @@
+import {utcDate} from './match-time';
 import { useEffect, useState } from 'react';
 import './prediction-history.css';
 
@@ -9,11 +10,10 @@ type Data = {
   submission: { firstAt: string; lastAt: string; count: number } | null;
 };
 function date(value: string) {
-  const utc = value.includes('T') ? value : value.replace(' ', 'T') + 'Z';
   return new Intl.DateTimeFormat('es-AR', {
     timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3, hourCycle: 'h23',
-  }).format(new Date(utc));
+  }).format(utcDate(value));
 }
 function score(value: Value | null) { return `${value?.homeScore ?? '—'}–${value?.awayScore ?? '—'}`; }
 function Snapshot({ value }: { value: Value }) {
