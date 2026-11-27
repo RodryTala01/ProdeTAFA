@@ -1,4 +1,4 @@
-import {PromiedosError, parsePromiedosGame, promiedosFixture, normalizePromiedosResult, PROMIEDOS_CALENDAR_TIME_ZONE, type PromiedosGame} from './promiedos';
+import {PromiedosError, parsePromiedosGame, promiedosFixture, normalizePromiedosResult, PROMIEDOS_SOURCE_TIME_ZONE, type PromiedosGame} from './promiedos';
 import {manualResultSql} from './result-source';
 
 export class PromiedosCachePending extends PromiedosError {}
@@ -23,13 +23,7 @@ async function read(db: D1Database, kind: Kind, key: string) {
     await queue(db,kind,key);
     throw new PromiedosCachePending('Datos de Promiedos pendientes o vencidos. Se solicitó una actualización; reintentá después de la próxima carga.');
   }
-  const payload=JSON.parse(row.payload_json);
-  const games=kind==='day'?payload:[payload];
-  if(!Array.isArray(games)||games.some((g:PromiedosGame)=>g?.clockVersion!==2||typeof g.sourceTimeZone!=='string')){
-    await queue(db,kind,key);
-    throw new PromiedosCachePending('Los horarios necesitan una adquisición con zona verificada. Se solicitó la actualización.');
-  }
-  return payload;
+  return JSON.parse(row.payload_json);
 }
 
 export async function searchCachedFixtures(date: string, db: D1Database) {
@@ -42,18 +36,18 @@ export async function getCachedGame(id: string, db: D1Database) {
 }
 
 // Repair scheduled kickoffs using verified fresh provider snapshots, including
-// previously stored assumptions about US timezones. Only open,
+// previously stored fixed-UTC-5 values after the US DST change. Only open,
 // scheduled, non-manual matches are eligible; predictions/results are untouched.
-export async function repairCachedKickoffTimes(db: D1Database,now=new Date().toISOString()) {
+export async function repairCachedKickoffTimes(db: D1Database) {
   const matches = await db.prepare(`SELECT m.id,m.provider_fixture_id,m.home_team_provider_id,m.away_team_provider_id,m.kickoff_at
     FROM matches m JOIN rounds r ON r.id=m.round_id
-    WHERE m.provider='promiedos' AND m.status='NS' AND r.status IN ('draft','open') AND julianday(m.kickoff_at,'+1 minute')>julianday(?)
+    WHERE m.provider='promiedos' AND m.status='NS' AND r.status='open'
       AND m.result_finalized_at IS NULL AND NOT ${manualResultSql('m')}
       AND NOT EXISTS(SELECT 1 FROM audit_log a WHERE a.action='match.kickoff_corrected'
         AND a.entity_type='match' AND a.entity_id=CAST(m.id AS TEXT))`)
-    .bind(now).all<{id:number;provider_fixture_id:string;home_team_provider_id:string;away_team_provider_id:string;kickoff_at:string}>();
+    .all<{id:number;provider_fixture_id:string;home_team_provider_id:string;away_team_provider_id:string;kickoff_at:string}>();
   if(!matches.results?.length)return 0;
-  const providerDay = new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_CALENDAR_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
+  const providerDay = new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_SOURCE_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
   const days = new Set<string>();
   for(const m of matches.results){
     const value=m.kickoff_at.trim().replace(' ','T');
@@ -91,19 +85,13 @@ export async function repairCachedKickoffTimes(db: D1Database,now=new Date().toI
     const kickoff=promiedosFixture(game).kickoffAt;
     const stored=m.kickoff_at.trim().replace(' ','T');
     if(new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(stored)?stored:`${stored}Z`).getTime()===Date.parse(kickoff))continue;
-    const update=db.prepare(`UPDATE matches SET kickoff_at=?,updated_at=datetime('now')
+    const updated=await db.prepare(`UPDATE matches SET kickoff_at=?,updated_at=datetime('now')
       WHERE id=? AND provider='promiedos' AND status='NS' AND result_finalized_at IS NULL
-        AND round_id IN (SELECT id FROM rounds WHERE status IN ('draft','open'))
-        AND julianday(kickoff_at,'+1 minute')>julianday(?)
-        AND kickoff_at=?
+        AND round_id IN (SELECT id FROM rounds WHERE status='open')
         AND NOT ${manualResultSql('matches')}
         AND NOT EXISTS(SELECT 1 FROM audit_log a WHERE a.action='match.kickoff_corrected'
-          AND a.entity_type='match' AND a.entity_id=CAST(matches.id AS TEXT))`).bind(kickoff,m.id,now,m.kickoff_at);
-    const audit=db.prepare(`INSERT INTO audit_log(action,entity_type,entity_id,before_json,after_json)
-      SELECT 'match.provider_kickoff_corrected','match',?,?,? WHERE changes()=1`)
-      .bind(String(m.id),JSON.stringify({kickoffAt:m.kickoff_at}),JSON.stringify({kickoffAt:kickoff,sourceTimeZone:game.sourceTimeZone,clockVersion:game.clockVersion}));
-    const updated=await db.batch([update,audit]);
-    repaired+=updated[0].meta.changes??0;
+          AND a.entity_type='match' AND a.entity_id=CAST(matches.id AS TEXT))`).bind(kickoff,m.id).run();
+    repaired+=updated.meta.changes??0;
   }
   return repaired;
 }
@@ -111,8 +99,9 @@ export async function repairCachedKickoffTimes(db: D1Database,now=new Date().toI
 // Adding a fixture uses the selected day's cached list, not gamecenter.
 export async function getCachedFixture(id: string, kickoff: string, db: D1Database) {
   if (!Number.isFinite(Date.parse(kickoff))) throw new PromiedosError('Horario inválido');
-  // Acquisition normalizes calendar keys to Argentina, including midnight boundaries.
-  const date = new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_CALENDAR_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(kickoff));
+  // The /games day key follows the provider's US Central calendar date (with DST).
+  // After midnight in Argentina the provider may still be on the previous day.
+  const date = new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_SOURCE_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(kickoff));
   const fixtures = await searchCachedFixtures(date,db);
   const found = fixtures.find(g=>g.providerFixtureId===id);
   if (!found) throw new PromiedosError('El partido no está en la caché de esa fecha. Actualizá la búsqueda.');
@@ -123,7 +112,7 @@ function cleanGame(value: unknown, id?: string): PromiedosGame {
   const g = parsePromiedosGame(value,id);
   // Do not persist advertising, betting information or unrelated provider fields.
   return {id:g.id,teams:g.teams.map(t=>({id:t.id,name:t.name})) as PromiedosGame['teams'],
-    start_time:g.start_time,sourceTimeZone:g.sourceTimeZone,clockVersion:g.clockVersion,status:{enum:g.status.enum,name:g.status.name},scores:g.scores,
+    start_time:g.start_time,status:{enum:g.status.enum,name:g.status.name},scores:g.scores,
     winner:g.winner,to_qualify:g.to_qualify,penalties:g.penalties,game_time:g.game_time,
     events:g.events?.map(e=>({name:e.name,scores:e.scores,is_penalties_stage:e.is_penalties_stage})),
     league:g.league ? {id:g.league.id,name:g.league.name,country_name:g.league.country_name} : undefined,
@@ -146,7 +135,7 @@ export async function getPromiedosWorkPlan(db:D1Database) {
     ORDER BY requested_at LIMIT 40`).all<{kind:Kind;cache_key:string}>();
   const days=new Set<string>(), games=new Set<string>();
   for(const row of pending.results??[]) (row.kind==='day'?days:games).add(row.cache_key);
-  const dateFormat=new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_CALENDAR_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
+  const dateFormat=new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_SOURCE_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
   // First refresh source-calendar days for upcoming matches in published rounds.
   // This also repairs old wrong kickoffs well before their stored lock time.
   const scheduled=await db.prepare(`SELECT kickoff_at FROM matches WHERE provider='promiedos'
@@ -160,13 +149,13 @@ export async function getPromiedosWorkPlan(db:D1Database) {
     if(!Number.isFinite(at.getTime()))continue;
     const date=dateFormat.format(at);
     const fresh=await db.prepare(`SELECT 1 AS ok FROM promiedos_cache WHERE kind='day'
-      AND cache_key=? AND julianday(expires_at)>julianday('now') AND (json_array_length(payload_json)=0 OR json_extract(payload_json,'$[0].clockVersion')=2)`).bind(date).first();
+      AND cache_key=? AND julianday(expires_at)>julianday('now')`).bind(date).first();
     if(!fresh)days.add(date);
   }
   // Warm a week using provider calendar days; never assume Argentina-local day keys.
   for(let i=0;i<7;i++) {
     const date=dateFormat.format(new Date(Date.now()+i*86400000));
-    const fresh=await db.prepare(`SELECT 1 AS ok FROM promiedos_cache WHERE kind='day' AND cache_key=? AND julianday(expires_at)>julianday('now') AND (json_array_length(payload_json)=0 OR json_extract(payload_json,'$[0].clockVersion')=2)`).bind(date).first();
+    const fresh=await db.prepare(`SELECT 1 AS ok FROM promiedos_cache WHERE kind='day' AND cache_key=? AND julianday(expires_at)>julianday('now')`).bind(date).first();
     if(!fresh)days.add(date);
   }
   const active=await db.prepare(`SELECT provider_fixture_id,kickoff_at FROM matches WHERE provider='promiedos'
@@ -177,7 +166,7 @@ export async function getPromiedosWorkPlan(db:D1Database) {
     .all<{provider_fixture_id:string;kickoff_at:string}>();
   for(const row of active.results??[])games.add(row.provider_fixture_id);
   const gameDays:Record<string,string>={};
-  const providerDay=new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_CALENDAR_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
+  const providerDay=new Intl.DateTimeFormat('en-CA',{timeZone:PROMIEDOS_SOURCE_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit'});
   for(const row of active.results??[]) {
     const value=row.kickoff_at.trim().replace(' ','T');
     const at=new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)?value:value+'Z');

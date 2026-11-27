@@ -26,7 +26,7 @@ results and existing scoring; ingestion cannot write sporting tables.
 ## Acquisition workflow
 
 `.github/workflows/promiedos-cache.yml` is a workflow with workflow_dispatch and a */5 * * * * schedule,
-gated by repository variable `PROMIEDOS_CACHE_ENABLED=true`. Scheduling is authorized for the live-sync fix. The manual diagnostic workflow validates the acquisition clock and does not ingest data.
+gated by repository variable `PROMIEDOS_CACHE_ENABLED=true`. Scheduling is authorized for the live-sync fix. The diagnostic workflow from PR #17 is unchanged and is not an ingestion job.
 
 Before any production activation, separately authorize/apply migration 0015 and
 deploy the reviewed Worker. Configure a new random token (at least 32 characters)
@@ -72,20 +72,19 @@ are deleted or rewritten by disabling the cache.
 
 ## Kickoff diagnosis and repair
 
-The previous assumption that all runners receive US Central time was incorrect.
-Read-only diagnostics on 2026-11-27 received 15:00 from a Los Angeles runner,
-17:00 from another runner, and 20:00 from Argentina for the same fixture
-(Vélez–Independiente, 2026-11-28). Its verified UTC kickoff is 23:00.
+Fresh read-only acquisition from GitHub Actions (2026-11-06) compared against
+independent Argentine fixtures revealed a US Central seasonal clock:
+- Oct 27 (CDT, UTC−5): Borussia raw 14:45 -> Argentina 16:45.
+- Nov 6 (CST, UTC−6): Independiente–Riestra raw 16:15 -> Argentina 19:15
+  (confirmed by DSPORTS, TyC Sports and Riestra official site).
+- Nov 6 (CST, UTC−6): Barracas–Racing raw 12:00 -> Argentina 15:00 (TyC).
+- Nov 7 (CST, UTC−6): Boca–Defensa raw 14:30 -> Argentina 17:30 (Boca official).
 
-Acquisition resolves its ephemeral runner timezone using ipwho.is, with ipapi.co
-as fallback (explicitly authorized). Only the IANA timezone is retained/logged;
-never IPs or response bodies. Failure stops acquisition and preserves cache.
-Each normalized game stores sourceTimeZone and clockVersion=2. Worker conversion
-uses that named zone, including DST; legacy zone-less cache is re-requested.
-Day keys are Argentina dates: acquisition includes adjacent source days as needed
-and memoizes them per run. No midnight fixtures are dropped or shown on the wrong day.
-Automatic corrections preserve IDs, official predictions, results, Admin overrides
-and already closed locks. Future scheduled corrections are audited atomically.
+Do not hardcode UTC−5 or UTC−6. Convert provider wall time using
+America/Chicago (daylight saving aware), store UTC, then display using
+America/Argentina/Buenos_Aires. The sync path corrects scheduled open
+matches from fresh provider day or gamecenter cache, preserving predictions,
+match identity, manually overridden results and finalized results.
 
 Promiedos started/final statuses also block prediction writes regardless of a
 future kickoff. If a started status contradicts a still-open timestamp, submission
