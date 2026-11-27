@@ -1,70 +1,31 @@
 name: Promiedos connectivity spike
-
 on:
   workflow_dispatch:
     inputs:
       date:
-        description: 'Provider calendar date (YYYY-MM-DD)'
+        description: 'Fecha argentina (YYYY-MM-DD)'
         required: true
-        default: '2026-11-28'
       fixture:
-        description: 'Public provider fixture ID'
+        description: 'ID público del partido'
         required: true
-        default: 'eijiief'
-
-permissions: {}
-
+      expectedUtc:
+        description: 'Referencia UTC oficial opcional (ISO 8601)'
+        required: false
+permissions:
+  contents: read
 jobs:
   connectivity:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
-      - name: Compare daily and individual provider clocks (read-only)
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Verify actual acquisition clock (read-only)
+        run: node scripts/diagnose-promiedos-clock.mjs
         env:
           PROBE_DATE: ${{ inputs.date }}
           PROBE_FIXTURE: ${{ inputs.fixture }}
-        shell: python
-        run: |
-          import json, os, re, subprocess, tempfile
-          from pathlib import Path
-          day = os.environ['PROBE_DATE']
-          fixture = os.environ['PROBE_FIXTURE']
-          assert re.fullmatch(r'\d{4}-\d{2}-\d{2}', day)
-          assert re.fullmatch(r'[A-Za-z0-9_-]{1,100}', fixture)
-          for geo_url in ['https://ipapi.co/timezone/', 'https://ipwho.is/?fields=success,timezone.id']:
-              geo = subprocess.run(['curl', '-sS', '--max-time', '15', geo_url], capture_output=True, text=True)
-              raw = geo.stdout.strip()
-              try: zone = json.loads(raw).get('timezone', {}).get('id')
-              except (ValueError, AttributeError): zone = raw if re.fullmatch(r'[A-Za-z_]+/[A-Za-z_]+(?:/[A-Za-z_]+)?', raw) else None
-              print(json.dumps({'runner_timezone_source': geo_url.split('/')[2], 'timezone': zone}))
-          for name, url in [
-              ('day', 'https://api.promiedos.com.ar/games/' + '-'.join(reversed(day.split('-')))),
-              ('game', 'https://api.promiedos.com.ar/gamecenter/' + fixture),
-              ('web', 'https://www.promiedos.com.ar/calendario/' + '-'.join(reversed(day.split('-')))),
-              ('tz-query', 'https://api.promiedos.com.ar/gamecenter/' + fixture + '?tz=UTC'),
-              ('Time-Zone', 'https://api.promiedos.com.ar/gamecenter/' + fixture),
-              ('X-Timezone', 'https://api.promiedos.com.ar/gamecenter/' + fixture),
-              ('X-TZ', 'https://api.promiedos.com.ar/gamecenter/' + fixture),
-          ]:
-              with tempfile.TemporaryDirectory() as directory:
-                  output = Path(directory) / 'body'
-                  command = ['curl', '-sS', '--max-time', '30', '-H', 'X-VER: 1.11.7.5', '-o', str(output), '-w', '%{http_code}', url]
-                  if name in ['Time-Zone','X-Timezone','X-TZ']: command += ['-H', name + ': UTC']
-                  response = subprocess.run(command, capture_output=True, text=True)
-                  result = {'endpoint': name, 'http': response.stdout, 'curl_exit': response.returncode}
-                  raw = output.read_text() if output.exists() else ''
-                  if name == 'web':
-                      match = re.search(r'<script[^>]*id="__NEXT_DATA__"[^>]*>(.*?)</script>', raw)
-                      data = json.loads(match.group(1))['props']['pageProps'] if match else {}
-                  else:
-                      data = json.loads(raw) if raw.startswith('{') else {}
-                  def find_games(value):
-                      if isinstance(value, dict):
-                          if value.get('id') == fixture and 'start_time' in value: yield value
-                          for item in value.values(): yield from find_games(item)
-                      elif isinstance(value, list):
-                          for item in value: yield from find_games(item)
-                  games = list(find_games(data))
-                  result['clock_fields'] = {k:v for k,v in data.items() if re.search('zone|offset|timestamp', k, re.I)}
-                  result['fixture'] = [{'id':g.get('id'), 'teams':[t.get('name') for t in g.get('teams', [])], 'time_fields':{k:v for k,v in g.items() if re.search('start|zone|offset|timestamp', k, re.I)}} for g in games if g.get('id') == fixture]
-                  print(json.dumps(result, ensure_ascii=True))
+          PROBE_EXPECTED_UTC: ${{ inputs.expectedUtc }}

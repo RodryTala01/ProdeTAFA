@@ -1,0 +1,15 @@
+import {build} from 'esbuild';
+const id=process.env.PROBE_FIXTURE,date=process.env.PROBE_DATE;
+if(!/^[a-zA-Z0-9_-]{1,100}$/.test(id??'')||!/^\d{4}-\d{2}-\d{2}$/.test(date??''))throw Error('Fecha o fixture inválido');
+const output=await build({entryPoints:['scripts/promiedos-client.ts'],bundle:true,write:false,format:'esm',platform:'node'});
+const client=await import('data:text/javascript;base64,'+Buffer.from(output.outputFiles[0].text).toString('base64'));
+const game=await client.getPromiedosGame(id);
+const day=await client.searchPromiedosFixtures(date);
+const fixture=day.find(g=>g.providerFixtureId===id);
+if(!fixture)throw Error('El partido no apareció en su día argentino');
+const worker=await build({entryPoints:['worker/promiedos.ts'],bundle:true,write:false,format:'esm',platform:'node'});
+const {promiedosFixture}=await import('data:text/javascript;base64,'+Buffer.from(worker.outputFiles[0].text).toString('base64'));
+const detail=promiedosFixture(game);
+if(detail.kickoffAt!==fixture.kickoffAt)throw Error('Listado y detalle difieren en su instante UTC');
+if(process.env.PROBE_EXPECTED_UTC&&detail.kickoffAt!==new Date(process.env.PROBE_EXPECTED_UTC).toISOString())throw Error('El instante difiere de la referencia oficial indicada');
+console.log(JSON.stringify({fixture:id,sourceTimeZone:game.sourceTimeZone,providerLocal:game.start_time,kickoffUtc:detail.kickoffAt,argentina:new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',dateStyle:'short',timeStyle:'short'}).format(new Date(detail.kickoffAt)),dayAndDetailAgree:true}));

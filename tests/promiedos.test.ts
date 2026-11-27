@@ -10,14 +10,14 @@ import {syncRoundResults,syncEligibleRounds} from '../worker/results';
 import {handleAdminCorrections} from '../worker/admin-corrections';
 let db:DatabaseSync;
 function env(){return {DB:{prepare(sql:string){let args:any[]=[];return {bind(...v:any[]){args=v;return this;},async first(){return db.prepare(sql).get(...args)??null;},async all(){return {results:db.prepare(sql).all(...args)};},async run(){const r=db.prepare(sql).run(...args);return {meta:{changes:Number(r.changes),last_row_id:Number(r.lastInsertRowid)}};}};},async batch(ss:any[]){db.exec('BEGIN');try {const out=[];for(const s of ss)out.push(await s.run());db.exec('COMMIT');return out;}catch(e){db.exec('ROLLBACK');throw e;}}} as unknown as D1Database,FOOTBALL_API_KEY:'test'};}
-const game=(changes:Partial<PromiedosGame>={}):PromiedosGame=>({id:'abc',teams:[{id:'home',name:'Local'},{id:'away',name:'Visita'}],league:{id:'league',name:'Liga'},start_time:'10-10-2026 15:45',status:{enum:3,name:'Finalizado'},scores:[2,1],winner:1,events:[{name:'Fin de los 90 minutos',scores:[2,1]}],...changes});
+const game=(changes:Partial<PromiedosGame>={}):PromiedosGame=>({sourceTimeZone:'America/Chicago',clockVersion:2,id:'abc',teams:[{id:'home',name:'Local'},{id:'away',name:'Visita'}],league:{id:'league',name:'Liga'},start_time:'10-10-2026 15:45',status:{enum:3,name:'Finalizado'},scores:[2,1],winner:1,events:[{name:'Fin de los 90 minutos',scores:[2,1]}],...changes});
 function cache(kind:string,key:string,payload:unknown,expired=false){db.prepare("INSERT OR REPLACE INTO promiedos_cache(kind,cache_key,payload_json,fetched_at,expires_at) VALUES (?,?,?,datetime('now'),datetime('now',?))").run(kind,key,JSON.stringify(payload),expired?'-1 minute':'+30 minutes');}
 function respond(g=game()){cache('game','abc',g);cache('day','2026-10-10',[g]);vi.stubGlobal('fetch',vi.fn(async()=>Response.json({game:g})));}
 function req(path:string,body?:unknown){return new Request('https://local/api/admin/'+path,{method:body?'PUT':'GET',headers:{cookie:'prode_session=admin','content-type':'application/json'},body:body?JSON.stringify(body):undefined});}
 function insert(provider='promiedos'){db.prepare(`INSERT INTO matches(id,round_id,provider,provider_fixture_id,home_team_provider_id,away_team_provider_id,home_team_name,away_team_name,kickoff_at,status) VALUES (1,1,?,'abc','home','away','Local','Visita','2026-10-10T18:45:00Z','NS')`).run(provider);}
 beforeEach(()=>{db=new DatabaseSync(':memory:');for(const f of readdirSync('migrations').filter(x=>x.endsWith('.sql')).sort())db.exec(readFileSync('migrations/'+f,'utf8'));db.exec(`INSERT INTO users(id,full_name,phone_normalized,password_hash,role) VALUES ('admin','Admin','1','hash','admin'); INSERT INTO rounds(id,name,status) VALUES (1,'Prueba','draft');`);db.prepare("INSERT INTO sessions(id,user_id,token_hash,expires_at) VALUES ('admin','admin',?,'2099-01-01')").run(createHash('sha256').update('admin').digest('hex'));});
 afterEach(()=>{db.close();vi.unstubAllGlobals();vi.restoreAllMocks();});
-it('converts provider US Central wall time with daylight saving and rejects invalid dates',()=>{expect(promiedosKickoff('10-10-2026 15:45')).toBe('2026-10-10T20:45:00.000Z');expect(()=>promiedosKickoff('31-02-2026 15:45')).toThrow();});
+it('converts provider US Central wall time with daylight saving and rejects invalid dates',()=>{expect(promiedosKickoff('10-10-2026 15:45','America/Chicago')).toBe('2026-10-10T20:45:00.000Z');expect(()=>promiedosKickoff('31-02-2026 15:45')).toThrow();});
 it('Admin correction saves a real Argentina instant and protects it from stale provider sync',async()=>{
  insert();db.exec("UPDATE rounds SET status='open'");
  const input=new Date(Date.now()+2*86400000);
@@ -31,7 +31,7 @@ it('Admin correction saves a real Argentina instant and protects it from stale p
  expect(db.prepare("SELECT action FROM audit_log WHERE entity_id='1'").all()).toMatchObject([{action:'match.kickoff_corrected'}]);
  const provider=game({status:{enum:1,name:'Programado'},events:[],scores:undefined});
  cache('day','2026-10-10',[provider]);cache('game','abc',provider);
- expect(await repairCachedKickoffTimes(env().DB)).toBe(0);
+ expect(await repairCachedKickoffTimes(env().DB,'2026-10-01T00:00:00Z')).toBe(0);
  await syncRoundResults(1,env());
  expect(db.prepare('SELECT kickoff_at FROM matches WHERE id=1').get()!.kickoff_at).toBe(after);
  expect(db.prepare('SELECT count(*) AS n FROM official_predictions').get()).toMatchObject({n:0});
@@ -118,7 +118,7 @@ it('retains all final stages in one idempotent audit snapshot',async()=>{
 });
 it('legacy API-Football still uses date and existing result handling',async()=>{insert('api-football');db.exec("UPDATE matches SET provider_fixture_id='100'");vi.stubGlobal('fetch',vi.fn(async()=>Response.json({errors:[],response:[{fixture:{id:100,date:'2026-10-10T18:45:00Z',status:{short:'FT',elapsed:90}},teams:{home:{id:'home',winner:true},away:{id:'away'}},goals:{home:2,away:1},score:{fulltime:{home:2,away:1}}}]})));expect((await syncRoundResults(1,env())).finalized).toBe(1);expect(String(vi.mocked(fetch).mock.calls[0][0])).toContain('date=2026-10-10');});
 it('cron skips future/finalized and uses only eligible opaque IDs without API key',async()=>{insert();db.exec("UPDATE rounds SET status='open'; UPDATE matches SET kickoff_at=datetime('now','-30 minutes')");respond(game({status:{enum:2,name:'En juego'},events:[]}));await syncEligibleRounds({DB:env().DB});expect(fetch).not.toHaveBeenCalled();expect(db.prepare('SELECT status FROM matches').get()).toMatchObject({status:'LIVE'});});
-it('wrong identity is rejected',async()=>{respond(game({id:'other'}));await expect(getPromiedosGame('abc')).rejects.toThrow();});
+it('wrong identity is rejected',async()=>{respond(game({id:'other'}));await expect(getPromiedosGame('abc',{count:0},'America/Chicago')).rejects.toThrow();});
 const ingestionToken='local-test-token-never-production-123456';
 const ingestionEnv=()=>({...env(),PROMIEDOS_INGEST_TOKEN:ingestionToken});
 const ingest=(entries:unknown[],token=ingestionToken)=>handlePromiedosCache(new Request('https://local/api/internal/promiedos-cache',{
@@ -204,7 +204,7 @@ it('discovers a published version once and caches it after an invalid payload',a
   .mockResolvedValueOnce(Response.json({game:game()}))
   .mockResolvedValueOnce(Response.json({game:game()}));
  vi.stubGlobal('fetch',mocked);const counter={count:0};
- await client.getPromiedosGame('abc',counter);await client.getPromiedosGame('abc',counter);
+ await client.getPromiedosGame('abc',counter,'America/Chicago');await client.getPromiedosGame('abc',counter,'America/Chicago');
  expect(counter.count).toBe(5);expect(mocked.mock.calls[3][1].headers).toEqual({'X-VER':'1.11.8.0'});
  expect(mocked.mock.calls[4][1].headers).toEqual({'X-VER':'1.11.8.0'});
 });
@@ -214,9 +214,9 @@ it('stops after one retry and does not attempt to bypass forbidden responses',as
   .mockResolvedValueOnce(new Response('<script src="/_next/static/chunks/pages/_app-abc123.js"></script>'))
   .mockResolvedValueOnce(new Response('"X-VER":"1.11.8.0"'))
   .mockResolvedValueOnce(Response.json({}));vi.stubGlobal('fetch',mocked);
- await expect(client.getPromiedosGame('abc')).rejects.toThrow();expect(mocked).toHaveBeenCalledTimes(4);
+ await expect(client.getPromiedosGame('abc',{count:0},'America/Chicago')).rejects.toThrow();expect(mocked).toHaveBeenCalledTimes(4);
  mocked.mockReset().mockResolvedValue(new Response('',{status:403}));
- await expect(client.getPromiedosGame('abc')).rejects.toThrow('HTTP 403');expect(mocked).toHaveBeenCalledTimes(1);
+ await expect(client.getPromiedosGame('abc',{count:0},'America/Chicago')).rejects.toThrow('HTTP 403');expect(mocked).toHaveBeenCalledTimes(1);
 });
 it.each([
  ['Borussia Dortmund–Werder Bremen','27-10-2026 14:45','2026-10-27T19:45:00.000Z','16:45'],
@@ -226,8 +226,8 @@ it.each([
  ['Barracas–Racing, after DST end','06-11-2026 12:00','2026-11-06T18:00:00.000Z','15:00'],
  ['Boca–Defensa, after DST end','07-11-2026 14:30','2026-11-07T20:30:00.000Z','17:30'],
 ])('real provider US Central time %s converts exactly once',(_name,raw,utc,argentina)=>{
- expect(promiedosKickoff(raw)).toBe(utc);
- expect(new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(promiedosKickoff(raw)))).toBe(argentina);
+ expect(promiedosKickoff(raw,'America/Chicago')).toBe(utc);
+ expect(new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(promiedosKickoff(raw,'America/Chicago')))).toBe(argentina);
 });
 it('fresh sync repairs an erroneously early kickoff after its stored lock without changing predictions',async()=>{
  insert();db.exec("UPDATE matches SET kickoff_at='2026-10-11T12:30:00Z'");
@@ -240,12 +240,12 @@ it('fresh sync repairs an erroneously early kickoff after its stored lock withou
 it('scheduled repair corrects an old kickoff before the game, without touching predictions or results',async()=>{
  insert();db.exec("UPDATE rounds SET status='open'");cache('day','2026-10-10',[game({status:{enum:1,name:'Programado'},scores:undefined,events:[]})]);
  const before=db.prepare('SELECT * FROM official_predictions').all();
- expect(await repairCachedKickoffTimes(env().DB)).toBe(1);
+ expect(await repairCachedKickoffTimes(env().DB,'2026-10-01T00:00:00Z')).toBe(1);
  expect(db.prepare('SELECT kickoff_at,status,result_finalized_at FROM matches').get()).toMatchObject({kickoff_at:'2026-10-10T20:45:00.000Z',status:'NS',result_finalized_at:null});
  expect(db.prepare('SELECT * FROM official_predictions').all()).toEqual(before);
- expect(await repairCachedKickoffTimes(env().DB)).toBe(0);
+ expect(await repairCachedKickoffTimes(env().DB,'2026-10-01T00:00:00Z')).toBe(0);
  db.exec("UPDATE matches SET kickoff_at='2026-10-10T18:45:00Z',status='LIVE'");
- expect(await repairCachedKickoffTimes(env().DB)).toBe(0);
+ expect(await repairCachedKickoffTimes(env().DB,'2026-10-01T00:00:00Z')).toBe(0);
  expect(db.prepare('SELECT kickoff_at FROM matches').get()?.kickoff_at).toBe('2026-10-10T18:45:00Z');
 });
 it('repairs November CST kickoff from recent day cache without touching submitted predictions',async()=>{
@@ -253,16 +253,16 @@ it('repairs November CST kickoff from recent day cache without touching submitte
  const provider=game({start_time:'06-11-2026 16:15',status:{enum:1,name:'No comenzado'},scores:undefined,events:[]});
  cache('day','2026-11-06',[provider]);
  const before=db.prepare('SELECT * FROM official_predictions').all();
- expect(await repairCachedKickoffTimes(env().DB)).toBe(1);
+ expect(await repairCachedKickoffTimes(env().DB,'2026-10-01T00:00:00Z')).toBe(1);
  expect(db.prepare('SELECT kickoff_at,status FROM matches WHERE id=1').get())
   .toMatchObject({kickoff_at:'2026-11-06T22:15:00.000Z',status:'NS'});
  expect(db.prepare('SELECT * FROM official_predictions').all()).toEqual(before);
- expect(await repairCachedKickoffTimes(env().DB)).toBe(0);
+ expect(await repairCachedKickoffTimes(env().DB,'2026-10-01T00:00:00Z')).toBe(0);
 });
 it('repairs November CST kickoff from fresh gamecenter cache when day cache has expired',async()=>{
  insert();db.exec("UPDATE rounds SET status='open'; UPDATE matches SET kickoff_at='2026-11-06T21:15:00Z'");
  cache('game','abc',game({start_time:'06-11-2026 16:15',status:{enum:1,name:'No comenzado'},scores:undefined,events:[]}));
- expect(await repairCachedKickoffTimes(env().DB)).toBe(1);
+ expect(await repairCachedKickoffTimes(env().DB,'2026-10-01T00:00:00Z')).toBe(1);
  expect(db.prepare('SELECT kickoff_at FROM matches WHERE id=1').get()?.kickoff_at).toBe('2026-11-06T22:15:00.000Z');
 });
 it('NS to LIVE persists score/minute, LIVE to FT persists final regulation',async()=>{
@@ -312,4 +312,55 @@ it('conserva los partidos de los días disponibles mientras se carga el resto de
  const response=await handleAdminRounds(req('fixtures?from=2026-11-30&to=2026-12-06'),env());
  expect(response!.status).toBe(202);const data=await response!.json() as any;
  expect(data.pendingDates).toHaveLength(6);expect(data.fixtures).toHaveLength(1);
+});
+
+it('normalizes the same Vélez–Independiente instant from different runner zones',()=>{
+ expect(promiedosKickoff('28-11-2026 15:00','America/Los_Angeles')).toBe('2026-11-28T23:00:00.000Z');
+ expect(promiedosKickoff('28-11-2026 17:00','America/Chicago')).toBe('2026-11-28T23:00:00.000Z');
+ expect(promiedosKickoff('28-11-2026 20:00','America/Argentina/Buenos_Aires')).toBe('2026-11-28T23:00:00.000Z');
+ expect(()=>promiedosKickoff('28-11-2026 15:00')).toThrow();
+ expect(()=>promiedosKickoff('01-11-2026 01:30','America/Los_Angeles')).toThrow();
+});
+it('quarantines a fresh legacy clock instead of assuming Chicago or reinterpreting it',async()=>{
+ const legacy=game({sourceTimeZone:undefined,clockVersion:undefined});cache('day','2026-11-28',[legacy]);
+ await expect(searchCachedFixtures('2026-11-28',env().DB)).rejects.toThrow('zona verificada');
+ expect(db.prepare("SELECT requested_at FROM promiedos_cache WHERE cache_key='2026-11-28'").get()?.requested_at).toBeTruthy();
+ insert();db.exec("UPDATE rounds SET status='open';UPDATE matches SET kickoff_at='2026-11-28T21:00:00Z'");
+ expect(await repairCachedKickoffTimes(env().DB,'2026-11-27T00:00:00Z')).toBe(0);
+ expect(db.prepare('SELECT kickoff_at FROM matches WHERE id=1').get()?.kickoff_at).toBe('2026-11-28T21:00:00Z');
+});
+it('repairs the verified future kickoff once, audits it, and never reopens a locked match',async()=>{
+ insert();db.exec("UPDATE rounds SET status='open';UPDATE matches SET kickoff_at='2026-11-28T21:00:00Z'");
+ cache('day','2026-11-28',[game({start_time:'28-11-2026 15:00',sourceTimeZone:'America/Los_Angeles',status:{enum:1,name:'Prog.'},scores:undefined,events:[]})]);
+ expect(await repairCachedKickoffTimes(env().DB,'2026-11-27T00:00:00Z')).toBe(1);
+ expect(db.prepare('SELECT kickoff_at FROM matches WHERE id=1').get()?.kickoff_at).toBe('2026-11-28T23:00:00.000Z');
+ expect(db.prepare("SELECT COUNT(*) n FROM audit_log WHERE action='match.provider_kickoff_corrected'").get()?.n).toBe(1);
+ expect(await repairCachedKickoffTimes(env().DB,'2026-11-27T00:00:00Z')).toBe(0);
+ db.exec("UPDATE matches SET kickoff_at='2026-11-28T21:00:00Z'");
+ expect(await repairCachedKickoffTimes(env().DB,'2026-11-28T22:00:00Z')).toBe(0);
+});
+it('acquisition keeps Argentina midnight fixtures and reuses overlapping source days',async()=>{
+ vi.resetModules();const client=await import('../scripts/promiedos-client');
+ const provider=(id:string,time:string)=>game({id,start_time:time});
+ const mocked=vi.fn(async(url:string)=>Response.json({leagues:[{id:'league',name:'Liga',games:url.includes('27-11-2026')?[provider('midnight','27-11-2026 20:30')]:url.includes('28-11-2026')?[provider('velez','28-11-2026 15:00'),provider('tomorrow','28-11-2026 20:30')]:[]}]}));
+ vi.stubGlobal('fetch',mocked);const counter={count:0};
+ const day=await client.getPromiedosDay('2026-11-28',counter,'America/Los_Angeles');
+ expect(day.map(g=>g.id)).toEqual(['midnight','velez']);expect(day.every(g=>g.sourceTimeZone==='America/Los_Angeles'&&g.clockVersion===2)).toBe(true);
+ expect(counter.count).toBe(2);
+ expect((await client.getPromiedosDay('2026-11-29',counter,'America/Los_Angeles')).map(g=>g.id)).toEqual(['tomorrow']);expect(counter.count).toBe(3);
+});
+it('the authorized clock lookup caches only an IANA zone and never prints the response body',async()=>{
+ vi.resetModules();const {resolvePromiedosClock}=await import('../scripts/promiedos-clock');
+ const print=vi.spyOn(console,'log').mockImplementation(()=>{});
+ const fetcher=vi.fn(async()=>Response.json({ip:'203.0.113.1',timezone:{id:'America/Los_Angeles'}}));
+ expect(await resolvePromiedosClock(fetcher as any)).toBe('America/Los_Angeles');expect(await resolvePromiedosClock(fetcher as any)).toBe('America/Los_Angeles');expect(fetcher).toHaveBeenCalledTimes(1);expect(JSON.stringify(print.mock.calls)).not.toContain('203.0.113.1');
+});
+
+it('edits Penales after adding a match and audits without changing fixtures',async()=>{
+ insert();db.exec("UPDATE matches SET kickoff_at='2099-01-01T20:00:00Z'");
+ const r=await handleAdminRounds(req('rounds/1/matches/1/type',{matchType:'PENALTIES_ONLY'}),env());
+ expect(r?.status).toBe(200);expect(db.prepare('SELECT match_type FROM matches WHERE id=1').get()?.match_type).toBe('PENALTIES_ONLY');
+ expect(db.prepare("SELECT COUNT(*) n FROM audit_log WHERE action='match.type_corrected'").get()?.n).toBe(1);
+ db.exec("UPDATE matches SET kickoff_at='2020-01-01T20:00:00Z'");
+ expect((await handleAdminRounds(req('rounds/1/matches/1/type',{matchType:'NORMAL'}),env()))?.status).toBe(409);
 });

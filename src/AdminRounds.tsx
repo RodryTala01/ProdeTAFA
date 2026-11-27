@@ -1,3 +1,4 @@
+import RoundImageExport from './RoundImageExport';
 import RoundCompetitionLinks from './RoundCompetitionLinks';
 import {argentinaDateTime} from './match-time';
 import AdminRoundSubmissions from './AdminRoundSubmissions';
@@ -76,6 +77,7 @@ function Team({ name, logoUrl, teamId }: { name: string; logoUrl: string | null;
 
 export default function AdminRounds() {
   const [confirm, setConfirm] = useState<{ title: string; message: string; action: string; run: () => Promise<void> } | null>(null);
+  const [roundPanel,setRoundPanel]=useState<'matches'|'submissions'|'ranking'|'corrections'>('matches');
   const [detailLoading, setDetailLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const detailVersion = useRef(0);
@@ -100,6 +102,7 @@ export default function AdminRounds() {
   const [syncNotice, setSyncNotice] = useState('');
 
   async function loadRound(id: number) {
+    if(selected?.id!==id)setRoundPanel('matches');
     const version = ++detailVersion.current;
     setDetailLoading(true);
     try {
@@ -225,6 +228,13 @@ export default function AdminRounds() {
     } finally { setLoading(false); }
   }
 
+  async function changeMatchType(match:StoredMatch){
+    if(!selected)return;
+    setLoading(true);setError('');
+    try{await api(`/api/admin/rounds/${selected.id}/matches/${match.id}/type`,{method:'PUT',body:JSON.stringify({matchType:match.matchType==='NORMAL'?'PENALTIES_ONLY':'NORMAL'})});setSuccess('Penales actualizado.');await loadRound(selected.id);}
+    catch(error){setError(error instanceof Error?error.message:'No se pudo cambiar Penales');}finally{setLoading(false);}
+  }
+
   async function removeMatch(match: StoredMatch) {
     if (!selected) return;
     setLoading(true); setError(''); setSuccess('');
@@ -267,7 +277,7 @@ export default function AdminRounds() {
         </form>
         <div className="round-list">
           {rounds.map((round) => (
-            <button type="button" className={`round-item ${selected?.id === round.id ? 'round-item--active' : ''}`} key={round.id} aria-current={selected?.id === round.id ? 'true' : undefined} disabled={busy} onClick={() => { setError(''); setSuccess(''); void loadRound(round.id).catch(() => setError('No pudimos abrir la Fecha. Reintentá.')); }}>
+            <button type="button" className={`round-item ${selected?.id === round.id ? 'round-item--active' : ''}`} key={round.id} aria-current={selected?.id === round.id ? 'true' : undefined} disabled={busy} onClick={() => { setRoundPanel('matches'); setError(''); setSuccess(''); void loadRound(round.id).catch(() => setError('No pudimos abrir la Fecha. Reintentá.')); }}>
               <span><strong>{round.name}</strong><small>{round.status === 'draft' ? 'Borrador' : round.status === 'open' ? 'Abierta' : 'Cerrada'}</small></span>
               <b>{round.matchCount}/12</b>
             </button>
@@ -276,7 +286,7 @@ export default function AdminRounds() {
         </div>
       </aside>
 
-      <section className="round-main">
+      <section className="round-main" aria-busy={detailLoading}>
         {error && <div role="alert" className="alert alert--error">{error}</div>}
         {syncNotice && <div role="status" className="alert">{syncNotice}</div>}
         {success && <div role="status" className="alert alert--success">{success}</div>}
@@ -293,6 +303,7 @@ export default function AdminRounds() {
                 <p>{statusLabel} · Horarios de Argentina</p>{isDraft && selected.matches.length < 12 && <p>Faltan {12-selected.matches.length} partidos para completar la Fecha.</p>}
               </div>
               <div className="topbar-actions">
+                <RoundImageExport name={selected.name} matches={selected.matches}/>
                 {isDraft && (
                   <button className="button button--primary" disabled={busy || selected.matches.length !== 12 || rounds.some(round => round.status === 'open' && round.id !== selected.id)} onClick={() => setConfirm({ title: `¿Publicar ${selected.name}?`, message: 'Los participantes podrán pronosticar. Después de publicar no se pueden agregar ni quitar partidos.', action: 'Publicar', run: publishRound })}>Publicar</button>
                 )}
@@ -312,8 +323,9 @@ export default function AdminRounds() {
               </div>
             </section>
 
+            {!isDraft&&<nav className="round-detail-tabs" aria-label="Secciones de la Fecha">{([['matches','Partidos'],['submissions','Envíos de la Fecha'],['ranking','Ranking'],['corrections','Correcciones']] as const).map(([key,label])=><button type="button" key={key} className="button button--secondary" aria-pressed={roundPanel===key} disabled={detailLoading} onClick={()=>setRoundPanel(key)}>{label}</button>)}</nav>}
+            {(isDraft||roundPanel==='matches')&&<>
             <RoundCompetitionLinks key={selected.id} roundId={selected.id} rounds={rounds}/>
-            {!isDraft && !detailLoading && <AdminRoundSubmissions key={selected.id} roundId={selected.id}/>}
 
             {isDraft && rounds.some(round => round.status === 'open' && round.id !== selected.id) && <p className="alert">Ya hay una Fecha abierta. Cerrala antes de publicar otra.</p>}
             {isDraft && selected.matches.length < 12 && (
@@ -370,6 +382,7 @@ export default function AdminRounds() {
                         {match.goals.home !== null && match.goals.away !== null && <span className="penalty-badge">Resultado {match.goals.home} - {match.goals.away}</span>}
                         {match.matchType === 'PENALTIES_ONLY' && <span className="penalty-badge">PENALES</span>}
                       </div>
+                      {(isDraft||isOpen)&&['NS','scheduled'].includes(match.status)&&<button type="button" className="button button--secondary" disabled={busy} onClick={()=>setConfirm({title:'¿Cambiar Penales?',message:'Cambia si se solicita elegir ganador de penales. Solo se permite antes del cierre y si todavía no hay pronósticos oficiales para este partido.',action:match.matchType==='NORMAL'?'Activar Penales':'Quitar Penales',run:()=>changeMatchType(match)})}>{match.matchType==='NORMAL'?'Activar Penales':'Quitar Penales'}</button>}
                       {((isDraft||isOpen)&&['NS','scheduled'].includes(match.status)||isFinished)&&<AdminKickoffEditor roundId={selected.id} matchId={match.id} kickoffAt={match.kickoffAt} corrected={match.kickoffOverride} onChanged={()=>{setSuccess('Horario corregido para toda TAFA.');void loadRound(selected.id);}}/>}
                       {isDraft && <AdminMenu label={`Acciones de ${match.home.name} vs ${match.away.name}`}><button className="admin-menu-danger" disabled={busy} onClick={() => setConfirm({ title: '¿Quitar partido?', message: `${match.home.name} vs ${match.away.name} se quitará del borrador. Podés volver a agregarlo desde la búsqueda.`, action: 'Quitar partido', run: () => removeMatch(match) })}>Quitar partido</button></AdminMenu>}
                     </div>
@@ -378,19 +391,11 @@ export default function AdminRounds() {
               </section>
             )}
 
-            {!isDraft && <details className="card panel admin-disclosure"><summary>Ranking de la Fecha</summary><RoundRanking roundId={selected.id} mode="admin" refreshToken={rankingRefresh} /></details>}
-            <PredictionHistory key={selected.id} roundId={selected.id} />
+            </>}
+            {!isDraft&&!detailLoading&&roundPanel==='submissions'&&<div key={'submissions-'+selected.id}><AdminRoundSubmissions roundId={selected.id}/><PredictionHistory roundId={selected.id}/></div>}
+            {!isDraft&&roundPanel==='ranking'&&<section className="card panel"><h2>Ranking de la Fecha</h2><RoundRanking roundId={selected.id} mode="admin" refreshToken={rankingRefresh}/></section>}
+            {!isDraft&&roundPanel==='corrections'&&<section className="card panel"><h2>Corregir resultados y pronósticos</h2><AdminCorrections roundId={selected.id} refreshToken={rankingRefresh} onChanged={()=>{setRankingRefresh(value=>value+1);void loadRound(selected.id);}}/></section>}
 
-            {!isDraft && (
-              <details className="card panel admin-disclosure"><summary>Corregir resultados y pronósticos</summary><AdminCorrections
-                roundId={selected.id}
-                refreshToken={rankingRefresh}
-                onChanged={() => {
-                  setRankingRefresh((value) => value + 1);
-                  void loadRound(selected.id);
-                }}
-              /></details>
-            )}
 
 
           </>

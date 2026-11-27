@@ -3,7 +3,7 @@ import {safeDailyLiveGame,normalizePromiedosResult} from '../worker/promiedos';
 import {collectProviderCache} from '../scripts/promiedos-collection-outcome.mjs';
 
 const game={
- id:'egddcde',teams:[{id:'home',name:'Local'},{id:'away',name:'Visitante'}],
+ sourceTimeZone:'America/Chicago',clockVersion:2,id:'egddcde',teams:[{id:'home',name:'Local'},{id:'away',name:'Visitante'}],
  start_time:'27-10-2026 16:45',status:{enum:2,name:'Segundo tiempo'},
  scores:[2,1],game_time:68
 };
