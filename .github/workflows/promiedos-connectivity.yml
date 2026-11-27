@@ -31,6 +31,12 @@ jobs:
           fixture = os.environ['PROBE_FIXTURE']
           assert re.fullmatch(r'\d{4}-\d{2}-\d{2}', day)
           assert re.fullmatch(r'[A-Za-z0-9_-]{1,100}', fixture)
+          for geo_url in ['https://ipapi.co/timezone/', 'https://ipwho.is/?fields=success,timezone.id']:
+              geo = subprocess.run(['curl', '-sS', '--max-time', '15', geo_url], capture_output=True, text=True)
+              raw = geo.stdout.strip()
+              try: zone = json.loads(raw).get('timezone', {}).get('id')
+              except (ValueError, AttributeError): zone = raw if re.fullmatch(r'[A-Za-z_]+/[A-Za-z_]+(?:/[A-Za-z_]+)?', raw) else None
+              print(json.dumps({'runner_timezone_source': geo_url.split('/')[2], 'timezone': zone}))
           for name, url in [
               ('day', 'https://api.promiedos.com.ar/games/' + '-'.join(reversed(day.split('-')))),
               ('game', 'https://api.promiedos.com.ar/gamecenter/' + fixture),
