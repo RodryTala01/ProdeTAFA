@@ -7,6 +7,7 @@ import {handleTeamPage} from '../worker/team-page';
 import {handleHistory} from '../worker/history';
 import {handleIffhs} from '../worker/iffhs';
 import type {Env} from '../worker/index';
+import type {TotalsData} from '../src/historical-totals-types';
 
 it('T1 importada alimenta Mi Club, ranking general, IFFHS y cruces; al revertir desaparece sin tocar el motor oficial',async()=>{
  const db=new DatabaseSync(':memory:');
@@ -45,16 +46,22 @@ it('T1 importada alimenta Mi Club, ranking general, IFFHS y cruces; al revertir 
   expect(all).toMatchObject([{userId:'A',points:52},{userId:'B',points:45}]);
   const totalsResponse=await handleHistory(req('participant/historical-totals','A'),env);
   expect(totalsResponse?.status).toBe(200);
-  const totalHistory=await totalsResponse!.json() as {
-   palmares:Array<{userId:string;championships:number;runnerUps:number}>;
-   iffhsOfficial:{ranking:Array<{userId:string;totalPoints:number}>};
-   general:Array<{userId:string;points:number;dates:number;averagePoints:number}>;
-   perCompetition:Record<string,Array<{userId:string;championships:number}>>;
-  };
+  const totalHistory=await totalsResponse!.json() as TotalsData;
   expect(totalHistory.general.find(r=>r.userId==='A')).toMatchObject({points:52,dates:5,averagePoints:52/28});
   expect(totalHistory.palmares.find(r=>r.userId==='A')?.championships).toBe(1);
   expect(totalHistory.perCompetition.LIGA_A.find(r=>r.userId==='A')?.championships).toBe(1);
   expect(totalHistory.iffhsOfficial.ranking.find(r=>r.userId==='A')?.totalPoints).toBe(120.5);
+  expect(totalHistory.relegations).toMatchObject([{userId:'B',relegations:1},{userId:'A',relegations:0}]);
+  db.exec(`UPDATE users SET is_active=0 WHERE id='B';
+   INSERT INTO users(id,full_name,phone_normalized,password_hash,role) VALUES
+    ('C','Carla','444','hash','participant'),('D','Diego','555','hash','participant');
+   INSERT INTO tafa_seasons(id,season_number,name,status) VALUES(32,32,'T32','active');
+   INSERT INTO season_divisions(id,season_id,code,name) VALUES(32,32,'A','Liga A');
+   INSERT INTO season_division_members(season_id,division_id,user_id) VALUES(32,32,'A'),(32,32,'B'),(32,32,'C');`);
+  const readTotals=async()=>await (await handleHistory(req('participant/historical-totals','A'),env))!.json() as TotalsData;
+  expect((await readTotals()).relegations).toMatchObject([
+   {userId:'B',relegations:1},{userId:'A',relegations:0},{userId:'C',relegations:0},
+  ]);
   const iff=(await (await handleIffhs(req('competition-engine/iffhs/ranking?throughSeason=1','A'),env))!.json() as {ranking:Array<{userId:string;totalPoints:number}>}).ranking;
   expect(iff[0]).toMatchObject({userId:'A',totalPoints:120.5});
   const reversed=await handleHistoricalArchive(req('admin/historical-imports/'+id+'/revert','admin','POST',{seasonNumber:1,sha256:preview.sha256,reason:'Corregir la tabla T1'}),env);
@@ -63,5 +70,6 @@ it('T1 importada alimenta Mi Club, ranking general, IFFHS y cruces; al revertir 
   expect(clubAfter.stats.points).toBe(0);
   expect(clubAfter.titles).toHaveLength(0);
   expect(clubAfter.encounters).toHaveLength(0);
+  expect((await readTotals()).relegations).toMatchObject([{userId:'A',relegations:0},{userId:'C',relegations:0}]);
  }finally{db.close();}
 });
