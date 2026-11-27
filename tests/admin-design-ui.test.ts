@@ -64,3 +64,18 @@ it('Fechas ofrece una sola sección de envíos y no duplica el bloque al cambiar
  await click('Envíos de la Fecha');expect(host.querySelectorAll('.admin-round-submissions')).toHaveLength(1);
  expect(writes).toHaveLength(0);
 });
+
+
+it('Admin Fechas keeps teams and Argentina time separate from penalties and the kickoff editor',async()=>{
+ round.status='open';
+ round.matches[0].kickoffAt='2026-11-29T00:30:00.000Z';
+ await mount(AdminRounds);
+ const match=host.querySelector('.stored-match')!;
+ expect(match.querySelector('.stored-match-main time')?.textContent).toContain('21:30');
+ expect(match.querySelector('.stored-match-main time')?.textContent).toContain('28/11');
+ expect(match.querySelector('.stored-teams')?.textContent).toContain('Equipo visitante');
+ expect(btn('Activar Penales',match.querySelector('.stored-match-actions')!)).toBeDefined();
+ const editor=match.querySelector(':scope > details.admin-kickoff-editor')!;
+ expect(editor.querySelector('input[type=datetime-local]')).toHaveProperty('value','2026-11-28T21:30');
+ expect(writes).toHaveLength(0);
+});

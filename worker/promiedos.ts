@@ -4,6 +4,8 @@ type Team = { id: string; name: string };
 type Stage = { name: string; scores?: number[]; is_penalties_stage?: boolean };
 export type PromiedosGame = {
   id: string; teams: [Team, Team]; start_time: string;
+  // Set by acquisition after comparing the localized clock with an offset-bearing feed.
+  kickoffAt?: string;
   status: { enum: number; name: string }; scores?: number[]; penalties?: number[];
   winner?: number; to_qualify?: number; game_time?: number; events?: Stage[];
   league?: { id: string; name: string; country_name?: string }; stage_round_name?: string;
@@ -15,34 +17,26 @@ function assert(condition: unknown): asserts condition {
 }
 const object = (x: unknown): x is Record<string, any> => !!x && typeof x === 'object' && !Array.isArray(x);
 const idValid = (id: unknown): id is string => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(id);
-// /games and /gamecenter start_time is a US Central wall clock (DD-MM-YYYY HH:mm).
-// This timezone observes daylight saving time: 2026-10-27 UTC-5 (CDT), but
-// 2026-11-06 UTC-6 (CST). A fixed UTC-5 offset made November matches 1h early.
-// Store UTC instants; all UI uses America/Argentina/Buenos_Aires.
-// Retain the original provider string in cache for future verification.
-export const PROMIEDOS_SOURCE_TIME_ZONE = 'America/Chicago';
-export function promiedosKickoff(value: string) {
+// This number represents the fields of a wall clock, not the kickoff instant.
+export function promiedosWallTime(value: string) {
   const m = /^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})$/.exec(value);
   assert(m);
   const [, d, mo, y, h, mi] = m;
   const wall = Date.UTC(+y, +mo - 1, +d, +h, +mi);
   const check = new Date(wall);
   assert(check.getUTCFullYear() === +y && check.getUTCMonth() === +mo - 1 && check.getUTCDate() === +d && +h < 24 && +mi < 60);
-  // Resolve the named zone, including historical offsets; never use host timezone.
-  const format = new Intl.DateTimeFormat('en-GB', { timeZone: PROMIEDOS_SOURCE_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-  const parts = Object.fromEntries(format.formatToParts(check).map(p => [p.type, p.value]));
-  const offset = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute) - wall;
-  const result = new Date(wall - offset);
-  const verify = Object.fromEntries(format.formatToParts(result).map(p => [p.type, p.value]));
-  assert(verify.day === d && verify.month === mo && verify.year === y && verify.hour === h && verify.minute === mi);
-  return result.toISOString();
+  return wall;
 }
 export function parsePromiedosGame(value: unknown, expectedId?: string): PromiedosGame {
   assert(object(value) && idValid(value.id) && (!expectedId || value.id === expectedId));
   assert(Array.isArray(value.teams) && value.teams.length === 2 && value.teams.every((t: unknown) => object(t) && idValid(t.id) && typeof t.name === 'string' && t.name.trim()));
   assert(value.teams[0].id !== value.teams[1].id);
   assert(object(value.status) && Number.isInteger(value.status.enum) && typeof value.status.name === 'string');
-  assert(typeof value.start_time === 'string'); promiedosKickoff(value.start_time);
+  assert(typeof value.start_time === 'string'); promiedosWallTime(value.start_time);
+  if (value.kickoffAt !== undefined) {
+    assert(typeof value.kickoffAt === 'string' && Number.isFinite(Date.parse(value.kickoffAt))
+      && new Date(value.kickoffAt).toISOString() === value.kickoffAt);
+  }
   if (value.events !== undefined) assert(Array.isArray(value.events) && value.events.every((s: unknown) => object(s) && typeof s.name === 'string'));
   return value as PromiedosGame;
 }
@@ -51,10 +45,10 @@ function score(value: unknown): [number, number] {
   return value as [number, number];
 }
 export function promiedosFixture(g: PromiedosGame, league = g.league) {
-  assert(league && idValid(league.id) && typeof league.name === 'string');
+  assert(g.kickoffAt && league && idValid(league.id) && typeof league.name === 'string');
   const team = (t: Team) => ({ ...t, logoUrl: `${API}/images/team/${t.id}/1` });
   const scores = g.scores === undefined ? [null, null] : score(g.scores);
-  return { provider: 'promiedos' as const, providerFixtureId: g.id, kickoffAt: promiedosKickoff(g.start_time),
+  return { provider: 'promiedos' as const, providerFixtureId: g.id, kickoffAt: g.kickoffAt,
     status: g.status.enum === 1 ? 'NS' : g.status.enum === 2 ? 'LIVE' : g.status.enum === 3 ? 'FT' : 'PST',
     statusLong: g.status.name, elapsedMinutes: g.game_time != null && g.game_time >= 0 ? g.game_time : null,
     competition: { id: league.id, name: league.name, country: league.country_name ?? '', logoUrl: null, round: g.stage_round_name ?? null },
@@ -127,7 +121,7 @@ export function normalizePromiedosResult(g: PromiedosGame) {
     assert(!side(g.winner) || side(g.winner) === winner);
     qualified = side(g.to_qualify);
   }
-  return { kickoffAt: promiedosKickoff(g.start_time), status: final ? (wentToPenalties ? 'PEN' : wentToExtra ? 'AET' : 'FT') : g.status.enum === 1 ? 'NS' : wentToPenalties ? 'P' : wentToExtra ? 'ET' : 'LIVE',
+  return { kickoffAt: g.kickoffAt ?? null, status: final ? (wentToPenalties ? 'PEN' : wentToExtra ? 'AET' : 'FT') : g.status.enum === 1 ? 'NS' : wentToPenalties ? 'P' : wentToExtra ? 'ET' : 'LIVE',
     current, regulation: reg, extraTime: et, penalties: pen ? score(pen.scores) : null,
     winner, qualified, wentToExtra, wentToPenalties, final,
     elapsed: g.game_time != null && g.game_time >= 0 ? g.game_time : null };

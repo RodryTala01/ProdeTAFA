@@ -72,28 +72,20 @@ are deleted or rewritten by disabling the cache.
 
 ## Kickoff diagnosis and repair
 
-Fresh read-only acquisition from GitHub Actions (2026-11-06) compared against
-independent Argentine fixtures revealed a US Central seasonal clock:
-- Oct 27 (CDT, UTC−5): Borussia raw 14:45 -> Argentina 16:45.
-- Nov 6 (CST, UTC−6): Independiente–Riestra raw 16:15 -> Argentina 19:15
-  (confirmed by DSPORTS, TyC Sports and Riestra official site).
-- Nov 6 (CST, UTC−6): Barracas–Racing raw 12:00 -> Argentina 15:00 (TyC).
-- Nov 7 (CST, UTC−6): Boca–Defensa raw 14:30 -> Argentina 17:30 (Boca official).
+Promiedos can return different unzoned wall times for the same match, even
+between GitHub Actions runs. Acquisition checks each day listing against the
+offset-bearing 365Scores schedule in Buenos Aires. Matching team pairs establish
+the UTC time. Additional pairs are converted only when several independent
+matches in the same response establish the same clock offset. The adjacent
+provider dates cover fixtures straddling local midnight. Day cache keys and all
+displayed dates use `America/Argentina/Buenos_Aires`.
 
-Do not hardcode UTC−5 or UTC−6. Convert provider wall time using
-America/Chicago (daylight saving aware), store UTC, then display using
-America/Argentina/Buenos_Aires. The sync path corrects scheduled open
-matches from fresh provider day or gamecenter cache, preserving predictions,
-match identity, manually overridden results and finalized results.
-
-Promiedos started/final statuses also block prediction writes regardless of a
-future kickoff. If a started status contradicts a still-open timestamp, submission
-fails closed before the existing snapshot triggers can promote that draft. It
-requires a fresh sync/review; no migration or trigger rewrite is needed.
-
-The production SELECT could not be completed: Cloudflare returned account access
-error 7403. The exact origin of the previously stored wrong values is therefore
-not established, and no production sporting data was rewritten during this fix.
+Older day snapshots without a verified kickoff are refreshed. Fresh verified
+kickoffs repair scheduled matches in published dates and upcoming drafts. An
+unzoned gamecenter snapshot can update results without overwriting the stored
+kickoff. Both paths protect manual corrections and check the fixture identity.
+Prediction deadlines still use the stored kickoff plus one minute. Promiedos
+started/final statuses also block prediction writes regardless of kickoff.
 
 Home and Pronosticos share live-only 60-second refresh, focus refresh and a
 wake-up at the next kickoff. Relevant NS games awaiting their first live update

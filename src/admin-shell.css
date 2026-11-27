@@ -55,9 +55,7 @@
 .admin-shell .round-progress strong { font-size:1.5rem; }
 .admin-shell .round-progress--complete { color:var(--accent); }
 .admin-shell .stored-match-list,.admin-shell .fixture-list { gap:0; }
-.admin-shell .stored-match { flex-direction:row; padding:12px 0; border:0; border-bottom:1px solid var(--border); border-radius:0; background:transparent; gap:8px; }
-.admin-shell .stored-match-main { flex:1; }
-.admin-shell .stored-match small { font-size:.6875rem; }
+.admin-shell .stored-match { padding:12px 0; border:0; border-bottom:1px solid var(--border); border-radius:0; background:transparent; gap:8px; }
 .admin-shell .stored-teams { display:grid; grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr); gap:8px; }
 .admin-shell .fixture-team img { flex-shrink:0; }
 .admin-shell .fixture-team strong { font-size:.8125rem; }

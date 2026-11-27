@@ -1,5 +1,5 @@
 import {useRoundRefresh} from './round-refresh';
-import {argentinaDateTime} from './match-time';
+import {argentinaDateTime, utcDate} from './match-time';
 import {CompetitionImage} from './AssetImage';
 import { TeamIdentity as Team } from './ui';
 import ParticipantCompetitionContexts from './ParticipantCompetitionContexts';
@@ -397,7 +397,7 @@ export default function ParticipantRound() {
 
 
   const percent = round.matches.length ? Math.round(complete / round.matches.length * 100) : 0;
-  const nextKickoff = round.matches.map(m => Date.parse(m.kickoffAt)).filter(t => t > now).sort((a,b) => a-b)[0];
+  const nextKickoff = round.matches.map(m => +utcDate(m.kickoffAt)).filter(t => t > now).sort((a,b) => a-b)[0];
   const resolved = round.matches.filter(m => FINAL_STATUSES.has(m.status) || m.result.isVoid);
   const stats = [['Puntos', round.pointsTotal], ['Plenos', round.matches.filter(m => m.score?.resultType === 'FULL').length], ['Parciales', round.matches.filter(m => m.score?.resultType === 'PARTIAL').length], ['Errores', round.matches.filter(m => m.score?.resultType === 'ERROR' || (FINAL_STATUSES.has(m.status) && !m.result.isVoid && m.officialPrediction.homeScore === null && !m.score)).length]];
   const progress = <><strong>{complete} DE {round.matches.length} COMPLETOS</strong><progress value={complete} max={round.matches.length || 1} aria-label="Partidos completos"/><span>{percent}%</span></>;
