@@ -35,11 +35,16 @@ jobs:
               ('day', 'https://api.promiedos.com.ar/games/' + '-'.join(reversed(day.split('-')))),
               ('game', 'https://api.promiedos.com.ar/gamecenter/' + fixture),
               ('web', 'https://www.promiedos.com.ar/calendario/' + '-'.join(reversed(day.split('-')))),
-              ('explicit-zone', 'https://api.promiedos.com.ar/gamecenter/' + fixture + '?timezone=America%2FArgentina%2FBuenos_Aires'),
+              ('tz-query', 'https://api.promiedos.com.ar/gamecenter/' + fixture + '?tz=UTC'),
+              ('Time-Zone', 'https://api.promiedos.com.ar/gamecenter/' + fixture),
+              ('X-Timezone', 'https://api.promiedos.com.ar/gamecenter/' + fixture),
+              ('X-TZ', 'https://api.promiedos.com.ar/gamecenter/' + fixture),
           ]:
               with tempfile.TemporaryDirectory() as directory:
                   output = Path(directory) / 'body'
-                  response = subprocess.run(['curl', '-sS', '--max-time', '30', '-H', 'X-VER: 1.11.7.5', '-o', str(output), '-w', '%{http_code}', url], capture_output=True, text=True)
+                  command = ['curl', '-sS', '--max-time', '30', '-H', 'X-VER: 1.11.7.5', '-o', str(output), '-w', '%{http_code}', url]
+                  if name in ['Time-Zone','X-Timezone','X-TZ']: command += ['-H', name + ': UTC']
+                  response = subprocess.run(command, capture_output=True, text=True)
                   result = {'endpoint': name, 'http': response.stdout, 'curl_exit': response.returncode}
                   raw = output.read_text() if output.exists() else ''
                   if name == 'web':
